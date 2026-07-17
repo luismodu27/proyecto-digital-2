@@ -19,6 +19,16 @@ export const getSystemById = (id: string) => repo.getSystemById(id);
 export const getSystemAssessments = (id: string) =>
   repo.getSystemAssessments(id);
 export const getSystemDossier = (id: string) => repo.getSystemDossier(id);
+export const getOrgMembers = () => repo.getOrgMembers();
+export const getPendingInvitations = () => repo.getPendingInvitations();
+export const getCurrentMemberRole = () => repo.getCurrentMemberRole();
 
 export { isSupabaseConfigured };
-export type { AiSystem, DossierData, GapItem } from "@/lib/mock-data";
+export type {
+  AiSystem,
+  DossierData,
+  GapItem,
+  MemberRole,
+  OrgMember,
+  PendingInvitation,
+} from "@/lib/mock-data";

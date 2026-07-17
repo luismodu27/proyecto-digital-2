@@ -6,6 +6,9 @@ import type {
   DossierData,
   EvidenceState,
   GapItem,
+  MemberRole,
+  OrgMember,
+  PendingInvitation,
   RiskLevel,
 } from "@/lib/mock-data";
 
@@ -197,6 +200,68 @@ export async function getSystemsForSelect(): Promise<
     .eq("organization_id", org)
     .order("name", { ascending: true });
   return data ?? [];
+}
+
+/* -------------------------------------------------------------------------- */
+/* Equipo / miembros                                                          */
+/* -------------------------------------------------------------------------- */
+
+/** Miembros de la organización activa (vía RPC security-definer con email). */
+export async function getOrgMembers(): Promise<OrgMember[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data } = await supabase.rpc("list_org_members", { org });
+  return (data ?? []).map(
+    (r: {
+      user_id: string;
+      email: string;
+      role: MemberRole;
+      joined_at: string;
+    }) => ({
+      userId: r.user_id,
+      email: r.email,
+      role: r.role,
+      joinedAt: String(r.joined_at),
+    }),
+  );
+}
+
+/** Invitaciones pendientes de la org (solo visibles para owner/admin por RLS). */
+export async function getPendingInvitations(): Promise<PendingInvitation[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data } = await supabase
+    .from("invitations")
+    .select("id, email, role, created_at")
+    .eq("organization_id", org)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    email: r.email,
+    role: r.role as MemberRole,
+    createdAt: String(r.created_at),
+  }));
+}
+
+/** Rol del usuario actual en la organización activa (o null). */
+export async function getCurrentMemberRole(): Promise<MemberRole | null> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return null;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data } = await supabase
+    .from("memberships")
+    .select("role")
+    .eq("organization_id", org)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  return (data?.role ?? null) as MemberRole | null;
 }
 
 export async function getGapItems(): Promise<GapItem[]> {

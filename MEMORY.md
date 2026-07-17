@@ -343,6 +343,24 @@ diseño, nombre, features grandes); autónomo en lo demás.
     el dossier y el historial ahora cuentan la historia completa en modo demo (bueno para venta/capturas).
   Build/lint verdes; verificado con captura (dossier de "Ranking de candidatos" con historial + evidencia).
   Loop completo: **inventario → evaluar → guardar (atestación + evidencia) → dossier/historial + audit-trail.**
+- **2026-07-17** · **Roles / equipo (Capa 6).** Nueva ruta `/dashboard/equipo`: gestión de
+  miembros de la organización sobre la fundación multi-tenant ya existente (memberships + RLS).
+  - **Migración `0008_invitations.sql`** (⚠️ el fundador debe aplicarla): tabla `invitations`
+    (org, email, role, status, unique(org,email)) + RLS (owner/admin), y 3 RPCs `security definer`:
+    `invite_member(org,email,role)` (si el email ya tiene cuenta lo añade al instante; si no, deja
+    invitación 'pending'; solo un owner puede otorgar owner), `claim_invitations()` (reclama por
+    email al registrarse) y `list_org_members(org)` (miembros con email, uniendo `auth.users`).
+    Añadida también al `supabase/setup.sql` concatenado.
+  - **UI:** lista de miembros (email, RoleBadge, alta), formulario de invitar (owner/admin),
+    selector de rol autoenviado, quitar miembro y revocar invitación (con confirmación), sección de
+    invitaciones pendientes, y leyenda de roles. Guardas de negocio en las server actions
+    (`team-actions.ts`): no dejar la org sin owner, solo un owner gestiona a otro owner.
+  - **Claim automático** en el onboarding: un invitado que se registra entra directo a su org.
+  - Modo demo: equipo de ejemplo de solo lectura con banner (la gestión requiere backend real).
+  - `RoleBadge` nuevo (owner=good, admin=info, member=neutral). Build/lint verdes; demo verificado
+    con captura. **Pendiente:** aplicar 0008 y verificar el flujo conectado (invitar→claim→listar→
+    cambiar rol→quitar) por curl. Futuro: auditar cambios de membership en el audit-trail;
+    selector de organización activa (hoy = primera membership).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -405,7 +423,8 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **Capa 3 Evidencia + documentación + audit-trail** ✅ (audit-trail ✅, evidencia declarada ✅, export PDF ✅, **generador de documentación técnica / dossier de gobernanza por sistema ✅**; futuro opcional: redacción asistida por LLM y firma/versión del dossier).
 - **Capa 4 Pruebas técnicas del modelo** ❌ (sesgo/explicabilidad/robustez — INTEGRAR, no construir).
 - **Capa 5 Monitoreo continuo en producción** ❌ (drift, incidentes).
-- **Capa 6 Supervisión humana / roles** 🟡 (roles owner/admin/member existen; faltan flujos de aprobación).
+- **Capa 6 Supervisión humana / roles** 🟡 (roles owner/admin/member + **UI de equipo: invitar,
+  cambiar rol, quitar, invitaciones + claim** ✅; faltan flujos de aprobación y auditoría de membership).
 - **Capa 7 Vigilancia regulatoria multi-marco** 🟡 (el **foso** más fuerte; **radar v1 ✅**: catálogo curado EU AI Act + motor de relevancia + UI `/dashboard/vigilancia`; falta persistir acks, multi-marco y la **automatización de ingesta** — los 4 agentes + RAG/pgvector).
 - **Capa 8 Riesgo de terceros/proveedores** ❌.
 - **Capa 9 Gobernanza de agentes de IA** ❌ (frontera; casi nadie la cubre).

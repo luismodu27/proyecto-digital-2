@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { OnboardingForm } from "@/components/auth/OnboardingForm";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/server";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
 
 export default async function OnboardingPage() {
@@ -10,7 +11,12 @@ export default async function OnboardingPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  // Si ya tiene organización, no repetir el onboarding.
+  // Si fue invitado, reclama las invitaciones pendientes por email y entra
+  // directamente a su organización (ignora el error si la RPC aún no existe).
+  const supabase = await createClient();
+  await supabase.rpc("claim_invitations");
+
+  // Si ya tiene organización (propia o reclamada), no repetir el onboarding.
   const org = await getActiveOrg();
   if (org) redirect("/dashboard");
 

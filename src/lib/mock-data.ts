@@ -223,6 +223,69 @@ export const SAMPLE_ASSESSMENTS: Record<string, AssessmentRecord[]> = {
   ],
 };
 
+/* -------------------------------------------------------------------------- */
+/* Equipo / miembros                                                          */
+/* -------------------------------------------------------------------------- */
+
+export type MemberRole = "owner" | "admin" | "member";
+
+export const ROLE_LABEL: Record<MemberRole, string> = {
+  owner: "Propietario",
+  admin: "Administrador",
+  member: "Miembro",
+};
+
+export const ROLE_HINT: Record<MemberRole, string> = {
+  owner: "Control total: gestiona el equipo, la organización y puede borrar sistemas.",
+  admin: "Gestiona sistemas, brechas y evaluaciones; puede invitar a miembros.",
+  member: "Acceso de lectura al panel de la organización.",
+};
+
+export type OrgMember = {
+  userId: string;
+  email: string;
+  role: MemberRole;
+  joinedAt: string; // ISO
+};
+
+export type PendingInvitation = {
+  id: string;
+  email: string;
+  role: MemberRole;
+  createdAt: string; // ISO
+};
+
+/** Equipo de ejemplo (modo demo). */
+export const SAMPLE_MEMBERS: OrgMember[] = [
+  {
+    userId: "demo-1",
+    email: "ana.lopez@empresa-demo.com",
+    role: "owner",
+    joinedAt: "2026-05-02T10:00:00Z",
+  },
+  {
+    userId: "demo-2",
+    email: "legal@empresa-demo.com",
+    role: "admin",
+    joinedAt: "2026-05-10T09:30:00Z",
+  },
+  {
+    userId: "demo-3",
+    email: "talent@empresa-demo.com",
+    role: "member",
+    joinedAt: "2026-06-01T14:15:00Z",
+  },
+];
+
+export const SAMPLE_INVITATIONS: PendingInvitation[] = [
+  {
+    id: "inv-demo-1",
+    email: "auditor.externo@despacho.com",
+    role: "member",
+    createdAt: "2026-07-14T12:00:00Z",
+  },
+];
+
 export const RISK_ORDER: RiskLevel[] = [
   "unacceptable",
   "high",

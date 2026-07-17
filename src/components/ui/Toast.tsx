@@ -12,6 +12,17 @@ const MESSAGES: Record<string, string> = {
   "pack-applied": "Policy pack RRHH aplicado al sistema.",
   "gap-created": "Brecha añadida.",
   "gap-deleted": "Brecha eliminada.",
+  "member-added": "Miembro añadido al equipo.",
+  "member-invited": "Invitación enviada.",
+  "member-exists": "Esa persona ya es miembro del equipo.",
+  "role-updated": "Rol actualizado.",
+  "member-removed": "Miembro eliminado del equipo.",
+  "invite-revoked": "Invitación revocada.",
+  "team-forbidden": "No tienes permisos para esta acción.",
+  "team-lastowner": "Debe quedar al menos un propietario.",
+  "team-bademail": "Introduce un correo válido.",
+  "team-demo": "La gestión del equipo requiere conectar tu organización.",
+  "team-error": "No se pudo completar la acción. Inténtalo de nuevo.",
 };
 
 /**

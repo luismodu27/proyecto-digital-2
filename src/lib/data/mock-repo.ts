@@ -2,10 +2,15 @@ import {
   AI_SYSTEMS,
   GAP_ITEMS,
   SAMPLE_ASSESSMENTS,
+  SAMPLE_INVITATIONS,
+  SAMPLE_MEMBERS,
   type AiSystem,
   type AssessmentRecord,
   type DossierData,
   type GapItem,
+  type MemberRole,
+  type OrgMember,
+  type PendingInvitation,
 } from "@/lib/mock-data";
 
 /** Repositorio de datos de ejemplo (modo demo). */
@@ -37,6 +42,19 @@ export async function getSystemAssessments(
   id: string,
 ): Promise<AssessmentRecord[]> {
   return SAMPLE_ASSESSMENTS[id] ?? [];
+}
+
+export async function getOrgMembers(): Promise<OrgMember[]> {
+  return SAMPLE_MEMBERS;
+}
+
+export async function getPendingInvitations(): Promise<PendingInvitation[]> {
+  return SAMPLE_INVITATIONS;
+}
+
+export async function getCurrentMemberRole(): Promise<MemberRole | null> {
+  // En demo mostramos el equipo como propietario, pero sin gestión real.
+  return "owner";
 }
 
 /**
