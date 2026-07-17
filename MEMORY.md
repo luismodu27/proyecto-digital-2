@@ -306,6 +306,9 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **GRC** — Governance, Risk & Compliance.
 - **ISO 42001** — estándar de sistema de gestión de IA.
 - **NIST AI RMF** — marco de gestión de riesgos de IA (EE.UU.).
+- **SealMark/logo** — el sello es ahora una imagen (`/public/sealmark.png`, monograma "A" +
+  check, jade con interior blanco), NO un SVG recolorable. El wordmark "Attesta" (Fraunces) NO
+  cambia. Favicon = `src/app/icon.png`. Si se rediseña, reemplazar esos archivos.
 - **Audit-trail** — registro cronológico e íntegro de acciones/cambios para auditoría.
 - **Flywheel** — círculo virtuoso: más clientes y más normas → mejor base de conocimiento → más valor.
 - **RAG** — el LLM responde leyendo el texto real de la norma, no de memoria.
