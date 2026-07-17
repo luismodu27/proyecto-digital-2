@@ -276,3 +276,55 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **NIST AI RMF** — marco de gestión de riesgos de IA (EE.UU.).
 - **Audit-trail** — registro cronológico e íntegro de acciones/cambios para auditoría.
 - **Flywheel** — círculo virtuoso: más clientes y más normas → mejor base de conocimiento → más valor.
+- **RAG** — el LLM responde leyendo el texto real de la norma, no de memoria.
+- **Shadow AI** — IA que la empresa usa sin autorización/registro formal.
+- **Drift** — degradación del comportamiento de un modelo en producción.
+- **OPA/Rego** — motor de "política como código" (permitir/bloquear una acción).
+
+## 13. Mapa de producto y automatización (doc de estrategia del fundador, jul-2026)
+
+> Documento externo `plataformagobernanzaia.md` integrado como estrategia de referencia.
+> Resumen operativo — el detalle completo está en ese archivo.
+
+### 13.1 Torre de 10 capas · dónde estamos
+- **Capa 0 Inventario** ✅ (con alta manual; falta descubrimiento automático / shadow-AI).
+- **Capa 1 Clasificación de riesgo** ✅ (falta multi-marco: hoy solo EU AI Act).
+- **Capa 2 Evaluaciones + plan de riesgo** 🟡 (cuestionario + plan de acción; falta plan con tareas/responsables editable).
+- **Capa 3 Evidencia + documentación + audit-trail** 🟡 (audit-trail ✅, evidencia declarada ✅, export PDF ✅; falta **generador de documentación técnica**).
+- **Capa 4 Pruebas técnicas del modelo** ❌ (sesgo/explicabilidad/robustez — INTEGRAR, no construir).
+- **Capa 5 Monitoreo continuo en producción** ❌ (drift, incidentes).
+- **Capa 6 Supervisión humana / roles** 🟡 (roles owner/admin/member existen; faltan flujos de aprobación).
+- **Capa 7 Vigilancia regulatoria multi-marco** ❌ (el **foso** más fuerte; el módulo estrella de automatización).
+- **Capa 8 Riesgo de terceros/proveedores** ❌.
+- **Capa 9 Gobernanza de agentes de IA** ❌ (frontera; casi nadie la cubre).
+- **Capa 10 Reportes/colaboración** 🟡 (dashboard + PDF; faltan reportes a dirección/auditor).
+
+### 13.2 Roadmap (cuña → plataforma)
+1. **Cuña (MVP)** = Inventario + gap (Capas 0-1) → **YA lo tenemos**.
+2. **Papeleo** = documentación + evidencia + audit-trail (Capa 3) → **generador de documentación** es el siguiente gran valor.
+3. **Pegajoso** = monitoreo + pruebas de sesgo/explicabilidad (Capas 4-5) → integrar Evidently/Fairlearn.
+4. **Foso** = vigilancia regulatoria multi-marco (Capa 7).
+5. **Frontera** = gobernanza de agentes (Capa 9).
+
+### 13.3 Limitaciones → ventajas (filosofía a mantener)
+- **No certificamos** → somos el **system of record de evidencia** (ya decidido, §10).
+- **No construimos ML/testing** → **INTEGRAMOS open-source** (Evidently, Fairlearn, Phoenix, SHAP, OPA). Nuestro valor único = (a) **capa de conocimiento regulatorio**, (b) **orquestación que lo entrelaza**, (c) **UX "de un botón"**.
+- **ICP deployer** → la conformidad/marcado CE (Capa 3 del doc) es del proveedor, no nuestro foco; lo reframeamos a "exige y conserva evidencia".
+
+### 13.4 Automatización — ruta LEAN que encaja con nuestro stack
+- **Orquestación:** empezar con lógica en Next.js + Supabase (cron/webhooks); escalar a n8n/Make y luego Temporal + LangGraph.
+- **Conocimiento/RAG:** **pgvector sobre nuestro Postgres de Supabase** (barato) para guardar el texto de las normas.
+- **Razonamiento:** API de Claude directa con nuestros subagentes; la clave es RAG sobre la ley.
+- **Módulo estrella:** *"ley nueva → preparación en horas"* con 4 agentes encadenados
+  (Vigía → Analista → Actualizador → Validador con humano-en-el-bucle). Audit-trail ya lo tenemos.
+- **Pruebas/enforcement:** integrar Evidently (gratis) y, más adelante, OPA/Rego.
+
+### 13.5 Decisiones abiertas del fundador (pendientes)
+- **¿Vertical o horizontal?** (doc recomienda vertical para la cuña; candidatos: RRHH, crédito, seguros, salud, edtech).
+- **¿Región de arranque?** Europa (deadline) vs LatAm (menos competencia).
+- **Precios de mercado (referencia):** mid-market gobernanza de IA **30–50k $/año**; pyme desde ~5k €/año. (Nuestro €390/mes en la landing es orientativo/early-access.)
+- **Canal:** consultores/auditores como aliados ("powered by" + reparto), no competencia.
+
+### 13.6 Corrección de fechas vs el doc
+- El doc dice "deadline ago-2026, posible aplazamiento". **Actualizado:** el Omnibus ya se
+  adoptó (2026) → alto riesgo **2 dic 2027** (ver §6). El mensaje es "ventana, no urgencia".
