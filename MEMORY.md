@@ -606,10 +606,16 @@ diseño, nombre, features grandes); autónomo en lo demás.
     Getters `getRegSources()` en los tres repos + tipo `RegSource` + toasts `vigia-*`.
   - **Verificado:** build + lint + tsc verdes; **prueba local del núcleo 9/9** (ruido volátil ignorado,
     cambio real detectado, hash determinista, fetch ok/404/error, máquina baseline→unchanged→changed).
-  - **PENDIENTE (fundador):** aplicar `0014` en el SQL Editor. Luego **verifico por curl** (no requiere
-    red ni el cron): como platform_admin de prueba, `vigia_report` sobre una fuente → 1ª vez `baseline`
-    (sin candidato); mismo hash → `unchanged`; hash nuevo → `changed` + candidato creado; 2º hash nuevo
-    con draft pendiente → `deduped`; un no-admin → `no autorizado`.
+  - **VERIFICADO e2e por curl (2026-07-17):** el fundador aplicó la `0014` (solo el archivo, NO el
+    `setup.sql` entero — re-ejecutar el concat completo falla con `type "risk_level" already exists`
+    porque la base ya tiene 0001–0013; regla nueva: para incrementales, pegar solo `00NN`). Con un
+    platform_admin de prueba sobre una fuente desechable: 1ª vez `baseline` (sin candidato) → mismo hash
+    `unchanged` → hash nuevo `changed` + **candidato-señal creado** (provenance Vigía, model null, conf
+    0.35, kind/date null) → 2º hash con draft pendiente `deduped` → `ok=false` `error` + `fail_count`++
+    sin tocar el hash. **Negativo:** un no-admin recibe `no autorizado` en `vigia_report` (400) y `[]` al
+    leer `reg_sources` (RLS). Limpieza hecha (candidato + fuente de prueba borrados; las 8 fuentes reales
+    intactas). Pendiente menor: el fundador borra el user de prueba `vigia-test@attesta-test.dev` +
+    su fila en `platform_admins` (RLS no deja por API).
   - **Deferido al deploy:** `CRON_SECRET` + `SUPABASE_SERVICE_ROLE_KEY` en Vercel + un cron que golpee
     el endpoint (el fetch real de fuentes necesita salida a internet sin el proxy del sandbox).
   - **Fase B (siguiente):** el **Analista** (pgvector + embeddings + Claude API) que lee la fuente
@@ -619,11 +625,13 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-> **▶ RETOMAR AQUÍ (2026-07-17, tras el Vigía determinista):** TODO hecho y verificado (build/lint/tsc +
-> prueba local del núcleo 9/9), árbol limpio y sincronizado. **NUEVO: Vigía = 1er agente del foso (Capa 7,
+> **▶ RETOMAR AQUÍ (2026-07-17, tras el Vigía determinista):** TODO hecho y **verificado e2e por curl**
+> (build/lint/tsc + prueba local del núcleo 9/9 + `vigia_report` real: baseline→unchanged→changed→deduped→
+> error + negativos RLS), árbol limpio y sincronizado. **NUEVO: Vigía = 1er agente del foso (Capa 7,
 > Fase A.1)** — monitor de fuentes por fetch+hash que encola candidatos-señal para el Validador (ver §10).
-> **Migración `0014_reg_vigia.sql` PENDIENTE de aplicar por el fundador**; luego verifico `vigia_report` por
-> curl (baseline→unchanged→changed→deduped + RLS). El resto de migraciones aplicadas hasta la 0013. Estado: **Capa 7 (foso) 🟢** = Fase A del pipeline
+> **Migración `0014_reg_vigia.sql` APLICADA por el fundador.** Único fleco: borrar el user de prueba
+> `vigia-test@attesta-test.dev` + su fila `platform_admins` (SQL, RLS no deja por API). Migraciones
+> aplicadas hasta la 0014. Estado: **Capa 7 (foso) 🟢** = Fase A del pipeline
 > (candidato→Validador humano→`reg_events`; RLS blinda la cola; `platform_admin`) + **multi-marco** (EU AI Act
 > + 5 marcos US de IA-empleo: NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto; verificado
 > por el experto) + **nexo de jurisdicción por org** (0012). **Capa 2 🟢** = **plan de acción editable**
@@ -635,11 +643,14 @@ diseño, nombre, features grandes); autónomo en lo demás.
 > **CONTEXTO CLAVE:** el fundador **no quiere deploy aún** ("seguiremos con sugerencias que me des"); nunca
 > ha tenido app con botones (todo se opera vía Supabase SQL Editor + mi verificación por curl con usuarios
 > `*@attesta-test.dev`). Flujo: yo escribo migración → él la pega en SQL Editor → yo verifico por curl.
-> **SIGUIENTES CANDIDATOS (yo sugiero, él elige):** (1) **Vigía determinista** — 1er agente del foso: monitor
-> de fuentes (fetch+hash) que crea candidatos "algo cambió aquí"; sin gasto (el cron real espera al deploy,
-> pero la lógica queda lista y verificable por curl). (2) **Fase B del foso** — pgvector + embeddings +
-> Analista LLM; necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic NO da embeddings)
-> + **llave/budget** (decisión del fundador).
+> **SIGUIENTES CANDIDATOS (yo sugiero, él elige):** (1) **Fase B del foso — el Analista**: lee la fuente
+> cambiada (que ya marca el Vigía) y **enriquece** el candidato-señal (fecha, tipo, resumen, impacto,
+> artículos) para hacerlo publicable. Necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024;
+> Anthropic NO da embeddings) + pgvector + **llave/budget** → decisión del fundador (primer gasto real).
+> (2) **Enriquecimiento manual del candidato-señal** (sin LLM, sin gasto): editor en la bandeja para que
+> el Validador complete fecha/tipo/resumen a mano y publique — cierra el bucle del Vigía HOY sin esperar a
+> la Fase B. (3) Otra capa: descubrimiento automático de inventario / shadow-AI (Capa 0) o pruebas de
+> sesgo integrando Evidently (Capa 4).
 > **PENDIENTES DE CONFIG/DEPLOY:** (a) Deploy a Vercel. (b) Al desplegar: en Supabase → URL Configuration,
 > añadir `https://<dominio>/auth/callback` a Redirect URLs + fijar Site URL (si no, `resetPasswordForEmail`
 > da 400). (c) Captcha Turnstile (llave gratis + toggle en Supabase). (d) Idea del recordatorio: email de
