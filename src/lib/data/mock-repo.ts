@@ -23,3 +23,9 @@ export async function getSystemsForSelect(): Promise<
 export async function getOrganizationName(): Promise<string | null> {
   return "Organización demo";
 }
+
+export async function getSystemById(_id: string): Promise<null> {
+  // En modo demo no se edita: los datos de ejemplo no son reales.
+  void _id;
+  return null;
+}

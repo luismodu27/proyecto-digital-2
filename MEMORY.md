@@ -256,6 +256,11 @@ diseño, nombre, features grandes); autónomo en lo demás.
   reescrita a sistemas de reclutamiento (cribado CVs, ranking, entrevistas vídeo, chatbot, test
   psicométrico, agenda). Base regulatoria: IA de empleo/selección = alto riesgo (Anexo III).
   Siguiente para el vertical: "policy pack RRHH" (controles/obligaciones específicos de selección).
+- **2026-07-17** · **Escritura completa (deja de ser solo lectura).** Editar sistema
+  (`/dashboard/inventario/[id]/editar` + `updateAiSystem`), borrar sistema (`deleteAiSystem`,
+  cascada a evaluaciones/brechas, con confirmación cliente), y cambiar estado de brecha
+  (control segmentado Falta/Parcial/Cubierto + `updateGapStatus`). AiSystem ahora lleva `dbId`
+  (uuid real) para rutear editar/borrar; solo visible en modo conectado. Verificado e2e por API.
 - **2026-07-17** · **Policy pack RRHH** (`src/lib/policy-packs/rrhh.ts`): 14 controles de
   reclutamiento; vista `/dashboard/packs` + `applyPolicyPack` (precarga los controles como
   gap_items de un sistema, sin duplicar). **Verificado por el experto** con correcciones clave:

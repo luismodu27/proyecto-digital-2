@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageHeader, Meter } from "@/components/dashboard/parts";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
@@ -60,7 +61,16 @@ export default async function InventarioPage() {
                 {systems.map((s) => (
                   <tr key={s.id} className="transition-colors hover:bg-paper-sunken/50">
                     <td className="px-5 py-4">
-                      <p className="font-medium text-ink">{s.name}</p>
+                      {s.dbId ? (
+                        <Link
+                          href={`/dashboard/inventario/${s.dbId}/editar`}
+                          className="font-medium text-ink transition-colors hover:text-brand"
+                        >
+                          {s.name}
+                        </Link>
+                      ) : (
+                        <p className="font-medium text-ink">{s.name}</p>
+                      )}
                       <p className="font-mono text-xs text-muted">
                         {s.id} · {s.owner}
                         {s.vendor ? ` · ${s.vendor}` : ""}

@@ -1,7 +1,8 @@
 import { PageHeader } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
-import { getGapItems } from "@/lib/data";
+import { GapStatusControl } from "@/components/dashboard/GapStatusControl";
+import { getGapItems, isSupabaseConfigured } from "@/lib/data";
 
 const statusMeta = {
   missing: {
@@ -58,11 +59,15 @@ export default async function GapPage() {
                 <p className="mt-1 font-medium text-ink">{g.requirement}</p>
                 <p className="text-xs text-muted">Sistema afectado: {g.system}</p>
               </div>
-              <span
-                className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium ${st.cls}`}
-              >
-                {st.label}
-              </span>
+              {isSupabaseConfigured ? (
+                <GapStatusControl id={g.id} status={g.status} />
+              ) : (
+                <span
+                  className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium ${st.cls}`}
+                >
+                  {st.label}
+                </span>
+              )}
             </article>
           );
         })}

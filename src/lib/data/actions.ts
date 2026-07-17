@@ -158,6 +158,84 @@ export async function seedSampleData() {
  * Persiste una clasificación de riesgo y actualiza el nivel vigente del sistema.
  * Usado por el asistente cuando se guarda contra un sistema del inventario.
  */
+/** Edita los campos de un sistema de IA. */
+export async function updateAiSystem(formData: FormData) {
+  if (!isSupabaseConfigured) redirect("/dashboard/inventario");
+  const id = String(formData.get("id") ?? "");
+  if (!id) redirect("/dashboard/inventario");
+
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) redirect("/onboarding");
+
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) redirect(`/dashboard/inventario/${id}/editar`);
+
+  await supabase
+    .from("ai_systems")
+    .update({
+      name,
+      owner: String(formData.get("owner") ?? "").trim() || null,
+      domain: String(formData.get("domain") ?? "").trim() || null,
+      vendor: String(formData.get("vendor") ?? "").trim() || null,
+      actor_role: String(formData.get("actor_role") ?? "deployer") || "deployer",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("organization_id", org)
+    .eq("id", id);
+
+  revalidatePath("/dashboard/inventario");
+  revalidatePath("/dashboard");
+  redirect("/dashboard/inventario?toast=system-updated");
+}
+
+/** Borra un sistema (y en cascada sus evaluaciones y brechas). */
+export async function deleteAiSystem(formData: FormData) {
+  if (!isSupabaseConfigured) redirect("/dashboard/inventario");
+  const id = String(formData.get("id") ?? "");
+  if (!id) redirect("/dashboard/inventario");
+
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) redirect("/onboarding");
+
+  await supabase
+    .from("ai_systems")
+    .delete()
+    .eq("organization_id", org)
+    .eq("id", id);
+
+  revalidatePath("/dashboard/inventario");
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/gap");
+  redirect("/dashboard/inventario?toast=system-deleted");
+}
+
+/** Cambia el estado de una brecha (falta / parcial / cubierto). */
+export async function updateGapStatus(formData: FormData) {
+  if (!isSupabaseConfigured) redirect("/dashboard/gap");
+  const id = String(formData.get("id") ?? "");
+  const status = String(formData.get("status") ?? "");
+  if (!id || !["missing", "partial", "done"].includes(status)) {
+    redirect("/dashboard/gap");
+  }
+
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) redirect("/onboarding");
+
+  await supabase
+    .from("gap_items")
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq("organization_id", org)
+    .eq("id", id);
+
+  revalidatePath("/dashboard/gap");
+  revalidatePath("/dashboard/plan");
+  revalidatePath("/dashboard");
+  redirect("/dashboard/gap");
+}
+
 export type EvidenceInput = {
   attestedByName?: string;
   note?: string;

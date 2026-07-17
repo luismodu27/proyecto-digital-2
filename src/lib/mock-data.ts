@@ -22,7 +22,8 @@ export const RISK_LABEL: Record<RiskLevel, string> = {
 };
 
 export type AiSystem = {
-  id: string;
+  id: string; // código visible (p. ej. SYS-001) o uuid si no hay código
+  dbId?: string; // uuid real en BD (para editar/borrar; ausente en modo demo)
   name: string;
   owner: string;
   domain: string;

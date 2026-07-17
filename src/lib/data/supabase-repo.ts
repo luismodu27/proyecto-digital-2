@@ -33,6 +33,7 @@ export async function getAiSystems(): Promise<AiSystem[]> {
 
   return data.map((row) => ({
     id: row.code ?? row.id,
+    dbId: row.id,
     name: row.name,
     owner: row.owner ?? "",
     domain: row.domain ?? "",
@@ -46,6 +47,39 @@ export async function getAiSystems(): Promise<AiSystem[]> {
       | EvidenceState
       | undefined,
   }));
+}
+
+export type EditableSystem = {
+  id: string;
+  name: string;
+  owner: string;
+  domain: string;
+  vendor: string;
+  actorRole: string;
+};
+
+/** Un sistema por su uuid, con los campos editables (o null si no existe/no es tuyo). */
+export async function getSystemById(
+  id: string,
+): Promise<EditableSystem | null> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return null;
+  const { data } = await supabase
+    .from("ai_systems")
+    .select("id, name, owner, domain, vendor, actor_role")
+    .eq("organization_id", org)
+    .eq("id", id)
+    .maybeSingle();
+  if (!data) return null;
+  return {
+    id: data.id,
+    name: data.name,
+    owner: data.owner ?? "",
+    domain: data.domain ?? "",
+    vendor: data.vendor ?? "",
+    actorRole: data.actor_role ?? "deployer",
+  };
 }
 
 /** Nombre de la organización activa (para informes/cabeceras). */
