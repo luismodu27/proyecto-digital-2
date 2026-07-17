@@ -595,7 +595,7 @@ export const SAMPLE_ACTION_TASKS: ActionTask[] = [
     status: "todo",
     assigneeId: "demo-3",
     assigneeEmail: "talent@empresa-demo.com",
-    dueDate: "2026-08-15",
+    dueDate: "2026-07-14",
     systemId: null,
     systemName: null,
     source: "recommendation",

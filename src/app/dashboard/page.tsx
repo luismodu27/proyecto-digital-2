@@ -3,7 +3,8 @@ import { PageHeader, StatCard, Meter } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
-import { getAiSystems, getOrgJurisdictions } from "@/lib/data";
+import { DeadlineReminders } from "@/components/dashboard/DeadlineReminders";
+import { getAiSystems, getOrgJurisdictions, getActionTasks } from "@/lib/data";
 import { avgCompliance, riskCounts } from "@/lib/mock-data";
 import {
   upcomingDeadlines,
@@ -17,9 +18,10 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function DashboardOverview() {
-  const [systems, orgJur] = await Promise.all([
+  const [systems, orgJur, tasks] = await Promise.all([
     getAiSystems(),
     getOrgJurisdictions(),
+    getActionTasks(),
   ]);
   const counts = riskCounts(systems);
   const avg = avgCompliance(systems);
@@ -110,6 +112,8 @@ export default async function DashboardOverview() {
           </div>
         </Link>
       )}
+
+      <DeadlineReminders tasks={tasks} now={now} />
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">

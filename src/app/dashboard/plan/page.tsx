@@ -14,17 +14,16 @@ import {
   getGapItems,
   getActionTasks,
   getOrgMembers,
-  type ActionTask,
 } from "@/lib/data";
 import {
   TASK_STATUS_LABEL,
-  TASK_STATUS_ORDER,
   TASK_PRIORITY_LABEL,
   TASK_PRIORITY_ORDER,
   type TaskStatus,
   type TaskPriority,
 } from "@/lib/mock-data";
 import { buildActionPlan, type Priority } from "@/lib/recommendations";
+import { isTaskOverdue } from "@/lib/task-reminders";
 
 export const dynamic = "force-dynamic";
 
@@ -68,18 +67,6 @@ function Pill({
   );
 }
 
-function formatDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function isOverdue(t: ActionTask, todayIso: string): boolean {
-  return t.status !== "done" && t.dueDate != null && t.dueDate < todayIso;
-}
-
 export default async function PlanPage() {
   const [systems, gaps, tasks, members] = await Promise.all([
     getAiSystems(),
@@ -108,7 +95,7 @@ export default async function PlanPage() {
   };
   for (const t of tasks) counts[t.status] += 1;
   const openCount = tasks.length - counts.done;
-  const overdueCount = tasks.filter((t) => isOverdue(t, todayIso)).length;
+  const overdueCount = tasks.filter((t) => isTaskOverdue(t, todayIso)).length;
 
   // Orden: activas primero (por prioridad, luego vencimiento), hechas al final.
   const sorted = [...tasks].sort((a, b) => {
@@ -272,7 +259,7 @@ export default async function PlanPage() {
       ) : (
         <div className="mt-6 space-y-3">
           {sorted.map((t) => {
-            const overdue = isOverdue(t, todayIso);
+            const overdue = isTaskOverdue(t, todayIso);
             return (
               <article
                 key={t.id}

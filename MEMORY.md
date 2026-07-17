@@ -536,26 +536,45 @@ diseño, nombre, features grandes); autónomo en lo demás.
     estado+responsable+fecha (confirma RLS **colaborativa**); un extraño ve **0 filas** (aislamiento); el
     audit-trail registra insert (owner) + update (member, `campos=[status,due_date,assignee_id]`) con
     emails; owner elimina. Todo ✅.
+- **2026-07-17** · **Recordatorios de vencimiento del plan (Capa 2).** Complemento del tablero editable:
+  las tareas con fecha ahora "empujan" al resumen. **Sin backend nuevo** — puro cálculo sobre
+  `getActionTasks()`, cero migración, cero coste.
+  - **Helper puro `src/lib/task-reminders.ts`:** `isTaskOverdue()`, `bucketTaskDeadlines(tasks, now,
+    soonDays=14)` → `{overdue, dueSoon}` (ignora hechas y sin fecha; ventana por defecto 14 días;
+    vencidas de la más atrasada arriba, próximas de antes a después) y `dueLabel()` ("vence hoy/mañana",
+    "vence en N días", "venció hace N días"). Reutiliza `daysUntil` de `regulatory-watch`.
+  - **Widget `DeadlineReminders.tsx`** (presentacional, sin cliente) en el **resumen** del dashboard,
+    debajo del hito regulatorio: título "Vencimientos del plan" + badge "N vencidas", filas con punto
+    rojo(vencida)/ámbar(próxima), pill de prioridad y texto relativo; enlaza a `/dashboard/plan`. **No se
+    renderiza si no hay ninguna.** Muestra hasta 5 (vencidas primero) y resume el resto ("y N tareas más").
+  - **Refactor:** el `isOverdue` local de `plan/page.tsx` se sustituye por el `isTaskOverdue` compartido
+    (una sola fuente de verdad para "vencida"); limpieza de imports muertos (`ActionTask`,
+    `TASK_STATUS_ORDER`, `formatDate`).
+  - **Demo:** cambiada la fecha de la tarea de ejemplo `task-demo-2` a una pasada (14-jul) para que el
+    demo muestre 1 vencida + 1 próxima. Lint/tsc verdes; **verificado con capturas** (resumen y plan
+    coherentes: badge "1 vencida", "venció hace 3 días" / "vence en 14 días").
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-> **▶ RETOMAR AQUÍ (2026-07-17, tras 2º compact):** Sesión muy productiva; TODO hecho y verificado e2e,
-> árbol limpio y sincronizado (último commit `488cd92`). **Migraciones aplicadas por el fundador hasta la
-> 0013.** Logrado esta tanda: **Capa 7 (foso) 🟢** = Fase A del pipeline (candidato→Validador humano→
-> `reg_events`; RLS blinda la cola; `platform_admin`) + **multi-marco** (EU AI Act + 5 marcos US de IA-
-> empleo: NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto; verificado por el experto)
-> + **nexo de jurisdicción por org** (0012). **Capa 2 🟢** = **plan de acción editable** (tablero
-> `action_tasks`, colaborativo, con responsable/fecha/estado + sugerencias con dedupe; 0013).
+> **▶ RETOMAR AQUÍ (2026-07-17, tras recordatorios):** TODO hecho y verificado, árbol limpio y sincronizado.
+> **Migraciones aplicadas por el fundador hasta la 0013.** Logrado en la tanda previa: **Capa 7 (foso) 🟢**
+> = Fase A del pipeline (candidato→Validador humano→`reg_events`; RLS blinda la cola; `platform_admin`) +
+> **multi-marco** (EU AI Act + 5 marcos US de IA-empleo: NYC LL144, Colorado SB 26-189, Illinois AIVIA +
+> IHRA, EEOC-contexto; verificado por el experto) + **nexo de jurisdicción por org** (0012). **Capa 2 🟢** =
+> **plan de acción editable** (tablero `action_tasks`, colaborativo; 0013) + **recordatorios de vencimiento**
+> (widget "Vencimientos del plan" en el resumen; `task-reminders.ts` + `DeadlineReminders.tsx`; **sin
+> migración ni backend nuevo** — puro cálculo sobre `getActionTasks()`; verificado con capturas).
 > **CONTEXTO CLAVE:** el fundador **no quiere deploy aún** ("seguiremos con sugerencias que me des"); nunca
 > ha tenido app con botones (todo se opera vía Supabase SQL Editor + mi verificación por curl con usuarios
 > `*@attesta-test.dev`). Flujo: yo escribo migración → él la pega en SQL Editor → yo verifico por curl.
-> **SIGUIENTES CANDIDATOS (yo sugiero, él elige — le presenté estas 3 al final):** (1) **Vigía determinista**
-> — 1er agente del foso: monitor de fuentes (fetch+hash) que crea candidatos "algo cambió aquí"; sin gasto
-> (el cron espera al deploy). (2) **Recordatorios de vencimiento del plan** (widget en resumen + posible
-> email); bajo coste. (3) **Fase B del foso** — pgvector + embeddings + Analista LLM; necesita **proveedor
-> de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic NO da embeddings) + **llave/budget** (decisión del
-> fundador). Pendientes de siempre: (a) Deploy a Vercel; (c) Pulido (forgot-password, captcha/rate-limit).
+> **SIGUIENTES CANDIDATOS (yo sugiero, él elige):** (1) **Vigía determinista** — 1er agente del foso: monitor
+> de fuentes (fetch+hash) que crea candidatos "algo cambió aquí"; sin gasto (el cron real espera al deploy,
+> pero la lógica queda lista y verificable por curl). (2) **Fase B del foso** — pgvector + embeddings +
+> Analista LLM; necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic NO da embeddings)
+> + **llave/budget** (decisión del fundador). (3) **Pulido de auth** — forgot-password + captcha/rate-limit.
+> Pendiente de siempre: (a) Deploy a Vercel. (Idea futura del recordatorio: email de aviso — requiere deploy
+> + proveedor de correo.)
 
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅
@@ -611,7 +630,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 ### 13.1 Torre de 10 capas · dónde estamos
 - **Capa 0 Inventario** ✅ (con alta manual; falta descubrimiento automático / shadow-AI).
 - **Capa 1 Clasificación de riesgo** ✅ (falta multi-marco: hoy solo EU AI Act).
-- **Capa 2 Evaluaciones + plan de riesgo** 🟢 (cuestionario + **plan de acción editable**: tablero de tareas con responsable/fecha/estado + sugerencias derivadas con dedupe; falta opcional: notificaciones/recordatorios de vencimiento).
+- **Capa 2 Evaluaciones + plan de riesgo** 🟢 (cuestionario + **plan de acción editable**: tablero de tareas con responsable/fecha/estado + sugerencias derivadas con dedupe + **recordatorios de vencimiento** en el resumen —vencidas/próximas—; falta opcional: aviso por email, requiere deploy + proveedor de correo).
 - **Capa 3 Evidencia + documentación + audit-trail** ✅ (audit-trail ✅, evidencia declarada ✅, export PDF ✅, **generador de documentación técnica / dossier de gobernanza por sistema ✅**; futuro opcional: redacción asistida por LLM y firma/versión del dossier).
 - **Capa 4 Pruebas técnicas del modelo** ❌ (sesgo/explicabilidad/robustez — INTEGRAR, no construir).
 - **Capa 5 Monitoreo continuo en producción** ❌ (drift, incidentes).
