@@ -8,8 +8,8 @@ export function SiteFooter() {
         <div>
           <Logo />
           <p className="mt-3 max-w-xs text-sm text-muted">
-            Gobernanza continua de IA para el mid-market. Inventario, riesgo y
-            evidencia lista para auditoría.
+            Gobernanza continua de IA para el mid-market: inventario, riesgo,
+            evidencia y vigilancia regulatoria, listos para auditoría.
           </p>
         </div>
         <div className="text-sm text-muted">
