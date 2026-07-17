@@ -22,8 +22,9 @@ const tiers = [
     features: [
       "Todo lo de Diagnóstico",
       "Gap assessment + plan de acción",
+      "Vigilancia regulatoria",
+      "Dossier e informe ejecutivo (PDF)",
       "Evidencia y audit-trail",
-      "Exportación a PDF",
       "Equipo y roles",
     ],
     cta: "Solicitar acceso",

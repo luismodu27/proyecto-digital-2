@@ -3,8 +3,8 @@ import { SealMark } from "@/components/ui/SealMark";
 /** Mockup on-brand del producto para el hero (no es una captura: escala nítido). */
 export function HeroPreview() {
   const risk = [
-    { label: "Alto riesgo", pct: 50, color: "#c9761f" },
-    { label: "Riesgo limitado", pct: 33, color: "#b0824a" },
+    { label: "Alto riesgo", pct: 67, color: "#c9761f" },
+    { label: "Riesgo limitado", pct: 17, color: "#b0824a" },
     { label: "Riesgo mínimo", pct: 17, color: "#0b6b4e" },
   ];
 
@@ -31,18 +31,20 @@ export function HeroPreview() {
                 Attesta
               </span>
             </div>
-            {["Resumen", "Inventario", "Riesgo", "Plan"].map((n, i) => (
-              <div
-                key={n}
-                className={`rounded-md px-2 py-1 text-[11px] ${
-                  i === 0
-                    ? "bg-brand-soft font-medium text-brand-strong"
-                    : "text-ink-soft"
-                }`}
-              >
-                {n}
-              </div>
-            ))}
+            {["Resumen", "Inventario", "Riesgo", "Vigilancia", "Equipo"].map(
+              (n, i) => (
+                <div
+                  key={n}
+                  className={`rounded-md px-2 py-1 text-[11px] ${
+                    i === 0
+                      ? "bg-brand-soft font-medium text-brand-strong"
+                      : "text-ink-soft"
+                  }`}
+                >
+                  {n}
+                </div>
+              ),
+            )}
           </div>
 
           {/* Contenido */}
@@ -53,8 +55,8 @@ export function HeroPreview() {
             <div className="mt-3 grid grid-cols-3 gap-2">
               {[
                 { k: "Sistemas", v: "6" },
-                { k: "Alto riesgo", v: "3", warn: true },
-                { k: "% listo", v: "62%" },
+                { k: "Alto riesgo", v: "4", warn: true },
+                { k: "% listo", v: "59%" },
               ].map((c) => (
                 <div key={c.k} className="rounded-lg border border-line bg-paper-raised p-2">
                   <p
@@ -67,6 +69,32 @@ export function HeroPreview() {
                   <p className="text-[10px] text-muted">{c.k}</p>
                 </div>
               ))}
+            </div>
+
+            {/* Próximo hito regulatorio (el foso, ya en el hero) */}
+            <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[#bfdccf] bg-brand-soft/50 px-3 py-2">
+              <div className="flex items-center gap-1.5">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-3.5 shrink-0 text-brand-strong"
+                  fill="none"
+                  aria-hidden
+                >
+                  <path
+                    d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className="text-[10px] font-medium text-ink">
+                  Próximo hito · Transparencia (Art. 50)
+                </span>
+              </div>
+              <span className="shrink-0 text-[10px] font-semibold tabular-nums text-brand-strong">
+                en 16 días
+              </span>
             </div>
 
             <div className="mt-3 rounded-lg border border-line bg-paper-raised p-3">

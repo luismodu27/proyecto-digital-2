@@ -404,6 +404,11 @@ diseño, nombre, features grandes); autónomo en lo demás.
   ya era honesto (no certificación, foco deployer, audit-trail) → sin cambios. Build/lint verdes;
   verificado con captura. Principio mantenido: nada de sobre-promesas (multi-marco ISO/NIST sigue
   siendo futuro, no se anuncia).
+- **2026-07-17** · **Pulido del landing (2ª tanda).** (a) `HeroPreview` modernizado: sidebar actual
+  (incluye Vigilancia/Equipo), cifras consistentes con la demo (6/4/59%) y nueva tira **"Próximo hito ·
+  Transparencia (Art. 50) · en 16 días"** → el foso (vigilancia) asoma ya en el mockup del hero.
+  (b) `Pricing`: el tier "Preparación" ahora lista **Vigilancia regulatoria** y **Dossier e informe
+  ejecutivo (PDF)**. ProblemStats/FAQ ya eran correctos. Build/lint verdes; verificado con capturas.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
