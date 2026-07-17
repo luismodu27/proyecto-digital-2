@@ -621,17 +621,31 @@ diseño, nombre, features grandes); autónomo en lo demás.
   - **Fase B (siguiente):** el **Analista** (pgvector + embeddings + Claude API) que lee la fuente
     cambiada y **enriquece** el candidato-señal (fecha, tipo, resumen, impacto, artículos) para hacerlo
     publicable. Decisión pendiente del fundador: proveedor de embeddings (OpenAI/Voyage) + budget.
+- **2026-07-17** · **Editor de enriquecimiento del candidato-señal (cierra el bucle del Vigía).** El
+  Vigía deja señales "algo cambió aquí" sin fecha/tipo (no publicables). Nuevo editor en la bandeja del
+  Validador (`CandidateReviewControls` reescrito) para **completar** la señal (título, marco, tipo, fecha,
+  resumen, impacto, acción, artículos, alcance por niveles de riesgo / toda la org) y **publicarla** como
+  evento del radar, o **guardarla como borrador**. Server action `enrichCandidate` (`reg-pipeline-actions.ts`):
+  `UPDATE reg_candidates` por RLS (platform_admin, solo `status='draft'`) + reutiliza `approve_reg_candidate`
+  para publicar. **Sin migración** (la RLS de `reg_candidates` ya permite el update al validador). Toast
+  `cand-saved`. El botón "Publicar" se deshabilita hasta que haya fecha+tipo (los exige el RPC). Build de
+  producción + lint + tsc **verdes**. **Pendiente:** verificación e2e por curl (necesita un platform_admin
+  de prueba → 1 línea de SQL del fundador para promoverlo); el usuario de prueba anterior ya se borró.
+  Reutiliza primitivas ya verificadas en Fase A (update por RLS + `approve_reg_candidate`).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-> **▶ RETOMAR AQUÍ (2026-07-17, tras el Vigía determinista):** TODO hecho y **verificado e2e por curl**
-> (build/lint/tsc + prueba local del núcleo 9/9 + `vigia_report` real: baseline→unchanged→changed→deduped→
-> error + negativos RLS), árbol limpio y sincronizado. **NUEVO: Vigía = 1er agente del foso (Capa 7,
-> Fase A.1)** — monitor de fuentes por fetch+hash que encola candidatos-señal para el Validador (ver §10).
-> **Migración `0014_reg_vigia.sql` APLICADA por el fundador.** Único fleco: borrar el user de prueba
-> `vigia-test@attesta-test.dev` + su fila `platform_admins` (SQL, RLS no deja por API). Migraciones
-> aplicadas hasta la 0014. Estado: **Capa 7 (foso) 🟢** = Fase A del pipeline
+> **▶ RETOMAR AQUÍ (2026-07-17, tras el editor de enriquecimiento):** **Vigía (Fase A.1) + editor de
+> enriquecimiento del candidato-señal HECHOS.** Vigía verificado e2e por curl; el editor verificado con
+> **build de producción + lint + tsc verdes** (falta solo el sello e2e por curl: necesita 1 línea SQL para
+> promover un platform_admin de prueba — el anterior ya se borró). Árbol limpio y sincronizado (`5afdde4`).
+> **BUCLE DEL FOSO CERRADO A MANO:** Vigía detecta cambio → señal en la bandeja → Validador la completa
+> (fecha/tipo/textos/artículos/alcance) y **publica** en el radar, o la descarta. **Migraciones aplicadas
+> hasta la 0014** (el editor no necesitó migración). **CONTEXTO NUEVO:** el fundador **ya hizo sign-up en
+> Voyage** (embeddings para Fase B) — el coste se revisa al entrar en B. Quiere **publicar una demo en
+> Vercel** más adelante para visualizar; de momento seguimos desarrollando. **PRÓXIMO: Fase B — el
+> Analista** (ver §11 SIGUIENTES). Estado: **Capa 7 (foso) 🟢** = Fase A del pipeline
 > (candidato→Validador humano→`reg_events`; RLS blinda la cola; `platform_admin`) + **multi-marco** (EU AI Act
 > + 5 marcos US de IA-empleo: NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto; verificado
 > por el experto) + **nexo de jurisdicción por org** (0012). **Capa 2 🟢** = **plan de acción editable**
@@ -640,17 +654,16 @@ diseño, nombre, features grandes); autónomo en lo demás.
 > completa (`/reset-password` + `/auth/callback` + `/reset-password/update`; `updateUser` probado e2e) +
 > **honeypot** anti-bots (recuperación + waitlist); **captcha DIFERIDO al deploy** (mi recomendación: honeypot
 > + rate-limit server-side de Supabase bastan pre-lanzamiento; Turnstile necesita dominio).
-> **CONTEXTO CLAVE:** el fundador **no quiere deploy aún** ("seguiremos con sugerencias que me des"); nunca
-> ha tenido app con botones (todo se opera vía Supabase SQL Editor + mi verificación por curl con usuarios
-> `*@attesta-test.dev`). Flujo: yo escribo migración → él la pega en SQL Editor → yo verifico por curl.
-> **SIGUIENTES CANDIDATOS (yo sugiero, él elige):** (1) **Fase B del foso — el Analista**: lee la fuente
-> cambiada (que ya marca el Vigía) y **enriquece** el candidato-señal (fecha, tipo, resumen, impacto,
-> artículos) para hacerlo publicable. Necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024;
-> Anthropic NO da embeddings) + pgvector + **llave/budget** → decisión del fundador (primer gasto real).
-> (2) **Enriquecimiento manual del candidato-señal** (sin LLM, sin gasto): editor en la bandeja para que
-> el Validador complete fecha/tipo/resumen a mano y publique — cierra el bucle del Vigía HOY sin esperar a
-> la Fase B. (3) Otra capa: descubrimiento automático de inventario / shadow-AI (Capa 0) o pruebas de
-> sesgo integrando Evidently (Capa 4).
+> **CONTEXTO CLAVE:** el fundador operaba sin app corriendo (todo vía Supabase SQL Editor + mi verificación
+> por curl con usuarios `*@attesta-test.dev`); AHORA quiere **publicar una demo en Vercel** para visualizar
+> (más adelante). Flujo de migraciones: yo escribo `00NN` → él lo pega en SQL Editor (SOLO el archivo, no el
+> `setup.sql` entero) → yo verifico por curl.
+> **SIGUIENTES CANDIDATOS:** (1) **Fase B del foso — el Analista** (EN CURSO, es lo próximo): lee la fuente
+> cambiada (que marca el Vigía) y **enriquece** el candidato-señal automáticamente (fecha, tipo, resumen,
+> impacto, artículos) vía RAG sobre el texto de la norma. **Voyage ya con sign-up** (embeddings 1024) +
+> pgvector + Claude API. Coste = primer gasto real, se revisa al construirlo. (2) ~~Enriquecimiento manual~~
+> **HECHO** (editor en la bandeja). (3) Otra capa: descubrimiento de inventario / shadow-AI (Capa 0) o
+> pruebas de sesgo con Evidently (Capa 4). (4) **Demo en Vercel** cuando el fundador quiera visualizar.
 > **PENDIENTES DE CONFIG/DEPLOY:** (a) Deploy a Vercel. (b) Al desplegar: en Supabase → URL Configuration,
 > añadir `https://<dominio>/auth/callback` a Redirect URLs + fijar Site URL (si no, `resetPasswordForEmail`
 > da 400). (c) Captcha Turnstile (llave gratis + toggle en Supabase). (d) Idea del recordatorio: email de
