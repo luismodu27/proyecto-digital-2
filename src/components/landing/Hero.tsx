@@ -19,19 +19,20 @@ export function Hero() {
         <div className="reveal is-visible text-center lg:text-left">
           <span className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-paper-raised px-3 py-1 text-xs font-medium text-ink-soft">
             <span className="size-1.5 rounded-full bg-brand" />
-            EU AI Act · ISO 42001 · NIST AI RMF
+            Gobernanza de IA para Recursos Humanos · EU AI Act
           </span>
 
           <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-5xl md:text-6xl">
-            Gobierna tu IA
+            Contrata con IA
             <br />
-            <span className="text-brand">antes que la auditoría.</span>
+            <span className="text-brand">sin miedo a la auditoría.</span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-ink-soft lg:mx-0">
-            Attesta inventaría tus sistemas de IA, clasifica su riesgo según el
-            EU AI Act y organiza tu evidencia lista para auditoría — de forma
-            continua. Preparación de nivel enterprise, sin necesitar un equipo GRC.
+            La IA que usas para contratar —cribado de CVs, entrevistas, scoring de
+            candidatos— es de <span className="font-medium text-ink">alto riesgo</span>{" "}
+            bajo el EU AI Act. Attesta la inventaría, clasifica su riesgo y organiza
+            tu evidencia lista para auditoría. Sin necesitar un equipo GRC.
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">

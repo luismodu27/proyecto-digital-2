@@ -4,6 +4,10 @@ const faqs = [
     a: "No. Attesta es una herramienta de autoevaluación y preparación para auditoría: organiza tu inventario, tu clasificación de riesgo y tu evidencia. La certificación de conformidad, cuando procede, solo la emiten organismos notificados acreditados. No prestamos asesoría legal.",
   },
   {
+    q: "¿La IA que filtra o puntúa candidatos es de alto riesgo?",
+    a: "Sí. La IA usada para selección de personal (cribado de CVs, ranking, entrevistas por vídeo, tests) entra en el Anexo III (empleo) del EU AI Act como alto riesgo. Eso implica obligaciones de supervisión humana, control de sesgo y evidencia — justo lo que Attesta organiza por ti.",
+  },
+  {
     q: "Usamos IA de terceros, no la desarrollamos. ¿Nos sirve?",
     a: "Sí — de hecho ese es nuestro foco. Como responsable del despliegue (deployer) tienes obligaciones propias (uso conforme, supervisión humana, conservación de logs, en ciertos casos una evaluación de impacto). Attesta te ayuda a cumplirlas y a demostrarlo con evidencia.",
   },

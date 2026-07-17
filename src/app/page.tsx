@@ -2,6 +2,7 @@ import { SiteHeader } from "@/components/landing/SiteHeader";
 import { Hero } from "@/components/landing/Hero";
 import { TrustStrip } from "@/components/landing/TrustStrip";
 import { ProblemStats } from "@/components/landing/ProblemStats";
+import { RecruitmentFocus } from "@/components/landing/RecruitmentFocus";
 import { Modules } from "@/components/landing/Modules";
 import { WhyNow } from "@/components/landing/WhyNow";
 import { HowItWorks } from "@/components/landing/HowItWorks";
@@ -22,6 +23,9 @@ export default function Home() {
         </Reveal>
         <Reveal>
           <ProblemStats />
+        </Reveal>
+        <Reveal>
+          <RecruitmentFocus />
         </Reveal>
         <Reveal>
           <Modules />

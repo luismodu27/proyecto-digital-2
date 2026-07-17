@@ -249,6 +249,13 @@ diseño, nombre, features grandes); autónomo en lo demás.
   **Regla:** todo color semántico nuevo va por token o tono, NUNCA hex hardcodeado en clases.
 - **Auth validación**: mensajes en español (traductor de errores de Supabase), validación por
   campo, mostrar/ocultar contraseña. Hueco pendiente: flujo "olvidé mi contraseña".
+- **2026-07-17** · **Enfoque vertical RRHH (cuña) en el landing + demo.** Landing reposicionado
+  a reclutamiento: eyebrow "Gobernanza de IA para RRHH", H1 "Contrata con IA sin miedo a la
+  auditoría", subhead de cribado/entrevistas/scoring, TrustStrip con casos de uso de selección,
+  nueva sección `RecruitmentFocus` (6 casos con su nivel de riesgo) y FAQ de RRHH. Demo (mock-data)
+  reescrita a sistemas de reclutamiento (cribado CVs, ranking, entrevistas vídeo, chatbot, test
+  psicométrico, agenda). Base regulatoria: IA de empleo/selección = alto riesgo (Anexo III).
+  Siguiente para el vertical: "policy pack RRHH" (controles/obligaciones específicos de selección).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
