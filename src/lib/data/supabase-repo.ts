@@ -17,6 +17,7 @@ import type {
   RegCandidate,
   RegCandidateProvenance,
   RegCandidateStatus,
+  RegSource,
   RiskLevel,
   TaskPriority,
   TaskStatus,
@@ -394,6 +395,54 @@ export async function getRegCandidates(): Promise<RegCandidate[]> {
     .order("created_at", { ascending: false });
   if (error || !data) return [];
   return (data as unknown as RegCandidateRow[]).map(rowToCandidate);
+}
+
+type RegSourceRow = {
+  id: string;
+  framework: string;
+  label: string;
+  url: string;
+  source_kind: string;
+  last_hash: string | null;
+  last_checked_at: string | null;
+  last_change_at: string | null;
+  last_status: string | null;
+  fail_count: number | null;
+  active: boolean;
+};
+
+function rowToSource(r: RegSourceRow): RegSource {
+  return {
+    id: r.id,
+    framework: r.framework,
+    label: r.label,
+    url: r.url,
+    sourceKind: r.source_kind,
+    lastHash: r.last_hash,
+    lastCheckedAt: r.last_checked_at,
+    lastChangeAt: r.last_change_at,
+    lastStatus: (r.last_status as RegSource["lastStatus"]) ?? null,
+    failCount: r.fail_count ?? 0,
+    active: r.active,
+  };
+}
+
+/**
+ * Watchlist del Vigía. RLS solo la deja ver a validadores de plataforma; un
+ * no-validador recibe [] silenciosamente. Fallback seguro si la migración 0014
+ * aún no está aplicada (columnas nuevas) → [].
+ */
+export async function getRegSources(): Promise<RegSource[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("reg_sources")
+    .select(
+      "id, framework, label, url, source_kind, last_hash, last_checked_at, last_change_at, last_status, fail_count, active",
+    )
+    .order("framework", { ascending: true })
+    .order("label", { ascending: true });
+  if (error || !data) return [];
+  return (data as RegSourceRow[]).map(rowToSource);
 }
 
 /** Jurisdicciones donde la organización activa tiene nexo (dónde contrata). */

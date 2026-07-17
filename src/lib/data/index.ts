@@ -26,6 +26,7 @@ export const getAuditLog = () => repo.getAuditLog();
 export const getRegulatoryAcks = () => repo.getRegulatoryAcks();
 export const getRegulatoryEvents = () => repo.getRegulatoryEvents();
 export const getRegCandidates = () => repo.getRegCandidates();
+export const getRegSources = () => repo.getRegSources();
 export const getIsPlatformAdmin = () => repo.getIsPlatformAdmin();
 export const getOrgJurisdictions = () => repo.getOrgJurisdictions();
 export const getActionTasks = () => repo.getActionTasks();
@@ -42,4 +43,5 @@ export type {
   PendingInvitation,
   RegAck,
   RegCandidate,
+  RegSource,
 } from "@/lib/mock-data";

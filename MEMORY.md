@@ -581,12 +581,49 @@ diseño, nombre, features grandes); autónomo en lo demás.
     de correo de recuperación con `token_hash` para robustez entre navegadores.
   - **Pendiente de la opción 3 (checkpoint):** **captcha** (Cloudflare Turnstile/hCaptcha) — requiere
     llave del proveedor (gratis) + activarlo en Supabase Auth; decisión del fundador.
+- **2026-07-17** · **Vigía determinista — 1er agente del foso (Capa 7, Fase A.1).** Primer agente del
+  pipeline de automatización: monitoriza las fuentes oficiales por **fetch + hash** y, cuando una
+  cambia, **encola un candidato-señal** en la bandeja del Validador. **Cero LLM**: el Vigía no
+  interpreta, solo detecta "algo cambió aquí"; el análisis semántico es del Analista (Fase B).
+  - **Migración `0014_reg_vigia.sql`** (⚠️ aplicar; aditiva, sin `drop`): columnas de observabilidad en
+    `reg_sources` (`last_change_at`, `last_status`, `fail_count`) + **unique(url)** para semilla
+    idempotente; **watchlist semilla** de 8 fuentes oficiales (EUR-Lex, Comisión, AI Act Service Desk,
+    NYC DCWP, Colorado GA, Illinois GA ×2, EEOC); RPC atómico **`vigia_report(src, new_hash, ok, err)`**
+    `security definer` que registra el chequeo, detecta cambio por hash (1ª vez = `baseline` sin señal),
+    y si cambió **encola un `reg_candidate` draft** (provenance `agent:'Vigía', model:null, confidence:0.35`)
+    con **dedupe** (no floodea si ya hay draft pendiente de esa fuente). Guardado por `is_platform_admin()`
+    **o** `service_role` (para el cron). Añadida a `setup.sql`.
+  - **App (deploy-ready):** núcleo puro `src/lib/reg-watch/vigia.ts` (`normalizeHtml` conservador +
+    `hashContent` SHA-256 + `fetchAndHash` con timeout/UA/`fetchImpl` inyectable) + orquestador `run.ts`
+    (`runVigia(client)` lee watchlist activa, hashea y llama al RPC) + `supabase/service.ts` (cliente
+    `service_role`, env-gated, server-only). **Route handler** `POST /api/reg-watch/vigia` (runtime node;
+    CRON con `Bearer CRON_SECRET`+service_role **o** sesión de platform_admin). Acción manual
+    `vigia-actions.ts` + botón `VigiaRunButton`.
+  - **UI:** panel `/dashboard/vigilancia/fuentes` (watchlist con estado/última revisión/último cambio,
+    gated a platform_admin; demo = `SAMPLE_REG_SOURCES` de solo lectura) + enlace de admin en el radar.
+    **Gate de publicación:** un candidato-señal del Vigía (sin fecha/tipo) **no es publicable** hasta
+    enriquecerlo → `CandidateReviewControls` muestra aviso en vez de un "Publicar" que rompería el RPC.
+    Getters `getRegSources()` en los tres repos + tipo `RegSource` + toasts `vigia-*`.
+  - **Verificado:** build + lint + tsc verdes; **prueba local del núcleo 9/9** (ruido volátil ignorado,
+    cambio real detectado, hash determinista, fetch ok/404/error, máquina baseline→unchanged→changed).
+  - **PENDIENTE (fundador):** aplicar `0014` en el SQL Editor. Luego **verifico por curl** (no requiere
+    red ni el cron): como platform_admin de prueba, `vigia_report` sobre una fuente → 1ª vez `baseline`
+    (sin candidato); mismo hash → `unchanged`; hash nuevo → `changed` + candidato creado; 2º hash nuevo
+    con draft pendiente → `deduped`; un no-admin → `no autorizado`.
+  - **Deferido al deploy:** `CRON_SECRET` + `SUPABASE_SERVICE_ROLE_KEY` en Vercel + un cron que golpee
+    el endpoint (el fetch real de fuentes necesita salida a internet sin el proxy del sandbox).
+  - **Fase B (siguiente):** el **Analista** (pgvector + embeddings + Claude API) que lee la fuente
+    cambiada y **enriquece** el candidato-señal (fecha, tipo, resumen, impacto, artículos) para hacerlo
+    publicable. Decisión pendiente del fundador: proveedor de embeddings (OpenAI/Voyage) + budget.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-> **▶ RETOMAR AQUÍ (2026-07-17, tras pulido de auth):** TODO hecho y verificado, árbol limpio y sincronizado.
-> **Migraciones aplicadas por el fundador hasta la 0013.** Estado: **Capa 7 (foso) 🟢** = Fase A del pipeline
+> **▶ RETOMAR AQUÍ (2026-07-17, tras el Vigía determinista):** TODO hecho y verificado (build/lint/tsc +
+> prueba local del núcleo 9/9), árbol limpio y sincronizado. **NUEVO: Vigía = 1er agente del foso (Capa 7,
+> Fase A.1)** — monitor de fuentes por fetch+hash que encola candidatos-señal para el Validador (ver §10).
+> **Migración `0014_reg_vigia.sql` PENDIENTE de aplicar por el fundador**; luego verifico `vigia_report` por
+> curl (baseline→unchanged→changed→deduped + RLS). El resto de migraciones aplicadas hasta la 0013. Estado: **Capa 7 (foso) 🟢** = Fase A del pipeline
 > (candidato→Validador humano→`reg_events`; RLS blinda la cola; `platform_admin`) + **multi-marco** (EU AI Act
 > + 5 marcos US de IA-empleo: NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto; verificado
 > por el experto) + **nexo de jurisdicción por org** (0012). **Capa 2 🟢** = **plan de acción editable**

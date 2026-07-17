@@ -515,6 +515,82 @@ export const SAMPLE_REG_CANDIDATES: RegCandidate[] = [
 ];
 
 /* -------------------------------------------------------------------------- */
+/* Vigía — fuentes vigiladas (watchlist del foso, Capa 7)                      */
+/* -------------------------------------------------------------------------- */
+
+/** Resultado del último chequeo del Vigía sobre una fuente. */
+export type RegSourceStatus =
+  | "baseline" // primera vez que se ve (línea base fijada)
+  | "ok" // revisada, sin cambios
+  | "changed" // cambió → generó una señal
+  | "error"; // falló la descarga
+
+export const REG_SOURCE_STATUS_LABEL: Record<RegSourceStatus, string> = {
+  baseline: "Línea base",
+  ok: "Sin cambios",
+  changed: "Cambió",
+  error: "Error",
+};
+
+/** Fuente oficial que el Vigía monitorea por fetch+hash. */
+export type RegSource = {
+  id: string;
+  framework: string;
+  label: string;
+  url: string;
+  sourceKind: string; // page | feed | api
+  lastHash: string | null;
+  lastCheckedAt: string | null;
+  lastChangeAt: string | null;
+  lastStatus: RegSourceStatus | null;
+  failCount: number;
+  active: boolean;
+};
+
+/** Watchlist de ejemplo (modo demo) para enseñar el panel del Vigía. */
+export const SAMPLE_REG_SOURCES: RegSource[] = [
+  {
+    id: "src-demo-1",
+    framework: "eu-ai-act",
+    label: "EUR-Lex — Reglamento (UE) 2024/1689",
+    url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    sourceKind: "page",
+    lastHash: "a1b2c3",
+    lastCheckedAt: "2026-07-17T06:00:00Z",
+    lastChangeAt: null,
+    lastStatus: "ok",
+    failCount: 0,
+    active: true,
+  },
+  {
+    id: "src-demo-2",
+    framework: "eu-ai-act",
+    label: "AI Act Service Desk — Art. 50",
+    url: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50",
+    sourceKind: "page",
+    lastHash: "d4e5f6",
+    lastCheckedAt: "2026-07-17T06:00:00Z",
+    lastChangeAt: "2026-07-15T06:00:00Z",
+    lastStatus: "changed",
+    failCount: 0,
+    active: true,
+  },
+  {
+    id: "src-demo-3",
+    framework: "us-nyc-ll144",
+    label: "NYC DCWP — Automated Employment Decision Tools",
+    url: "https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page",
+    sourceKind: "page",
+    lastHash: null,
+    lastCheckedAt: null,
+    lastChangeAt: null,
+    lastStatus: null,
+    failCount: 0,
+    active: true,
+  },
+];
+
+/* -------------------------------------------------------------------------- */
 /* Plan de acción editable (Capa 2) — tablero de tareas                        */
 /* -------------------------------------------------------------------------- */
 

@@ -175,6 +175,7 @@ function CandidateCard({
             id={c.id}
             proposedEventId={c.proposedEventId}
             title={c.title}
+            publishable={Boolean(c.date && c.kind)}
           />
         </div>
       ) : (

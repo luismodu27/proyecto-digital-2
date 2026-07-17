@@ -235,12 +235,20 @@ export default async function VigilanciaPage({
         subtitle="Radar de plazos y cambios normativos que afectan a tus sistemas de IA."
         action={
           isAdmin ? (
-            <Link
-              href="/dashboard/vigilancia/candidatos"
-              className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
-            >
-              Bandeja de validación →
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/dashboard/vigilancia/fuentes"
+                className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
+              >
+                Fuentes vigiladas →
+              </Link>
+              <Link
+                href="/dashboard/vigilancia/candidatos"
+                className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
+              >
+                Bandeja de validación →
+              </Link>
+            </div>
           ) : undefined
         }
       />
