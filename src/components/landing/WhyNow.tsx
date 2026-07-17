@@ -1,18 +1,18 @@
 const milestones = [
   {
-    date: "Ago 2026",
+    date: "Adoptado 2026",
+    title: "El Omnibus amplía el plazo",
+    body: "El Digital Omnibus (adoptado en 2026) movió el deadline de alto riesgo. La obligación sigue: solo tienes más tiempo para prepararte bien.",
+  },
+  {
+    date: "Dic 2027",
     title: "Obligaciones de alto riesgo",
-    body: "Entran en vigor las obligaciones para sistemas de alto riesgo del EU AI Act.",
+    body: "Entran en aplicación las obligaciones para sistemas de alto riesgo del EU AI Act (Anexo III).",
   },
   {
     date: "2026 →",
     title: "Leyes estatales en EE.UU.",
     body: "Se suman regulaciones de IA a nivel estatal. La superficie regulatoria crece.",
-  },
-  {
-    date: "Dic 2027",
-    title: "Posible aplazamiento (Omnibus)",
-    body: "Una propuesta podría ampliar el plazo. No desaparece la obligación: da más tiempo para construir bien.",
   },
 ];
 

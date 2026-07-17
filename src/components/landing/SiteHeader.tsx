@@ -3,8 +3,9 @@ import { ButtonLink } from "@/components/ui/Button";
 
 const nav = [
   { label: "Producto", href: "#producto" },
-  { label: "Por qué ahora", href: "#por-que-ahora" },
   { label: "Cómo funciona", href: "#como-funciona" },
+  { label: "Precios", href: "#precios" },
+  { label: "FAQ", href: "#faq" },
 ];
 
 export function SiteHeader() {
