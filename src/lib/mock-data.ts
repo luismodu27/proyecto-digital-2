@@ -286,6 +286,88 @@ export const SAMPLE_INVITATIONS: PendingInvitation[] = [
   },
 ];
 
+/* -------------------------------------------------------------------------- */
+/* Registro de actividad (audit-trail)                                        */
+/* -------------------------------------------------------------------------- */
+
+export type AuditAction = "insert" | "update" | "delete";
+
+/** Una entrada del registro de actividad, ya legible para la UI. */
+export type AuditEntry = {
+  id: number;
+  actorEmail: string | null;
+  table: string; // ai_systems | risk_assessments | gap_items | memberships
+  rowId: string;
+  action: AuditAction;
+  label: string; // nombre/resumen de la fila afectada
+  changed: string[]; // campos (humanos) cambiados en un update
+  at: string; // ISO
+};
+
+/** Registro de actividad de ejemplo (modo demo). */
+export const SAMPLE_AUDIT: AuditEntry[] = [
+  {
+    id: 8,
+    actorEmail: "legal@empresa-demo.com",
+    table: "gap_items",
+    rowId: "GAP-03",
+    action: "update",
+    label: "Supervisión humana efectiva",
+    changed: ["estado"],
+    at: "2026-07-16T15:42:00Z",
+  },
+  {
+    id: 7,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "risk_assessments",
+    rowId: "AS-005-1",
+    action: "insert",
+    label: "nivel Alto riesgo",
+    changed: [],
+    at: "2026-07-10T11:00:00Z",
+  },
+  {
+    id: 6,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "ai_systems",
+    rowId: "SYS-005",
+    action: "update",
+    label: "Test psicométrico automatizado",
+    changed: ["riesgo", "respaldo", "última revisión"],
+    at: "2026-07-10T11:00:05Z",
+  },
+  {
+    id: 5,
+    actorEmail: "talent@empresa-demo.com",
+    table: "gap_items",
+    rowId: "GAP-04",
+    action: "insert",
+    label: "Control de sesgo en la selección de candidatos",
+    changed: [],
+    at: "2026-07-05T09:12:00Z",
+  },
+  {
+    id: 4,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "memberships",
+    rowId: "mem-3",
+    action: "insert",
+    label: "rol Miembro",
+    changed: [],
+    at: "2026-06-01T14:15:00Z",
+  },
+  {
+    id: 3,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "ai_systems",
+    rowId: "SYS-001",
+    action: "insert",
+    label: "Cribado de CVs — ATS",
+    changed: [],
+    at: "2026-05-28T08:30:00Z",
+  },
+];
+
 export const RISK_ORDER: RiskLevel[] = [
   "unacceptable",
   "high",

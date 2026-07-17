@@ -2,10 +2,12 @@ import {
   AI_SYSTEMS,
   GAP_ITEMS,
   SAMPLE_ASSESSMENTS,
+  SAMPLE_AUDIT,
   SAMPLE_INVITATIONS,
   SAMPLE_MEMBERS,
   type AiSystem,
   type AssessmentRecord,
+  type AuditEntry,
   type DossierData,
   type GapItem,
   type MemberRole,
@@ -55,6 +57,10 @@ export async function getPendingInvitations(): Promise<PendingInvitation[]> {
 export async function getCurrentMemberRole(): Promise<MemberRole | null> {
   // En demo mostramos el equipo como propietario, pero sin gestión real.
   return "owner";
+}
+
+export async function getAuditLog(): Promise<AuditEntry[]> {
+  return SAMPLE_AUDIT;
 }
 
 /**

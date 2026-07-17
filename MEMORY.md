@@ -369,6 +369,20 @@ diseño, nombre, features grandes); autónomo en lo demás.
     member NO ve invitaciones). Fundador aplicó 0008 + re-ejecutó `invite_member` corregida.
   - Futuro: auditar cambios de membership en el audit-trail; selector de organización activa
     (hoy = primera membership).
+- **2026-07-17** · **Registro de actividad — visor del audit-trail (Capa 10).** Nueva ruta
+  `/dashboard/actividad`: hace visible el `audit_log` inmutable que ya rellenaban los triggers (0003).
+  - **Migración `0009_audit_view.sql`** (⚠️ el fundador debe aplicarla): RPC `list_audit_log(org, lim)`
+    `security definer` que lee el audit_log y une `actor_id` con el email de `auth.users` (no consultable
+    por RLS), guardada por pertenencia a la org. Solo lectura; la inmutabilidad la garantizan los
+    triggers `block_mutation` (0003). Añadida al `setup.sql`.
+  - **Presentación:** `src/lib/audit.ts` convierte las filas crudas (jsonb) en texto legible en español:
+    verbo por acción (creó/actualizó/eliminó), entidad por tabla (sistema/evaluación/brecha/miembro),
+    etiqueta de la fila (nombre, requisito, nivel, rol) y **campos cambiados** en updates (mapa de
+    columnas→nombre humano, filtrando ruido técnico). UI con feed, filtros por tipo, sello "Inmutable"
+    y avatares. `dynamic = "force-dynamic"`.
+  - Modo demo: actividad de ejemplo (`SAMPLE_AUDIT`). Build/lint verdes; demo verificado con captura.
+    **Pendiente:** aplicar 0009 y verificar `list_audit_log` por curl (debería ir a la primera: la RPC
+    no referencia tipos sin cualificar). Realiza de forma tangible la tesis "system of record de evidencia".
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -436,7 +450,8 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **Capa 7 Vigilancia regulatoria multi-marco** 🟡 (el **foso** más fuerte; **radar v1 ✅**: catálogo curado EU AI Act + motor de relevancia + UI `/dashboard/vigilancia`; falta persistir acks, multi-marco y la **automatización de ingesta** — los 4 agentes + RAG/pgvector).
 - **Capa 8 Riesgo de terceros/proveedores** ❌.
 - **Capa 9 Gobernanza de agentes de IA** ❌ (frontera; casi nadie la cubre).
-- **Capa 10 Reportes/colaboración** 🟡 (dashboard + PDF; faltan reportes a dirección/auditor).
+- **Capa 10 Reportes/colaboración** 🟡 (dashboard + PDF + **visor del audit-trail (registro de
+  actividad) ✅**; faltan reportes ejecutivos a dirección/auditor).
 
 ### 13.2 Roadmap (cuña → plataforma)
 1. **Cuña (MVP)** = Inventario + gap (Capas 0-1) → **YA lo tenemos**.

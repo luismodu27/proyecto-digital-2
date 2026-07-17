@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrg } from "./context";
+import { toAuditEntry, type RawAudit } from "@/lib/audit";
 import type {
   AiSystem,
   AssessmentRecord,
+  AuditEntry,
   DossierData,
   EvidenceState,
   GapItem,
@@ -244,6 +246,15 @@ export async function getPendingInvitations(): Promise<PendingInvitation[]> {
     role: r.role as MemberRole,
     createdAt: String(r.created_at),
   }));
+}
+
+/** Registro de actividad (audit-trail) de la organización activa. */
+export async function getAuditLog(): Promise<AuditEntry[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data } = await supabase.rpc("list_audit_log", { org, lim: 100 });
+  return ((data ?? []) as RawAudit[]).map(toAuditEntry);
 }
 
 /** Rol del usuario actual en la organización activa (o null). */

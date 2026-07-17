@@ -15,6 +15,7 @@ const nav = [
   { label: "Policy packs", href: "/dashboard/packs", icon: "M4 7a2 2 0 012-2h8l4 4v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7Zm10-2v4h4M8 13h6M8 16h4" },
   { label: "Vigilancia", href: "/dashboard/vigilancia", icon: "M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" },
   { label: "Equipo", href: "/dashboard/equipo", icon: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" },
+  { label: "Actividad", href: "/dashboard/actividad", icon: "M12 7v5l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0Z" },
 ];
 
 export function Sidebar({ userEmail }: { userEmail?: string }) {

@@ -22,10 +22,12 @@ export const getSystemDossier = (id: string) => repo.getSystemDossier(id);
 export const getOrgMembers = () => repo.getOrgMembers();
 export const getPendingInvitations = () => repo.getPendingInvitations();
 export const getCurrentMemberRole = () => repo.getCurrentMemberRole();
+export const getAuditLog = () => repo.getAuditLog();
 
 export { isSupabaseConfigured };
 export type {
   AiSystem,
+  AuditEntry,
   DossierData,
   GapItem,
   MemberRole,
