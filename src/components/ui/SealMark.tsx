@@ -1,8 +1,7 @@
-import Image from "next/image";
-
 /**
  * SealMark — marca de "sello de atestación" de Attesta.
- * Sello con monograma "A" y check integrado (evidencia validada).
+ * Sello con monograma "A" y check integrado. La imagen se invierte según el
+ * tema (clara en modo claro, invertida en oscuro) vía la variable --seal-img.
  */
 export function SealMark({
   className = "",
@@ -12,14 +11,14 @@ export function SealMark({
   size?: number;
 }) {
   return (
-    <Image
-      src="/sealmark.png"
-      alt=""
-      width={size}
-      height={size}
-      className={className}
+    <span
       aria-hidden
-      priority
+      className={`inline-block shrink-0 bg-contain bg-center bg-no-repeat ${className}`}
+      style={{
+        width: size,
+        height: size,
+        backgroundImage: "var(--seal-img)",
+      }}
     />
   );
 }

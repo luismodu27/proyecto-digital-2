@@ -56,6 +56,9 @@
   /* Rejilla de fondo (se invierte en oscuro). */
   --grid-line: rgba(15, 26, 20, 0.04);
 
+  /* Sello: versión clara por defecto, invertida en oscuro. */
+  --seal-img: url("/sealmark.png");
+
   /* Tonos semánticos para badges/estados (claro). */
   --tone-danger-bg: #f7e4e2;   --tone-danger-fg: #8f271f;   --tone-danger-bd: #e6b6b1;
   --tone-warn-bg:   #f7ead8;   --tone-warn-fg:   #8a4f14;   --tone-warn-bd:   #e6cba3;
@@ -83,6 +86,7 @@
   --color-seal-soft: #241d12;
 
   --grid-line: rgba(238, 242, 238, 0.035);
+  --seal-img: url("/sealmark-dark.png");
 
   --tone-danger-bg: #2a1614;   --tone-danger-fg: #f0a89f;   --tone-danger-bd: #4a221d;
   --tone-warn-bg:   #2a2013;   --tone-warn-fg:   #e6b877;   --tone-warn-bd:   #4a3a1e;
@@ -110,6 +114,7 @@
     --color-seal-soft: #241d12;
 
     --grid-line: rgba(238, 242, 238, 0.035);
+  --seal-img: url("/sealmark-dark.png");
 
     --tone-danger-bg: #2a1614;   --tone-danger-fg: #f0a89f;   --tone-danger-bd: #4a221d;
     --tone-warn-bg:   #2a2013;   --tone-warn-fg:   #e6b877;   --tone-warn-bd:   #4a3a1e;
