@@ -3,6 +3,7 @@ import { getActiveOrg } from "./context";
 import type {
   AiSystem,
   AssessmentRecord,
+  DossierData,
   EvidenceState,
   GapItem,
   RiskLevel,
@@ -103,6 +104,66 @@ export async function getSystemById(
     domain: data.domain ?? "",
     vendor: data.vendor ?? "",
     actorRole: data.actor_role ?? "deployer",
+  };
+}
+
+/**
+ * Reúne todo lo necesario para el dossier de gobernanza de un sistema:
+ * su ficha, sus brechas y su historial de evaluaciones. `id` es el uuid real.
+ */
+export async function getSystemDossier(
+  id: string,
+): Promise<DossierData | null> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return null;
+
+  const { data: row } = await supabase
+    .from("ai_systems")
+    .select("*")
+    .eq("organization_id", org)
+    .eq("id", id)
+    .maybeSingle();
+  if (!row) return null;
+
+  const [gapRes, assessments] = await Promise.all([
+    supabase
+      .from("gap_items")
+      .select("*")
+      .eq("organization_id", org)
+      .eq("ai_system_id", id)
+      .order("created_at", { ascending: true }),
+    getSystemAssessments(id),
+  ]);
+
+  const code = row.code ?? row.id;
+  return {
+    system: {
+      id: code,
+      dbId: row.id,
+      name: row.name,
+      owner: row.owner ?? "",
+      domain: row.domain ?? "",
+      vendor: row.vendor ?? "",
+      actorRole: row.actor_role ?? "deployer",
+      risk: (row.risk_level ?? "minimal") as RiskLevel,
+      compliance: row.compliance_pct ?? 0,
+      lastReviewed: row.last_reviewed_at
+        ? String(row.last_reviewed_at).slice(0, 10)
+        : "",
+      evidenceState: (row.evidence_state ?? undefined) as
+        | EvidenceState
+        | undefined,
+    },
+    gaps: (gapRes.data ?? []).map((g) => ({
+      id: g.id,
+      requirement: g.requirement,
+      article: g.article ?? "",
+      status: g.status as GapItem["status"],
+      severity: SEVERITY_ES[g.severity] ?? "media",
+      system: code,
+    })),
+    assessments,
   };
 }
 

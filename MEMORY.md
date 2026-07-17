@@ -284,6 +284,22 @@ diseño, nombre, features grandes); autónomo en lo demás.
     es **práctica PROHIBIDA** salvo fines médicos/seguridad (**Art. 5.1.f**) → control condicional, severidad alta.
   - **FRIA (Art. 27) normalmente NO aplica** a un empleador privado ordinario (solo público / servicios
     públicos / Anexo III 5(b)(c)) → incluido como "N/A" para dejar constancia.
+- **2026-07-17** · **Generador de documentación técnica (Capa 3)** — el "reemplaza al consultor".
+  Nueva ruta `/dashboard/inventario/[id]/dossier`: **Dossier de gobernanza de IA** por sistema,
+  imprimible a PDF (reutiliza el patrón `PrintButton` del informe de gap). Ensamblado
+  **determinista** (cero LLM, cero alucinación): 100% anclado en los datos reales del sistema y en
+  el texto del EU AI Act ya verificado por el experto. 7 secciones: identificación · clasificación de
+  riesgo (racional + respaldo + atestación) · obligaciones aplicables (`OBLIGATIONS_BY_LEVEL`) ·
+  controles y brechas · plan de acción priorizado (`recommendationsForLevel`) · historial de
+  evaluaciones · declaración de responsabilidad + nota legal (`LEGAL_PDF`). Capa de datos:
+  `getSystemDossier(id)` en ambos repos (supabase por uuid, mock por código) + tipo `DossierData`.
+  Entradas: enlace "Dossier" por fila en el inventario (demo y conectado, `dbId ?? id`) y botón
+  "Generar dossier" en editar sistema. Funciona en modo demo y conectado. Build/lint verdes;
+  verificado con capturas (alto riesgo con brechas + plan de 10 acciones, y riesgo mínimo con
+  estados vacíos elegantes).
+  - **Razón del enfoque determinista** (no LLM): en un producto de compliance el texto legal
+    alucinado es un pasivo. El dossier debe ser 100% trazable a los datos del cliente y a normas
+    verificadas. Redacción asistida por LLM se puede añadir como capa opcional en el futuro.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -298,6 +314,8 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - ~~Write-path: alta de sistemas + seed de ejemplo~~ → hecho ✅.
 - **Pendiente write-path**: cablear el asistente de riesgo para GUARDAR contra un sistema
   (`saveRiskAssessment` ya existe), y edición de brechas.
+- ~~Generador de documentación técnica (Capa 3)~~ → hecho ✅ (dossier de gobernanza por sistema,
+  `/dashboard/inventario/[id]/dossier`, imprimible a PDF, determinista).
 - ~~Conectar formulario de waitlist~~ → hecho ✅ (tabla `waitlist`, RLS insert-only,
   verificado: insert 201, select bloqueado). Consultar leads desde el panel Supabase.
   Pendiente opcional: captcha/rate-limit contra spam.
@@ -337,7 +355,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **Capa 0 Inventario** ✅ (con alta manual; falta descubrimiento automático / shadow-AI).
 - **Capa 1 Clasificación de riesgo** ✅ (falta multi-marco: hoy solo EU AI Act).
 - **Capa 2 Evaluaciones + plan de riesgo** 🟡 (cuestionario + plan de acción; falta plan con tareas/responsables editable).
-- **Capa 3 Evidencia + documentación + audit-trail** 🟡 (audit-trail ✅, evidencia declarada ✅, export PDF ✅; falta **generador de documentación técnica**).
+- **Capa 3 Evidencia + documentación + audit-trail** ✅ (audit-trail ✅, evidencia declarada ✅, export PDF ✅, **generador de documentación técnica / dossier de gobernanza por sistema ✅**; futuro opcional: redacción asistida por LLM y firma/versión del dossier).
 - **Capa 4 Pruebas técnicas del modelo** ❌ (sesgo/explicabilidad/robustez — INTEGRAR, no construir).
 - **Capa 5 Monitoreo continuo en producción** ❌ (drift, incidentes).
 - **Capa 6 Supervisión humana / roles** 🟡 (roles owner/admin/member existen; faltan flujos de aprobación).
@@ -348,7 +366,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 ### 13.2 Roadmap (cuña → plataforma)
 1. **Cuña (MVP)** = Inventario + gap (Capas 0-1) → **YA lo tenemos**.
-2. **Papeleo** = documentación + evidencia + audit-trail (Capa 3) → **generador de documentación** es el siguiente gran valor.
+2. **Papeleo** = documentación + evidencia + audit-trail (Capa 3) → **generador de documentación (dossier) ✅ hecho**.
 3. **Pegajoso** = monitoreo + pruebas de sesgo/explicabilidad (Capas 4-5) → integrar Evidently/Fairlearn.
 4. **Foso** = vigilancia regulatoria multi-marco (Capa 7).
 5. **Frontera** = gobernanza de agentes (Capa 9).

@@ -118,6 +118,13 @@ export type AssessmentRecord = {
   assessedAt: string; // ISO
 };
 
+/** Todo lo necesario para generar el dossier de gobernanza de un sistema. */
+export type DossierData = {
+  system: AiSystem & { actorRole: string };
+  gaps: GapItem[];
+  assessments: AssessmentRecord[];
+};
+
 export const GAP_ITEMS: GapItem[] = [
   {
     id: "GAP-01",

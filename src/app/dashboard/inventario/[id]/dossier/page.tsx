@@ -1,0 +1,444 @@
+import type { ReactNode } from "react";
+import Link from "next/link";
+import { SealMark } from "@/components/ui/SealMark";
+import { PrintButton } from "@/components/dashboard/PrintButton";
+import { getSystemDossier, getOrganizationName } from "@/lib/data";
+import { LEGAL_PDF } from "@/components/ui/LegalNote";
+import { OBLIGATIONS_BY_LEVEL } from "@/lib/risk-assessment";
+import { recommendationsForLevel } from "@/lib/recommendations";
+import {
+  EVIDENCE_LABEL,
+  RISK_LABEL,
+  type EvidenceState,
+  type RiskLevel,
+} from "@/lib/mock-data";
+
+/* Colores fijos (documento en blanco, a prueba de impresión). */
+const RISK_COLOR: Record<RiskLevel, string> = {
+  unacceptable: "#8f271f",
+  high: "#8f271f",
+  limited: "#8a4f14",
+  minimal: "#1f7a54",
+};
+
+const SEVERITY_COLOR = {
+  alta: "#8f271f",
+  media: "#8a4f14",
+  baja: "#5b6b62",
+} as const;
+
+const PRIORITY_COLOR = {
+  crítica: "#8f271f",
+  alta: "#8a4f14",
+  media: "#5b6b62",
+} as const;
+
+const STATUS_META = {
+  missing: { label: "Falta", color: "#8f271f" },
+  partial: { label: "Parcial", color: "#8a4f14" },
+  done: { label: "Cubierto", color: "#1f7a54" },
+} as const;
+
+const ROLE_LABEL: Record<string, string> = {
+  deployer: "Responsable del despliegue (deployer)",
+  provider: "Proveedor (provider)",
+};
+
+const RATIONALE_FALLBACK: Record<RiskLevel, string> = {
+  unacceptable:
+    "El sistema incurre en una o más prácticas prohibidas por el Art. 5 del EU AI Act; no puede comercializarse ni usarse en la UE.",
+  high: "El sistema opera en un área de alto riesgo del Anexo III del EU AI Act y le aplican los requisitos de los Arts. 9–15 y las obligaciones del responsable del despliegue (Art. 26).",
+  limited:
+    "El sistema no es de alto riesgo, pero está sujeto a obligaciones de transparencia del Art. 50.",
+  minimal:
+    "El sistema no encaja en prácticas prohibidas, áreas de alto riesgo ni obligaciones de transparencia. Se recomiendan códigos de conducta voluntarios (Art. 95).",
+};
+
+function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString("es-ES", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/** Bloque de campo etiqueta/valor para la ficha de identificación. */
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="break-inside-avoid border-b border-line py-2.5">
+      <dt className="text-[11px] uppercase tracking-wide text-muted">{label}</dt>
+      <dd className="mt-0.5 text-sm font-medium text-ink">{value || "—"}</dd>
+    </div>
+  );
+}
+
+/** Cabecera numerada de sección. */
+function SectionTitle({ n, children }: { n: number; children: ReactNode }) {
+  return (
+    <h2 className="mb-3 flex items-center gap-2.5 font-display text-lg font-semibold text-ink">
+      <span className="flex size-6 items-center justify-center rounded-md bg-brand-soft text-xs font-semibold text-brand-strong">
+        {n}
+      </span>
+      {children}
+    </h2>
+  );
+}
+
+export default async function DossierPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const [dossier, orgName] = await Promise.all([
+    getSystemDossier(id),
+    getOrganizationName(),
+  ]);
+
+  const fecha = new Date().toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  if (!dossier) {
+    return (
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-6 print:hidden">
+          <Link
+            href="/dashboard/inventario"
+            className="text-sm font-medium text-brand hover:text-brand-strong"
+          >
+            ← Volver al inventario
+          </Link>
+        </div>
+        <div className="rounded-2xl border border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] p-6 text-sm text-[var(--tone-warn-fg)]">
+          No se encontró el sistema. Puede que se haya eliminado o que no
+          pertenezca a tu organización.
+        </div>
+      </div>
+    );
+  }
+
+  const { system, gaps, assessments } = dossier;
+  const level = system.risk;
+  const latest = assessments[0];
+  const rationale = latest?.rationale ?? RATIONALE_FALLBACK[level];
+  const evidenceState: EvidenceState = system.evidenceState ?? "declared";
+  const obligations = OBLIGATIONS_BY_LEVEL[level];
+  const recs = recommendationsForLevel(level);
+  const openGaps = gaps.filter((g) => g.status !== "done").length;
+
+  const summary = [
+    { k: "Nivel de riesgo", v: RISK_LABEL[level], color: RISK_COLOR[level] },
+    { k: "Preparación", v: `${system.compliance}%` },
+    { k: "Brechas abiertas", v: String(openGaps) },
+    { k: "Respaldo", v: EVIDENCE_LABEL[evidenceState] },
+  ];
+
+  return (
+    <div className="mx-auto max-w-3xl">
+      {/* Barra de acciones (no se imprime) */}
+      <div className="mb-6 flex items-center justify-between print:hidden">
+        <Link
+          href={
+            system.dbId
+              ? `/dashboard/inventario/${system.dbId}/editar`
+              : "/dashboard/inventario"
+          }
+          className="text-sm font-medium text-brand hover:text-brand-strong"
+        >
+          ← Volver
+        </Link>
+        <PrintButton label="Descargar dossier (PDF)" />
+      </div>
+
+      {/* Documento */}
+      <article className="rounded-2xl border border-line bg-white p-8 text-ink print:rounded-none print:border-0 print:p-0">
+        {/* Portada */}
+        <header className="flex items-start justify-between border-b border-line pb-6">
+          <div className="flex items-center gap-2">
+            <SealMark size={34} className="text-brand" />
+            <span className="font-display text-2xl font-semibold">Attesta</span>
+          </div>
+          <div className="text-right text-xs text-muted">
+            <p>Dossier de gobernanza de IA</p>
+            <p>Ref. {system.id}</p>
+            <p>{fecha}</p>
+          </div>
+        </header>
+
+        <div className="mt-6">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted">
+            Documentación técnica · Preparación para auditoría · EU AI Act
+          </p>
+          <h1 className="mt-2 font-display text-2xl font-semibold">
+            {system.name}
+          </h1>
+          <p className="mt-1 text-sm text-ink-soft">
+            Organización:{" "}
+            <span className="font-medium text-ink">{orgName ?? "—"}</span> · rol:{" "}
+            <span className="font-medium text-ink">
+              {ROLE_LABEL[system.actorRole] ?? system.actorRole}
+            </span>{" "}
+            · datos autodeclarados
+          </p>
+        </div>
+
+        {/* Resumen ejecutivo */}
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {summary.map((c) => (
+            <div
+              key={c.k}
+              className="break-inside-avoid rounded-lg border border-line px-3 py-3"
+            >
+              <p
+                className="font-display text-xl font-semibold leading-tight"
+                style={c.color ? { color: c.color } : undefined}
+              >
+                {c.v}
+              </p>
+              <p className="mt-0.5 text-[11px] text-muted">{c.k}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* 1 · Identificación */}
+        <section className="mt-9">
+          <SectionTitle n={1}>Identificación del sistema</SectionTitle>
+          <dl className="grid gap-x-8 sm:grid-cols-2">
+            <Field label="Código" value={system.id} />
+            <Field label="Nombre" value={system.name} />
+            <Field label="Área responsable" value={system.owner} />
+            <Field label="Dominio de uso" value={system.domain} />
+            <Field label="Proveedor" value={system.vendor} />
+            <Field
+              label="Vuestro rol"
+              value={ROLE_LABEL[system.actorRole] ?? system.actorRole}
+            />
+            <Field label="Última revisión" value={system.lastReviewed} />
+            <Field label="Preparación declarada" value={`${system.compliance}%`} />
+          </dl>
+        </section>
+
+        {/* 2 · Clasificación de riesgo */}
+        <section className="mt-9 break-inside-avoid">
+          <SectionTitle n={2}>Clasificación de riesgo</SectionTitle>
+          <div className="rounded-xl border border-line p-5">
+            <div className="flex items-center gap-3">
+              <span
+                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white"
+                style={{ backgroundColor: RISK_COLOR[level] }}
+              >
+                {RISK_LABEL[level]}
+              </span>
+              <span className="text-xs text-muted">
+                Respaldo: {EVIDENCE_LABEL[evidenceState]}
+              </span>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+              {rationale}
+            </p>
+            {latest ? (
+              <p className="mt-3 text-xs text-muted">
+                Evaluación vigente del {formatDateTime(latest.assessedAt)}
+                {latest.attestedByName
+                  ? ` · atestada por ${latest.attestedByName}`
+                  : " · sin atestación nominal"}
+                .
+              </p>
+            ) : (
+              <p className="mt-3 text-xs text-muted">
+                Nivel asignado a la ficha del sistema; sin evaluación guardada con
+                el asistente de riesgo.
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* 3 · Obligaciones aplicables */}
+        <section className="mt-9 break-inside-avoid">
+          <SectionTitle n={3}>Obligaciones aplicables</SectionTitle>
+          <ul className="space-y-2">
+            {obligations.map((o) => (
+              <li key={o} className="flex gap-2.5 text-sm text-ink-soft">
+                <span
+                  aria-hidden
+                  className="mt-1.5 size-1.5 shrink-0 rounded-full bg-seal"
+                />
+                {o}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* 4 · Controles y brechas */}
+        <section className="mt-9">
+          <SectionTitle n={4}>Controles y brechas</SectionTitle>
+          {gaps.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-line-strong px-4 py-6 text-center text-sm text-muted">
+              No hay controles registrados para este sistema. Aplica el policy
+              pack de RRHH o añade brechas desde el gap assessment.
+            </p>
+          ) : (
+            <table className="w-full border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-b border-line-strong text-xs uppercase tracking-wide text-muted">
+                  <th className="py-2 pr-3 font-medium">Artículo</th>
+                  <th className="py-2 pr-3 font-medium">Requisito / control</th>
+                  <th className="py-2 pr-3 font-medium">Severidad</th>
+                  <th className="py-2 font-medium">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {gaps.map((g) => {
+                  const st = STATUS_META[g.status];
+                  return (
+                    <tr
+                      key={g.id}
+                      className="break-inside-avoid border-b border-line align-top"
+                    >
+                      <td className="py-3 pr-3 font-mono text-xs text-seal">
+                        {g.article || "—"}
+                      </td>
+                      <td className="py-3 pr-3">{g.requirement}</td>
+                      <td className="py-3 pr-3 capitalize">
+                        <span style={{ color: SEVERITY_COLOR[g.severity] }}>
+                          {g.severity}
+                        </span>
+                      </td>
+                      <td
+                        className="py-3 font-medium"
+                        style={{ color: st.color }}
+                      >
+                        {st.label}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </section>
+
+        {/* 5 · Plan de acción priorizado */}
+        <section className="mt-9">
+          <SectionTitle n={5}>Plan de acción priorizado</SectionTitle>
+          {recs.length === 0 ? (
+            <p className="text-sm text-ink-soft">
+              Sin acciones obligatorias bajo el EU AI Act para este nivel de
+              riesgo. Se recomiendan buenas prácticas y códigos de conducta
+              voluntarios (Art. 95).
+            </p>
+          ) : (
+            <ol className="space-y-3">
+              {recs.map((r, i) => (
+                <li
+                  key={r.id}
+                  className="break-inside-avoid rounded-xl border border-line p-4"
+                >
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="font-mono text-xs text-muted">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="font-medium text-ink">{r.title}</span>
+                    <span
+                      className="text-[11px] font-semibold uppercase"
+                      style={{ color: PRIORITY_COLOR[r.priority] }}
+                    >
+                      · {r.priority}
+                    </span>
+                    <span className="text-[11px] text-muted">
+                      · esfuerzo {r.effort}
+                    </span>
+                    <span className="font-mono text-[11px] text-seal">
+                      · {r.article}
+                    </span>
+                  </div>
+                  <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
+                    {r.action}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+
+        {/* 6 · Historial de evaluaciones */}
+        <section className="mt-9">
+          <SectionTitle n={6}>Historial de evaluaciones</SectionTitle>
+          {assessments.length === 0 ? (
+            <p className="text-sm text-ink-soft">
+              No hay evaluaciones guardadas para este sistema.
+            </p>
+          ) : (
+            <ol className="space-y-3">
+              {assessments.map((a, i) => (
+                <li
+                  key={a.id}
+                  className="break-inside-avoid border-b border-line pb-3 text-sm"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white"
+                      style={{ backgroundColor: RISK_COLOR[a.level] }}
+                    >
+                      {RISK_LABEL[a.level]}
+                    </span>
+                    <span className="text-xs text-muted">
+                      {EVIDENCE_LABEL[a.evidenceState]}
+                    </span>
+                    {i === 0 && (
+                      <span className="text-[11px] font-medium text-brand-strong">
+                        vigente
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1.5 text-ink-soft">{a.rationale}</p>
+                  <p className="mt-1 text-xs text-muted">
+                    {formatDateTime(a.assessedAt)}
+                    {a.attestedByName ? ` · atestada por ${a.attestedByName}` : ""}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+
+        {/* 7 · Declaración de responsabilidad */}
+        <section className="mt-9 break-inside-avoid">
+          <SectionTitle n={7}>Declaración de responsabilidad</SectionTitle>
+          <div className="rounded-xl border border-line p-5 text-sm text-ink-soft">
+            <p>
+              Los datos de este dossier han sido{" "}
+              <span className="font-medium text-ink">autodeclarados</span> por la
+              organización{" "}
+              <span className="font-medium text-ink">{orgName ?? "—"}</span> y
+              reflejan el estado y la evidencia declarados por sus responsables.
+            </p>
+            <dl className="mt-4 grid gap-x-8 sm:grid-cols-2">
+              <Field
+                label="Nivel de respaldo"
+                value={EVIDENCE_LABEL[evidenceState]}
+              />
+              <Field
+                label="Atestado por"
+                value={latest?.attestedByName ?? "—"}
+              />
+            </dl>
+          </div>
+        </section>
+
+        <footer className="mt-10 border-t border-line pt-5 text-xs text-muted">
+          <p>
+            Generado por <span className="font-medium text-ink">Attesta</span> el{" "}
+            {fecha}. Documento de trabajo para preparación de auditoría.
+          </p>
+          <p className="mt-1">{LEGAL_PDF}</p>
+        </footer>
+      </article>
+    </div>
+  );
+}

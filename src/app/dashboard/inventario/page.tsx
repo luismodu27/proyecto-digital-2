@@ -55,6 +55,9 @@ export default async function InventarioPage() {
                   <th className="px-5 py-3 font-medium">Respaldo</th>
                   <th className="px-5 py-3 font-medium">Preparación</th>
                   <th className="px-5 py-3 font-medium">Última revisión</th>
+                  <th className="px-5 py-3 font-medium">
+                    <span className="sr-only">Acciones</span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -90,6 +93,28 @@ export default async function InventarioPage() {
                     </td>
                     <td className="px-5 py-4 tabular-nums text-ink-soft">
                       {s.lastReviewed}
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <Link
+                        href={`/dashboard/inventario/${s.dbId ?? s.id}/dossier`}
+                        className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-brand transition-colors hover:text-brand-strong"
+                      >
+                        <svg
+                          viewBox="0 0 20 20"
+                          className="size-4"
+                          fill="none"
+                          aria-hidden
+                        >
+                          <path
+                            d="M6 2.5h5L15.5 7v10.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Zm5 0V7h4.5M7 11h6M7 14h4"
+                            stroke="currentColor"
+                            strokeWidth="1.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        Dossier
+                      </Link>
                     </td>
                   </tr>
                 ))}

@@ -27,6 +27,16 @@ export default async function EditarSistemaPage({
       <PageHeader
         title="Editar sistema"
         subtitle="Actualiza los datos del sistema o elimínalo del inventario."
+        action={
+          system ? (
+            <ButtonLink
+              href={`/dashboard/inventario/${system.id}/dossier`}
+              variant="outline"
+            >
+              ⬇ Generar dossier
+            </ButtonLink>
+          ) : undefined
+        }
       />
       <div className="mb-5">
         <Link
