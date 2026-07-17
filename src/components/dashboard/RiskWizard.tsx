@@ -13,6 +13,8 @@ import {
 } from "@/lib/risk-assessment";
 import { RISK_LABEL } from "@/lib/mock-data";
 import { saveRiskAssessment } from "@/lib/data/actions";
+import { recommendationsForLevel } from "@/lib/recommendations";
+import { RecommendationList } from "@/components/dashboard/Recommendations";
 
 type SystemOption = { id: string; name: string };
 
@@ -94,6 +96,7 @@ export function RiskWizard({
     }
 
     const canSave = connected && systems.length > 0;
+    const recs = recommendationsForLevel(result.level);
     return (
       <div className="rounded-2xl border border-line bg-paper-raised p-7">
         <div className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -153,6 +156,20 @@ export function RiskWizard({
             </ul>
           </div>
         </div>
+
+        {recs.length > 0 && (
+          <div className="mt-8 border-t border-line pt-6">
+            <h3 className="font-display text-sm font-semibold text-ink">
+              Puntos críticos y próximos pasos
+            </h3>
+            <p className="mt-1 text-xs text-muted">
+              Qué priorizar para cumplir, ordenado por urgencia.
+            </p>
+            <div className="mt-4">
+              <RecommendationList recs={recs} />
+            </div>
+          </div>
+        )}
 
         {canSave && (
           <div className="mt-8 border-t border-line pt-6">

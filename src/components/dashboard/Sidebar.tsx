@@ -10,6 +10,7 @@ const nav = [
   { label: "Inventario", href: "/dashboard/inventario", icon: "M4 7h16M4 12h16M4 17h16" },
   { label: "Riesgo", href: "/dashboard/riesgo", icon: "M12 3 2 20h20L12 3Zm0 6v5m0 3h.01" },
   { label: "Gap assessment", href: "/dashboard/gap", icon: "M9 11l3 3 8-8M4 12a8 8 0 108-8" },
+  { label: "Plan de acción", href: "/dashboard/plan", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9 2 2 4-4" },
 ];
 
 export function Sidebar({ userEmail }: { userEmail?: string }) {
