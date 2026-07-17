@@ -1,0 +1,170 @@
+[
+  {
+    "doc_ref": "Art. 5.1.f",
+    "title": "Prohibited practice — emotion inference in the workplace and education",
+    "content": "the placing on the market, the putting into service for this specific purpose, or the use of AI systems to infer emotions of a natural person in the areas of workplace and education institutions, except where the use of the AI system is intended to be put in place or into the market for medical or safety reasons;",
+    "source_url": "https://artificialintelligenceact.eu/article/5/"
+  },
+  {
+    "doc_ref": "Art. 6.2",
+    "title": "High-risk classification — systems listed in Annex III",
+    "content": "In addition to the high-risk AI systems referred to in paragraph 1, AI systems referred to in Annex III shall be considered to be high-risk.",
+    "source_url": "https://artificialintelligenceact.eu/article/6/"
+  },
+  {
+    "doc_ref": "Art. 6.3",
+    "title": "Derogation from high-risk classification (no significant risk) and profiling carve-out",
+    "content": "By derogation from paragraph 2, an AI system referred to in Annex III shall not be considered to be high-risk where it does not pose a significant risk of harm to the health, safety or fundamental rights of natural persons, including by not materially influencing the outcome of decision making. The first subparagraph shall apply where any of the following conditions is fulfilled:\n\n(a) the AI system is intended to perform a narrow procedural task;\n\n(b) the AI system is intended to improve the result of a previously completed human activity;\n\n(c) the AI system is intended to detect decision-making patterns or deviations from prior decision-making patterns and is not meant to replace or influence the previously completed human assessment, without proper human review; or\n\n(d) the AI system is intended to perform a preparatory task to an assessment relevant for the purposes of the use cases listed in Annex III.\n\nNotwithstanding the first subparagraph, an AI system referred to in Annex III shall always be considered to be high-risk where the AI system performs profiling of natural persons.",
+    "source_url": "https://artificialintelligenceact.eu/article/6/"
+  },
+  {
+    "doc_ref": "Anexo III (chapeau)",
+    "title": "Annex III — high-risk areas referred to in Article 6(2)",
+    "content": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas:",
+    "source_url": "https://artificialintelligenceact.eu/annex/3/"
+  },
+  {
+    "doc_ref": "Anexo III.4",
+    "title": "Annex III point 4 — Employment, workers management and access to self-employment",
+    "content": "4. Employment, workers management and access to self-employment:\n\n(a) AI systems intended to be used for the recruitment or selection of natural persons, in particular to place targeted job advertisements, to analyse and filter job applications, and to evaluate candidates;\n\n(b) AI systems intended to be used to make decisions affecting terms of work-related relationships, the promotion or termination of work-related contractual relationships, to allocate tasks based on individual behaviour or personal traits or characteristics or to monitor and evaluate the performance and behaviour of persons in such relationships.",
+    "source_url": "https://artificialintelligenceact.eu/annex/3/"
+  },
+  {
+    "doc_ref": "Art. 14.1",
+    "title": "Human oversight — effective oversight by natural persons",
+    "content": "High-risk AI systems shall be designed and developed in such a way, including with appropriate human-machine interface tools, that they can be effectively overseen by natural persons during the period in which they are in use.",
+    "source_url": "https://artificialintelligenceact.eu/article/14/"
+  },
+  {
+    "doc_ref": "Art. 14.2",
+    "title": "Human oversight — aim to prevent or minimise risks",
+    "content": "Human oversight shall aim to prevent or minimise the risks to health, safety or fundamental rights that may emerge when a high-risk AI system is used in accordance with its intended purpose or under conditions of reasonably foreseeable misuse, in particular where such risks persist despite the application of other requirements set out in this Section.",
+    "source_url": "https://artificialintelligenceact.eu/article/14/"
+  },
+  {
+    "doc_ref": "Art. 14.3",
+    "title": "Human oversight — measures built in by provider and/or implemented by deployer",
+    "content": "The oversight measures shall be commensurate with the risks, level of autonomy and context of use of the high-risk AI system, and shall be ensured through either one or both of the following types of measures:\n\n(a) measures identified and built, when technically feasible, into the high-risk AI system by the provider before it is placed on the market or put into service;\n\n(b) measures identified by the provider before placing the high-risk AI system on the market or putting it into service and that are appropriate to be implemented by the deployer.",
+    "source_url": "https://artificialintelligenceact.eu/article/14/"
+  },
+  {
+    "doc_ref": "Art. 14.4",
+    "title": "Human oversight — capabilities of the persons assigned to oversight",
+    "content": "For the purpose of implementing paragraphs 1, 2 and 3, the high-risk AI system shall be provided to the deployer in such a way that natural persons to whom human oversight is assigned are enabled, as appropriate and proportionate:\n\n(a) to properly understand the relevant capacities and limitations of the high-risk AI system and be able to duly monitor its operation, including in view of detecting and addressing anomalies, dysfunctions and unexpected performance;\n\n(b) to remain aware of the possible tendency of automatically relying or over-relying on the output produced by a high-risk AI system (automation bias), in particular for high-risk AI systems used to provide information or recommendations for decisions to be taken by natural persons;\n\n(c) to correctly interpret the high-risk AI system's output, taking into account, for example, the interpretation tools and methods available;\n\n(d) to decide, in any particular situation, not to use the high-risk AI system or to otherwise disregard, override or reverse the output of the high-risk AI system;\n\n(e) to intervene in the operation of the high-risk AI system or interrupt the system through a 'stop' button or a similar procedure that allows the system to come to a halt in a safe state.",
+    "source_url": "https://artificialintelligenceact.eu/article/14/"
+  },
+  {
+    "doc_ref": "Art. 14.5",
+    "title": "Human oversight — dual verification for biometric identification (Annex III point 1(a))",
+    "content": "For high-risk AI systems referred to in point 1(a) of Annex III, the measures referred to in paragraph 3 of this Article shall be such as to ensure that, in addition, no action or decision is taken by the deployer on the basis of the identification resulting from the system unless that identification has been separately verified and confirmed by at least two natural persons with the necessary competence, training and authority.\n\nThe requirement for a separate verification by at least two natural persons shall not apply to high-risk AI systems used for the purposes of law enforcement, migration, border control or asylum, where Union or national law considers the application of this requirement to be disproportionate.",
+    "source_url": "https://artificialintelligenceact.eu/article/14/"
+  },
+  {
+    "doc_ref": "Art. 26.1",
+    "title": "Deployer obligations — use per instructions for use",
+    "content": "Deployers of high-risk AI systems shall take appropriate technical and organisational measures to ensure they use such systems in accordance with the instructions for use accompanying the systems, pursuant to paragraphs 3 and 6.",
+    "source_url": "https://artificialintelligenceact.eu/article/26/"
+  },
+  {
+    "doc_ref": "Art. 26.2",
+    "title": "Deployer obligations — assign human oversight to competent persons",
+    "content": "Deployers shall assign human oversight to natural persons who have the necessary competence, training and authority, as well as the necessary support.",
+    "source_url": "https://artificialintelligenceact.eu/article/26/"
+  },
+  {
+    "doc_ref": "Art. 26.3",
+    "title": "Deployer obligations — without prejudice to other obligations",
+    "content": "The obligations set out in paragraphs 1 and 2, are without prejudice to other deployer obligations under Union or national law and to the deployer's freedom to organise its own resources and activities for the purpose of implementing the human oversight measures indicated by the provider.",
+    "source_url": "https://artificialintelligenceact.eu/article/26/"
+  },
+  {
+    "doc_ref": "Art. 26.5",
+    "title": "Deployer obligations — monitoring, incident reporting and suspension",
+    "content": "Deployers shall monitor the operation of the high-risk AI system on the basis of the instructions for use and, where relevant, inform providers in accordance with Article 72. Where deployers have reason to consider that the use of the high-risk AI system in accordance with the instructions may result in that AI system presenting a risk within the meaning of Article 79(1), they shall, without undue delay, inform the provider or distributor and the relevant market surveillance authority, and shall suspend the use of that system. Where deployers have identified a serious incident, they shall also immediately inform first the provider, and then the importer or distributor and the relevant market surveillance authorities of that incident. If the deployer is not able to reach the provider, Article 73 shall apply mutatis mutandis. This obligation shall not cover sensitive operational data of deployers of AI systems which are law enforcement authorities.\n\nFor deployers that are financial institutions subject to requirements regarding their internal governance, arrangements or processes under Union financial services law, the monitoring obligation set out in the first subparagraph shall be deemed to be fulfilled by complying with the rules on internal governance arrangements, processes and mechanisms pursuant to the relevant financial service law.",
+    "source_url": "https://artificialintelligenceact.eu/article/26/"
+  },
+  {
+    "doc_ref": "Art. 26.6",
+    "title": "Deployer obligations — keep automatically generated logs (at least six months)",
+    "content": "Deployers of high-risk AI systems shall keep the logs automatically generated by that high-risk AI system to the extent such logs are under their control, for a period appropriate to the intended purpose of the high-risk AI system, of at least six months, unless provided otherwise in applicable Union or national law, in particular in Union law on the protection of personal data.\n\nDeployers that are financial institutions subject to requirements regarding their internal governance, arrangements or processes under Union financial services law shall maintain the logs as part of the documentation kept pursuant to the relevant Union financial service law.",
+    "source_url": "https://artificialintelligenceact.eu/article/26/"
+  },
+  {
+    "doc_ref": "Art. 26.7",
+    "title": "Deployer obligations — inform workers' representatives and workers at the workplace",
+    "content": "Before putting into service or using a high-risk AI system at the workplace, deployers who are employers shall inform workers' representatives and the affected workers that they will be subject to the use of the high-risk AI system. This information shall be provided, where applicable, in accordance with the rules and procedures laid down in Union and national law and practice on information of workers and their representatives.",
+    "source_url": "https://artificialintelligenceact.eu/article/26/"
+  },
+  {
+    "doc_ref": "Art. 26.11",
+    "title": "Deployer obligations — inform natural persons subject to Annex III decisions",
+    "content": "Without prejudice to Article 50 of this Regulation, deployers of high-risk AI systems referred to in Annex III that make decisions or assist in making decisions related to natural persons shall inform the natural persons that they are subject to the use of the high-risk AI system. For high-risk AI systems used for law enforcement purposes Article 13 of Directive (EU) 2016/680 shall apply.",
+    "source_url": "https://artificialintelligenceact.eu/article/26/"
+  },
+  {
+    "doc_ref": "Art. 27.1",
+    "title": "FRIA — who must perform it and required contents (a-f)",
+    "content": "Prior to deploying a high-risk AI system referred to in Article 6(2), with the exception of high-risk AI systems intended to be used in the area listed in point 2 of Annex III, deployers that are bodies governed by public law, or are private entities providing public services, and deployers of high-risk AI systems referred to in points 5 (b) and (c) of Annex III, shall perform an assessment of the impact on fundamental rights that the use of such system may produce. For that purpose, deployers shall perform an assessment consisting of:\n\n(a) a description of the deployer's processes in which the high-risk AI system will be used in line with its intended purpose;\n\n(b) a description of the period of time within which, and the frequency with which, each high-risk AI system is intended to be used;\n\n(c) the categories of natural persons and groups likely to be affected by its use in the specific context;\n\n(d) the specific risks of harm likely to have an impact on the categories of natural persons or groups of persons identified pursuant to point (c) of this paragraph, taking into account the information given by the provider pursuant to Article 13;\n\n(e) a description of the implementation of human oversight measures, according to the instructions for use;\n\n(f) the measures to be taken in the case of the materialisation of those risks, including the arrangements for internal governance and complaint mechanisms.",
+    "source_url": "https://artificialintelligenceact.eu/article/27/"
+  },
+  {
+    "doc_ref": "Art. 27.2",
+    "title": "FRIA — applies to first use; reliance on prior assessments and updates",
+    "content": "The obligation laid down in paragraph 1 applies to the first use of the high-risk AI system. The deployer may, in similar cases, rely on previously conducted fundamental rights impact assessments or existing impact assessments carried out by provider. If, during the use of the high-risk AI system, the deployer considers that any of the elements listed in paragraph 1 has changed or is no longer up to date, the deployer shall take the necessary steps to update the information.",
+    "source_url": "https://artificialintelligenceact.eu/article/27/"
+  },
+  {
+    "doc_ref": "Art. 27.3",
+    "title": "FRIA — notify market surveillance authority via template",
+    "content": "Once the assessment referred to in paragraph 1 of this Article has been performed, the deployer shall notify the market surveillance authority of its results, submitting the filled-out template referred to in paragraph 5 of this Article as part of the notification. In the case referred to in Article 46(1), deployers may be exempt from that obligation to notify.",
+    "source_url": "https://artificialintelligenceact.eu/article/27/"
+  },
+  {
+    "doc_ref": "Art. 27.4",
+    "title": "FRIA — complementarity with GDPR/LED data protection impact assessment",
+    "content": "If any of the obligations laid down in this Article is already met through the data protection impact assessment conducted pursuant to Article 35 of Regulation (EU) 2016/679 or Article 27 of Directive (EU) 2016/680, the fundamental rights impact assessment referred to in paragraph 1 of this Article shall complement that data protection impact assessment.",
+    "source_url": "https://artificialintelligenceact.eu/article/27/"
+  },
+  {
+    "doc_ref": "Art. 27.5",
+    "title": "FRIA — AI Office to develop template questionnaire",
+    "content": "The AI Office shall develop a template for a questionnaire, including through an automated tool, to facilitate deployers in complying with their obligations under this Article in a simplified manner.",
+    "source_url": "https://artificialintelligenceact.eu/article/27/"
+  },
+  {
+    "doc_ref": "Art. 50.1",
+    "title": "Transparency — provider duty to disclose AI interaction to natural persons",
+    "content": "Providers shall ensure that AI systems intended to interact directly with natural persons are designed and developed in such a way that the natural persons concerned are informed that they are interacting with an AI system, unless this is obvious from the point of view of a natural person who is reasonably well-informed, observant and circumspect, taking into account the circumstances and the context of use. This obligation shall not apply to AI systems authorised by law to detect, prevent, investigate or prosecute criminal offences, subject to appropriate safeguards for the rights and freedoms of third parties, unless those systems are available for the public to report a criminal offence.",
+    "source_url": "https://artificialintelligenceact.eu/article/50/"
+  },
+  {
+    "doc_ref": "Art. 50.2",
+    "title": "Transparency — provider marking of synthetic (AI-generated) content",
+    "content": "Providers of AI systems, including general-purpose AI systems, generating synthetic audio, image, video or text content, shall ensure that the outputs of the AI system are marked in a machine-readable format and detectable as artificially generated or manipulated. Providers shall ensure their technical solutions are effective, interoperable, robust and reliable as far as this is technically feasible, taking into account the specificities and limitations of various types of content, the costs of implementation and the generally acknowledged state of the art, as may be reflected in relevant technical standards. This obligation shall not apply to the extent the AI systems perform an assistive function for standard editing or do not substantially alter the input data provided by the deployer or the semantics thereof, or where authorised by law to detect, prevent, investigate or prosecute criminal offences.",
+    "source_url": "https://artificialintelligenceact.eu/article/50/"
+  },
+  {
+    "doc_ref": "Art. 50.4",
+    "title": "Transparency — deployer disclosure of deep fakes and AI-generated public-interest text",
+    "content": "Deployers of an AI system that generates or manipulates image, audio or video content constituting a deep fake, shall disclose that the content has been artificially generated or manipulated. This obligation shall not apply where the use is authorised by law to detect, prevent, investigate or prosecute criminal offence. Where the content forms part of an evidently artistic, creative, satirical, fictional or analogous work or programme, the transparency obligations set out in this paragraph are limited to disclosure of the existence of such generated or manipulated content in an appropriate manner that does not hamper the display or enjoyment of the work.\n\nDeployers of an AI system that generates or manipulates text which is published with the purpose of informing the public on matters of public interest shall disclose that the text has been artificially generated or manipulated. This obligation shall not apply where the use is authorised by law to detect, prevent, investigate or prosecute criminal offences or where the AI-generated content has undergone a process of human review or editorial control and where a natural or legal person holds editorial responsibility for the publication of the content.",
+    "source_url": "https://artificialintelligenceact.eu/article/50/"
+  },
+  {
+    "doc_ref": "Art. 86.1",
+    "title": "Right to explanation — affected person's right to obtain explanation from deployer",
+    "content": "Any affected person subject to a decision which is taken by the deployer on the basis of the output from a high-risk AI system listed in Annex III, with the exception of systems listed under point 2 thereof, and which produces legal effects or similarly significantly affects that person in a way that they consider to have an adverse impact on their health, safety or fundamental rights shall have the right to obtain from the deployer clear and meaningful explanations of the role of the AI system in the decision-making procedure and the main elements of the decision taken.",
+    "source_url": "https://artificialintelligenceact.eu/article/86/"
+  },
+  {
+    "doc_ref": "Art. 86.2",
+    "title": "Right to explanation — exceptions under Union or national law",
+    "content": "Paragraph 1 shall not apply to the use of AI systems for which exceptions from, or restrictions to, the obligation under that paragraph follow from Union or national law in compliance with Union law.",
+    "source_url": "https://artificialintelligenceact.eu/article/86/"
+  },
+  {
+    "doc_ref": "Art. 86.3",
+    "title": "Right to explanation — applies only where not otherwise provided under Union law",
+    "content": "This Article shall apply only to the extent that the right referred to in paragraph 1 is not otherwise provided for under Union law.",
+    "source_url": "https://artificialintelligenceact.eu/article/86/"
+  }
+]
