@@ -358,9 +358,17 @@ diseño, nombre, features grandes); autónomo en lo demás.
   - **Claim automático** en el onboarding: un invitado que se registra entra directo a su org.
   - Modo demo: equipo de ejemplo de solo lectura con banner (la gestión requiere backend real).
   - `RoleBadge` nuevo (owner=good, admin=info, member=neutral). Build/lint verdes; demo verificado
-    con captura. **Pendiente:** aplicar 0008 y verificar el flujo conectado (invitar→claim→listar→
-    cambiar rol→quitar) por curl. Futuro: auditar cambios de membership en el audit-trail;
-    selector de organización activa (hoy = primera membership).
+    con captura.
+  - **BUG encontrado y corregido en la verificación:** `invite_member` casteaba `::member_role[]`
+    sin esquema; con `search_path=''` fallaba (`type "member_role[]" does not exist`). Fix:
+    `::public.member_role[]` (mismo gotcha que el audit trigger 0005). `list_org_members` y
+    `claim_invitations` ya estaban bien.
+  - **Verificado e2e por API (2026-07-17):** invitar a email inexistente → 'invited' (pendiente) →
+    signup + `claim_invitations` → 1 (entra como admin); reinvitar → 'already_member'; invitar a
+    usuario existente → 'added' (alta instantánea); **aislamiento RLS OK** (admin lista miembros;
+    member NO ve invitaciones). Fundador aplicó 0008 + re-ejecutó `invite_member` corregida.
+  - Futuro: auditar cambios de membership en el audit-trail; selector de organización activa
+    (hoy = primera membership).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
