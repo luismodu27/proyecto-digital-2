@@ -128,6 +128,21 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **Aprendizaje:** Tailwind v4 tree-shakea variables `@theme` no referenciadas por
   clases → los colores inline por CSS var salían vacíos. Solución: mapa de hex en el
   componente. (Ver `src/app/dashboard/page.tsx`.)
+- **2026-07-17** · **Revisión regulatoria de `src/lib/risk-assessment.ts`** (compliance-domain-expert).
+  Faltaba una práctica prohibida del Art. 5: **predicción de delitos basada solo en perfilado**
+  (Art. 5(1)(d)) → añadida. Afinados los matices de reconocimiento de emociones (excepción
+  médica/seguridad) e identificación biométrica remota en tiempo real (fines policiales +
+  excepciones tasadas). Añadida cita de **obligaciones del deployer (Art. 26)** en alto riesgo,
+  clave porque el ICP son deployers, no providers. Verificado contra artificialintelligenceact.eu
+  (Arts. 5 y 50). Anexo III y excepciones del Art. 6(3) ya eran correctos.
+- **2026-07-17** · **Asistente de clasificación de riesgo** construido (`/dashboard/riesgo/evaluar`):
+  cuestionario guiado de 3–4 pasos (prohibido → ámbito Anexo III → excepción Art. 6(3) → transparencia)
+  con resultado (nivel + racional + obligaciones + citas). Aviso cuando alto riesgo + Art. 50 se suman.
+  Lógica en `src/lib/risk-assessment.ts`, verificada por el subagente. Build y lint en verde; capturas OK.
+- **Caveats del experto para el futuro** (no bloquean, pero mejoran el producto):
+  1. La API devuelve un solo nivel; un sistema puede ser alto + limitado a la vez (transparencia se suma).
+  2. Distinguir el **rol del cliente** (provider vs deployer): el ICP son deployers → foco en Arts. 26, 27, 50.
+  3. La excepción del Art. 6(3) debe **documentarse** (Art. 6(4)+49(2)) → generar esa evidencia, no solo concluir.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -135,6 +150,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅
 - ~~Landing + app shell~~ → hecho ✅ (con datos de ejemplo)
+- ~~Asistente de clasificación de riesgo~~ → hecho ✅ (lógica en memoria, sin persistir aún)
 - **Backend/datos** (Supabase vs Postgres+Prisma) — siguiente incremento grande.
 - Conectar formulario de waitlist a un destino real (CRM / lista).
 - Exportación real a PDF + audit-trail íntegro.

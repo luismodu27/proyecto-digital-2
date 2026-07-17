@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/dashboard/parts";
+import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import {
   AI_SYSTEMS,
@@ -25,6 +26,11 @@ export default function RiesgoPage() {
       <PageHeader
         title="Clasificación de riesgo"
         subtitle="Cada sistema mapeado a su nivel de riesgo del EU AI Act y sus obligaciones."
+        action={
+          <ButtonLink href="/dashboard/riesgo/evaluar" variant="primary">
+            + Evaluar un sistema
+          </ButtonLink>
+        }
       />
 
       <div className="space-y-5">
