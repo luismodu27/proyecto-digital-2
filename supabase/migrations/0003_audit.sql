@@ -34,7 +34,7 @@ begin
     (select auth.uid()),
     tg_table_name,
     (coalesce((case when tg_op = 'DELETE' then old else new end).id))::text,
-    lower(tg_op)::audit_action,
+    lower(tg_op)::public.audit_action,
     v_old,
     v_new,
     case when tg_op = 'UPDATE' then v_diff else null end
