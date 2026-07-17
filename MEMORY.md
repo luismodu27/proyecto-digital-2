@@ -256,6 +256,9 @@ diseño, nombre, features grandes); autónomo en lo demás.
   reescrita a sistemas de reclutamiento (cribado CVs, ranking, entrevistas vídeo, chatbot, test
   psicométrico, agenda). Base regulatoria: IA de empleo/selección = alto riesgo (Anexo III).
   Siguiente para el vertical: "policy pack RRHH" (controles/obligaciones específicos de selección).
+- **2026-07-17** · **CRUD completo de brechas.** Añadir (`/dashboard/gap/nuevo` + `createGapItem`)
+  y eliminar (`deleteGapItem`, con confirmación) brechas, además del cambio de estado ya existente.
+  Botón "+ Añadir brecha" y papelera por fila (modo conectado). Verificado e2e por API.
 - **2026-07-17** · **Historial de evaluaciones por sistema.** En la página del sistema
   (`/dashboard/inventario/[id]/editar`) se muestra la línea de tiempo de sus `risk_assessments`
   (nivel, respaldo, quién atestó, fecha; la más reciente marcada "Vigente"), + botón "Evaluar"

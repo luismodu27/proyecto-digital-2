@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
 import { GapStatusControl } from "@/components/dashboard/GapStatusControl";
+import { DeleteGapButton } from "@/components/dashboard/DeleteGapButton";
 import { getGapItems, isSupabaseConfigured } from "@/lib/data";
 
 const statusMeta = {
@@ -35,9 +36,16 @@ export default async function GapPage() {
         title="Gap assessment"
         subtitle={`${open} brechas abiertas frente a los requisitos del EU AI Act.`}
         action={
-          <ButtonLink href="/dashboard/gap/informe" variant="outline">
-            ⬇ Exportar evidencia (PDF)
-          </ButtonLink>
+          <div className="flex flex-wrap gap-2">
+            {isSupabaseConfigured && (
+              <ButtonLink href="/dashboard/gap/nuevo" variant="primary">
+                + Añadir brecha
+              </ButtonLink>
+            )}
+            <ButtonLink href="/dashboard/gap/informe" variant="outline">
+              ⬇ Exportar evidencia (PDF)
+            </ButtonLink>
+          </div>
         }
       />
 
@@ -60,7 +68,10 @@ export default async function GapPage() {
                 <p className="text-xs text-muted">Sistema afectado: {g.system}</p>
               </div>
               {isSupabaseConfigured ? (
-                <GapStatusControl id={g.id} status={g.status} />
+                <div className="flex shrink-0 items-center gap-1">
+                  <GapStatusControl id={g.id} status={g.status} />
+                  <DeleteGapButton id={g.id} />
+                </div>
               ) : (
                 <span
                   className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium ${st.cls}`}

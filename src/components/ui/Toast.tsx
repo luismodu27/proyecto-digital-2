@@ -10,6 +10,8 @@ const MESSAGES: Record<string, string> = {
   "system-deleted": "Sistema eliminado.",
   seeded: "Datos de ejemplo cargados.",
   "pack-applied": "Policy pack RRHH aplicado al sistema.",
+  "gap-created": "Brecha añadida.",
+  "gap-deleted": "Brecha eliminada.",
 };
 
 /**

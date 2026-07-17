@@ -211,6 +211,61 @@ export async function deleteAiSystem(formData: FormData) {
   redirect("/dashboard/inventario?toast=system-deleted");
 }
 
+/** Alta manual de una brecha/control en el gap assessment. */
+export async function createGapItem(formData: FormData) {
+  if (!isSupabaseConfigured) redirect("/dashboard/gap");
+
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) redirect("/onboarding");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const aiSystemId = String(formData.get("systemId") ?? "");
+  const requirement = String(formData.get("requirement") ?? "").trim();
+  if (!aiSystemId || !requirement) redirect("/dashboard/gap/nuevo");
+
+  const status = String(formData.get("status") ?? "missing");
+  await supabase.from("gap_items").insert({
+    organization_id: org,
+    ai_system_id: aiSystemId,
+    requirement,
+    article: String(formData.get("article") ?? "").trim() || null,
+    severity: SEVERITY_EN[String(formData.get("severity") ?? "media")] ?? "medium",
+    status: ["missing", "partial", "done"].includes(status) ? status : "missing",
+    created_by: user?.id,
+  });
+
+  revalidatePath("/dashboard/gap");
+  revalidatePath("/dashboard/plan");
+  revalidatePath("/dashboard");
+  redirect("/dashboard/gap?toast=gap-created");
+}
+
+/** Elimina una brecha del gap assessment. */
+export async function deleteGapItem(formData: FormData) {
+  if (!isSupabaseConfigured) redirect("/dashboard/gap");
+  const id = String(formData.get("id") ?? "");
+  if (!id) redirect("/dashboard/gap");
+
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) redirect("/onboarding");
+
+  await supabase
+    .from("gap_items")
+    .delete()
+    .eq("organization_id", org)
+    .eq("id", id);
+
+  revalidatePath("/dashboard/gap");
+  revalidatePath("/dashboard/plan");
+  revalidatePath("/dashboard");
+  redirect("/dashboard/gap?toast=gap-deleted");
+}
+
 /** Cambia el estado de una brecha (falta / parcial / cubierto). */
 export async function updateGapStatus(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/dashboard/gap");
