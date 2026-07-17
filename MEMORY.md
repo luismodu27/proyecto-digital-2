@@ -381,8 +381,10 @@ diseño, nombre, features grandes); autónomo en lo demás.
     columnas→nombre humano, filtrando ruido técnico). UI con feed, filtros por tipo, sello "Inmutable"
     y avatares. `dynamic = "force-dynamic"`.
   - Modo demo: actividad de ejemplo (`SAMPLE_AUDIT`). Build/lint verdes; demo verificado con captura.
-    **Pendiente:** aplicar 0009 y verificar `list_audit_log` por curl (debería ir a la primera: la RPC
-    no referencia tipos sin cualificar). Realiza de forma tangible la tesis "system of record de evidencia".
+  - **Verificado e2e por API (2026-07-17):** con un usuario de prueba se crearon/editaron sistema y
+    brecha; `list_audit_log` devolvió las 4 entradas (incluida la membership del alta de org) con
+    email del actor, acción y diff correctos (update de ai_systems → `name, risk_level`). Fue a la
+    primera. Realiza de forma tangible la tesis "system of record de evidencia".
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
