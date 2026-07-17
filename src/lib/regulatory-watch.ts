@@ -16,7 +16,25 @@
 
 import type { AiSystem, RiskLevel } from "./mock-data";
 
-export type RegFramework = "eu-ai-act";
+export type RegFramework =
+  | "eu-ai-act"
+  | "us-nyc-ll144"
+  | "us-co-aiact"
+  | "us-il-aivia"
+  | "us-eeoc";
+
+/** Jurisdicción a la que pertenece un marco (para agrupar y filtrar el radar). */
+export type RegJurisdiction = "eu" | "us-ny" | "us-co" | "us-il" | "us-federal";
+
+export type FrameworkMeta = {
+  /** Nombre completo de la ley/marco. */
+  label: string;
+  /** Etiqueta corta para pills. */
+  short: string;
+  jurisdiction: RegJurisdiction;
+  /** Etiqueta legible de la jurisdicción (para agrupar en la UI). */
+  jurisdictionLabel: string;
+};
 
 export type RegKind =
   | "deadline" // plazo de aplicación
@@ -59,8 +77,74 @@ export const REG_KIND_LABEL: Record<RegKind, string> = {
   enforcement: "Sanción",
 };
 
+export const FRAMEWORK_META: Record<RegFramework, FrameworkMeta> = {
+  "eu-ai-act": {
+    label: "EU AI Act",
+    short: "EU AI Act",
+    jurisdiction: "eu",
+    jurisdictionLabel: "Unión Europea",
+  },
+  "us-nyc-ll144": {
+    label: "NYC Local Law 144 (AEDT)",
+    short: "NYC LL144",
+    jurisdiction: "us-ny",
+    jurisdictionLabel: "EE. UU. — Nueva York",
+  },
+  "us-co-aiact": {
+    label: "Colorado AI Act (SB 24-205)",
+    short: "Colorado AI Act",
+    jurisdiction: "us-co",
+    jurisdictionLabel: "EE. UU. — Colorado",
+  },
+  "us-il-aivia": {
+    label: "Illinois — IA en el empleo",
+    short: "Illinois",
+    jurisdiction: "us-il",
+    jurisdictionLabel: "EE. UU. — Illinois",
+  },
+  "us-eeoc": {
+    label: "EEOC — orientación federal",
+    short: "EEOC",
+    jurisdiction: "us-federal",
+    jurisdictionLabel: "EE. UU. — Federal",
+  },
+};
+
+/** Nombre del marco (con reserva segura para valores no conocidos de BD). */
+export function frameworkLabel(framework: string): string {
+  return FRAMEWORK_META[framework as RegFramework]?.label ?? framework;
+}
+
+/** Jurisdicción legible del marco (reserva: "Otras"). */
+export function jurisdictionLabel(framework: string): string {
+  return FRAMEWORK_META[framework as RegFramework]?.jurisdictionLabel ?? "Otras";
+}
+
+/** Orden de jurisdicciones en la UI (UE primero, luego EE. UU.). */
+export const JURISDICTION_ORDER: RegJurisdiction[] = [
+  "eu",
+  "us-ny",
+  "us-co",
+  "us-il",
+  "us-federal",
+];
+
+/** Etiqueta legible de cada jurisdicción (para chips de filtro). */
+export const JURISDICTION_LABEL: Record<RegJurisdiction, string> = {
+  eu: "Unión Europea",
+  "us-ny": "EE. UU. — Nueva York",
+  "us-co": "EE. UU. — Colorado",
+  "us-il": "EE. UU. — Illinois",
+  "us-federal": "EE. UU. — Federal",
+};
+
+/** Compatibilidad: mapa simple id de marco → nombre. */
 export const FRAMEWORK_LABEL: Record<RegFramework, string> = {
-  "eu-ai-act": "EU AI Act",
+  "eu-ai-act": FRAMEWORK_META["eu-ai-act"].label,
+  "us-nyc-ll144": FRAMEWORK_META["us-nyc-ll144"].label,
+  "us-co-aiact": FRAMEWORK_META["us-co-aiact"].label,
+  "us-il-aivia": FRAMEWORK_META["us-il-aivia"].label,
+  "us-eeoc": FRAMEWORK_META["us-eeoc"].label,
 };
 
 /* -------------------------------------------------------------------------- */

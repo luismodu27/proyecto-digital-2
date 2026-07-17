@@ -9,6 +9,8 @@ import {
   upcomingDeadlines,
   daysUntil,
   affectedSystems,
+  FRAMEWORK_META,
+  type RegulatoryEvent,
 } from "@/lib/regulatory-watch";
 
 // El widget de "próximo hito" depende de la fecha actual.
@@ -73,7 +75,10 @@ export default async function DashboardOverview() {
             </span>
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-muted">
-                Próximo hito regulatorio
+                Próximo hito regulatorio ·{" "}
+                {FRAMEWORK_META[
+                  nextDeadline.framework as RegulatoryEvent["framework"]
+                ]?.short ?? nextDeadline.framework}
               </p>
               <p className="truncate text-sm font-medium text-ink">
                 {nextDeadline.title}

@@ -306,7 +306,7 @@ function rowToRegEvent(r: RegEventRow): RegulatoryEvent {
     id: r.id,
     date: r.event_date,
     kind: r.kind as RegKind,
-    framework: "eu-ai-act",
+    framework: r.framework as RegulatoryEvent["framework"],
     title: r.title,
     summary: r.summary,
     impact: r.impact,

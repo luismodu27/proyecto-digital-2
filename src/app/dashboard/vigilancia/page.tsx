@@ -18,11 +18,15 @@ import {
 } from "@/lib/mock-data";
 import {
   REG_KIND_LABEL,
-  FRAMEWORK_LABEL,
+  FRAMEWORK_META,
+  JURISDICTION_ORDER,
+  JURISDICTION_LABEL,
+  frameworkLabel,
   affectedSystems,
   daysUntil,
   upcomingDeadlines,
   type RegKind,
+  type RegJurisdiction,
   type RegulatoryEvent,
 } from "@/lib/regulatory-watch";
 
@@ -56,6 +60,40 @@ const ACK_TONE: Record<RegAckStatus, keyof typeof TONE_PILL> = {
 
 function AckPill({ status }: { status: RegAckStatus }) {
   return <Pill tone={ACK_TONE[status]}>{REG_ACK_LABEL[status]}</Pill>;
+}
+
+/** Pill sutil con el marco/jurisdicción de un evento. */
+function FrameworkPill({ framework }: { framework: string }) {
+  const meta = FRAMEWORK_META[framework as RegulatoryEvent["framework"]];
+  return (
+    <span className="inline-flex items-center rounded-full border border-line bg-paper px-2 py-0.5 text-[11px] font-medium text-ink-soft">
+      {meta?.short ?? framework}
+    </span>
+  );
+}
+
+/** Chip de filtro por jurisdicción. */
+function JurisdictionChip({
+  label,
+  href,
+  active,
+}: {
+  label: string;
+  href: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+        active
+          ? "border-brand bg-brand-soft text-brand-strong"
+          : "border-line-strong text-ink-soft hover:bg-paper-sunken"
+      }`}
+    >
+      {label}
+    </Link>
+  );
 }
 
 /** Tono del countdown según cercanía. */
@@ -109,7 +147,12 @@ function Pill({
   );
 }
 
-export default async function VigilanciaPage() {
+export default async function VigilanciaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ j?: string }>;
+}) {
+  const sp = await searchParams;
   const [systems, acks, role, events, isAdmin] = await Promise.all([
     getAiSystems(),
     getRegulatoryAcks(),
@@ -121,7 +164,24 @@ export default async function VigilanciaPage() {
   const canManage =
     isSupabaseConfigured && (role === "owner" || role === "admin");
 
-  const withDays = events.map((e) => ({
+  // Jurisdicciones presentes en el catálogo (para el filtro multi-marco).
+  const present = new Set(
+    events
+      .map((e) => FRAMEWORK_META[e.framework]?.jurisdiction)
+      .filter((j): j is RegJurisdiction => Boolean(j)),
+  );
+  const jurisdictions = JURISDICTION_ORDER.filter((j) => present.has(j));
+  const activeJ =
+    sp.j && jurisdictions.includes(sp.j as RegJurisdiction)
+      ? (sp.j as RegJurisdiction)
+      : null;
+  const shown = activeJ
+    ? events.filter(
+        (e) => FRAMEWORK_META[e.framework]?.jurisdiction === activeJ,
+      )
+    : events;
+
+  const withDays = shown.map((e) => ({
     ev: e,
     days: daysUntil(e.date, now),
     affected: affectedSystems(e, systems),
@@ -134,7 +194,7 @@ export default async function VigilanciaPage() {
   const past = withDays.filter((x) => x.days < 0).sort((a, b) => b.days - a.days);
   const feed = [...upcoming, ...past];
 
-  const deadlines = upcomingDeadlines(now, events);
+  const deadlines = upcomingDeadlines(now, shown);
   const hero = deadlines[0];
   const heroAffected = hero ? affectedSystems(hero, systems) : [];
   const heroDays = hero ? daysUntil(hero.date, now) : 0;
@@ -158,6 +218,24 @@ export default async function VigilanciaPage() {
         }
       />
 
+      {/* Filtro por jurisdicción (solo si hay más de un marco) */}
+      {jurisdictions.length > 1 && (
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+            Jurisdicción
+          </span>
+          <JurisdictionChip label="Todas" href="/dashboard/vigilancia" active={!activeJ} />
+          {jurisdictions.map((j) => (
+            <JurisdictionChip
+              key={j}
+              label={JURISDICTION_LABEL[j]}
+              href={`/dashboard/vigilancia?j=${j}`}
+              active={activeJ === j}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Hero: próximo plazo */}
       {hero && (
         <section className="mb-8 overflow-hidden rounded-2xl border border-line bg-paper-raised">
@@ -165,8 +243,9 @@ export default async function VigilanciaPage() {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Pill tone={countdownTone(heroDays)}>Próximo plazo</Pill>
+                <FrameworkPill framework={hero.framework} />
                 <span className="text-xs text-muted">
-                  {FRAMEWORK_LABEL[hero.framework]}
+                  {frameworkLabel(hero.framework)}
                 </span>
                 {heroAck && <AckPill status={heroAck.status} />}
               </div>
@@ -228,7 +307,10 @@ export default async function VigilanciaPage() {
                       {formatDate(e.date)}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm font-medium text-ink">{e.title}</p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <FrameworkPill framework={e.framework} />
+                  </div>
+                  <p className="mt-1.5 text-sm font-medium text-ink">{e.title}</p>
                   <div className="mt-1 flex items-center justify-between gap-2">
                     <p className="text-xs text-muted">
                       {n} {n === 1 ? "sistema afectado" : "sistemas afectados"}
@@ -245,7 +327,8 @@ export default async function VigilanciaPage() {
       {/* Cronología completa */}
       <section>
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
-          Cronología regulatoria · EU AI Act
+          Cronología regulatoria
+          {activeJ ? ` · ${JURISDICTION_LABEL[activeJ]}` : ""}
         </h3>
         <div className="space-y-3">
           {feed.map(({ ev, days, affected }) => (
@@ -297,6 +380,7 @@ function EventRow({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Pill tone={KIND_TONE[ev.kind]}>{REG_KIND_LABEL[ev.kind]}</Pill>
+            <FrameworkPill framework={ev.framework} />
             {upcoming ? (
               <span className="text-[11px] font-medium text-muted">por venir</span>
             ) : (

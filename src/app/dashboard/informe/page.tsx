@@ -14,6 +14,8 @@ import {
   upcomingDeadlines,
   affectedSystems,
   daysUntil,
+  FRAMEWORK_META,
+  type RegulatoryEvent,
 } from "@/lib/regulatory-watch";
 
 export const dynamic = "force-dynamic";
@@ -273,6 +275,10 @@ export default async function InformeEjecutivoPage() {
                     <span>
                       {e.title}
                       <span className="ml-1 text-xs text-muted">
+                        ·{" "}
+                        {FRAMEWORK_META[
+                          e.framework as RegulatoryEvent["framework"]
+                        ]?.short ?? e.framework}{" "}
                         · afecta a {n} {n === 1 ? "sistema" : "sistemas"}
                       </span>
                     </span>
