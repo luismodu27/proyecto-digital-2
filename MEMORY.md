@@ -167,6 +167,22 @@ diseño, nombre, features grandes); autónomo en lo demás.
   página `/dashboard/inventario/nuevo` (form de alta, con guardas de modo demo). Botón
   "+ Registrar sistema" enlazado. Build/lint verdes.
   Ojo: la anon key NO permite DDL → el esquema lo aplica el fundador desde el panel.
+- **2026-07-17** · **Verificación end-to-end del backend (API vía proxy)**. Se probó el flujo
+  completo contra el Supabase real: signup → RPC `create_org_and_owner` → insert `ai_systems`
+  → read aislado por org → **audit-trail** registrando cada cambio → inmutabilidad (RLS bloquea
+  UPDATE/DELETE del audit_log) → **aislamiento multi-tenant** (usuario B ve `[]`). Todo ✅.
+- **BUG encontrado y corregido en la verificación:** `write_audit` casteaba `::audit_action`
+  sin esquema; con `search_path=''` no resolvía y rompía el onboarding. Fix: `::public.audit_action`
+  (0003 + parche 0005 + setup.sql). Lección: **funciones `security definer` con `search_path=''`
+  deben cualificar TODO con esquema** (tipos incluidos), no solo tablas.
+- **2026-07-17** · **Cargador de datos de ejemplo** (`seedSampleData`): empty-state del inventario
+  con botón "Cargar datos de ejemplo" (upsert idempotente por `code` + brechas enlazadas).
+  Verificado a nivel de BD (upsert 201, gap 201, idempotencia OK).
+- **Config Supabase requerida (fundador):** Auth → Email provider habilitado, "Allow new users
+  to sign up" ON, "Confirm email" OFF (para MVP). Anon key + URL en `.env.local` (no versionado).
+  ⚠️ El build DEBE hacerse con `.env.local` presente para inlinear `NEXT_PUBLIC_*` en el cliente.
+- **Limitación del entorno:** el Chromium headless de Playwright NO usa el proxy de salida, así que
+  no puede alcanzar Supabase → la verificación del flujo real se hace por API con `curl` (sí usa proxy).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -175,10 +191,12 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - ~~Alcance del MVP~~ → confirmado ✅
 - ~~Landing + app shell~~ → hecho ✅ (con datos de ejemplo)
 - ~~Asistente de clasificación de riesgo~~ → hecho ✅ (lógica en memoria, sin persistir aún)
-- ~~Backend/datos~~ → **Supabase**, fundación lista ✅ (falta conectar credenciales + auth + writes).
-- **Credenciales Supabase del fundador** (URL + anon key) para activar el modo real.
-- ~~Auth UI (login/registro) + middleware + onboarding~~ → hecho ✅ (activo solo en modo conectado).
-- **Write-path**: persistir clasificación de riesgo, alta/edición de sistemas y brechas.
+- ~~Backend/datos~~ → **Supabase conectado y verificado e2e** ✅ (esquema, RLS, auth, audit-trail).
+- ~~Credenciales Supabase~~ → conectadas en `.env.local` ✅.
+- ~~Auth UI (login/registro) + middleware + onboarding~~ → hecho y verificado ✅.
+- ~~Write-path: alta de sistemas + seed de ejemplo~~ → hecho ✅.
+- **Pendiente write-path**: cablear el asistente de riesgo para GUARDAR contra un sistema
+  (`saveRiskAssessment` ya existe), y edición de brechas.
 - Conectar formulario de waitlist a un destino real (CRM / lista).
 - Exportación real a PDF + audit-trail íntegro.
 - Autenticación y multi-tenancy.

@@ -6,6 +6,13 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
 import type { Answers, ClassificationResult } from "@/lib/risk-assessment";
+import { AI_SYSTEMS, GAP_ITEMS } from "@/lib/mock-data";
+
+const SEVERITY_EN: Record<string, string> = {
+  alta: "high",
+  media: "medium",
+  baja: "low",
+};
 
 /** Alta de un sistema de IA en el inventario (modo conectado). */
 export async function createAiSystem(formData: FormData) {
@@ -35,6 +42,69 @@ export async function createAiSystem(formData: FormData) {
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
+  redirect("/dashboard/inventario");
+}
+
+/**
+ * Puebla la organización activa con los datos de ejemplo (sistemas + brechas).
+ * Útil para que un panel recién creado no esté vacío. Idempotente por `code`.
+ */
+export async function seedSampleData() {
+  if (!isSupabaseConfigured) redirect("/dashboard/inventario");
+
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) redirect("/onboarding");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Inserta los sistemas (upsert por (organization_id, code)) y recupera sus ids.
+  const { data: systems } = await supabase
+    .from("ai_systems")
+    .upsert(
+      AI_SYSTEMS.map((s) => ({
+        organization_id: org,
+        code: s.id,
+        name: s.name,
+        owner: s.owner,
+        domain: s.domain,
+        vendor: s.vendor,
+        actor_role: "deployer",
+        risk_level: s.risk,
+        compliance_pct: s.compliance,
+        last_reviewed_at: s.lastReviewed,
+        created_by: user?.id,
+      })),
+      { onConflict: "organization_id,code" },
+    )
+    .select("id, code");
+
+  // Mapa code → id para enlazar las brechas a sus sistemas.
+  const idByCode = new Map((systems ?? []).map((r) => [r.code, r.id]));
+
+  const gapRows = GAP_ITEMS.map((g) => {
+    const aiSystemId = idByCode.get(g.system);
+    if (!aiSystemId) return null;
+    return {
+      organization_id: org,
+      ai_system_id: aiSystemId,
+      requirement: g.requirement,
+      article: g.article,
+      status: g.status,
+      severity: SEVERITY_EN[g.severity] ?? "medium",
+    };
+  }).filter(Boolean);
+
+  if (gapRows.length > 0) {
+    await supabase.from("gap_items").insert(gapRows as never[]);
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/inventario");
+  revalidatePath("/dashboard/riesgo");
+  revalidatePath("/dashboard/gap");
   redirect("/dashboard/inventario");
 }
 
