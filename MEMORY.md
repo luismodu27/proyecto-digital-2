@@ -227,6 +227,13 @@ diseño, nombre, features grandes); autónomo en lo demás.
   - **Versionar** cuestionario + fecha regulatoria del snapshot (la norma cambia — lo del Omnibus
     lo prueba). Invitar a re-evaluar ante cambios. Disclaimers en resultado, PDF y pie.
   - Disclaimers y ToS definitivos: **revisar con abogado UE** antes de producción.
+- **2026-07-17** · **Captura de evidencia (Parte B del encuadre).** Al guardar una
+  autoevaluación se registra **responsable que atesta** + **evidencia (nota/enlace)**, y se
+  deriva el nivel de respaldo: **Declarado** (sin soporte) vs **Con evidencia** (hay nota/enlace)
+  vs **Revisado** (futuro). Migración `0006_evidence.sql` (columnas en risk_assessments y
+  ai_systems). Columna "Respaldo" en el inventario (EvidenceBadge). Ataca el riesgo de "casillas
+  a favor sin cumplir": un check sin evidencia queda visible como "Declarado", no como aprobado.
+  Pendiente: el fundador aplica 0006 en su instancia para activar el guardado con evidencia.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
