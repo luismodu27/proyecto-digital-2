@@ -3,16 +3,39 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
+import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function WaitlistCTA() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
-    // TODO(backend): enviar a la lista de espera real (API / CRM).
-    setSubmitted(true);
+    setError(null);
+    if (!EMAIL_RE.test(email.trim())) {
+      setError("Introduce un correo válido (p. ej. tu@empresa.com).");
+      return;
+    }
+    setLoading(true);
+    try {
+      if (isSupabaseConfigured) {
+        const supabase = createClient();
+        const { error } = await supabase
+          .from("waitlist")
+          .insert({ email: email.trim(), source: "landing" });
+        if (error) throw error;
+      }
+      setSubmitted(true);
+    } catch {
+      setError("No pudimos registrarte. Inténtalo de nuevo en un momento.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -20,7 +43,7 @@ export function WaitlistCTA() {
       <div className="relative overflow-hidden rounded-3xl border border-line-strong bg-paper-raised px-6 py-14 text-center sm:px-12">
         <div className="absolute inset-0 grid-paper opacity-50" aria-hidden />
         <div className="relative mx-auto max-w-xl">
-          <SealMark size={48} className="mx-auto text-brand" />
+          <SealMark size={48} className="mx-auto" />
           <h2 className="mt-5 font-display text-3xl font-semibold text-ink sm:text-4xl">
             Ve por delante de la auditoría.
           </h2>
@@ -30,7 +53,7 @@ export function WaitlistCTA() {
           </p>
 
           {submitted ? (
-            <div className="mt-8 rounded-2xl border border-[#bfdccf] bg-brand-soft px-6 py-5 text-brand-strong">
+            <div className="mt-8 rounded-2xl border border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] px-6 py-5 text-[var(--tone-good-fg)]">
               <p className="font-display text-lg font-semibold">¡Gracias! 🎉</p>
               <p className="mt-1 text-sm">
                 Te avisaremos en <span className="font-medium">{email}</span>{" "}
@@ -40,25 +63,34 @@ export function WaitlistCTA() {
           ) : (
             <form
               onSubmit={handleSubmit}
+              noValidate
               className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row"
             >
-              <label htmlFor="email" className="sr-only">
+              <label htmlFor="waitlist-email" className="sr-only">
                 Correo de trabajo
               </label>
               <input
-                id="email"
+                id="waitlist-email"
                 type="email"
-                required
+                autoComplete="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (error) setError(null);
+                }}
                 placeholder="tu@empresa.com"
                 className="w-full rounded-full border border-line-strong bg-paper px-5 py-3 text-sm text-ink outline-none placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/30"
               />
-              <Button type="submit" className="px-6 py-3 shrink-0">
-                Solicitar acceso
+              <Button type="submit" disabled={loading} className="px-6 py-3 shrink-0">
+                {loading ? "Enviando…" : "Solicitar acceso"}
               </Button>
             </form>
           )}
+
+          {error && (
+            <p className="mt-3 text-sm text-[var(--tone-danger-fg)]">{error}</p>
+          )}
+
           <p className="mt-4 text-xs text-muted">
             Sin compromiso. Attesta ofrece orientación de compliance, no asesoría
             legal.
