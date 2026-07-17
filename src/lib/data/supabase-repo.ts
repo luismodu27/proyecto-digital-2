@@ -44,6 +44,21 @@ export async function getAiSystems(): Promise<AiSystem[]> {
   }));
 }
 
+/** Sistemas de la org (id real + nombre) para selectores. */
+export async function getSystemsForSelect(): Promise<
+  { id: string; name: string }[]
+> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data } = await supabase
+    .from("ai_systems")
+    .select("id, name")
+    .eq("organization_id", org)
+    .order("name", { ascending: true });
+  return data ?? [];
+}
+
 export async function getGapItems(): Promise<GapItem[]> {
   const supabase = await createClient();
   const org = await getActiveOrg();

@@ -13,3 +13,9 @@ export async function getAiSystems(): Promise<AiSystem[]> {
 export async function getGapItems(): Promise<GapItem[]> {
   return GAP_ITEMS;
 }
+
+export async function getSystemsForSelect(): Promise<
+  { id: string; name: string }[]
+> {
+  return AI_SYSTEMS.map((s) => ({ id: s.id, name: s.name }));
+}

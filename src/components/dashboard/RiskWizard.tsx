@@ -12,6 +12,9 @@ import {
   type Question,
 } from "@/lib/risk-assessment";
 import { RISK_LABEL } from "@/lib/mock-data";
+import { saveRiskAssessment } from "@/lib/data/actions";
+
+type SystemOption = { id: string; name: string };
 
 function toggle(
   question: Question,
@@ -27,10 +30,22 @@ function toggle(
     : [...next, value];
 }
 
-export function RiskWizard() {
+export function RiskWizard({
+  systems = [],
+  connected = false,
+  presetSystemId,
+}: {
+  systems?: SystemOption[];
+  connected?: boolean;
+  presetSystemId?: string;
+}) {
   const [answers, setAnswers] = useState<Answers>({});
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
+  const [systemId, setSystemId] = useState(presetSystemId ?? "");
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">(
+    "idle",
+  );
 
   const questions = useMemo(() => visibleQuestions(answers), [answers]);
   const clampedIndex = Math.min(index, questions.length - 1);
@@ -59,6 +74,8 @@ export function RiskWizard() {
     setAnswers({});
     setIndex(0);
     setDone(false);
+    setSystemId(presetSystemId ?? "");
+    setSaveState("idle");
   }
 
   if (done) {
@@ -68,6 +85,15 @@ export function RiskWizard() {
     const alsoTransparency =
       result.level === "high" &&
       (answers.transparency ?? []).filter((v) => v !== NONE).length > 0;
+
+    async function handleSave() {
+      if (!systemId) return;
+      setSaveState("saving");
+      const res = await saveRiskAssessment(systemId, answers, result);
+      setSaveState(res.ok ? "saved" : "error");
+    }
+
+    const canSave = connected && systems.length > 0;
     return (
       <div className="rounded-2xl border border-line bg-paper-raised p-7">
         <div className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -127,6 +153,55 @@ export function RiskWizard() {
             </ul>
           </div>
         </div>
+
+        {canSave && (
+          <div className="mt-8 border-t border-line pt-6">
+            {saveState === "saved" ? (
+              <div className="rounded-xl border border-[#bfdccf] bg-brand-soft px-4 py-3 text-sm text-brand-strong">
+                ✓ Clasificación guardada. El sistema quedó actualizado a{" "}
+                <span className="font-medium">{RISK_LABEL[result.level]}</span> y
+                se registró en el audit-trail.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div className="flex-1">
+                  <label
+                    htmlFor="save-system"
+                    className="block text-sm font-medium text-ink"
+                  >
+                    Guardar esta clasificación en un sistema
+                  </label>
+                  <select
+                    id="save-system"
+                    value={systemId}
+                    onChange={(e) => setSystemId(e.target.value)}
+                    disabled={!!presetSystemId}
+                    className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60"
+                  >
+                    <option value="">Selecciona un sistema…</option>
+                    {systems.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <Button
+                  onClick={handleSave}
+                  disabled={!systemId || saveState === "saving"}
+                  variant="primary"
+                >
+                  {saveState === "saving" ? "Guardando…" : "Guardar clasificación"}
+                </Button>
+              </div>
+            )}
+            {saveState === "error" && (
+              <p className="mt-2 text-sm text-[#8f271f]">
+                No se pudo guardar. Inténtalo de nuevo.
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="mt-8 flex flex-col gap-3 border-t border-line pt-6 sm:flex-row">
           <Button onClick={reset} variant="primary">

@@ -1,8 +1,17 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
 import { RiskWizard } from "@/components/dashboard/RiskWizard";
+import { getSystemsForSelect, isSupabaseConfigured } from "@/lib/data";
 
-export default function EvaluarRiesgoPage() {
+export default async function EvaluarRiesgoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ system?: string }>;
+}) {
+  const { system } = await searchParams;
+  const systems = isSupabaseConfigured ? await getSystemsForSelect() : [];
+  const preset = system && systems.some((s) => s.id === system) ? system : undefined;
+
   return (
     <>
       <PageHeader
@@ -18,7 +27,11 @@ export default function EvaluarRiesgoPage() {
         </Link>
       </div>
       <div className="max-w-2xl">
-        <RiskWizard />
+        <RiskWizard
+          systems={systems}
+          connected={isSupabaseConfigured}
+          presetSystemId={preset}
+        />
       </div>
     </>
   );

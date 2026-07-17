@@ -13,6 +13,7 @@ const repo = isSupabaseConfigured ? supabaseRepo : mockRepo;
 
 export const getAiSystems = () => repo.getAiSystems();
 export const getGapItems = () => repo.getGapItems();
+export const getSystemsForSelect = () => repo.getSystemsForSelect();
 
 export { isSupabaseConfigured };
 export type { AiSystem, GapItem } from "@/lib/mock-data";
