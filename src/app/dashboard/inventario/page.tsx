@@ -11,7 +11,7 @@ export default async function InventarioPage() {
         title="Inventario de sistemas de IA"
         subtitle="Cada modelo y sistema en uso, con su propietario, proveedor y estado."
         action={
-          <ButtonLink href="#" variant="primary">
+          <ButtonLink href="/dashboard/inventario/nuevo" variant="primary">
             + Registrar sistema
           </ButtonLink>
         }

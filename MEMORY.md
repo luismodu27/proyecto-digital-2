@@ -159,6 +159,14 @@ diseño, nombre, features grandes); autónomo en lo demás.
   y protege `/dashboard` (no-op en modo demo), logout + email en el sidebar. Enlace "Entrar"
   en la landing. En MODO DEMO todo sigue abierto con datos de ejemplo; en modo conectado exige
   sesión + organización. Build/lint verdes; login verificado con captura (env dummy).
+- **2026-07-17** · **Conexión Supabase + write-path (alta de sistemas)**. Proyecto Supabase
+  del fundador conectado vía `.env.local` (URL + anon key; NO versionado). Verificado: red OK,
+  anon key válida (auth settings 200). Esquema pendiente de aplicar por el fundador
+  (`supabase/setup.sql` = las 4 migraciones concatenadas, para pegar en SQL Editor).
+  Nuevo write-path: `src/lib/data/actions.ts` (`createAiSystem`, `saveRiskAssessment`) y
+  página `/dashboard/inventario/nuevo` (form de alta, con guardas de modo demo). Botón
+  "+ Registrar sistema" enlazado. Build/lint verdes.
+  Ojo: la anon key NO permite DDL → el esquema lo aplica el fundador desde el panel.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
