@@ -295,7 +295,9 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - ~~Write-path: alta de sistemas + seed de ejemplo~~ → hecho ✅.
 - **Pendiente write-path**: cablear el asistente de riesgo para GUARDAR contra un sistema
   (`saveRiskAssessment` ya existe), y edición de brechas.
-- Conectar formulario de waitlist a un destino real (CRM / lista).
+- ~~Conectar formulario de waitlist~~ → hecho ✅ (tabla `waitlist`, RLS insert-only,
+  verificado: insert 201, select bloqueado). Consultar leads desde el panel Supabase.
+  Pendiente opcional: captcha/rate-limit contra spam.
 - Exportación real a PDF + audit-trail íntegro.
 - Autenticación y multi-tenancy.
 - Validación real (del propio thesis):
