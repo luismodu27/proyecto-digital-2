@@ -700,20 +700,23 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-> **▶ RETOMAR AQUÍ (2026-07-17, tras Fase B.1 verificada + Analista a LLM gratis):** El **foso automatizado
-> está construido de punta a punta**: Vigía (A.1) + editor de enriquecimiento + **Analista (Fase B)**. Árbol
-> limpio y sincronizado. **Migraciones aplicadas hasta la 0015** (pgvector + `reg_knowledge_chunks` +
-> `match_reg_chunks` + `enrich_reg_candidate_ai`). **B.1 VERIFICADO e2e:** el corpus (28 apartados verbatim del
-> AI Act) está **ingerido en la base real** (Voyage voyage-4, dim 1024) y el retrieval devuelve los artículos
-> del deployer (Arts. 26/14) — ver §10. **B.2 (Analista) construido pero NO verificado en vivo** porque
-> Anthropic no tenía crédito → se cambió a **LLM compatible con OpenAI (NVIDIA NIM gratis por defecto)** en
-> `src/lib/analista/llm.ts`. **▶ LO ÚNICO QUE FALTA para cerrar B.2:** que el fundador saque una **API key
-> gratis en build.nvidia.com** (`nvapi-...`) y me la pase; entonces corro el Analista sobre una señal y
-> verifico borrador grounded (citas reales, encuadre deployer, sin copy prohibido). Validador de prueba
-> **`analista-test@attesta-test.dev`** (uid `9f226580...`) sigue promovido para eso. **PENDIENTE DE LIMPIEZA:**
-> al terminar B.2, borrar el user de prueba + candidatos de prueba (el corpus se queda). El fundador va a
-> **tirar un compact** ahora. **SIGUIENTE tras B.2:** demo en Vercel (llaves como env vars, no por chat) o
-> nueva capa. Estado: **Capa 7 (foso) 🟢🟢** = Fase A + **Fase B (Analista) casi cerrada** = Fase A del pipeline
+> **▶ RETOMAR AQUÍ (2026-07-17, FASE B / FOSO COMPLETO):** El **foso automatizado está COMPLETO y
+> verificado e2e**: Vigía (detecta) → señal → **Analista (RAG + LLM redacta borrador grounded)** → editor →
+> Validador humano publica. Árbol limpio y sincronizado. **Migraciones aplicadas hasta la 0015.**
+> **B.1 ✅ verificado:** corpus (28 apartados verbatim del AI Act) ingerido en la base real (Voyage voyage-4,
+> 1024) + retrieval correcto (Arts. 26/14). **B.2 ✅ verificado e2e** (2026-07-17): señal Vigía → embed →
+> `match_reg_chunks` → **NVIDIA NIM (function calling)** → borrador grounded (**citas ancladas a fragmentos
+> reales, publicable kind+fecha, sin copy prohibido, usa Art. 26**) → `enrich_reg_candidate_ai` → candidato
+> enriquecido con `provenance.agent='Analista'`. Drafting = `src/lib/analista/llm.ts` (OpenAI-compatible;
+> **NVIDIA NIM gratis** por defecto; Groq/OpenRouter por env). **NOTA DE MODELO:** verifiqué con `llama-3.1-8b`
+> (rápido) — floja (ensucia articles, desliza 'proveedor'); **producción usa `meta/llama-3.3-70b-instruct`**
+> (default en config; el cron es async, la lentitud del free-tier da igual) + humano valida. Prompt ya
+> reforzado (articles limpios + no 'proveedor').
+> **⚠️ PENDIENTE DE LIMPIEZA (el fundador, 1 SQL):** borrar los users de prueba `analista-test@attesta-test.dev`
+> (uid `9f226580-bd52-4f3d-b459-9387968b582b`) y su fila en `platform_admins`. El corpus y `reg_events` se
+> quedan. **SIGUIENTE:** demo en Vercel (llaves = env vars, NO por chat; `CRON_SECRET`+service_role para el
+> cron real del Vigía/Analista) o nueva capa (shadow-AI Capa 0, pruebas de sesgo Capa 4). Estado: **Capa 7
+> (foso) 🟢🟢🟢** = Fase A + Fase B (Vigía+Analista+Validador) COMPLETA y verificada = Fase A del pipeline
 > (candidato→Validador humano→`reg_events`; RLS blinda la cola; `platform_admin`) + **multi-marco** (EU AI Act
 > + 5 marcos US de IA-empleo: NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto; verificado
 > por el experto) + **nexo de jurisdicción por org** (0012). **Capa 2 🟢** = **plan de acción editable**
