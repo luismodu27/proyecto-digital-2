@@ -30,7 +30,7 @@ export default async function DashboardOverview() {
     <>
       <PageHeader
         title="Resumen de gobernanza"
-        subtitle="Estado de cumplimiento de tus sistemas de IA en un vistazo."
+        subtitle="Estado de preparación de tus sistemas de IA en un vistazo."
       />
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -41,7 +41,7 @@ export default async function DashboardOverview() {
           hint="requieren obligaciones estrictas"
           accent="danger"
         />
-        <StatCard label="Cumplimiento medio" value={`${avg}%`} accent={avg >= 60 ? "brand" : "warn"} />
+        <StatCard label="Preparación media" value={`${avg}%`} hint="% listo para auditoría" accent={avg >= 60 ? "brand" : "warn"} />
         <StatCard label="Brechas abiertas" value={4} hint="ver gap assessment" accent="warn" />
       </section>
 

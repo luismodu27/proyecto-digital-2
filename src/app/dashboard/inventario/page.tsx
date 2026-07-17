@@ -51,7 +51,7 @@ export default async function InventarioPage() {
                   <th className="px-5 py-3 font-medium">Dominio</th>
                   <th className="px-5 py-3 font-medium">Proveedor</th>
                   <th className="px-5 py-3 font-medium">Riesgo</th>
-                  <th className="px-5 py-3 font-medium">Cumplimiento</th>
+                  <th className="px-5 py-3 font-medium">Preparación</th>
                   <th className="px-5 py-3 font-medium">Última revisión</th>
                 </tr>
               </thead>

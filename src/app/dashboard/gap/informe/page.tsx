@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SealMark } from "@/components/ui/SealMark";
 import { PrintButton } from "@/components/dashboard/PrintButton";
 import { getAiSystems, getGapItems, getOrganizationName } from "@/lib/data";
+import { LEGAL_PDF } from "@/components/ui/LegalNote";
 
 const statusLabel = { missing: "Falta", partial: "Parcial", done: "Cubierto" } as const;
 const statusCls = {
@@ -58,13 +59,14 @@ export default async function InformeGapPage() {
 
         <div className="mt-6">
           <p className="text-xs uppercase tracking-[0.2em] text-muted">
-            Gap assessment · EU AI Act
+            Autoevaluación · EU AI Act
           </p>
           <h1 className="mt-2 font-display text-2xl font-semibold">
-            Evaluación de brechas de cumplimiento
+            Brechas y preparación para auditoría
           </h1>
           <p className="mt-1 text-sm text-ink-soft">
-            Organización: <span className="font-medium text-ink">{orgName ?? "—"}</span>
+            Organización: <span className="font-medium text-ink">{orgName ?? "—"}</span>{" "}
+            · datos autodeclarados
           </p>
         </div>
 
@@ -121,11 +123,9 @@ export default async function InformeGapPage() {
         <footer className="mt-10 border-t border-line pt-5 text-xs text-muted">
           <p>
             Generado por <span className="font-medium text-ink">Attesta</span> el {fecha}.
-            Documento de trabajo para evidencia de auditoría.
+            Documento de trabajo para preparación de auditoría.
           </p>
-          <p className="mt-1">
-            Attesta ofrece orientación de compliance y no constituye asesoría legal.
-          </p>
+          <p className="mt-1">{LEGAL_PDF}</p>
         </footer>
       </article>
     </div>

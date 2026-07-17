@@ -50,13 +50,13 @@ export function Hero() {
               <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-muted">
-                    Certificado de gobernanza
+                    Preparación para auditoría
                   </p>
                   <p className="mt-2 font-display text-2xl font-semibold text-ink">
                     Inventario · Riesgo · Evidencia
                   </p>
                   <p className="mt-1 text-sm text-ink-soft">
-                    Estado de cumplimiento actualizado en tiempo real.
+                    Estado de preparación actualizado en tiempo real.
                   </p>
                 </div>
                 <div className="flex items-center gap-3 rounded-xl border border-[#bfdccf] bg-brand-soft px-4 py-3">

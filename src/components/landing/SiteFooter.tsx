@@ -1,4 +1,5 @@
 import { Logo } from "@/components/ui/Logo";
+import { LEGAL_FOOTER } from "@/components/ui/LegalNote";
 
 export function SiteFooter() {
   return (
@@ -13,9 +14,7 @@ export function SiteFooter() {
         </div>
         <div className="text-sm text-muted">
           <p>© 2026 Attesta. Todos los derechos reservados.</p>
-          <p className="mt-1">
-            Orientación de compliance, no constituye asesoría legal.
-          </p>
+          <p className="mt-1 max-w-sm">{LEGAL_FOOTER}</p>
         </div>
       </div>
     </footer>

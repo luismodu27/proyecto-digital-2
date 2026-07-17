@@ -16,8 +16,8 @@ const steps = [
   },
   {
     n: "4",
-    title: "Demuestra cumplimiento",
-    body: "Exporta evidencia lista para auditoría y mantén el trail actualizado de forma continua.",
+    title: "Prepárate para la auditoría",
+    body: "Exporta tu evidencia declarada, lista para auditoría, y mantén el trail actualizado de forma continua.",
   },
 ];
 

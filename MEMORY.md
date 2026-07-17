@@ -71,9 +71,12 @@ captar leads + esqueleto del dashboard (app shell). (2) Backend real (datos) des
 
 ## 6. Por qué ahora / contexto regulatorio
 
-- Obligaciones de alto riesgo del EU AI Act con fecha (**2 ago 2026**).
-- Propuesta **Omnibus** podría aplazar el deadline a **dic 2027** → amplía el tiempo
-  para construir, no lo cierra.
+- **ACTUALIZADO (2026):** el **Digital Omnibus on AI** ya se ADOPTÓ (acuerdo 6–7 may 2026,
+  Parlamento 16 jun, Consejo 29 jun; pendiente solo de publicación en el DOUE). El deadline
+  de obligaciones de **alto riesgo (Anexo III) se movió de 2 ago 2026 → 2 dic 2027** (y a
+  2 ago 2028 para IA embebida en productos del Anexo I). Certeza alta. → **amplía el tiempo
+  para construir, no lo cierra.** El mensaje comercial se ajusta de "urgencia inmediata" a
+  "obligación inevitable con ventana más larga" (vender preparación + ahorro, no miedo a multa).
 - Leyes estatales de IA en EE.UU. sumándose.
 - Mercado de software de gobernanza de IA: **$492M (2026) → $15.8B (2030)**, ~30–36% CAGR.
 
@@ -201,6 +204,29 @@ diseño, nombre, features grandes); autónomo en lo demás.
   (FRIA)** con alcance real (organismos públicos + Anexo III 5(b)/5(c): crédito y seguros vida/salud);
   **Art. 49** corregido: un deployer privado mid-market normalmente NO registra (lo hace el proveedor).
   Regla reforzada: distinguir SIEMPRE provider vs deployer en textos regulatorios (nuestro ICP = deployer).
+- **2026-07-17** · **DECISIÓN DE PRODUCTO CLAVE (encuadre legal): Attesta NO certifica.**
+  Motivo (planteado por el fundador): un cuestionario autodeclarado no puede sustentar un
+  "aprobatorio/certificado" sin exponernos a responsabilidad. Encuadre correcto validado por
+  el experto: Attesta es **herramienta de autoevaluación + preparación para auditoría + gestión
+  de evidencia** (system of record), NO un organismo notificado. Bajo el AI Act solo un
+  **organismo notificado** certifica (Anexo VII); el resto es autodeclaración del **proveedor**
+  (Anexo VI, Declaración UE de Conformidad + marcado CE). Nuestro ICP (deployer) ni siquiera
+  certifica: cumple deberes de uso (Art. 26) y debe **demostrarlos con evidencia**.
+  - **Lenguaje PROHIBIDO en UI/PDF:** certificado, aprobado/apto/pasa, cumple/compliant,
+    garantiza, sello de conformidad, marcado CE, validado/auditado por Attesta, libre de riesgo,
+    asesoría/dictamen legal.
+  - **Lenguaje SEGURO:** autoevaluación, preparación para auditoría, evidencia declarada,
+    % listo / grado de preparación, brechas identificadas, clasificación **orientativa/indicativa**,
+    obligaciones aplicables (orientativo), registro de evidencia, plan de remediación sugerido.
+  - **Regla de copy:** verbos de la ORGANIZACIÓN ("tu organización declara…"), no de Attesta
+    ("Attesta certifica…"). Evitar imperativos legales ("debes…") sin "(orientativo)".
+  - **Puntaje:** "cumplimiento %" → **"preparación para auditoría / % listo"**.
+  - **Modelo de evidencia** (Parte B, siguiente): por respuesta capturar quién atesta (persona+rol),
+    fecha, estado, **nivel de respaldo: Declarado / Con evidencia / Revisado**, documento/enlace,
+    artículo, sistema, nota. Indicador honesto "% de controles con evidencia".
+  - **Versionar** cuestionario + fecha regulatoria del snapshot (la norma cambia — lo del Omnibus
+    lo prueba). Invitar a re-evaluar ante cambios. Disclaimers en resultado, PDF y pie.
+  - Disclaimers y ToS definitivos: **revisar con abogado UE** antes de producción.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación

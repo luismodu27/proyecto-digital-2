@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { RecommendationCard } from "@/components/dashboard/Recommendations";
+import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
 import { getAiSystems, getGapItems } from "@/lib/data";
 import { buildActionPlan, type Priority } from "@/lib/recommendations";
 
@@ -62,10 +63,10 @@ export default async function PlanPage() {
             ))}
           </div>
 
-          <p className="mt-6 text-xs text-muted">
-            Recomendaciones generadas a partir de tus brechas abiertas y niveles de
-            riesgo. Attesta ofrece orientación de compliance, no asesoría legal.
-          </p>
+          <LegalNote
+            text={`Recomendaciones orientativas generadas a partir de tus brechas abiertas y niveles de riesgo declarados. ${LEGAL_FOOTER}`}
+            className="mt-6"
+          />
         </>
       )}
     </>

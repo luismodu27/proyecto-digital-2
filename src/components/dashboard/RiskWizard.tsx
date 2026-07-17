@@ -15,6 +15,7 @@ import { RISK_LABEL } from "@/lib/mock-data";
 import { saveRiskAssessment } from "@/lib/data/actions";
 import { recommendationsForLevel } from "@/lib/recommendations";
 import { RecommendationList } from "@/components/dashboard/Recommendations";
+import { LegalNote, LEGAL_RESULT } from "@/components/ui/LegalNote";
 
 type SystemOption = { id: string; name: string };
 
@@ -102,11 +103,16 @@ export function RiskWizard({
         <div className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted">
-              Resultado de la clasificación
+              Resultado orientativo
             </p>
             <h2 className="mt-2 font-display text-2xl font-semibold text-ink">
-              {RISK_LABEL[result.level]}
+              {RISK_LABEL[result.level]}{" "}
+              <span className="text-base font-normal text-muted">(indicativo)</span>
             </h2>
+            <p className="mt-1 text-sm text-ink-soft">
+              Clasificación orientativa según los criterios del EU AI Act, a partir de
+              lo que tu organización ha declarado.
+            </p>
           </div>
           <RiskBadge level={result.level} />
         </div>
@@ -232,10 +238,7 @@ export function RiskWizard({
           </Link>
         </div>
 
-        <p className="mt-6 text-xs text-muted">
-          Orientación de compliance, no asesoría legal. Los casos límite deben
-          revisarse con un experto.
-        </p>
+        <LegalNote text={LEGAL_RESULT} className="mt-6" />
       </div>
     );
   }

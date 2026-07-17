@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
+import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
 import { getGapItems } from "@/lib/data";
 
 const statusMeta = {
@@ -58,11 +59,7 @@ export default async function GapPage() {
         })}
       </div>
 
-      <p className="mt-6 text-xs text-muted">
-        La exportación a PDF y el audit-trail íntegro se conectarán con el backend
-        en el siguiente incremento. Attesta ofrece orientación de compliance, no
-        asesoría legal.
-      </p>
+      <LegalNote text={LEGAL_FOOTER} className="mt-6" />
     </>
   );
 }
