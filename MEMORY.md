@@ -331,6 +331,18 @@ diseño, nombre, features grandes); autónomo en lo demás.
     condicional ("stop-the-clock" por normas armonizadas).
 - **Pendiente v2 de vigilancia:** persistir "marcar como revisado" (tabla + audit-trail), multi-marco
   (ISO 42001, NIST, leyes estatales EE.UU.), y la automatización de ingesta (los 4 agentes + RAG/pgvector).
+- **2026-07-17** · **Bucle de evidencia cerrado.** El asistente de riesgo ya persistía la evaluación
+  (`saveRiskAssessment` con atestación + evidencia), pero la evidencia capturada (nota/enlace) **se
+  guardaba y nunca se mostraba**: `getSystemAssessments` no la leía. Corregido de punta a punta:
+  - `AssessmentRecord` ahora lleva `evidenceNote`/`evidenceUrl`; `getSystemAssessments` (supabase-repo)
+    los incluye en el `select`. Verificado contra la BD real vía PostgREST (columnas válidas, 200).
+  - Se **muestran** en el historial de la ficha del sistema (`AssessmentHistory`) y en la sección
+    "Historial de evaluaciones" del **dossier** (nota + enlace clicable "Ver evidencia").
+  - Tras guardar, el asistente hace `router.refresh()` y ofrece un enlace **"Ver dossier del sistema →"**.
+  - **Datos de ejemplo de evaluaciones** (`SAMPLE_ASSESSMENTS` en mock-data) para SYS-001/002/005:
+    el dossier y el historial ahora cuentan la historia completa en modo demo (bueno para venta/capturas).
+  Build/lint verdes; verificado con captura (dossier de "Ranking de candidatos" con historial + evidencia).
+  Loop completo: **inventario → evaluar → guardar (atestación + evidencia) → dossier/historial + audit-trail.**
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -343,8 +355,9 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - ~~Credenciales Supabase~~ → conectadas en `.env.local` ✅.
 - ~~Auth UI (login/registro) + middleware + onboarding~~ → hecho y verificado ✅.
 - ~~Write-path: alta de sistemas + seed de ejemplo~~ → hecho ✅.
-- **Pendiente write-path**: cablear el asistente de riesgo para GUARDAR contra un sistema
-  (`saveRiskAssessment` ya existe), y edición de brechas.
+- ~~Write-path: guardar la evaluación del asistente contra un sistema + edición de brechas~~ → hecho ✅.
+  El **bucle de evidencia** está cerrado: se guarda con atestación + evidencia y se muestra en el
+  dossier, el historial de la ficha y el audit-trail (con datos de ejemplo en demo).
 - ~~Generador de documentación técnica (Capa 3)~~ → hecho ✅ (dossier de gobernanza por sistema,
   `/dashboard/inventario/[id]/dossier`, imprimible a PDF, determinista).
 - ~~Vigilancia regulatoria — radar v1 (Capa 7)~~ → hecho ✅ (`/dashboard/vigilancia`, catálogo curado

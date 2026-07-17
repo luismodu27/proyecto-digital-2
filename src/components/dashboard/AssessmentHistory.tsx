@@ -51,6 +51,32 @@ export function AssessmentHistory({
             {formatDate(a.assessedAt)}
             {a.attestedByName ? ` · atestado por ${a.attestedByName}` : ""}
           </p>
+          {(a.evidenceNote || a.evidenceUrl) && (
+            <div className="mt-2 rounded-lg border border-line bg-paper px-3 py-2 text-xs">
+              {a.evidenceNote && <p className="text-ink-soft">{a.evidenceNote}</p>}
+              {a.evidenceUrl && (
+                <a
+                  href={a.evidenceUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className={`inline-flex items-center gap-1 font-medium text-brand hover:text-brand-strong ${
+                    a.evidenceNote ? "mt-1" : ""
+                  }`}
+                >
+                  Ver evidencia
+                  <svg viewBox="0 0 16 16" className="size-3" fill="none" aria-hidden>
+                    <path
+                      d="M6 3h7v7M13 3 3 13"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </a>
+              )}
+            </div>
+          )}
         </li>
       ))}
     </ol>

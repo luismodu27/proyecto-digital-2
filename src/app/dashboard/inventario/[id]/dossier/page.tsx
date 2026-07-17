@@ -401,6 +401,23 @@ export default async function DossierPage({
                     {formatDateTime(a.assessedAt)}
                     {a.attestedByName ? ` · atestada por ${a.attestedByName}` : ""}
                   </p>
+                  {(a.evidenceNote || a.evidenceUrl) && (
+                    <p className="mt-1 text-xs text-ink-soft">
+                      <span className="text-muted">Evidencia: </span>
+                      {a.evidenceNote}
+                      {a.evidenceNote && a.evidenceUrl ? " · " : ""}
+                      {a.evidenceUrl && (
+                        <a
+                          href={a.evidenceUrl}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="font-medium text-brand underline"
+                        >
+                          {a.evidenceUrl}
+                        </a>
+                      )}
+                    </p>
+                  )}
                 </li>
               ))}
             </ol>

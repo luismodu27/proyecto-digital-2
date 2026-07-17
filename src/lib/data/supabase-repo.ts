@@ -60,7 +60,9 @@ export async function getSystemAssessments(
   if (!org) return [];
   const { data } = await supabase
     .from("risk_assessments")
-    .select("id, level, rationale, evidence_state, attested_by_name, assessed_at")
+    .select(
+      "id, level, rationale, evidence_state, attested_by_name, evidence_note, evidence_url, assessed_at",
+    )
     .eq("organization_id", org)
     .eq("ai_system_id", systemId)
     .order("assessed_at", { ascending: false });
@@ -70,6 +72,8 @@ export async function getSystemAssessments(
     rationale: r.rationale,
     evidenceState: (r.evidence_state ?? "declared") as EvidenceState,
     attestedByName: r.attested_by_name ?? null,
+    evidenceNote: r.evidence_note ?? null,
+    evidenceUrl: r.evidence_url ?? null,
     assessedAt: String(r.assessed_at),
   }));
 }

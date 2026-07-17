@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import {
@@ -42,6 +43,7 @@ export function RiskWizard({
   connected?: boolean;
   presetSystemId?: string;
 }) {
+  const router = useRouter();
   const [answers, setAnswers] = useState<Answers>({});
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
@@ -104,7 +106,13 @@ export function RiskWizard({
         url: evidenceIsUrl ? evidence : undefined,
         note: evidenceIsUrl ? undefined : evidence,
       });
-      setSaveState(res.ok ? "saved" : "error");
+      if (res.ok) {
+        setSaveState("saved");
+        // Refresca los server components (inventario, dossier, historial).
+        router.refresh();
+      } else {
+        setSaveState("error");
+      }
     }
 
     const canSave = connected && systems.length > 0;
@@ -192,12 +200,22 @@ export function RiskWizard({
           <div className="mt-8 border-t border-line pt-6">
             {saveState === "saved" ? (
               <div className="rounded-xl border border-[#bfdccf] bg-brand-soft px-4 py-3 text-sm text-brand-strong">
-                ✓ Autoevaluación guardada como{" "}
-                <span className="font-medium">
-                  {hasEvidence ? "con evidencia" : "declarado"}
-                </span>
-                . El sistema se actualizó y quedó registrado en el audit-trail
-                {attestedBy.trim() ? `, atestado por ${attestedBy.trim()}` : ""}.
+                <p>
+                  ✓ Autoevaluación guardada como{" "}
+                  <span className="font-medium">
+                    {hasEvidence ? "con evidencia" : "declarado"}
+                  </span>
+                  . El sistema se actualizó y quedó registrado en el audit-trail
+                  {attestedBy.trim() ? `, atestado por ${attestedBy.trim()}` : ""}.
+                </p>
+                {systemId && (
+                  <Link
+                    href={`/dashboard/inventario/${systemId}/dossier`}
+                    className="mt-2 inline-flex items-center gap-1 font-medium underline"
+                  >
+                    Ver dossier del sistema →
+                  </Link>
+                )}
               </div>
             ) : (
               <div className="space-y-4">

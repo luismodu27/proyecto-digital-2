@@ -1,7 +1,9 @@
 import {
   AI_SYSTEMS,
   GAP_ITEMS,
+  SAMPLE_ASSESSMENTS,
   type AiSystem,
+  type AssessmentRecord,
   type DossierData,
   type GapItem,
 } from "@/lib/mock-data";
@@ -31,9 +33,10 @@ export async function getSystemById(_id: string): Promise<null> {
   return null;
 }
 
-export async function getSystemAssessments(_id: string): Promise<never[]> {
-  void _id;
-  return [];
+export async function getSystemAssessments(
+  id: string,
+): Promise<AssessmentRecord[]> {
+  return SAMPLE_ASSESSMENTS[id] ?? [];
 }
 
 /**
@@ -48,6 +51,6 @@ export async function getSystemDossier(
   return {
     system: { ...system, actorRole: "deployer" },
     gaps: GAP_ITEMS.filter((g) => g.system === system.id),
-    assessments: [],
+    assessments: SAMPLE_ASSESSMENTS[system.id] ?? [],
   };
 }

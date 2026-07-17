@@ -115,6 +115,8 @@ export type AssessmentRecord = {
   rationale: string;
   evidenceState: EvidenceState;
   attestedByName: string | null;
+  evidenceNote?: string | null;
+  evidenceUrl?: string | null;
   assessedAt: string; // ISO
 };
 
@@ -167,6 +169,59 @@ export const GAP_ITEMS: GapItem[] = [
     system: "SYS-004",
   },
 ];
+
+/**
+ * Historial de evaluaciones de ejemplo (modo demo), indexado por código de
+ * sistema. Da vida al dossier y a la ficha del sistema sin backend.
+ */
+export const SAMPLE_ASSESSMENTS: Record<string, AssessmentRecord[]> = {
+  "SYS-002": [
+    {
+      id: "AS-002-2",
+      level: "high",
+      rationale:
+        "El sistema opera en un área de alto riesgo del Anexo III (empleo y gestión de trabajadores) y no le aplica ninguna excepción del Art. 6(3).",
+      evidenceState: "evidenced",
+      attestedByName: "Ana López · Responsable de RRHH",
+      evidenceNote: "DPIA y prueba de sesgo del proveedor archivadas en el expediente.",
+      evidenceUrl: "https://drive.example.com/ranking/dpia-2026.pdf",
+      assessedAt: "2026-07-02T09:20:00Z",
+    },
+    {
+      id: "AS-002-1",
+      level: "high",
+      rationale:
+        "Clasificación inicial: ranking de candidatos en el ámbito de empleo (Anexo III).",
+      evidenceState: "declared",
+      attestedByName: null,
+      assessedAt: "2026-05-14T16:05:00Z",
+    },
+  ],
+  "SYS-005": [
+    {
+      id: "AS-005-1",
+      level: "high",
+      rationale:
+        "Test psicométrico automatizado usado en selección de personal: alto riesgo del Anexo III (empleo).",
+      evidenceState: "reviewed",
+      attestedByName: "Comité de Gobernanza de IA",
+      evidenceNote:
+        "Revisado por Legal y RRHH; supervisión humana y DPIA documentadas.",
+      assessedAt: "2026-07-10T11:00:00Z",
+    },
+  ],
+  "SYS-001": [
+    {
+      id: "AS-001-1",
+      level: "high",
+      rationale:
+        "Cribado de CVs en el ámbito de empleo (Anexo III); pendiente de reunir evidencia del proveedor.",
+      evidenceState: "declared",
+      attestedByName: null,
+      assessedAt: "2026-06-28T08:30:00Z",
+    },
+  ],
+};
 
 export const RISK_ORDER: RiskLevel[] = [
   "unacceptable",
