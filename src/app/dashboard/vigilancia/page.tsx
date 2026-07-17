@@ -6,7 +6,9 @@ import { EventStatusControl } from "@/components/dashboard/EventStatusControl";
 import {
   getAiSystems,
   getRegulatoryAcks,
+  getRegulatoryEvents,
   getCurrentMemberRole,
+  getIsPlatformAdmin,
   isSupabaseConfigured,
 } from "@/lib/data";
 import {
@@ -15,7 +17,6 @@ import {
   type RegAckStatus,
 } from "@/lib/mock-data";
 import {
-  REGULATORY_EVENTS,
   REG_KIND_LABEL,
   FRAMEWORK_LABEL,
   affectedSystems,
@@ -109,16 +110,18 @@ function Pill({
 }
 
 export default async function VigilanciaPage() {
-  const [systems, acks, role] = await Promise.all([
+  const [systems, acks, role, events, isAdmin] = await Promise.all([
     getAiSystems(),
     getRegulatoryAcks(),
     getCurrentMemberRole(),
+    getRegulatoryEvents(),
+    getIsPlatformAdmin(),
   ]);
   const now = new Date();
   const canManage =
     isSupabaseConfigured && (role === "owner" || role === "admin");
 
-  const withDays = REGULATORY_EVENTS.map((e) => ({
+  const withDays = events.map((e) => ({
     ev: e,
     days: daysUntil(e.date, now),
     affected: affectedSystems(e, systems),
@@ -131,7 +134,7 @@ export default async function VigilanciaPage() {
   const past = withDays.filter((x) => x.days < 0).sort((a, b) => b.days - a.days);
   const feed = [...upcoming, ...past];
 
-  const deadlines = upcomingDeadlines(now);
+  const deadlines = upcomingDeadlines(now, events);
   const hero = deadlines[0];
   const heroAffected = hero ? affectedSystems(hero, systems) : [];
   const heroDays = hero ? daysUntil(hero.date, now) : 0;
@@ -143,6 +146,16 @@ export default async function VigilanciaPage() {
       <PageHeader
         title="Vigilancia regulatoria"
         subtitle="Radar de plazos y cambios normativos que afectan a tus sistemas de IA."
+        action={
+          isAdmin ? (
+            <Link
+              href="/dashboard/vigilancia/candidatos"
+              className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
+            >
+              Bandeja de validación →
+            </Link>
+          ) : undefined
+        }
       />
 
       {/* Hero: próximo plazo */}

@@ -13,8 +13,16 @@ import type {
   PendingInvitation,
   RegAck,
   RegAckStatus,
+  RegCandidate,
+  RegCandidateProvenance,
+  RegCandidateStatus,
   RiskLevel,
 } from "@/lib/mock-data";
+import {
+  mergeCatalog,
+  type RegulatoryEvent,
+  type RegKind,
+} from "@/lib/regulatory-watch";
 
 /** Mapea la severidad de BD (en) a la del modelo de UI (es). */
 const SEVERITY_ES: Record<string, GapItem["severity"]> = {
@@ -268,6 +276,129 @@ export async function getRegulatoryAcks(): Promise<Record<string, RegAck>> {
     };
   }
   return map;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Pipeline del foso: eventos publicados, candidatos y rol de validador        */
+/* -------------------------------------------------------------------------- */
+
+type RegEventRow = {
+  id: string;
+  event_date: string;
+  kind: string;
+  framework: string;
+  title: string;
+  summary: string;
+  impact: string;
+  action: string;
+  articles: unknown;
+  source: unknown;
+  scope: unknown;
+};
+
+function asStringArray(v: unknown): string[] {
+  return Array.isArray(v) ? v.map((x) => String(x)) : [];
+}
+
+function rowToRegEvent(r: RegEventRow): RegulatoryEvent {
+  const src = (r.source ?? {}) as { label?: string; url?: string };
+  return {
+    id: r.id,
+    date: r.event_date,
+    kind: r.kind as RegKind,
+    framework: "eu-ai-act",
+    title: r.title,
+    summary: r.summary,
+    impact: r.impact,
+    action: r.action,
+    articles: asStringArray(r.articles),
+    source: { label: src.label ?? "", url: src.url ?? "" },
+    scope: (r.scope ?? {}) as RegulatoryEvent["scope"],
+  };
+}
+
+/**
+ * Catálogo del radar: base curada en código + eventos publicados por el
+ * pipeline. Si la tabla no existe o hay error, cae a la base curada.
+ */
+export async function getRegulatoryEvents(): Promise<RegulatoryEvent[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("reg_events")
+    .select(
+      "id, event_date, kind, framework, title, summary, impact, action, articles, source, scope",
+    );
+  if (error || !data) return mergeCatalog([]);
+  return mergeCatalog((data as RegEventRow[]).map(rowToRegEvent));
+}
+
+type RegCandidateRow = {
+  id: string;
+  proposed_event_id: string | null;
+  event_date: string | null;
+  kind: string | null;
+  framework: string;
+  title: string;
+  summary: string | null;
+  impact: string | null;
+  action: string | null;
+  articles: unknown;
+  source: unknown;
+  scope: unknown;
+  status: RegCandidateStatus;
+  provenance: unknown;
+  created_at: string;
+  reviewed_at: string | null;
+  review_note: string | null;
+  reg_sources: { label: string } | null;
+};
+
+function rowToCandidate(r: RegCandidateRow): RegCandidate {
+  const src = r.source as { label?: string; url?: string } | null;
+  return {
+    id: r.id,
+    proposedEventId: r.proposed_event_id,
+    date: r.event_date,
+    kind: r.kind,
+    framework: r.framework,
+    title: r.title,
+    summary: r.summary,
+    impact: r.impact,
+    action: r.action,
+    articles: asStringArray(r.articles),
+    source: src?.url ? { label: src.label ?? "", url: src.url } : null,
+    scope: (r.scope ?? {}) as RegCandidate["scope"],
+    status: r.status,
+    sourceLabel: r.reg_sources?.label ?? null,
+    provenance: (r.provenance ?? {}) as RegCandidateProvenance,
+    createdAt: r.created_at,
+    reviewedAt: r.reviewed_at,
+    reviewNote: r.review_note,
+  };
+}
+
+/**
+ * Cola de candidatos del pipeline. RLS solo la deja ver a validadores de
+ * plataforma; un no-validador recibe [] silenciosamente.
+ */
+export async function getRegCandidates(): Promise<RegCandidate[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("reg_candidates")
+    .select(
+      "id, proposed_event_id, event_date, kind, framework, title, summary, impact, action, articles, source, scope, status, provenance, created_at, reviewed_at, review_note, reg_sources(label)",
+    )
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return (data as unknown as RegCandidateRow[]).map(rowToCandidate);
+}
+
+/** ¿El usuario actual es validador de plataforma (personal de Attesta)? */
+export async function getIsPlatformAdmin(): Promise<boolean> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("is_platform_admin");
+  if (error) return false;
+  return data === true;
 }
 
 /** Registro de actividad (audit-trail) de la organización activa. */

@@ -6,6 +6,7 @@ import {
   SAMPLE_INVITATIONS,
   SAMPLE_MEMBERS,
   SAMPLE_REG_ACKS,
+  SAMPLE_REG_CANDIDATES,
   type AiSystem,
   type AssessmentRecord,
   type AuditEntry,
@@ -15,7 +16,9 @@ import {
   type OrgMember,
   type PendingInvitation,
   type RegAck,
+  type RegCandidate,
 } from "@/lib/mock-data";
+import { mergeCatalog, type RegulatoryEvent } from "@/lib/regulatory-watch";
 
 /** Repositorio de datos de ejemplo (modo demo). */
 export async function getAiSystems(): Promise<AiSystem[]> {
@@ -67,6 +70,20 @@ export async function getAuditLog(): Promise<AuditEntry[]> {
 
 export async function getRegulatoryAcks(): Promise<Record<string, RegAck>> {
   return SAMPLE_REG_ACKS;
+}
+
+export async function getRegulatoryEvents(): Promise<RegulatoryEvent[]> {
+  // En demo el catálogo es solo la base curada (sin eventos de pipeline).
+  return mergeCatalog([]);
+}
+
+export async function getRegCandidates(): Promise<RegCandidate[]> {
+  return SAMPLE_REG_CANDIDATES;
+}
+
+export async function getIsPlatformAdmin(): Promise<boolean> {
+  // En demo mostramos la bandeja del Validador para poder enseñarla.
+  return true;
 }
 
 /**

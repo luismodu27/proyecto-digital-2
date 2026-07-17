@@ -424,20 +424,56 @@ diseño, nombre, features grandes); autónomo en lo demás.
   - **Verificado e2e por API (2026-07-17):** marcar (insert 'reviewed' + nota) → leer por RLS → upsert
     a 'planned' (on_conflict merge) → **ambas operaciones salen en `list_audit_log`** (insert + update
     con `campos=['status']`, filtrando ruido) con el email del actor. Fundador aplicó 0010. Todo ✅.
+- **2026-07-17** · **Automatización del foso — Fase A: la espina del pipeline (Capa 7).** El fundador
+  eligió automatizar el foso. Principio innegociable: **la automatización PROPONE borradores; nada se
+  publica como afirmación regulatoria sin validación humana** (el catálogo curado en código sigue siendo
+  la línea base de confianza). Los 4 agentes: **Vigía** (detecta cambios en fuentes, determinista),
+  **Analista** (lee el texto vía RAG → redacta borrador, necesita LLM+embeddings), **Actualizador**
+  (mapea a nuestro esquema + `affectedSystems`, determinista), **Validador** (**un humano** aprueba/rechaza,
+  auditado). El catálogo es **GLOBAL** (misma ley para todos) → el Validador es **personal de Attesta**
+  (`platform_admins`), NO un cliente; por eso las tablas del pipeline no llevan `organization_id` y NO
+  usan las policies por-org (y no pueden colgar el trigger `write_audit`, que lee `new.organization_id`
+  → la trazabilidad va en la propia fila: `reviewed_by/at`, `status`).
+  - **Migración `0011_reg_pipeline.sql`** (⚠️ aplicar; toda aditiva, sin `drop`, NO da aviso destructivo):
+    `platform_admins` (quién valida; nadie se auto-inserta, alta por SQL) + `public.is_platform_admin()`
+    (security definer); `reg_sources` (watchlist global, admin-only); `reg_events` (eventos **publicados**
+    por el pipeline; **todo autenticado los lee**, solo admin escribe); `reg_candidates` (cola de
+    borradores, admin-only) con `status` draft/approved/rejected/superseded + `provenance` jsonb; RPCs
+    **`approve_reg_candidate(cand, event_id)`** (atómico: inserta en `reg_events` + marca aprobado) y
+    **`reject_reg_candidate(cand, note)`**, ambos con guard `is_platform_admin`. Añadida al setup.sql.
+    **Seed manual:** el fundador debe insertarse como validador → `insert into public.platform_admins
+    (user_id) select id from auth.users where email = '<su-email>';`
+  - **Read-path:** `regulatory-watch.ts` gana `mergeCatalog(published, curated)` (código SIEMPRE gana ante
+    choque de id) y `upcomingDeadlines(now, events?)`. Getters `getRegulatoryEvents()` (base curada +
+    `reg_events`), `getRegCandidates()`, `getIsPlatformAdmin()` (mock + supabase, con **fallback seguro**:
+    si la tabla aún no existe, radar cae a la base curada y la bandeja no aparece — la app no se rompe
+    aunque la migración no esté aplicada). Fachada + tipos `RegCandidate` en `mock-data.ts` (+2 de ejemplo).
+  - **UI del Validador:** ruta `/dashboard/vigilancia/candidatos` (bandeja, gated a `is_platform_admin`;
+    en demo se enseña con `SAMPLE_REG_CANDIDATES`). Cada candidato muestra impacto/acción/artículos +
+    caja de **procedencia** (agente, modelo/"sin LLM", confianza %, fuente, cita) y controles
+    **Publicar** (id de evento editable) / **Descartar** (con nota). Acciones `reg-pipeline-actions.ts`
+    con toasts `cand-*`. Enlace "Bandeja de validación →" en el header del radar solo para validadores.
+  - Build/lint verdes; **demo verificado con capturas** (radar intacto tras el merge + bandeja con los 2
+    candidatos y controles). **Pendiente:** el fundador aplica la 0011 y se añade como admin → entonces
+    verifico e2e por curl (RLS niega a no-admin, RPCs de aprobar/rechazar, aparición en el radar).
+  - **Fase B (siguiente):** pgvector + embeddings + el Analista con Claude API. La dimensión del vector
+    depende del proveedor (OpenAI 1536 / Voyage 1024) → **esa decisión de vendor/llave se toma al entrar
+    en B**, no antes. Anthropic NO da embeddings; hará falta OpenAI o Voyage (coste → decisión del fundador).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-> **▶ RETOMAR AQUÍ (2026-07-17, tras compact):** MVP funcional completo y verificado e2e —
-> inventario, riesgo (con evidencia), gap, plan, policy packs, dossier PDF, informe ejecutivo,
-> vigilancia regulatoria v1+v2 (radar + "marcar como revisado" auditado), equipo/roles, registro
-> de actividad. Todo pusheado a `claude/startup-project-setup-612pzs` (árbol limpio). Migraciones
-> aplicadas por el fundador hasta la **0010**. **El fundador va a elegir entre las alternativas que
-> propuse:** (a) **Deploy a Vercel** — está listo; yo preparo repo (verificar next.config/.gitignore/
-> sin secretos + documentar `NEXT_PUBLIC_SUPABASE_URL/ANON_KEY`) y guío los clics en Vercel + añadir
-> la Redirect URL en Supabase Auth. (b) **Automatización del foso** (RAG sobre la ley + agentes
-> Vigía→Analista→Actualizador→Validador; pgvector en Supabase) — el paso más ambicioso de la Capa 7.
-> (c) **Pulido**: forgot-password, captcha/rate-limit en waitlist. Esperar la señal del fundador.
+> **▶ RETOMAR AQUÍ (2026-07-17):** El fundador eligió **automatizar el foso**. **Fase A (la espina del
+> pipeline) HECHA y verificada en demo** — ver bitácora §10 (migración `0011_reg_pipeline.sql`, tablas
+> `platform_admins`/`reg_sources`/`reg_events`/`reg_candidates`, RPCs approve/reject, bandeja del
+> Validador en `/dashboard/vigilancia/candidatos`, read-path fusionado con fallback seguro). **BLOQUEO
+> ACTUAL:** el fundador debe **(1)** aplicar la migración `0011` en el SQL Editor y **(2)** insertarse
+> como validador (`insert into public.platform_admins (user_id) select id from auth.users where email =
+> '<su-email>';`). En cuanto lo haga → **verifico e2e por curl** (RLS niega a no-admin, aprobar publica
+> al radar, todo). **Fase B (siguiente incremento):** pgvector + embeddings + el Analista con Claude API;
+> requiere **decidir proveedor de embeddings** (OpenAI 1536 / Voyage 1024 — Anthropic no da embeddings)
+> y una **llave/API budget** (decisión del fundador). Pendientes de otras alternativas si se retoman:
+> (a) Deploy a Vercel — repo listo; (c) Pulido (forgot-password, captcha/rate-limit en waitlist).
 
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅
@@ -499,7 +535,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **Capa 5 Monitoreo continuo en producción** ❌ (drift, incidentes).
 - **Capa 6 Supervisión humana / roles** 🟡 (roles owner/admin/member + **UI de equipo: invitar,
   cambiar rol, quitar, invitaciones + claim** ✅; faltan flujos de aprobación y auditoría de membership).
-- **Capa 7 Vigilancia regulatoria multi-marco** 🟡 (el **foso** más fuerte; **radar v1 ✅** + **acuse "marcar como revisado" auditado ✅**: catálogo curado EU AI Act + motor de relevancia + UI `/dashboard/vigilancia`; falta multi-marco y la **automatización de ingesta** — los 4 agentes + RAG/pgvector).
+- **Capa 7 Vigilancia regulatoria multi-marco** 🟡 (el **foso** más fuerte; **radar v1 ✅** + **acuse auditado ✅** + **automatización Fase A ✅** — la espina del pipeline con humano-en-el-bucle: `platform_admins` + `reg_sources`/`reg_events`/`reg_candidates` + RPCs approve/reject + bandeja del Validador; falta multi-marco y **Fase B**: pgvector + embeddings + el Analista LLM que llena la cola de candidatos).
 - **Capa 8 Riesgo de terceros/proveedores** ❌.
 - **Capa 9 Gobernanza de agentes de IA** ❌ (frontera; casi nadie la cubre).
 - **Capa 10 Reportes/colaboración** ✅ (dashboard + dossier PDF por sistema + **informe ejecutivo de
@@ -509,7 +545,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 1. **Cuña (MVP)** = Inventario + gap (Capas 0-1) → **YA lo tenemos**.
 2. **Papeleo** = documentación + evidencia + audit-trail (Capa 3) → **generador de documentación (dossier) ✅ hecho**.
 3. **Pegajoso** = monitoreo + pruebas de sesgo/explicabilidad (Capas 4-5) → integrar Evidently/Fairlearn.
-4. **Foso** = vigilancia regulatoria multi-marco (Capa 7) → **radar v1 ✅** (curado); falta automatización de ingesta.
+4. **Foso** = vigilancia regulatoria multi-marco (Capa 7) → **radar v1 ✅** (curado) + **pipeline Fase A ✅** (cola de candidatos + Validador humano); falta **Fase B** (embeddings/RAG + Analista LLM que llena la cola).
 5. **Frontera** = gobernanza de agentes (Capa 9).
 
 ### 13.3 Limitaciones → ventajas (filosofía a mantener)

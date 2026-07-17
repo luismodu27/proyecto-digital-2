@@ -265,11 +265,26 @@ export function sortByDate(
 }
 
 /** Próximos plazos (kind = deadline y fecha futura), del más cercano al más lejano. */
-export function upcomingDeadlines(now: Date): RegulatoryEvent[] {
+export function upcomingDeadlines(
+  now: Date,
+  events: RegulatoryEvent[] = REGULATORY_EVENTS,
+): RegulatoryEvent[] {
   return sortByDate(
-    REGULATORY_EVENTS.filter(
-      (e) => e.kind === "deadline" && isUpcoming(e, now),
-    ),
+    events.filter((e) => e.kind === "deadline" && isUpcoming(e, now)),
     "asc",
   );
+}
+
+/**
+ * Fusiona el catálogo curado (línea base de confianza) con los eventos que el
+ * pipeline haya publicado. El código SIEMPRE gana ante un choque de `id`: un
+ * evento publicado por el pipeline solo se añade si su id no existe ya curado.
+ */
+export function mergeCatalog(
+  published: RegulatoryEvent[],
+  curated: RegulatoryEvent[] = REGULATORY_EVENTS,
+): RegulatoryEvent[] {
+  const seen = new Set(curated.map((e) => e.id));
+  const extra = published.filter((e) => !seen.has(e.id));
+  return [...curated, ...extra];
 }

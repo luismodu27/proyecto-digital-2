@@ -400,6 +400,120 @@ export const SAMPLE_REG_ACKS: Record<string, RegAck> = {
   },
 };
 
+/* -------------------------------------------------------------------------- */
+/* Pipeline del "foso automatizado" — candidatos a la espera de validación     */
+/* -------------------------------------------------------------------------- */
+
+export type RegCandidateStatus = "draft" | "approved" | "rejected" | "superseded";
+
+export const REG_CANDIDATE_STATUS_LABEL: Record<RegCandidateStatus, string> = {
+  draft: "Borrador",
+  approved: "Publicado",
+  rejected: "Descartado",
+  superseded: "Reemplazado",
+};
+
+/** Procedencia del borrador: qué agente lo generó y con qué señal. */
+export type RegCandidateProvenance = {
+  agent?: string; // p. ej. "Analista"
+  model?: string | null; // modelo LLM usado (null si aún determinista)
+  confidence?: number | null; // 0..1
+  excerpt?: string | null; // fragmento de la fuente que lo motivó
+  detected_at?: string | null; // ISO
+};
+
+/** Borrador de evento regulatorio propuesto por el pipeline. */
+export type RegCandidate = {
+  id: string;
+  proposedEventId: string | null;
+  date: string | null; // ISO YYYY-MM-DD
+  kind: string | null;
+  framework: string;
+  title: string;
+  summary: string | null;
+  impact: string | null;
+  action: string | null;
+  articles: string[];
+  source: { label: string; url: string } | null;
+  scope: { riskLevels?: string[]; all?: boolean };
+  status: RegCandidateStatus;
+  sourceLabel: string | null; // etiqueta de la fuente vigilada (reg_sources)
+  provenance: RegCandidateProvenance;
+  createdAt: string; // ISO
+  reviewedAt: string | null;
+  reviewNote: string | null;
+};
+
+/** Candidatos de ejemplo (modo demo) para mostrar la bandeja del Validador. */
+export const SAMPLE_REG_CANDIDATES: RegCandidate[] = [
+  {
+    id: "cand-demo-1",
+    proposedEventId: "eu-ai-office-hiring-guidelines",
+    date: "2026-09-15",
+    kind: "guidance",
+    framework: "eu-ai-act",
+    title:
+      "La AI Office publica directrices sobre IA en selección de personal",
+    summary:
+      "Borrador detectado: la Oficina Europea de IA habría publicado directrices interpretativas sobre el uso de sistemas de IA de alto riesgo en contratación (Anexo III, empleo), con criterios de supervisión humana e información a los candidatos.",
+    impact:
+      "Afinaría cómo un deployer de RRHH cumple el Art. 26 en cribado de CVs y entrevistas: expectativas concretas de supervisión humana y transparencia hacia el candidato.",
+    action:
+      "Revisar el policy pack de RRHH contra las nuevas directrices y ajustar la evidencia de supervisión humana.",
+    articles: ["Art. 26", "Anexo III"],
+    source: {
+      label: "European AI Office — guidelines (fuente a verificar)",
+      url: "https://digital-strategy.ec.europa.eu/en/policies/ai-office",
+    },
+    scope: { riskLevels: ["high"] },
+    status: "draft",
+    sourceLabel: "AI Office — biblioteca",
+    provenance: {
+      agent: "Analista",
+      model: null,
+      confidence: 0.62,
+      excerpt:
+        "…guidelines on the use of high-risk AI systems in recruitment and worker management…",
+      detected_at: "2026-07-16T08:00:00Z",
+    },
+    createdAt: "2026-07-16T08:05:00Z",
+    reviewedAt: null,
+    reviewNote: null,
+  },
+  {
+    id: "cand-demo-2",
+    proposedEventId: null,
+    date: "2026-10-01",
+    kind: "standard",
+    framework: "eu-ai-act",
+    title: "CEN-CENELEC avanza la norma armonizada de gestión de riesgos de IA",
+    summary:
+      "Borrador detectado: publicación de un estándar armonizado (presunción de conformidad) sobre gestión de riesgos de sistemas de IA de alto riesgo.",
+    impact:
+      "Podría dar una vía de presunción de conformidad; útil para exigir a proveedores evidencia alineada con la norma.",
+    action:
+      "Evaluar si el estándar aplica a los sistemas de alto riesgo del inventario y pedir a proveedores su alineación.",
+    articles: ["Art. 40"],
+    source: {
+      label: "CEN-CENELEC JTC 21 (fuente a verificar)",
+      url: "https://www.cencenelec.eu/",
+    },
+    scope: { riskLevels: ["high"] },
+    status: "draft",
+    sourceLabel: "CEN-CENELEC JTC 21",
+    provenance: {
+      agent: "Vigía",
+      model: null,
+      confidence: 0.48,
+      excerpt: "…harmonised standard on AI risk management…",
+      detected_at: "2026-07-15T07:30:00Z",
+    },
+    createdAt: "2026-07-15T07:35:00Z",
+    reviewedAt: null,
+    reviewNote: null,
+  },
+];
+
 export const RISK_ORDER: RiskLevel[] = [
   "unacceptable",
   "high",
