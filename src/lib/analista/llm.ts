@@ -95,7 +95,7 @@ const PROPOSE_FN = {
         summary: { type: "string", description: "Qué es (español, ≤ 60 palabras)." },
         impact: { type: "string", description: "Qué significa para un DEPLOYER mid-market de RRHH (español)." },
         action: { type: "string", description: "Acción concreta (español)." },
-        articles: { type: "array", items: { type: "string" }, description: "Artículos citados (p. ej. 'Art. 26')." },
+        articles: { type: "array", items: { type: "string" }, description: "Referencias LIMPIAS de artículo (p. ej. 'Art. 26.11', 'Anexo III.4'). SIN corchetes, números de lista ni títulos." },
         scope_all: { type: "boolean", description: "true si afecta a toda la organización." },
         scope_risk_levels: { type: "array", items: { type: "string", enum: [...RISK_LEVELS] }, description: "Niveles de riesgo afectados." },
         proposed_event_id: { type: "string", description: "Id sugerido (kebab-case) o vacío." },
@@ -143,6 +143,8 @@ function systemPrompt(): string {
     "- PROHIBIDO: certifica, certificado, aprobado, apto, cumple/compliant, garantiza, sello de conformidad, marcado CE, validado/auditado por Attesta, libre de riesgo, asesoría legal.",
     "- Usa: orientativo, preparación para auditoría, obligaciones aplicables (orientativo). Los verbos son de la organización.",
     "- summary/impact/action en ESPAÑOL, para un responsable de RRHH/Legal mid-market.",
+    "- El cliente es el DEPLOYER (usa la IA). NUNCA lo llames 'proveedor/provider' ni digas que 'fabrica/desarrolla/diseña' el sistema; las obligaciones del proveedor se reencuadran como 'exige/conserva evidencia del proveedor'.",
+    "- En `articles` pon SOLO la referencia (p. ej. 'Art. 26.11'), sin corchetes, números ni títulos.",
     "",
     "Responde ÚNICAMENTE llamando a la función propose_reg_event.",
   ].join("\n");
