@@ -4,6 +4,14 @@ import { RiskBadge } from "@/components/ui/RiskBadge";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
 import { getAiSystems } from "@/lib/data";
 import { avgCompliance, riskCounts } from "@/lib/mock-data";
+import {
+  upcomingDeadlines,
+  daysUntil,
+  affectedSystems,
+} from "@/lib/regulatory-watch";
+
+// El widget de "próximo hito" depende de la fecha actual.
+export const dynamic = "force-dynamic";
 
 export default async function DashboardOverview() {
   const systems = await getAiSystems();
@@ -13,6 +21,13 @@ export default async function DashboardOverview() {
   const recent = [...systems]
     .sort((a, b) => a.compliance - b.compliance)
     .slice(0, 4);
+
+  const now = new Date();
+  const nextDeadline = upcomingDeadlines(now)[0];
+  const nextDays = nextDeadline ? daysUntil(nextDeadline.date, now) : 0;
+  const nextAffected = nextDeadline
+    ? affectedSystems(nextDeadline, systems).length
+    : 0;
 
   return (
     <>
@@ -32,6 +47,50 @@ export default async function DashboardOverview() {
         <StatCard label="Preparación media" value={`${avg}%`} hint="% listo para auditoría" accent={avg >= 60 ? "brand" : "warn"} />
         <StatCard label="Brechas abiertas" value={4} hint="ver gap assessment" accent="warn" />
       </section>
+
+      {nextDeadline && (
+        <Link
+          href="/dashboard/vigilancia"
+          className="card-lift mt-6 flex items-center justify-between gap-4 rounded-2xl border border-line bg-paper-raised px-5 py-4"
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand-strong">
+              <svg viewBox="0 0 24 24" className="size-4.5" fill="none" aria-hidden>
+                <path
+                  d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs uppercase tracking-wide text-muted">
+                Próximo hito regulatorio
+              </p>
+              <p className="truncate text-sm font-medium text-ink">
+                {nextDeadline.title}
+              </p>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-4">
+            <div className="text-right">
+              <p className="text-sm font-semibold tabular-nums text-ink">
+                {nextDays === 0
+                  ? "hoy"
+                  : `en ${nextDays} ${nextDays === 1 ? "día" : "días"}`}
+              </p>
+              <p className="text-xs text-muted">
+                {nextAffected} {nextAffected === 1 ? "sistema" : "sistemas"}
+              </p>
+            </div>
+            <span className="text-brand transition-transform group-hover:translate-x-0.5">
+              →
+            </span>
+          </div>
+        </Link>
+      )}
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">

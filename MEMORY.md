@@ -300,6 +300,30 @@ diseño, nombre, features grandes); autónomo en lo demás.
   - **Razón del enfoque determinista** (no LLM): en un producto de compliance el texto legal
     alucinado es un pasivo. El dossier debe ser 100% trazable a los datos del cliente y a normas
     verificadas. Redacción asistida por LLM se puede añadir como capa opcional en el futuro.
+- **2026-07-17** · **Vigilancia regulatoria — radar v1 (Capa 7, el foso).** Nueva ruta
+  `/dashboard/vigilancia`: catálogo CURADO de eventos del EU AI Act (`src/lib/regulatory-watch.ts`)
+  + **motor de relevancia determinista** que mapea cada norma a los sistemas afectados del inventario
+  ("afecta a N de tus sistemas", por nivel de riesgo). UI: hero de próximo plazo con cuenta atrás,
+  grid de plazos futuros, cronología expandible (qué es / qué significa para ti / qué hacer /
+  artículos / fuente oficial / sistemas afectados) con `<details>` nativo (sin JS cliente). Widget
+  "próximo hito regulatorio" en el resumen + entrada "Vigilancia" en el sidebar. `dynamic = "force-dynamic"`
+  para que el countdown sea fresco. Funciona en demo y conectado. Build/lint verdes; verificado con capturas.
+  Mismo principio que el dossier: **contenido curado y trazable, cero LLM en la ruta legal**; la
+  automatización futura (agentes Vigía→Analista→Actualizador→Validador con RAG/pgvector) alimentará
+  ESTE modelo de datos.
+  - **Verificado por el experto de compliance** contra fuentes oficiales. El calendario escalonado,
+    el encuadre del Art. 5.1.f (emociones en vídeo-entrevistas) y la atribución Art. 26 (deployer)
+    vs Arts. 9–15 (proveedor) ya eran correctos. Correcciones: evento del Omnibus `Art. 111` → **`Art. 113`**
+    (el aplazamiento modifica las fechas de aplicación del 113; el 111 son transitorias) y `source` →
+    nota oficial del **Consejo 29 jun 2026** (confirma 2 dic 2027 / 2 ago 2028); añadido `Cap. VII (gobernanza)`
+    al evento de 2 ago 2025.
+  - **Pendiente de decidir (checkpoint del fundador):** el Digital Omnibus además (a) introdujo una
+    **nueva práctica prohibida del Art. 5** (contenido íntimo no consentido / CSAM, ~dic 2026) y
+    (b) pudo **reducir el periodo de gracia de transparencia del Art. 50**. No se añadieron al catálogo
+    (certeza media, dependen del texto final en el DOUE). Decidir si incluir (a) como evento y verificar (b).
+    Nota: 2 dic 2027 es fecha tope de un mecanismo condicional ("stop-the-clock" por normas armonizadas).
+- **Pendiente v2 de vigilancia:** persistir "marcar como revisado" (tabla + audit-trail), multi-marco
+  (ISO 42001, NIST, leyes estatales EE.UU.), y la automatización de ingesta (los 4 agentes + RAG/pgvector).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -316,6 +340,9 @@ diseño, nombre, features grandes); autónomo en lo demás.
   (`saveRiskAssessment` ya existe), y edición de brechas.
 - ~~Generador de documentación técnica (Capa 3)~~ → hecho ✅ (dossier de gobernanza por sistema,
   `/dashboard/inventario/[id]/dossier`, imprimible a PDF, determinista).
+- ~~Vigilancia regulatoria — radar v1 (Capa 7)~~ → hecho ✅ (`/dashboard/vigilancia`, catálogo curado
+  EU AI Act + motor de relevancia, verificado por el experto). Pendiente v2: acks persistidos,
+  multi-marco y automatización de ingesta (4 agentes + RAG/pgvector).
 - ~~Conectar formulario de waitlist~~ → hecho ✅ (tabla `waitlist`, RLS insert-only,
   verificado: insert 201, select bloqueado). Consultar leads desde el panel Supabase.
   Pendiente opcional: captcha/rate-limit contra spam.
@@ -359,7 +386,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **Capa 4 Pruebas técnicas del modelo** ❌ (sesgo/explicabilidad/robustez — INTEGRAR, no construir).
 - **Capa 5 Monitoreo continuo en producción** ❌ (drift, incidentes).
 - **Capa 6 Supervisión humana / roles** 🟡 (roles owner/admin/member existen; faltan flujos de aprobación).
-- **Capa 7 Vigilancia regulatoria multi-marco** ❌ (el **foso** más fuerte; el módulo estrella de automatización).
+- **Capa 7 Vigilancia regulatoria multi-marco** 🟡 (el **foso** más fuerte; **radar v1 ✅**: catálogo curado EU AI Act + motor de relevancia + UI `/dashboard/vigilancia`; falta persistir acks, multi-marco y la **automatización de ingesta** — los 4 agentes + RAG/pgvector).
 - **Capa 8 Riesgo de terceros/proveedores** ❌.
 - **Capa 9 Gobernanza de agentes de IA** ❌ (frontera; casi nadie la cubre).
 - **Capa 10 Reportes/colaboración** 🟡 (dashboard + PDF; faltan reportes a dirección/auditor).
@@ -368,7 +395,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 1. **Cuña (MVP)** = Inventario + gap (Capas 0-1) → **YA lo tenemos**.
 2. **Papeleo** = documentación + evidencia + audit-trail (Capa 3) → **generador de documentación (dossier) ✅ hecho**.
 3. **Pegajoso** = monitoreo + pruebas de sesgo/explicabilidad (Capas 4-5) → integrar Evidently/Fairlearn.
-4. **Foso** = vigilancia regulatoria multi-marco (Capa 7).
+4. **Foso** = vigilancia regulatoria multi-marco (Capa 7) → **radar v1 ✅** (curado); falta automatización de ingesta.
 5. **Frontera** = gobernanza de agentes (Capa 9).
 
 ### 13.3 Limitaciones → ventajas (filosofía a mantener)
