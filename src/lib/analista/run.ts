@@ -4,7 +4,7 @@
  * Recorre las señales del Vigía sin analizar (candidatos `draft`, agente
  * 'Vigía', sin `kind`), y para cada una: obtiene el contenido de la fuente →
  * embed de la consulta → recupera fragmentos de norma (`match_reg_chunks`) →
- * Claude propone un borrador grounded → lo escribe con `enrich_reg_candidate_ai`.
+ * el LLM propone un borrador grounded → lo escribe con `enrich_reg_candidate_ai`.
  * Mantiene el candidato en `draft`: NUNCA publica (eso es del humano).
  *
  * Fallback seguro: sin llaves (B.0) marca cada señal como "skipped" sin escribir
@@ -15,7 +15,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { normalizeHtml } from "@/lib/reg-watch/vigia";
 import { ANALISTA_MODEL, EMBED_MODEL, isAnalistaConfigured } from "./config";
 import { embedOne } from "./voyage";
-import { draft, type RetrievedChunk } from "./claude";
+import { draft, type RetrievedChunk } from "./llm";
 
 export type AnalistaOutcome = {
   id: string;
@@ -85,7 +85,7 @@ export async function runAnalista(
         id: s.id,
         label,
         status: "skipped",
-        detail: "IA no configurada (falta VOYAGE_API_KEY / ANTHROPIC_API_KEY)",
+        detail: "IA no configurada (falta VOYAGE_API_KEY / ANALISTA_API_KEY)",
       });
       continue;
     }
