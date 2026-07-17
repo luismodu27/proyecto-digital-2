@@ -409,6 +409,19 @@ diseño, nombre, features grandes); autónomo en lo demás.
   Transparencia (Art. 50) · en 16 días"** → el foso (vigilancia) asoma ya en el mockup del hero.
   (b) `Pricing`: el tier "Preparación" ahora lista **Vigilancia regulatoria** y **Dossier e informe
   ejecutivo (PDF)**. ProblemStats/FAQ ya eran correctos. Build/lint verdes; verificado con capturas.
+- **2026-07-17** · **Vigilancia v2 — "marcar como revisado" (acuse de vigilancia).** owner/admin
+  pueden marcar cada evento del radar con un estado interno (**Revisado / Plan en marcha / No aplica**),
+  dejando evidencia de vigilancia activa. Y como se AUDITA, cada marca aparece en el registro de actividad.
+  - **Migración `0010_regulatory_acks.sql`** (⚠️ aplicar; NO da aviso destructivo, es toda aditiva):
+    tabla `regulatory_acks` (org, event_id text del catálogo, status, note, unique(org,event_id)) + RLS
+    (miembros leen, owner/admin escriben) + **trigger de auditoría** `write_audit`. Añadida al setup.sql.
+  - Data: `getRegulatoryAcks()` → `Record<eventId, RegAck>` (mock + supabase). Acción `setEventStatus`
+    (`reg-actions.ts`): upsert o borra (status vacío), guarda owner/admin, sin redirect (revalida en sitio).
+  - UI: pills de estado (Revisado=good, Plan=info, No aplica=neutral) en hero, tarjetas y cronología;
+    en el detalle, control `EventStatusControl` (owner/admin) o badge de solo lectura. `audit.ts` mapea
+    `regulatory_acks` → "revisión regulatoria «título del evento»" para que se lea bien en Actividad.
+  - Demo: `SAMPLE_REG_ACKS` (Omnibus=Revisado, GPAI=No aplica). Build/lint verdes; demo verificado.
+    **Pendiente:** aplicar 0010 y verificar por curl (marcar → aparece → sale en el audit-trail).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -473,7 +486,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **Capa 5 Monitoreo continuo en producción** ❌ (drift, incidentes).
 - **Capa 6 Supervisión humana / roles** 🟡 (roles owner/admin/member + **UI de equipo: invitar,
   cambiar rol, quitar, invitaciones + claim** ✅; faltan flujos de aprobación y auditoría de membership).
-- **Capa 7 Vigilancia regulatoria multi-marco** 🟡 (el **foso** más fuerte; **radar v1 ✅**: catálogo curado EU AI Act + motor de relevancia + UI `/dashboard/vigilancia`; falta persistir acks, multi-marco y la **automatización de ingesta** — los 4 agentes + RAG/pgvector).
+- **Capa 7 Vigilancia regulatoria multi-marco** 🟡 (el **foso** más fuerte; **radar v1 ✅** + **acuse "marcar como revisado" auditado ✅**: catálogo curado EU AI Act + motor de relevancia + UI `/dashboard/vigilancia`; falta multi-marco y la **automatización de ingesta** — los 4 agentes + RAG/pgvector).
 - **Capa 8 Riesgo de terceros/proveedores** ❌.
 - **Capa 9 Gobernanza de agentes de IA** ❌ (frontera; casi nadie la cubre).
 - **Capa 10 Reportes/colaboración** ✅ (dashboard + dossier PDF por sistema + **informe ejecutivo de

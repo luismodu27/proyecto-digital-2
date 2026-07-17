@@ -368,6 +368,38 @@ export const SAMPLE_AUDIT: AuditEntry[] = [
   },
 ];
 
+/* -------------------------------------------------------------------------- */
+/* Acuse de vigilancia regulatoria ("marcar como revisado")                   */
+/* -------------------------------------------------------------------------- */
+
+export type RegAckStatus = "reviewed" | "planned" | "not_applicable";
+
+export const REG_ACK_LABEL: Record<RegAckStatus, string> = {
+  reviewed: "Revisado",
+  planned: "Plan en marcha",
+  not_applicable: "No aplica",
+};
+
+export type RegAck = {
+  status: RegAckStatus;
+  note: string | null;
+  at: string; // ISO
+};
+
+/** Acuses de ejemplo (modo demo), indexados por id de evento regulatorio. */
+export const SAMPLE_REG_ACKS: Record<string, RegAck> = {
+  "eu-omnibus-highrisk-delay": {
+    status: "reviewed",
+    note: "Revisado por Legal; plan de preparación de alto riesgo en marcha.",
+    at: "2026-07-15T10:00:00Z",
+  },
+  "eu-gpai-governance": {
+    status: "not_applicable",
+    note: null,
+    at: "2026-07-12T09:00:00Z",
+  },
+};
+
 export const RISK_ORDER: RiskLevel[] = [
   "unacceptable",
   "high",

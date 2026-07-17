@@ -11,6 +11,8 @@ import type {
   MemberRole,
   OrgMember,
   PendingInvitation,
+  RegAck,
+  RegAckStatus,
   RiskLevel,
 } from "@/lib/mock-data";
 
@@ -246,6 +248,26 @@ export async function getPendingInvitations(): Promise<PendingInvitation[]> {
     role: r.role as MemberRole,
     createdAt: String(r.created_at),
   }));
+}
+
+/** Acuses de vigilancia regulatoria de la org (id de evento -> estado). */
+export async function getRegulatoryAcks(): Promise<Record<string, RegAck>> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return {};
+  const { data } = await supabase
+    .from("regulatory_acks")
+    .select("event_id, status, note, acknowledged_at")
+    .eq("organization_id", org);
+  const map: Record<string, RegAck> = {};
+  for (const r of data ?? []) {
+    map[r.event_id] = {
+      status: r.status as RegAckStatus,
+      note: r.note ?? null,
+      at: String(r.acknowledged_at),
+    };
+  }
+  return map;
 }
 
 /** Registro de actividad (audit-trail) de la organización activa. */

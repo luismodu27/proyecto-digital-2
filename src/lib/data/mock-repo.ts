@@ -5,6 +5,7 @@ import {
   SAMPLE_AUDIT,
   SAMPLE_INVITATIONS,
   SAMPLE_MEMBERS,
+  SAMPLE_REG_ACKS,
   type AiSystem,
   type AssessmentRecord,
   type AuditEntry,
@@ -13,6 +14,7 @@ import {
   type MemberRole,
   type OrgMember,
   type PendingInvitation,
+  type RegAck,
 } from "@/lib/mock-data";
 
 /** Repositorio de datos de ejemplo (modo demo). */
@@ -61,6 +63,10 @@ export async function getCurrentMemberRole(): Promise<MemberRole | null> {
 
 export async function getAuditLog(): Promise<AuditEntry[]> {
   return SAMPLE_AUDIT;
+}
+
+export async function getRegulatoryAcks(): Promise<Record<string, RegAck>> {
+  return SAMPLE_REG_ACKS;
 }
 
 /**

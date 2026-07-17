@@ -2,7 +2,18 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
 import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
-import { getAiSystems } from "@/lib/data";
+import { EventStatusControl } from "@/components/dashboard/EventStatusControl";
+import {
+  getAiSystems,
+  getRegulatoryAcks,
+  getCurrentMemberRole,
+  isSupabaseConfigured,
+} from "@/lib/data";
+import {
+  REG_ACK_LABEL,
+  type RegAck,
+  type RegAckStatus,
+} from "@/lib/mock-data";
 import {
   REGULATORY_EVENTS,
   REG_KIND_LABEL,
@@ -35,6 +46,16 @@ const KIND_TONE: Record<RegKind, keyof typeof TONE_PILL> = {
   amendment: "gold",
   enforcement: "danger",
 };
+
+const ACK_TONE: Record<RegAckStatus, keyof typeof TONE_PILL> = {
+  reviewed: "good",
+  planned: "info",
+  not_applicable: "neutral",
+};
+
+function AckPill({ status }: { status: RegAckStatus }) {
+  return <Pill tone={ACK_TONE[status]}>{REG_ACK_LABEL[status]}</Pill>;
+}
 
 /** Tono del countdown según cercanía. */
 function countdownTone(days: number): keyof typeof TONE_PILL {
@@ -88,8 +109,14 @@ function Pill({
 }
 
 export default async function VigilanciaPage() {
-  const systems = await getAiSystems();
+  const [systems, acks, role] = await Promise.all([
+    getAiSystems(),
+    getRegulatoryAcks(),
+    getCurrentMemberRole(),
+  ]);
   const now = new Date();
+  const canManage =
+    isSupabaseConfigured && (role === "owner" || role === "admin");
 
   const withDays = REGULATORY_EVENTS.map((e) => ({
     ev: e,
@@ -108,6 +135,7 @@ export default async function VigilanciaPage() {
   const hero = deadlines[0];
   const heroAffected = hero ? affectedSystems(hero, systems) : [];
   const heroDays = hero ? daysUntil(hero.date, now) : 0;
+  const heroAck = hero ? acks[hero.id] : undefined;
   const otherDeadlines = deadlines.slice(1);
 
   return (
@@ -127,6 +155,7 @@ export default async function VigilanciaPage() {
                 <span className="text-xs text-muted">
                   {FRAMEWORK_LABEL[hero.framework]}
                 </span>
+                {heroAck && <AckPill status={heroAck.status} />}
               </div>
               <h2 className="mt-2 font-display text-xl font-semibold text-ink">
                 {hero.title}
@@ -174,6 +203,7 @@ export default async function VigilanciaPage() {
             {otherDeadlines.map((e) => {
               const d = daysUntil(e.date, now);
               const n = affectedSystems(e, systems).length;
+              const ack = acks[e.id];
               return (
                 <div
                   key={e.id}
@@ -186,9 +216,12 @@ export default async function VigilanciaPage() {
                     </span>
                   </div>
                   <p className="mt-2 text-sm font-medium text-ink">{e.title}</p>
-                  <p className="mt-1 text-xs text-muted">
-                    {n} {n === 1 ? "sistema afectado" : "sistemas afectados"}
-                  </p>
+                  <div className="mt-1 flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted">
+                      {n} {n === 1 ? "sistema afectado" : "sistemas afectados"}
+                    </p>
+                    {ack && <AckPill status={ack.status} />}
+                  </div>
                 </div>
               );
             })}
@@ -203,7 +236,15 @@ export default async function VigilanciaPage() {
         </h3>
         <div className="space-y-3">
           {feed.map(({ ev, days, affected }) => (
-            <EventRow key={ev.id} ev={ev} days={days} affectedCount={affected.length} affected={affected} />
+            <EventRow
+              key={ev.id}
+              ev={ev}
+              days={days}
+              affectedCount={affected.length}
+              affected={affected}
+              ack={acks[ev.id]}
+              canManage={canManage}
+            />
           ))}
         </div>
       </section>
@@ -218,11 +259,15 @@ function EventRow({
   days,
   affectedCount,
   affected,
+  ack,
+  canManage,
 }: {
   ev: RegulatoryEvent;
   days: number;
   affectedCount: number;
   affected: { id: string; name: string }[];
+  ack?: RegAck;
+  canManage: boolean;
 }) {
   const upcoming = days >= 0;
   return (
@@ -244,6 +289,7 @@ function EventRow({
             ) : (
               <span className="text-[11px] font-medium text-muted">en vigor</span>
             )}
+            {ack && <AckPill status={ack.status} />}
           </div>
           <p className="mt-1.5 font-medium text-ink">{ev.title}</p>
           <p className="mt-0.5 text-xs text-muted">
@@ -305,6 +351,22 @@ function EventRow({
               />
             </svg>
           </a>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line pt-4">
+          <p className="text-[11px] uppercase tracking-wide text-muted">
+            Estado interno
+          </p>
+          {canManage ? (
+            <EventStatusControl eventId={ev.id} status={ack?.status} />
+          ) : ack ? (
+            <AckPill status={ack.status} />
+          ) : (
+            <span className="text-xs text-muted">Sin marcar</span>
+          )}
+          {ack?.note && (
+            <span className="text-xs text-ink-soft">· {ack.note}</span>
+          )}
         </div>
 
         {affected.length > 0 && (

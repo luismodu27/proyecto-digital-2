@@ -23,6 +23,7 @@ export const getOrgMembers = () => repo.getOrgMembers();
 export const getPendingInvitations = () => repo.getPendingInvitations();
 export const getCurrentMemberRole = () => repo.getCurrentMemberRole();
 export const getAuditLog = () => repo.getAuditLog();
+export const getRegulatoryAcks = () => repo.getRegulatoryAcks();
 
 export { isSupabaseConfigured };
 export type {
@@ -33,4 +34,5 @@ export type {
   MemberRole,
   OrgMember,
   PendingInvitation,
+  RegAck,
 } from "@/lib/mock-data";

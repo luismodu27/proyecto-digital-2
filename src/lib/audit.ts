@@ -13,6 +13,9 @@ import {
   type MemberRole,
   type RiskLevel,
 } from "./mock-data";
+import { REGULATORY_EVENTS } from "./regulatory-watch";
+
+const EVENT_TITLE = new Map(REGULATORY_EVENTS.map((e) => [e.id, e.title]));
 
 /** Metadatos por tabla de negocio. */
 export const ENTITY_META: Record<
@@ -23,6 +26,7 @@ export const ENTITY_META: Record<
   risk_assessments: { label: "evaluación", article: "la", tone: "gold" },
   gap_items: { label: "brecha", article: "la", tone: "warn" },
   memberships: { label: "miembro", article: "el", tone: "good" },
+  regulatory_acks: { label: "revisión regulatoria", article: "la", tone: "info" },
 };
 
 export const ACTION_META: Record<
@@ -55,6 +59,7 @@ const FIELD_LABELS: Record<string, Record<string, string>> = {
     remediation_note: "nota",
   },
   memberships: { role: "rol" },
+  regulatory_acks: { status: "estado", note: "nota" },
 };
 
 /** Columnas técnicas que no aportan al usuario. */
@@ -68,6 +73,9 @@ const NOISE = new Set([
   "assessed_at",
   "assessed_by",
   "ai_system_id",
+  "acknowledged_at",
+  "acknowledged_by",
+  "event_id",
 ]);
 
 type Json = Record<string, unknown> | null;
@@ -87,6 +95,11 @@ export function deriveLabel(table: string, data: Json): string {
     case "memberships": {
       const role = data.role as MemberRole | undefined;
       return role ? `rol ${ROLE_LABEL[role]}` : "";
+    }
+    case "regulatory_acks": {
+      const eid = data.event_id as string | undefined;
+      const title = eid ? EVENT_TITLE.get(eid) : undefined;
+      return title ? `«${title}»` : (eid ?? "");
     }
     default:
       return "";
