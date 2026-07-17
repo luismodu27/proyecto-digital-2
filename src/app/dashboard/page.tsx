@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageHeader, StatCard, Meter } from "@/components/dashboard/parts";
+import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
 import { getAiSystems } from "@/lib/data";
@@ -34,6 +35,11 @@ export default async function DashboardOverview() {
       <PageHeader
         title="Resumen de gobernanza"
         subtitle="Estado de preparación de tus sistemas de IA en un vistazo."
+        action={
+          <ButtonLink href="/dashboard/informe" variant="outline">
+            ⬇ Informe ejecutivo
+          </ButtonLink>
+        }
       />
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">

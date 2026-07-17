@@ -385,6 +385,15 @@ diseño, nombre, features grandes); autónomo en lo demás.
     brecha; `list_audit_log` devolvió las 4 entradas (incluida la membership del alta de org) con
     email del actor, acción y diff correctos (update de ai_systems → `name, risk_level`). Fue a la
     primera. Realiza de forma tangible la tesis "system of record de evidencia".
+- **2026-07-17** · **Informe ejecutivo de organización (Capa 10, capstone).** Nueva ruta
+  `/dashboard/informe`: PDF de una página para dirección/auditor que resume el estado de TODA la org,
+  extendiendo el patrón del dossier del nivel *sistema* al nivel *organización*. Ensamblado
+  determinista: 5 KPIs (sistemas, alto riesgo, preparación media, brechas abiertas, % con respaldo),
+  distribución de riesgo (barras), sistemas prioritarios (alto riesgo <60%), brechas abiertas
+  prioritarias, y próximos plazos regulatorios (reutiliza `upcomingDeadlines`/`affectedSystems`).
+  Reutiliza `riskCounts`/`avgCompliance` + `PrintButton` + `LEGAL_PDF`. Entrada: botón "Informe
+  ejecutivo" en la cabecera del resumen. Funciona en demo y conectado (sin migración). Build/lint
+  verdes; verificado con captura. Es el entregable que el comprador (Legal/RRHH) enseña "hacia arriba".
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -452,8 +461,8 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **Capa 7 Vigilancia regulatoria multi-marco** 🟡 (el **foso** más fuerte; **radar v1 ✅**: catálogo curado EU AI Act + motor de relevancia + UI `/dashboard/vigilancia`; falta persistir acks, multi-marco y la **automatización de ingesta** — los 4 agentes + RAG/pgvector).
 - **Capa 8 Riesgo de terceros/proveedores** ❌.
 - **Capa 9 Gobernanza de agentes de IA** ❌ (frontera; casi nadie la cubre).
-- **Capa 10 Reportes/colaboración** 🟡 (dashboard + PDF + **visor del audit-trail (registro de
-  actividad) ✅**; faltan reportes ejecutivos a dirección/auditor).
+- **Capa 10 Reportes/colaboración** ✅ (dashboard + dossier PDF por sistema + **informe ejecutivo de
+  organización** + **visor del audit-trail**; futuro: colaboración/comentarios, envío programado).
 
 ### 13.2 Roadmap (cuña → plataforma)
 1. **Cuña (MVP)** = Inventario + gap (Capas 0-1) → **YA lo tenemos**.
