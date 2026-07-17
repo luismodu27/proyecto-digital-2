@@ -415,11 +415,16 @@ export const REG_CANDIDATE_STATUS_LABEL: Record<RegCandidateStatus, string> = {
 
 /** Procedencia del borrador: qué agente lo generó y con qué señal. */
 export type RegCandidateProvenance = {
-  agent?: string; // p. ej. "Analista"
-  model?: string | null; // modelo LLM usado (null si aún determinista)
+  agent?: string; // p. ej. "Vigía" | "Analista"
+  model?: string | null; // modelo LLM usado (null si determinista)
+  embed_model?: string | null; // modelo de embeddings (Analista)
   confidence?: number | null; // 0..1
   excerpt?: string | null; // fragmento de la fuente que lo motivó
   detected_at?: string | null; // ISO
+  /** Citas del Analista: qué fragmento de norma respalda cada afirmación. */
+  citations?: { chunk_id: string; doc_ref: string; quote: string }[] | null;
+  /** doc_refs de los fragmentos recuperados por RAG. */
+  retrieved_refs?: string[] | null;
 };
 
 /** Borrador de evento regulatorio propuesto por el pipeline. */

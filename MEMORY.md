@@ -632,6 +632,29 @@ diseño, nombre, features grandes); autónomo en lo demás.
   producción + lint + tsc **verdes**. **Pendiente:** verificación e2e por curl (necesita un platform_admin
   de prueba → 1 línea de SQL del fundador para promoverlo); el usuario de prueba anterior ya se borró.
   Reutiliza primitivas ya verificadas en Fase A (update por RLS + `approve_reg_candidate`).
+- **2026-07-17** · **Fase B del foso — B.0: fundación del Analista (SIN gasto).** Diseño por
+  `product-architect`. El Analista tomará las señales del Vigía (`provenance.agent='Vigía'`, `kind` null,
+  `draft`) y las enriquecerá vía RAG sobre el articulado, dejándolas `draft` para el validador humano
+  (nada se publica solo; texto anclado a citas, nunca inventado).
+  - **Migración `0015_reg_analista.sql`** (⚠️ aplicar SOLO el archivo, aditiva): `create extension vector`,
+    tabla **`reg_knowledge_chunks`** (corpus verbatim + `embedding vector(1024)`, HNSW coseno, RLS admin,
+    unique(framework,doc_ref,chunk_index) para ingesta idempotente), RPC **`match_reg_chunks`** (retrieval
+    top-k por `<=>`, `security definer`) y RPC **`enrich_reg_candidate_ai`** (escribe el borrador enriquecido,
+    guard `is_platform_admin OR service_role`, solo `draft`, fusiona provenance). Añadida a `setup.sql`.
+    Gotcha respetado: `extensions.vector`, `extensions.vector_cosine_ops`, `OPERATOR(extensions.<=>)`.
+  - **App:** `src/lib/analista/{config,voyage,claude,run}.ts` (clientes con **fallback seguro**: sin
+    `VOYAGE_API_KEY`/`ANTHROPIC_API_KEY` no llaman a nada y el pipeline no se rompe) + route
+    `/api/reg-watch/analista` (cron `CRON_SECRET`+service_role o platform_admin, clon del Vigía).
+    `RegCandidateProvenance` gana `citations`/`retrieved_refs`/`embed_model`. `.env.example` documenta las
+    llaves. Defaults: embeddings **voyage-4 (1024)**, drafting **claude-sonnet-5**.
+  - **Verificado:** build de producción + lint + tsc **verdes**; ruta registrada. Sin coste (nada llama a
+    APIs de pago en B.0). **Pendiente:** fundador aplica `0015`; luego verifico por curl (extensión+índice HNSW,
+    `match_reg_chunks` con vector cero → [] sin error, `enrich_reg_candidate_ai` sobre un candidato de prueba,
+    negativos de RLS). Necesita un platform_admin de prueba (1 línea SQL).
+  - **Checkpoints ANTES de B.1/B.2 (donde empieza el gasto):** (1) embeddings **voyage-4** vs voyage-law-2
+    (ambos 1024, no cambia el esquema); (2) drafting **Sonnet 5** ± gate Haiku; (3) corpus = articulado
+    verbatim curado en repo **verificado por el compliance-domain-expert** (Arts. 5,6,14,26,27,50,86 + Anexo III);
+    (4) contenido que analiza el Analista: re-fetch (actual) vs snapshot en `vigia_report`.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
