@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { Toaster } from "@/components/ui/Toast";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
 
@@ -25,6 +27,9 @@ export default async function DashboardLayout({
       <div className="flex-1 md:h-dvh md:overflow-y-auto">
         <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">{children}</div>
       </div>
+      <Suspense>
+        <Toaster />
+      </Suspense>
     </div>
   );
 }

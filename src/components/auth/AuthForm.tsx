@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { SealMark } from "@/components/ui/SealMark";
 import { createClient } from "@/lib/supabase/client";
 
 type Mode = "login" | "signup";
@@ -55,7 +56,8 @@ export function AuthForm() {
 
   return (
     <div className="rounded-2xl border border-line bg-paper-raised p-8">
-      <h1 className="font-display text-2xl font-semibold text-ink">
+      <SealMark size={36} className="text-brand" />
+      <h1 className="mt-4 font-display text-2xl font-semibold text-ink">
         {mode === "login" ? "Inicia sesión" : "Crea tu cuenta"}
       </h1>
       <p className="mt-1 text-sm text-ink-soft">

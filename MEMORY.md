@@ -234,6 +234,14 @@ diseño, nombre, features grandes); autónomo en lo demás.
   ai_systems). Columna "Respaldo" en el inventario (EvidenceBadge). Ataca el riesgo de "casillas
   a favor sin cumplir": un check sin evidencia queda visible como "Declarado", no como aprobado.
   Pendiente: el fundador aplica 0006 en su instancia para activar el guardado con evidencia.
+- **2026-07-17** · **Rediseño UI (3 fases).** (1) Fundación de movimiento: `Reveal`
+  (scroll-reveal), `card-lift`, `float-soft`, todo respetando `prefers-reduced-motion`.
+  Landing rediseñado: hero con mockup (`HeroPreview`), `TrustStrip`, `Pricing`, `FAQ`,
+  favicon propio (`icon.svg`). (2) Dashboard: `RiskDonut`, micro-interacciones, medidores
+  animados, sidebar con hover sutil. (3) Auth split-screen (`AuthShell`) para login/onboarding,
+  sello en el formulario, y **toasts** sutiles (`Toaster`, disparados por `?toast=` tras server
+  actions). Regla de diseño: animaciones **sutiles y suaves, nunca infantiles**.
+  Pendiente opcional: modo oscuro.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación

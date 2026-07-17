@@ -42,7 +42,7 @@ export async function createAiSystem(formData: FormData) {
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
-  redirect("/dashboard/inventario");
+  redirect("/dashboard/inventario?toast=system-created");
 }
 
 /**
@@ -105,7 +105,7 @@ export async function seedSampleData() {
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard/riesgo");
   revalidatePath("/dashboard/gap");
-  redirect("/dashboard/inventario");
+  redirect("/dashboard/inventario?toast=seeded");
 }
 
 /**

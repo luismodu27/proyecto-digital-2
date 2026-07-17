@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Logo } from "@/components/ui/Logo";
+import { AuthShell } from "@/components/auth/AuthShell";
 import { OnboardingForm } from "@/components/auth/OnboardingForm";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
@@ -15,17 +15,8 @@ export default async function OnboardingPage() {
   if (org) redirect("/dashboard");
 
   return (
-    <main className="flex min-h-dvh flex-col bg-paper">
-      <div className="border-b border-line">
-        <div className="container-page flex h-16 items-center">
-          <Logo />
-        </div>
-      </div>
-      <div className="flex flex-1 items-center justify-center px-5 py-12">
-        <div className="w-full max-w-md">
-          <OnboardingForm />
-        </div>
-      </div>
-    </main>
+    <AuthShell>
+      <OnboardingForm />
+    </AuthShell>
   );
 }
