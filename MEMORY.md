@@ -655,6 +655,24 @@ diseño, nombre, features grandes); autónomo en lo demás.
     (ambos 1024, no cambia el esquema); (2) drafting **Sonnet 5** ± gate Haiku; (3) corpus = articulado
     verbatim curado en repo **verificado por el compliance-domain-expert** (Arts. 5,6,14,26,27,50,86 + Anexo III);
     (4) contenido que analiza el Analista: re-fetch (actual) vs snapshot en `vigia_report`.
+- **2026-07-17** · **Fase B.1 (corpus) + B.2 (el Analista) — código completo.**
+  - **B.1 corpus:** `compliance-domain-expert` produjo el texto **VERBATIM** del AI Act (28 apartados: Arts.
+    5.1.f, 6.2/6.3, Anexo III.4, 14.1-5, 26.1/2/3/5/6/7/11, 27.1-5, 50.1/2/4, 86.1-3), verificado contra
+    artificialintelligenceact.eu (espejo del DOUE). En `corpus/eu-ai-act.data.json` (JSON tipado) + notas de
+    encuadre deployer-vs-provider (`EU_AI_ACT_FRAMING_NOTES`) para el prompt. Infra de ingesta `ingest.ts`
+    (chunk→embed→upsert idempotente por source_hash+model) + route `/api/reg-watch/ingest`.
+    Caveat del experto: reverificar carácter-por-carácter contra EUR-Lex antes de producción.
+  - **B.2 Analista:** `claude.ts` `draft()` vía **tool use forzado** (`propose_reg_event`, strict) con
+    **grounding estricto** (los chunks = única fuente legal; cita-o-abstención; sin soporte →
+    `insufficient_evidence`), reencuadre deployer, y **filtro determinista de copy prohibido** (si aparece
+    "certifica/cumple/…" se descarta el borrador). Modelo **claude-sonnet-5**, `thinking:disabled`. `run.ts`
+    ata el flujo: señal Vigía → fetch contenido → embed query → `match_reg_chunks` → draft → `enrich_reg_candidate_ai`.
+    Verificado con el skill `claude-api` (contrato de la API). Inerte sin llaves (fallback seguro).
+  - **Verificado:** build de producción + lint + tsc **verdes** en cada paso. **Sin coste** (nada llama a
+    APIs de pago hasta que se configuren las llaves).
+  - **PENDIENTE para correr en vivo (necesito del fundador, paso a paso cuando toque):** (1) aplicar `0015`;
+    (2) `VOYAGE_API_KEY` + `ANTHROPIC_API_KEY`; (3) un platform_admin de prueba (1 línea SQL). Con eso YO
+    ejecuto la ingesta (B.1) y paso una señal por el Analista (B.2) y verifico e2e por curl.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
