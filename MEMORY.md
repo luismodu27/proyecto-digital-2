@@ -464,20 +464,49 @@ diseño, nombre, features grandes); autónomo en lo demás.
   - **Fase B (siguiente):** pgvector + embeddings + el Analista con Claude API. La dimensión del vector
     depende del proveedor (OpenAI 1536 / Voyage 1024) → **esa decisión de vendor/llave se toma al entrar
     en B**, no antes. Anthropic NO da embeddings; hará falta OpenAI o Voyage (coste → decisión del fundador).
+- **2026-07-17** · **Vigilancia multi-marco — leyes de IA-empleo de EE. UU. (Capa 7).** El radar deja de
+  ser mono-marco: ahora cubre EU AI Act **+ 5 marcos de EE. UU.** relevantes al vertical RRHH, con el
+  contenido **curado y verificado por el `compliance-domain-expert` contra fuentes oficiales**.
+  - **Arquitectura:** `RegFramework` pasa de 1 a 6 valores (`eu-ai-act`, `us-nyc-ll144`, `us-co-aiact`,
+    `us-il-aivia`, `us-il-hra`, `us-eeoc`). Nuevo `FRAMEWORK_META` (label/short/jurisdiction) + helpers
+    `frameworkLabel()`/`jurisdictionLabel()` con reserva segura, `JURISDICTION_ORDER`/`_LABEL`. Radar con
+    **filtro por jurisdicción** (chips server-side vía `?j=`, aparece solo si hay >1 marco), **pill de
+    marco** en hero/tarjetas/cronología, encabezado según filtro. Resumen e informe etiquetan jurisdicción.
+    Fix: `rowToRegEvent` respeta el framework real (ya no fijo a EU). (commit `f83dcf3` + contenido).
+  - **Contenido (7 eventos):** **NYC LL144** (en vigor desde 5-jul-2023: auditoría de sesgo <12m + aviso
+    + publicación; obligación del **empleador-deployer**, no del vendor; §§ 20-870/874, 6 RCNY 5-300/304)
+    con 2º evento de la **caducidad rotatoria** anual. **Colorado**: HALLAZGO CLAVE — la SB 24-205 (modelo
+    estilo UE de "alto riesgo") fue aplazada y **DEROGADA Y REESCRITA por SB 26-189** (firmada 14-may-2026,
+    efectiva **1-ene-2027**, régimen ADMT más ligero); 2 eventos (efectividad + registro de la derogación
+    para no dar orientación caduca). **Illinois**: DOS leyes separadas en 2 frameworks — AIVIA (820 ILCS 42,
+    video-entrevistas, desde 2020) y **IHRA/HB 3773** (antidiscriminación IA en empleo + prohíbe ZIP como
+    proxy + aviso, desde 1-ene-2026). **EEOC**: incluido solo como CONTEXTO — es *guidance* retirada de
+    eeoc.gov en ene-2025, NO ley; Title VII/ADA/ADEA siguen aplicando. Encuadre honesto deployer-vs-vendor
+    en cada uno; disclaimers "orientación, no asesoría".
+  - **Caveats registrados (importantes):** (a) los `riskLevels: ["high"]` de los eventos US son
+    **conveniencia de enrutamiento**, NO una clasificación jurídica (esas leyes usan sus propios umbrales:
+    AEDT/ADMT/decisión-consecuente). (b) Son **territoriales** (solo aplican con nexo NYC/CO/IL): hoy el
+    radar los muestra a todo deployer con sistemas de alto riesgo → **v2: campo de jurisdicción/nexo por
+    organización** para no sobre-alarmar (el filtro lo mitiga, el copy dice "si operas en X"). (c) **Colorado
+    SB 26-189**: reconfirmar numeración C.R.S. consolidada y detalle de obligaciones del deployer antes de
+    producción (certeza media). (d) Illinois: reconfirmar nº de ley pública de HB 3773 y deep-link IHRA.
+  - Build/lint verdes; **demo verificado con capturas** (radar con chips de jurisdicción + 6 marcos; filtro
+    NY deja solo los 2 eventos LL144). Detalle completo del experto en `scratchpad/us-frameworks.md`.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-> **▶ RETOMAR AQUÍ (2026-07-17):** El fundador eligió **automatizar el foso**. **Fase A (la espina del
-> pipeline) HECHA y VERIFICADA e2e** (demo + curl conectado; migración `0011` aplicada por el fundador,
-> que ya es `platform_admin`). Funciona el bucle completo: candidato → validador aprueba → publica en
-> `reg_events` → aparece en el radar de todos, con RLS blindando la cola a no-admins. Ver bitácora §10.
-> **NOTA:** el fundador nunca ha tenido una **app corriendo con botones** — todo se opera vía Supabase +
-> mi verificación por curl; por eso "abre la app y pulsa X" no aplica hasta el **deploy**. **SIGUIENTE
-> DECISIÓN (a elegir por el fundador):** (Fase B) pgvector + embeddings + el Analista con Claude API —
-> requiere **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic no da embeddings) + **llave/
-> budget**; ó (a) **Deploy a Vercel** (para tener app clicable de una vez — probablemente conviene YA,
-> dado que no hay UI navegable); ó (c) Pulido (forgot-password, captcha/rate-limit en waitlist).
+> **▶ RETOMAR AQUÍ (2026-07-17):** Foso muy avanzado. Hecho y verificado: **Fase A del pipeline**
+> (candidato → Validador humano aprueba → publica en `reg_events`; RLS blinda la cola; migración `0011`
+> aplicada, el fundador es `platform_admin`) **+ multi-marco** (EU AI Act + 5 marcos US de IA-empleo —
+> NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto — con filtro por jurisdicción,
+> verificado por el experto). **NOTA:** el fundador **no quiere deploy aún** ("seguiremos con sugerencias
+> que me des") y nunca ha tenido app con botones (todo se opera vía Supabase + curl). **SIGUIENTES
+> CANDIDATOS (yo sugiero, él elige):** (Fase B) pgvector + embeddings + Analista con Claude API — necesita
+> **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic no da) + **llave/budget**; **v2 del
+> radar** = nexo de jurisdicción por organización (para no sobre-alarmar con leyes territoriales US);
+> **plan de acción editable** (Capa 2, tareas/responsables); **Vigía determinista** (monitor de fuentes).
+> Pendientes de siempre: (a) Deploy a Vercel; (c) Pulido (forgot-password, captcha/rate-limit waitlist).
 
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅
@@ -539,7 +568,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **Capa 5 Monitoreo continuo en producción** ❌ (drift, incidentes).
 - **Capa 6 Supervisión humana / roles** 🟡 (roles owner/admin/member + **UI de equipo: invitar,
   cambiar rol, quitar, invitaciones + claim** ✅; faltan flujos de aprobación y auditoría de membership).
-- **Capa 7 Vigilancia regulatoria multi-marco** 🟡 (el **foso** más fuerte; **radar v1 ✅** + **acuse auditado ✅** + **automatización Fase A ✅** — la espina del pipeline con humano-en-el-bucle: `platform_admins` + `reg_sources`/`reg_events`/`reg_candidates` + RPCs approve/reject + bandeja del Validador; falta multi-marco y **Fase B**: pgvector + embeddings + el Analista LLM que llena la cola de candidatos).
+- **Capa 7 Vigilancia regulatoria multi-marco** 🟢 (el **foso** más fuerte; **radar v1 ✅** + **acuse auditado ✅** + **automatización Fase A ✅** (pipeline con Validador humano) + **multi-marco ✅** — EU AI Act + 5 marcos de EE. UU. de IA-empleo (NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto) con filtro por jurisdicción, verificado por el experto; pendiente **Fase B**: pgvector + embeddings + el Analista LLM que llena la cola de candidatos; y **v2**: nexo de jurisdicción por organización).
 - **Capa 8 Riesgo de terceros/proveedores** ❌.
 - **Capa 9 Gobernanza de agentes de IA** ❌ (frontera; casi nadie la cubre).
 - **Capa 10 Reportes/colaboración** ✅ (dashboard + dossier PDF por sistema + **informe ejecutivo de
