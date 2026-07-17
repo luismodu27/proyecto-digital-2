@@ -394,6 +394,16 @@ diseño, nombre, features grandes); autónomo en lo demás.
   Reutiliza `riskCounts`/`avgCompliance` + `PrintButton` + `LEGAL_PDF`. Entrada: botón "Informe
   ejecutivo" en la cabecera del resumen. Funciona en demo y conectado (sin migración). Build/lint
   verdes; verificado con captura. Es el entregable que el comprador (Legal/RRHH) enseña "hacia arriba".
+- **2026-07-17** · **Landing actualizado al producto completo.** El landing se había quedado en los
+  3 módulos originales. Cambios: (a) refresco de los 3 módulos core (`Modules`) — **corregido un
+  overclaim**: decía "Marcos: AI Act, ISO 42001" cuando solo hacemos EU AI Act → ahora "Mapeo a
+  artículos del AI Act"; pilar 3 menciona policy pack + plan por artículo. (b) Nueva sección
+  **`Platform` ("El foso")**: "Gobernanza continua, no la foto de un día" con 4 diferenciadores
+  (vigilancia regulatoria, dossier/informes automáticos, registro inmutable, equipo con roles).
+  (c) Hero y HowItWorks (paso 4) mencionan generar evidencia/dossier y vigilar la norma. FAQ revisado:
+  ya era honesto (no certificación, foco deployer, audit-trail) → sin cambios. Build/lint verdes;
+  verificado con captura. Principio mantenido: nada de sobre-promesas (multi-marco ISO/NIST sigue
+  siendo futuro, no se anuncia).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación

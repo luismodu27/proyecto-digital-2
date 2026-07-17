@@ -8,14 +8,14 @@ const modules = [
   {
     step: "02",
     title: "Clasificación de riesgo",
-    body: "Un asistente clasifica cada sistema según el EU AI Act —inaceptable, alto, limitado o mínimo— y te dice exactamente qué obligaciones aplican.",
-    points: ["Mapeo a artículos", "Marcos: AI Act, ISO 42001", "Explicable y defendible"],
+    body: "Un asistente guiado clasifica cada sistema según el EU AI Act —inaceptable, alto, limitado o mínimo— y te dice exactamente qué obligaciones aplican, distinguiendo lo tuyo (deployer) de lo del proveedor.",
+    points: ["Mapeo a artículos del AI Act", "Captura de evidencia y atestación", "Explicable y defendible"],
   },
   {
     step: "03",
-    title: "Gap assessment + evidencia",
-    body: "Qué te falta para cumplir, con plan de remediación, y evidencia exportable a PDF lista para presentar ante un auditor.",
-    points: ["Brechas priorizadas", "Informe exportable", "Audit-trail íntegro"],
+    title: "Gap assessment y plan",
+    body: "Qué te falta para cumplir, priorizado por severidad, con plan de acción por artículo. Aplica un policy pack de RRHH y precarga los controles típicos de un sistema de selección.",
+    points: ["Brechas priorizadas", "Policy pack de RRHH", "Plan de acción por artículo"],
   },
 ];
 
@@ -30,7 +30,7 @@ export function Modules() {
           El sistema de registro de tu gobernanza de IA.
         </h2>
         <p className="mt-4 text-lg text-ink-soft">
-          Tres piezas que trabajan juntas y se mantienen actualizadas solas.
+          El flujo completo: del inventario a la evidencia lista para auditar.
         </p>
       </div>
 

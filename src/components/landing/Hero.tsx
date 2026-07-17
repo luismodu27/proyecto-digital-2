@@ -31,8 +31,8 @@ export function Hero() {
           <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-ink-soft lg:mx-0">
             La IA que usas para contratar —cribado de CVs, entrevistas, scoring de
             candidatos— es de <span className="font-medium text-ink">alto riesgo</span>{" "}
-            bajo el EU AI Act. Attesta la inventaría, clasifica su riesgo y organiza
-            tu evidencia lista para auditoría. Sin necesitar un equipo GRC.
+            bajo el EU AI Act. Attesta la inventaría, clasifica su riesgo, genera tu
+            evidencia y vigila los cambios normativos. Sin necesitar un equipo GRC.
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">

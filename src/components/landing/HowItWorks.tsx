@@ -16,8 +16,8 @@ const steps = [
   },
   {
     n: "4",
-    title: "Prepárate para la auditoría",
-    body: "Exporta tu evidencia declarada, lista para auditoría, y mantén el trail actualizado de forma continua.",
+    title: "Genera evidencia y vigila",
+    body: "Genera tu dossier y el informe ejecutivo con un clic, y deja que el radar regulatorio te avise de cada plazo y cambio del EU AI Act.",
   },
 ];
 
