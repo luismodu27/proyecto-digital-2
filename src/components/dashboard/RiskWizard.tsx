@@ -46,6 +46,8 @@ export function RiskWizard({
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
   const [systemId, setSystemId] = useState(presetSystemId ?? "");
+  const [attestedBy, setAttestedBy] = useState("");
+  const [evidence, setEvidence] = useState("");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">(
     "idle",
   );
@@ -78,6 +80,8 @@ export function RiskWizard({
     setIndex(0);
     setDone(false);
     setSystemId(presetSystemId ?? "");
+    setAttestedBy("");
+    setEvidence("");
     setSaveState("idle");
   }
 
@@ -89,10 +93,17 @@ export function RiskWizard({
       result.level === "high" &&
       (answers.transparency ?? []).filter((v) => v !== NONE).length > 0;
 
+    const evidenceIsUrl = /^https?:\/\//i.test(evidence.trim());
+    const hasEvidence = evidence.trim().length > 0;
+
     async function handleSave() {
       if (!systemId) return;
       setSaveState("saving");
-      const res = await saveRiskAssessment(systemId, answers, result);
+      const res = await saveRiskAssessment(systemId, answers, result, {
+        attestedByName: attestedBy,
+        url: evidenceIsUrl ? evidence : undefined,
+        note: evidenceIsUrl ? undefined : evidence,
+      });
       setSaveState(res.ok ? "saved" : "error");
     }
 
@@ -181,18 +192,24 @@ export function RiskWizard({
           <div className="mt-8 border-t border-line pt-6">
             {saveState === "saved" ? (
               <div className="rounded-xl border border-[#bfdccf] bg-brand-soft px-4 py-3 text-sm text-brand-strong">
-                ✓ Clasificación guardada. El sistema quedó actualizado a{" "}
-                <span className="font-medium">{RISK_LABEL[result.level]}</span> y
-                se registró en el audit-trail.
+                ✓ Autoevaluación guardada como{" "}
+                <span className="font-medium">
+                  {hasEvidence ? "con evidencia" : "declarado"}
+                </span>
+                . El sistema se actualizó y quedó registrado en el audit-trail
+                {attestedBy.trim() ? `, atestado por ${attestedBy.trim()}` : ""}.
               </div>
             ) : (
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <div className="flex-1">
+              <div className="space-y-4">
+                <h3 className="font-display text-sm font-semibold text-ink">
+                  Guardar como autoevaluación
+                </h3>
+                <div>
                   <label
                     htmlFor="save-system"
                     className="block text-sm font-medium text-ink"
                   >
-                    Guardar esta clasificación en un sistema
+                    Sistema
                   </label>
                   <select
                     id="save-system"
@@ -209,12 +226,50 @@ export function RiskWizard({
                     ))}
                   </select>
                 </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="attested-by"
+                      className="block text-sm font-medium text-ink"
+                    >
+                      Responsable que atesta
+                    </label>
+                    <input
+                      id="attested-by"
+                      value={attestedBy}
+                      onChange={(e) => setAttestedBy(e.target.value)}
+                      placeholder="Nombre y cargo"
+                      className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="evidence"
+                      className="block text-sm font-medium text-ink"
+                    >
+                      Evidencia de soporte{" "}
+                      <span className="font-normal text-muted">(opcional)</span>
+                    </label>
+                    <input
+                      id="evidence"
+                      value={evidence}
+                      onChange={(e) => setEvidence(e.target.value)}
+                      placeholder="Enlace o descripción del documento"
+                      className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted">
+                  {hasEvidence
+                    ? "Se guardará como «con evidencia»: aportas soporte documental."
+                    : "Sin evidencia se guardará como «declarado» (sin verificar). Añade un enlace o documento para respaldarlo."}
+                </p>
                 <Button
                   onClick={handleSave}
                   disabled={!systemId || saveState === "saving"}
                   variant="primary"
                 >
-                  {saveState === "saving" ? "Guardando…" : "Guardar clasificación"}
+                  {saveState === "saving" ? "Guardando…" : "Guardar autoevaluación"}
                 </Button>
               </div>
             )}

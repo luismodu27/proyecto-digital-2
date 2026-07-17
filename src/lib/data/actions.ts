@@ -112,10 +112,17 @@ export async function seedSampleData() {
  * Persiste una clasificación de riesgo y actualiza el nivel vigente del sistema.
  * Usado por el asistente cuando se guarda contra un sistema del inventario.
  */
+export type EvidenceInput = {
+  attestedByName?: string;
+  note?: string;
+  url?: string;
+};
+
 export async function saveRiskAssessment(
   aiSystemId: string,
   answers: Answers,
   result: ClassificationResult,
+  evidence?: EvidenceInput,
 ) {
   if (!isSupabaseConfigured) return { ok: false as const, error: "demo" };
 
@@ -126,6 +133,11 @@ export async function saveRiskAssessment(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const note = evidence?.note?.trim() || null;
+  const url = evidence?.url?.trim() || null;
+  // "Con evidencia" solo si se aportó una nota o un enlace de soporte.
+  const evidenceState = note || url ? "evidenced" : "declared";
 
   const { data, error } = await supabase
     .from("risk_assessments")
@@ -138,6 +150,10 @@ export async function saveRiskAssessment(
       citations: result.citations,
       obligations: result.obligations,
       assessed_by: user?.id,
+      attested_by_name: evidence?.attestedByName?.trim() || null,
+      evidence_note: note,
+      evidence_url: url,
+      evidence_state: evidenceState,
     })
     .select("id")
     .single();
@@ -150,6 +166,7 @@ export async function saveRiskAssessment(
       risk_level: result.level,
       current_assessment_id: data.id,
       last_reviewed_at: new Date().toISOString(),
+      evidence_state: evidenceState,
     })
     .eq("id", aiSystemId);
 

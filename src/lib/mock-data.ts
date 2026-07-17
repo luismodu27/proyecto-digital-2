@@ -5,6 +5,15 @@
 
 export type RiskLevel = "unacceptable" | "high" | "limited" | "minimal";
 
+/** Nivel de respaldo de una autoevaluación. */
+export type EvidenceState = "declared" | "evidenced" | "reviewed";
+
+export const EVIDENCE_LABEL: Record<EvidenceState, string> = {
+  declared: "Declarado",
+  evidenced: "Con evidencia",
+  reviewed: "Revisado",
+};
+
 export const RISK_LABEL: Record<RiskLevel, string> = {
   unacceptable: "Inaceptable",
   high: "Alto riesgo",
@@ -19,8 +28,9 @@ export type AiSystem = {
   domain: string;
   vendor: string;
   risk: RiskLevel;
-  compliance: number; // 0-100
+  compliance: number; // 0-100 · "preparación para auditoría" (% listo)
   lastReviewed: string;
+  evidenceState?: EvidenceState;
 };
 
 export const AI_SYSTEMS: AiSystem[] = [
@@ -43,6 +53,7 @@ export const AI_SYSTEMS: AiSystem[] = [
     risk: "high",
     compliance: 61,
     lastReviewed: "2026-07-02",
+    evidenceState: "evidenced",
   },
   {
     id: "SYS-003",
@@ -53,6 +64,7 @@ export const AI_SYSTEMS: AiSystem[] = [
     risk: "limited",
     compliance: 78,
     lastReviewed: "2026-07-10",
+    evidenceState: "reviewed",
   },
   {
     id: "SYS-004",

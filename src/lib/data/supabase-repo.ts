@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveOrg } from "./context";
 import type {
   AiSystem,
+  EvidenceState,
   GapItem,
   RiskLevel,
 } from "@/lib/mock-data";
@@ -41,6 +42,9 @@ export async function getAiSystems(): Promise<AiSystem[]> {
     lastReviewed: row.last_reviewed_at
       ? String(row.last_reviewed_at).slice(0, 10)
       : "",
+    evidenceState: (row.evidence_state ?? undefined) as
+      | EvidenceState
+      | undefined,
   }));
 }
 

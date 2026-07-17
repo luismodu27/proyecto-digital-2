@@ -1,6 +1,7 @@
 import { PageHeader, Meter } from "@/components/dashboard/parts";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
+import { EvidenceBadge } from "@/components/ui/EvidenceBadge";
 import { getAiSystems, isSupabaseConfigured } from "@/lib/data";
 import { seedSampleData } from "@/lib/data/actions";
 
@@ -44,13 +45,13 @@ export default async function InventarioPage() {
       ) : (
         <div className="overflow-hidden rounded-2xl border border-line bg-paper-raised">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
+            <table className="w-full min-w-[820px] text-left text-sm">
               <thead>
                 <tr className="border-b border-line text-xs uppercase tracking-wide text-muted">
                   <th className="px-5 py-3 font-medium">Sistema</th>
                   <th className="px-5 py-3 font-medium">Dominio</th>
-                  <th className="px-5 py-3 font-medium">Proveedor</th>
                   <th className="px-5 py-3 font-medium">Riesgo</th>
+                  <th className="px-5 py-3 font-medium">Respaldo</th>
                   <th className="px-5 py-3 font-medium">Preparación</th>
                   <th className="px-5 py-3 font-medium">Última revisión</th>
                 </tr>
@@ -62,12 +63,15 @@ export default async function InventarioPage() {
                       <p className="font-medium text-ink">{s.name}</p>
                       <p className="font-mono text-xs text-muted">
                         {s.id} · {s.owner}
+                        {s.vendor ? ` · ${s.vendor}` : ""}
                       </p>
                     </td>
                     <td className="px-5 py-4 text-ink-soft">{s.domain}</td>
-                    <td className="px-5 py-4 text-ink-soft">{s.vendor}</td>
                     <td className="px-5 py-4">
                       <RiskBadge level={s.risk} />
+                    </td>
+                    <td className="px-5 py-4">
+                      <EvidenceBadge state={s.evidenceState} />
                     </td>
                     <td className="px-5 py-4">
                       <div className="w-32">
