@@ -531,8 +531,11 @@ diseño, nombre, features grandes); autónomo en lo demás.
     controles inline autoenvío (`TaskControls.tsx`: estado, responsable, fecha, eliminar), y sección de
     sugerencias con "+ Añadir al plan". Todo miembro edita (sin gating por rol).
   - Build/lint verdes; **demo verificado con capturas** (3 tareas + controles + sugerencias con dedupe —
-    Art.14/Art.11 ya son tarea y no reaparecen como sugerencia). **Pendiente:** el fundador aplica la 0013
-    → verifico e2e por curl (crear/editar estado+responsable+fecha, RLS por miembro, auditoría).
+    Art.14/Art.11 ya son tarea y no reaparecen como sugerencia). Fundador aplicó la 0013.
+  - **Verificado e2e por curl (2026-07-17):** owner crea tarea; **un member** (no owner) le cambia
+    estado+responsable+fecha (confirma RLS **colaborativa**); un extraño ve **0 filas** (aislamiento); el
+    audit-trail registra insert (owner) + update (member, `campos=[status,due_date,assignee_id]`) con
+    emails; owner elimina. Todo ✅.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -547,8 +550,8 @@ diseño, nombre, features grandes); autónomo en lo demás.
 > CANDIDATOS (yo sugiero, él elige):** (Fase B) pgvector + embeddings +
 > Analista con Claude API — necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic no
 > da) + **llave/budget**; **Vigía determinista** (monitor de fuentes, sin gasto). **Plan de acción editable
-> (Capa 2) HECHO** (migración `0013` pendiente de aplicar → luego e2e). Pendientes de siempre: (a) Deploy a
-> Vercel; (c) Pulido (forgot-password, captcha). Migraciones aplicadas por el fundador hasta la **0012**.
+> (Capa 2) HECHO y VERIFICADO e2e** (migración `0013` aplicada). Pendientes de siempre: (a) Deploy a
+> Vercel; (c) Pulido (forgot-password, captcha). Migraciones aplicadas por el fundador hasta la **0013**.
 
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅
