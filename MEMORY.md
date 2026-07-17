@@ -256,6 +256,19 @@ diseño, nombre, features grandes); autónomo en lo demás.
   reescrita a sistemas de reclutamiento (cribado CVs, ranking, entrevistas vídeo, chatbot, test
   psicométrico, agenda). Base regulatoria: IA de empleo/selección = alto riesgo (Anexo III).
   Siguiente para el vertical: "policy pack RRHH" (controles/obligaciones específicos de selección).
+- **2026-07-17** · **Policy pack RRHH** (`src/lib/policy-packs/rrhh.ts`): 14 controles de
+  reclutamiento; vista `/dashboard/packs` + `applyPolicyPack` (precarga los controles como
+  gap_items de un sistema, sin duplicar). **Verificado por el experto** con correcciones clave:
+  - Reencuadre **provider vs deployer**: sesgo → **normativa antidiscriminación** (Directivas UE
+    2000/78, 2006/54, 2000/43 + ley nacional), NO Art. 10 (=proveedor); supervisión → **Art. 26.2**
+    (designar) + 14; transparencia al candidato → **Art. 26.11** + GDPR 13/14; logs → **Art. 26.6**;
+    documentación → **Art. 26.1** (usar conforme). Del proveedor (Arts. 10/11/12/14/15) se **exige evidencia**.
+  - Añadidos: derecho a **explicación (Art. 86)**, exactitud/robustez (26.5), monitoreo/incidentes (26.5),
+    conservación de evidencia de decisiones (GDPR 5.2), **DPIA (GDPR 35)**.
+  - **AVISO FUERTE:** inferir **emociones en el trabajo** (p. ej. análisis de afecto en vídeo-entrevistas)
+    es **práctica PROHIBIDA** salvo fines médicos/seguridad (**Art. 5.1.f**) → control condicional, severidad alta.
+  - **FRIA (Art. 27) normalmente NO aplica** a un empleador privado ordinario (solo público / servicios
+    públicos / Anexo III 5(b)(c)) → incluido como "N/A" para dejar constancia.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
