@@ -80,6 +80,17 @@
   padding-inline: 1.5rem;
 }
 
+/* Impresión: documento limpio (informes/evidencia) */
+@media print {
+  body {
+    background: #fff;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
 /* Rejilla de fondo sutil (papel técnico) */
 @utility grid-paper {
   background-image:

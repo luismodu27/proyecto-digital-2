@@ -44,6 +44,19 @@ export async function getAiSystems(): Promise<AiSystem[]> {
   }));
 }
 
+/** Nombre de la organización activa (para informes/cabeceras). */
+export async function getOrganizationName(): Promise<string | null> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return null;
+  const { data } = await supabase
+    .from("organizations")
+    .select("name")
+    .eq("id", org)
+    .maybeSingle();
+  return data?.name ?? null;
+}
+
 /** Sistemas de la org (id real + nombre) para selectores. */
 export async function getSystemsForSelect(): Promise<
   { id: string; name: string }[]

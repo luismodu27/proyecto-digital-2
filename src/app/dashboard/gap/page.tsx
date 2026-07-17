@@ -24,7 +24,7 @@ export default async function GapPage() {
         title="Gap assessment"
         subtitle={`${open} brechas abiertas frente a los requisitos del EU AI Act.`}
         action={
-          <ButtonLink href="#" variant="outline">
+          <ButtonLink href="/dashboard/gap/informe" variant="outline">
             ⬇ Exportar evidencia (PDF)
           </ButtonLink>
         }

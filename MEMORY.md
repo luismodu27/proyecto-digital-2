@@ -183,6 +183,12 @@ diseño, nombre, features grandes); autónomo en lo demás.
   ⚠️ El build DEBE hacerse con `.env.local` presente para inlinear `NEXT_PUBLIC_*` en el cliente.
 - **Limitación del entorno:** el Chromium headless de Playwright NO usa el proxy de salida, así que
   no puede alcanzar Supabase → la verificación del flujo real se hace por API con `curl` (sí usa proxy).
+- **2026-07-17** · **#1 Guardar clasificación de riesgo**: el wizard ahora persiste el
+  resultado contra un sistema (selector + `saveRiskAssessment`) y actualiza `risk_level`.
+  Verificado e2e (insert + update + audit). **#2 Export PDF del gap assessment**: vista de
+  informe con formato de documento (`/dashboard/gap/informe`) + impresión a PDF del navegador
+  (print CSS, sidebar oculto, marca Attesta). Verificado con captura y PDF real generado.
+  Enfoque elegido: print-to-PDF (sin dependencias pesadas) en vez de @react-pdf/renderer.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación

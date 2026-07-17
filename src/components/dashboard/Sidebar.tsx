@@ -16,7 +16,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-full shrink-0 flex-col border-b border-line bg-paper-raised md:h-dvh md:w-64 md:border-b-0 md:border-r">
+    <aside className="flex w-full shrink-0 flex-col border-b border-line bg-paper-raised md:h-dvh md:w-64 md:border-b-0 md:border-r print:hidden">
       <div className="flex h-16 items-center border-b border-line px-5">
         <Logo href="/dashboard" />
       </div>

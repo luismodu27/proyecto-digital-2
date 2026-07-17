@@ -19,3 +19,7 @@ export async function getSystemsForSelect(): Promise<
 > {
   return AI_SYSTEMS.map((s) => ({ id: s.id, name: s.name }));
 }
+
+export async function getOrganizationName(): Promise<string | null> {
+  return "Organización demo";
+}
