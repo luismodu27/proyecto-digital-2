@@ -508,8 +508,10 @@ diseño, nombre, features grandes); autónomo en lo demás.
     y "Todas". Configurador colapsable `JurisdictionSettings` (checkboxes, owner/admin — gated por
     `canManage`, por eso NO se ve en demo). El resumen y el informe también respetan el nexo.
   - Build/lint verdes; **demo verificado con capturas**: nexo UE+NY oculta CO/IL/Federal por defecto;
-    "Todas" las revela. **Pendiente:** el fundador aplica la 0012 → verifico e2e por curl (set/lectura +
-    guard owner/admin + validación de códigos).
+    "Todas" las revela. Fundador aplicó la 0012.
+  - **Verificado e2e por curl (2026-07-17):** owner fija/actualiza/vacía sus jurisdicciones; la RPC
+    **filtra códigos basura y deduplica** (`['eu','us-ny','marte','eu']`→`['eu','us-ny']`); un no-miembro
+    recibe **"no autorizado"** y no cambia nada. Todo ✅.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -520,8 +522,8 @@ diseño, nombre, features grandes); autónomo en lo demás.
 > NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto — con filtro por jurisdicción,
 > verificado por el experto). **NOTA:** el fundador **no quiere deploy aún** ("seguiremos con sugerencias
 > que me des") y nunca ha tenido app con botones (todo se opera vía Supabase + curl). **v2 del radar
-> (nexo de jurisdicción por organización) HECHO** (migración `0012` pendiente de aplicar por el fundador →
-> luego verifico e2e). **SIGUIENTES CANDIDATOS (yo sugiero, él elige):** (Fase B) pgvector + embeddings +
+> (nexo de jurisdicción por organización) HECHO y VERIFICADO e2e** (migración `0012` aplicada). **SIGUIENTES
+> CANDIDATOS (yo sugiero, él elige):** (Fase B) pgvector + embeddings +
 > Analista con Claude API — necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic no
 > da) + **llave/budget**; **plan de acción editable** (Capa 2, tareas/responsables); **Vigía determinista**
 > (monitor de fuentes). Pendientes de siempre: (a) Deploy a Vercel; (c) Pulido (forgot-password, captcha).
