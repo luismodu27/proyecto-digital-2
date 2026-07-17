@@ -154,6 +154,11 @@ diseño, nombre, features grandes); autónomo en lo demás.
   sigue idéntica** sin credenciales. Clientes `@supabase/ssr` (browser/server). Build/lint verdes.
   Defaults adoptados: región UE, N orgs por usuario, audit por triggers (hash-chain en fase 2).
   **Falta credenciales del fundador** para activar (URL + anon key) + auth UI + write-path.
+- **2026-07-17** · **Auth UI + middleware de sesión**. Pantallas `/login` (login+registro
+  con toggle) y `/onboarding` (crear organización vía RPC), middleware que refresca sesión
+  y protege `/dashboard` (no-op en modo demo), logout + email en el sidebar. Enlace "Entrar"
+  en la landing. En MODO DEMO todo sigue abierto con datos de ejemplo; en modo conectado exige
+  sesión + organización. Build/lint verdes; login verificado con captura (env dummy).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -164,7 +169,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - ~~Asistente de clasificación de riesgo~~ → hecho ✅ (lógica en memoria, sin persistir aún)
 - ~~Backend/datos~~ → **Supabase**, fundación lista ✅ (falta conectar credenciales + auth + writes).
 - **Credenciales Supabase del fundador** (URL + anon key) para activar el modo real.
-- **Auth UI** (login/registro) + middleware de sesión + onboarding.
+- ~~Auth UI (login/registro) + middleware + onboarding~~ → hecho ✅ (activo solo en modo conectado).
 - **Write-path**: persistir clasificación de riesgo, alta/edición de sistemas y brechas.
 - Conectar formulario de waitlist a un destino real (CRM / lista).
 - Exportación real a PDF + audit-trail íntegro.

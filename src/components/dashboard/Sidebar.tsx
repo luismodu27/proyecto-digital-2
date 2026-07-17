@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
+import { signOut } from "@/lib/auth/actions";
 
 const nav = [
   { label: "Resumen", href: "/dashboard", icon: "M3 12h7V3H3v9Zm0 9h7v-7H3v7Zm11 0h7V12h-7v9Zm0-18v7h7V3h-7Z" },
@@ -11,7 +12,7 @@ const nav = [
   { label: "Gap assessment", href: "/dashboard/gap", icon: "M9 11l3 3 8-8M4 12a8 8 0 108-8" },
 ];
 
-export function Sidebar() {
+export function Sidebar({ userEmail }: { userEmail?: string }) {
   const pathname = usePathname();
 
   return (
@@ -50,18 +51,34 @@ export function Sidebar() {
         })}
       </nav>
       <div className="mt-auto hidden p-4 md:block">
-        <div className="rounded-xl border border-line bg-paper-sunken/60 p-4">
-          <p className="text-xs font-medium text-ink">Demo con datos de ejemplo</p>
-          <p className="mt-1 text-xs text-muted">
-            Backend real pendiente. Los datos no son reales.
-          </p>
-          <Link
-            href="/"
-            className="mt-3 inline-block text-xs font-medium text-brand hover:text-brand-strong"
-          >
-            ← Volver al sitio
-          </Link>
-        </div>
+        {userEmail ? (
+          <div className="rounded-xl border border-line bg-paper-sunken/60 p-4">
+            <p className="truncate text-xs font-medium text-ink" title={userEmail}>
+              {userEmail}
+            </p>
+            <form action={signOut} className="mt-2">
+              <button
+                type="submit"
+                className="text-xs font-medium text-brand hover:text-brand-strong"
+              >
+                Cerrar sesión
+              </button>
+            </form>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-line bg-paper-sunken/60 p-4">
+            <p className="text-xs font-medium text-ink">Demo con datos de ejemplo</p>
+            <p className="mt-1 text-xs text-muted">
+              Backend real pendiente. Los datos no son reales.
+            </p>
+            <Link
+              href="/"
+              className="mt-3 inline-block text-xs font-medium text-brand hover:text-brand-strong"
+            >
+              ← Volver al sitio
+            </Link>
+          </div>
+        )}
       </div>
     </aside>
   );
