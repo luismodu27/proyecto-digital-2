@@ -585,14 +585,16 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-> **▶ RETOMAR AQUÍ (2026-07-17, tras recordatorios):** TODO hecho y verificado, árbol limpio y sincronizado.
-> **Migraciones aplicadas por el fundador hasta la 0013.** Logrado en la tanda previa: **Capa 7 (foso) 🟢**
-> = Fase A del pipeline (candidato→Validador humano→`reg_events`; RLS blinda la cola; `platform_admin`) +
-> **multi-marco** (EU AI Act + 5 marcos US de IA-empleo: NYC LL144, Colorado SB 26-189, Illinois AIVIA +
-> IHRA, EEOC-contexto; verificado por el experto) + **nexo de jurisdicción por org** (0012). **Capa 2 🟢** =
-> **plan de acción editable** (tablero `action_tasks`, colaborativo; 0013) + **recordatorios de vencimiento**
-> (widget "Vencimientos del plan" en el resumen; `task-reminders.ts` + `DeadlineReminders.tsx`; **sin
-> migración ni backend nuevo** — puro cálculo sobre `getActionTasks()`; verificado con capturas).
+> **▶ RETOMAR AQUÍ (2026-07-17, tras pulido de auth):** TODO hecho y verificado, árbol limpio y sincronizado.
+> **Migraciones aplicadas por el fundador hasta la 0013.** Estado: **Capa 7 (foso) 🟢** = Fase A del pipeline
+> (candidato→Validador humano→`reg_events`; RLS blinda la cola; `platform_admin`) + **multi-marco** (EU AI Act
+> + 5 marcos US de IA-empleo: NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto; verificado
+> por el experto) + **nexo de jurisdicción por org** (0012). **Capa 2 🟢** = **plan de acción editable**
+> (tablero `action_tasks`, colaborativo; 0013) + **recordatorios de vencimiento** (widget en el resumen;
+> `task-reminders.ts` + `DeadlineReminders.tsx`; sin migración). **Auth 🟢** = **recuperación de contraseña**
+> completa (`/reset-password` + `/auth/callback` + `/reset-password/update`; `updateUser` probado e2e) +
+> **honeypot** anti-bots (recuperación + waitlist); **captcha DIFERIDO al deploy** (mi recomendación: honeypot
+> + rate-limit server-side de Supabase bastan pre-lanzamiento; Turnstile necesita dominio).
 > **CONTEXTO CLAVE:** el fundador **no quiere deploy aún** ("seguiremos con sugerencias que me des"); nunca
 > ha tenido app con botones (todo se opera vía Supabase SQL Editor + mi verificación por curl con usuarios
 > `*@attesta-test.dev`). Flujo: yo escribo migración → él la pega en SQL Editor → yo verifico por curl.
@@ -600,9 +602,11 @@ diseño, nombre, features grandes); autónomo en lo demás.
 > de fuentes (fetch+hash) que crea candidatos "algo cambió aquí"; sin gasto (el cron real espera al deploy,
 > pero la lógica queda lista y verificable por curl). (2) **Fase B del foso** — pgvector + embeddings +
 > Analista LLM; necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic NO da embeddings)
-> + **llave/budget** (decisión del fundador). (3) **Pulido de auth** — forgot-password + captcha/rate-limit.
-> Pendiente de siempre: (a) Deploy a Vercel. (Idea futura del recordatorio: email de aviso — requiere deploy
-> + proveedor de correo.)
+> + **llave/budget** (decisión del fundador).
+> **PENDIENTES DE CONFIG/DEPLOY:** (a) Deploy a Vercel. (b) Al desplegar: en Supabase → URL Configuration,
+> añadir `https://<dominio>/auth/callback` a Redirect URLs + fijar Site URL (si no, `resetPasswordForEmail`
+> da 400). (c) Captcha Turnstile (llave gratis + toggle en Supabase). (d) Idea del recordatorio: email de
+> aviso de vencimientos (requiere deploy + proveedor de correo).
 
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅
