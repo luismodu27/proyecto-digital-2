@@ -673,20 +673,47 @@ diseño, nombre, features grandes); autónomo en lo demás.
   - **PENDIENTE para correr en vivo (necesito del fundador, paso a paso cuando toque):** (1) aplicar `0015`;
     (2) `VOYAGE_API_KEY` + `ANTHROPIC_API_KEY`; (3) un platform_admin de prueba (1 línea SQL). Con eso YO
     ejecuto la ingesta (B.1) y paso una señal por el Analista (B.2) y verifico e2e por curl.
+- **2026-07-17** · **Fase B.1 VERIFICADA e2e + Analista movido a LLM gratis (OpenAI-compatible).**
+  - **B.1 verificado (Voyage, gratis):** el fundador aplicó la `0015` (fix `drop policy if exists` porque
+    `create policy` no es idempotente) y promovió un validador de prueba. Ingesté los **28 apartados** del AI
+    Act a `reg_knowledge_chunks` (embeddings voyage-4, dim 1024) → **count=28**; el corpus queda **en la base
+    real** (dato de producción, NO se borra). **Retrieval probado:** consulta "obligaciones del deployer:
+    supervisión humana + informar al candidato" → top-5 = **Art. 26.2, 26.3, 14.4, 26.7, 50.1** (los del
+    deployer). El RAG recupera lo correcto. Modelo de embeddings confirmado: **voyage-4** existe y da 1024.
+  - **B.2 — cambio de proveedor:** la llave de **Anthropic era válida pero la cuenta NO tiene crédito**
+    ("credit balance too low"). El fundador pidió alternativa gratis → refactoricé el drafting a un endpoint
+    **compatible con OpenAI + function calling**: `claude.ts` → **`src/lib/analista/llm.ts`**. Config agnóstica
+    (`ANALISTA_API_KEY` / `ANALISTA_BASE_URL` / `ANALISTA_MODEL`), **por defecto NVIDIA NIM**
+    (`https://integrate.api.nvidia.com/v1`, `meta/llama-3.3-70b-instruct`, gratis). Mismo grounding estricto
+    (cita-o-abstención), reencuadre deployer y filtro de copy prohibido. `.env.example` actualizado. Build+lint+
+    tsc verdes.
+  - **PENDIENTE para cerrar B.2 (verificación en vivo):** el fundador saca una **API key gratis de NVIDIA**
+    en **build.nvidia.com** (formato `nvapi-...`) y me la pasa. Con eso YO: paso una señal del Vigía por el
+    Analista (fetch/contenido → embed query → match_reg_chunks → llm.draft → enrich_reg_candidate_ai) y
+    verifico que el borrador sale con **citas reales, encuadre deployer y sin copy prohibido**. El validador de
+    prueba **`analista-test@attesta-test.dev`** (uid `9f226580-bd52-4f3d-b459-9387968b582b`) sigue promovido en
+    `platform_admins` para esa verificación. **Limpieza pendiente al terminar:** borrar ese user +
+    `vigia-test` si quedó, y candidatos de prueba (el corpus se queda).
+  - **Llaves que el fundador me pasó por chat (rotar tras verificar si quiere):** Voyage `pa-...`, Anthropic
+    `sk-ant-...` (sin saldo, inútil por ahora). Supabase URL `flesaxlgtvhewwcvzrxs` + anon key (pública).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-> **▶ RETOMAR AQUÍ (2026-07-17, tras el editor de enriquecimiento):** **Vigía (Fase A.1) + editor de
-> enriquecimiento del candidato-señal HECHOS.** Vigía verificado e2e por curl; el editor verificado con
-> **build de producción + lint + tsc verdes** (falta solo el sello e2e por curl: necesita 1 línea SQL para
-> promover un platform_admin de prueba — el anterior ya se borró). Árbol limpio y sincronizado (`5afdde4`).
-> **BUCLE DEL FOSO CERRADO A MANO:** Vigía detecta cambio → señal en la bandeja → Validador la completa
-> (fecha/tipo/textos/artículos/alcance) y **publica** en el radar, o la descarta. **Migraciones aplicadas
-> hasta la 0014** (el editor no necesitó migración). **CONTEXTO NUEVO:** el fundador **ya hizo sign-up en
-> Voyage** (embeddings para Fase B) — el coste se revisa al entrar en B. Quiere **publicar una demo en
-> Vercel** más adelante para visualizar; de momento seguimos desarrollando. **PRÓXIMO: Fase B — el
-> Analista** (ver §11 SIGUIENTES). Estado: **Capa 7 (foso) 🟢** = Fase A del pipeline
+> **▶ RETOMAR AQUÍ (2026-07-17, tras Fase B.1 verificada + Analista a LLM gratis):** El **foso automatizado
+> está construido de punta a punta**: Vigía (A.1) + editor de enriquecimiento + **Analista (Fase B)**. Árbol
+> limpio y sincronizado. **Migraciones aplicadas hasta la 0015** (pgvector + `reg_knowledge_chunks` +
+> `match_reg_chunks` + `enrich_reg_candidate_ai`). **B.1 VERIFICADO e2e:** el corpus (28 apartados verbatim del
+> AI Act) está **ingerido en la base real** (Voyage voyage-4, dim 1024) y el retrieval devuelve los artículos
+> del deployer (Arts. 26/14) — ver §10. **B.2 (Analista) construido pero NO verificado en vivo** porque
+> Anthropic no tenía crédito → se cambió a **LLM compatible con OpenAI (NVIDIA NIM gratis por defecto)** en
+> `src/lib/analista/llm.ts`. **▶ LO ÚNICO QUE FALTA para cerrar B.2:** que el fundador saque una **API key
+> gratis en build.nvidia.com** (`nvapi-...`) y me la pase; entonces corro el Analista sobre una señal y
+> verifico borrador grounded (citas reales, encuadre deployer, sin copy prohibido). Validador de prueba
+> **`analista-test@attesta-test.dev`** (uid `9f226580...`) sigue promovido para eso. **PENDIENTE DE LIMPIEZA:**
+> al terminar B.2, borrar el user de prueba + candidatos de prueba (el corpus se queda). El fundador va a
+> **tirar un compact** ahora. **SIGUIENTE tras B.2:** demo en Vercel (llaves como env vars, no por chat) o
+> nueva capa. Estado: **Capa 7 (foso) 🟢🟢** = Fase A + **Fase B (Analista) casi cerrada** = Fase A del pipeline
 > (candidato→Validador humano→`reg_events`; RLS blinda la cola; `platform_admin`) + **multi-marco** (EU AI Act
 > + 5 marcos US de IA-empleo: NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto; verificado
 > por el experto) + **nexo de jurisdicción por org** (0012). **Capa 2 🟢** = **plan de acción editable**
