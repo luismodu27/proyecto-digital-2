@@ -46,7 +46,7 @@ declare
   v_email text := lower(trim(invitee_email));
   v_uid uuid;
 begin
-  if not private.user_has_role(org, array['owner','admin']::member_role[]) then
+  if not private.user_has_role(org, array['owner','admin']::public.member_role[]) then
     raise exception 'No autorizado';
   end if;
   if v_email is null or v_email = '' then
@@ -54,7 +54,7 @@ begin
   end if;
   -- Solo un owner puede otorgar el rol owner.
   if invitee_role = 'owner'
-     and not private.user_has_role(org, array['owner']::member_role[]) then
+     and not private.user_has_role(org, array['owner']::public.member_role[]) then
     raise exception 'Solo un owner puede asignar el rol owner';
   end if;
 
