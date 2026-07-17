@@ -256,6 +256,13 @@ diseño, nombre, features grandes); autónomo en lo demás.
   reescrita a sistemas de reclutamiento (cribado CVs, ranking, entrevistas vídeo, chatbot, test
   psicométrico, agenda). Base regulatoria: IA de empleo/selección = alto riesgo (Anexo III).
   Siguiente para el vertical: "policy pack RRHH" (controles/obligaciones específicos de selección).
+- **2026-07-17** · **Historial de evaluaciones por sistema.** En la página del sistema
+  (`/dashboard/inventario/[id]/editar`) se muestra la línea de tiempo de sus `risk_assessments`
+  (nivel, respaldo, quién atestó, fecha; la más reciente marcada "Vigente"), + botón "Evaluar"
+  (deep-link `?system=`). `getSystemAssessments` en la capa de datos. Cierra el círculo de
+  "system of record de evidencia". Verificado e2e por API.
+- **2026-07-17** · **Sello nuevo + inversión por tema.** Sello (monograma A + check) como imagen
+  (`public/sealmark.png` claro, `sealmark-dark.png` invertido). SealMark usa `var(--seal-img)`.
 - **2026-07-17** · **Escritura completa (deja de ser solo lectura).** Editar sistema
   (`/dashboard/inventario/[id]/editar` + `updateAiSystem`), borrar sistema (`deleteAiSystem`,
   cascada a evaluaciones/brechas, con confirmación cliente), y cambiar estado de brecha

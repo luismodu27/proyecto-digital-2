@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveOrg } from "./context";
 import type {
   AiSystem,
+  AssessmentRecord,
   EvidenceState,
   GapItem,
   RiskLevel,
@@ -46,6 +47,29 @@ export async function getAiSystems(): Promise<AiSystem[]> {
     evidenceState: (row.evidence_state ?? undefined) as
       | EvidenceState
       | undefined,
+  }));
+}
+
+/** Historial de evaluaciones de un sistema (más recientes primero). */
+export async function getSystemAssessments(
+  systemId: string,
+): Promise<AssessmentRecord[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data } = await supabase
+    .from("risk_assessments")
+    .select("id, level, rationale, evidence_state, attested_by_name, assessed_at")
+    .eq("organization_id", org)
+    .eq("ai_system_id", systemId)
+    .order("assessed_at", { ascending: false });
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    level: r.level as RiskLevel,
+    rationale: r.rationale,
+    evidenceState: (r.evidence_state ?? "declared") as EvidenceState,
+    attestedByName: r.attested_by_name ?? null,
+    assessedAt: String(r.assessed_at),
   }));
 }
 

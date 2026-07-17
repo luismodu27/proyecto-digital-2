@@ -29,3 +29,8 @@ export async function getSystemById(_id: string): Promise<null> {
   void _id;
   return null;
 }
+
+export async function getSystemAssessments(_id: string): Promise<never[]> {
+  void _id;
+  return [];
+}

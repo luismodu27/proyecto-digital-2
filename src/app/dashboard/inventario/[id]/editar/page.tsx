@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { DeleteSystemButton } from "@/components/dashboard/DeleteSystemButton";
-import { getSystemById, isSupabaseConfigured } from "@/lib/data";
+import { AssessmentHistory } from "@/components/dashboard/AssessmentHistory";
+import {
+  getSystemById,
+  getSystemAssessments,
+  isSupabaseConfigured,
+} from "@/lib/data";
 import { updateAiSystem } from "@/lib/data/actions";
 
 const field =
@@ -15,6 +20,7 @@ export default async function EditarSistemaPage({
 }) {
   const { id } = await params;
   const system = isSupabaseConfigured ? await getSystemById(id) : null;
+  const assessments = system ? await getSystemAssessments(id) : [];
 
   return (
     <>
@@ -92,6 +98,26 @@ export default async function EditarSistemaPage({
               </Link>
             </div>
           </form>
+
+          <div className="mt-6 max-w-xl rounded-2xl border border-line bg-paper-raised p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-display text-base font-semibold text-ink">
+                Historial de evaluaciones
+              </h2>
+              <ButtonLink
+                href={`/dashboard/riesgo/evaluar?system=${system.id}`}
+                variant="outline"
+                className="px-4 py-2 text-xs"
+              >
+                + Evaluar
+              </ButtonLink>
+            </div>
+            <p className="mb-5 mt-1 text-sm text-ink-soft">
+              Cada clasificación guardada queda registrada, con su nivel de respaldo
+              y quién la atestó.
+            </p>
+            <AssessmentHistory assessments={assessments} />
+          </div>
 
           <div className="mt-6 max-w-xl rounded-2xl border border-line bg-paper-raised p-6">
             <h2 className="font-display text-sm font-semibold text-ink">Zona de peligro</h2>

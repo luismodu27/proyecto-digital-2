@@ -16,6 +16,8 @@ export const getGapItems = () => repo.getGapItems();
 export const getSystemsForSelect = () => repo.getSystemsForSelect();
 export const getOrganizationName = () => repo.getOrganizationName();
 export const getSystemById = (id: string) => repo.getSystemById(id);
+export const getSystemAssessments = (id: string) =>
+  repo.getSystemAssessments(id);
 
 export { isSupabaseConfigured };
 export type { AiSystem, GapItem } from "@/lib/mock-data";

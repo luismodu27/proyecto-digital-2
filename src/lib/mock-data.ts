@@ -108,6 +108,16 @@ export type GapItem = {
   system: string;
 };
 
+/** Una evaluación de riesgo guardada (para el historial de un sistema). */
+export type AssessmentRecord = {
+  id: string;
+  level: RiskLevel;
+  rationale: string;
+  evidenceState: EvidenceState;
+  attestedByName: string | null;
+  assessedAt: string; // ISO
+};
+
 export const GAP_ITEMS: GapItem[] = [
   {
     id: "GAP-01",
