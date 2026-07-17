@@ -454,8 +454,13 @@ diseño, nombre, features grandes); autónomo en lo demás.
     **Publicar** (id de evento editable) / **Descartar** (con nota). Acciones `reg-pipeline-actions.ts`
     con toasts `cand-*`. Enlace "Bandeja de validación →" en el header del radar solo para validadores.
   - Build/lint verdes; **demo verificado con capturas** (radar intacto tras el merge + bandeja con los 2
-    candidatos y controles). **Pendiente:** el fundador aplica la 0011 y se añade como admin → entonces
-    verifico e2e por curl (RLS niega a no-admin, RPCs de aprobar/rechazar, aparición en el radar).
+    candidatos y controles). **Fundador aplicó la 0011 y se añadió como validador.**
+  - **Verificado e2e por curl (2026-07-17):** (seguridad) un usuario normal ve `is_platform_admin=false`,
+    lee `reg_events` (0) pero `reg_candidates`/`reg_sources` le devuelven [] por RLS, y `approve`/`reject`
+    responden "no autorizado". (bucle positivo, con un validador de prueba promovido por SQL) aprobar un
+    candidato draft → **lo publica en `reg_events`** (kind/date/scope correctos + `published_by`), marca el
+    candidato `approved` con reviewer+event_id, y una 2ª aprobación se bloquea ("ya fue revisado").
+    Limpieza hecha (evento+candidato borrados por el propio admin vía RLS). Todo ✅.
   - **Fase B (siguiente):** pgvector + embeddings + el Analista con Claude API. La dimensión del vector
     depende del proveedor (OpenAI 1536 / Voyage 1024) → **esa decisión de vendor/llave se toma al entrar
     en B**, no antes. Anthropic NO da embeddings; hará falta OpenAI o Voyage (coste → decisión del fundador).
@@ -464,16 +469,15 @@ diseño, nombre, features grandes); autónomo en lo demás.
 ## 11. Preguntas abiertas / próximos pasos de validación
 
 > **▶ RETOMAR AQUÍ (2026-07-17):** El fundador eligió **automatizar el foso**. **Fase A (la espina del
-> pipeline) HECHA y verificada en demo** — ver bitácora §10 (migración `0011_reg_pipeline.sql`, tablas
-> `platform_admins`/`reg_sources`/`reg_events`/`reg_candidates`, RPCs approve/reject, bandeja del
-> Validador en `/dashboard/vigilancia/candidatos`, read-path fusionado con fallback seguro). **BLOQUEO
-> ACTUAL:** el fundador debe **(1)** aplicar la migración `0011` en el SQL Editor y **(2)** insertarse
-> como validador (`insert into public.platform_admins (user_id) select id from auth.users where email =
-> '<su-email>';`). En cuanto lo haga → **verifico e2e por curl** (RLS niega a no-admin, aprobar publica
-> al radar, todo). **Fase B (siguiente incremento):** pgvector + embeddings + el Analista con Claude API;
-> requiere **decidir proveedor de embeddings** (OpenAI 1536 / Voyage 1024 — Anthropic no da embeddings)
-> y una **llave/API budget** (decisión del fundador). Pendientes de otras alternativas si se retoman:
-> (a) Deploy a Vercel — repo listo; (c) Pulido (forgot-password, captcha/rate-limit en waitlist).
+> pipeline) HECHA y VERIFICADA e2e** (demo + curl conectado; migración `0011` aplicada por el fundador,
+> que ya es `platform_admin`). Funciona el bucle completo: candidato → validador aprueba → publica en
+> `reg_events` → aparece en el radar de todos, con RLS blindando la cola a no-admins. Ver bitácora §10.
+> **NOTA:** el fundador nunca ha tenido una **app corriendo con botones** — todo se opera vía Supabase +
+> mi verificación por curl; por eso "abre la app y pulsa X" no aplica hasta el **deploy**. **SIGUIENTE
+> DECISIÓN (a elegir por el fundador):** (Fase B) pgvector + embeddings + el Analista con Claude API —
+> requiere **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic no da embeddings) + **llave/
+> budget**; ó (a) **Deploy a Vercel** (para tener app clicable de una vez — probablemente conviene YA,
+> dado que no hay UI navegable); ó (c) Pulido (forgot-password, captcha/rate-limit en waitlist).
 
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅
