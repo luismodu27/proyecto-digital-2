@@ -151,17 +151,36 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     framework: "eu-ai-act",
     title: "Aplicación general del Reglamento y transparencia (Art. 50)",
     summary:
-      "Desde el 2 de agosto de 2026 el Reglamento es de aplicación general, incluidas las obligaciones de transparencia del Art. 50.",
+      "Desde el 2 de agosto de 2026 el Reglamento es de aplicación general, incluidas las obligaciones de transparencia del Art. 50. El Digital Omnibus NO aplazó esta fecha para el deployer: el único alivio es un periodo de gracia hasta el 2 de diciembre de 2026 para el mecanismo de marcado legible por máquina del PROVEEDOR (Art. 50.2), y solo para la IA generativa ya en el mercado antes del 2 de agosto de 2026.",
     impact:
-      "Relevante para RRHH: si usas un chatbot conversacional con candidatos, debes informarles de que interactúan con una IA. También debe etiquetarse el contenido generado por IA.",
+      "Relevante para RRHH: si usas un chatbot conversacional con candidatos, debes informarles de que interactúan con una IA. También debe etiquetarse el contenido generado por IA. Ojo: la prórroga de marcado del Art. 50.2 es del proveedor, no tuya — tu deber como deployer de avisar al candidato de que habla con una IA sigue vigente el 2 de agosto de 2026, sin prórroga.",
     action:
       "Revisa que tu chatbot de reclutamiento avise de forma clara de que es una IA. Comprueba dónde generas o manipulas contenido con IA para etiquetarlo.",
-    articles: ["Art. 50"],
+    articles: ["Art. 50", "Art. 50.2"],
     source: {
-      label: "Calendario de aplicación del AI Act — Comisión Europea",
-      url: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+      label: "Art. 50 — AI Act Service Desk (Comisión Europea)",
+      url: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50",
     },
     scope: { riskLevels: ["limited", "high"] },
+  },
+  {
+    id: "eu-omnibus-art5-intimate",
+    date: "2026-12-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "Nueva práctica prohibida (Art. 5): imágenes íntimas no consentidas y CSAM",
+    summary:
+      "El Digital Omnibus añadió al Art. 5 dos nuevas prácticas prohibidas: los sistemas de IA que generan o manipulan imágenes íntimas realistas de una persona identificable sin su consentimiento libre, específico, informado e inequívoco, y los que generan o manipulan material de abuso sexual infantil (CSAM, en el sentido de la Directiva 2011/93/UE). La prohibición es aplicable desde el 2 de diciembre de 2026 (periodo transitorio fijado por el Omnibus).",
+    impact:
+      "Prohibición transversal, no específica de RRHH: en la práctica NO afecta a las herramientas de selección de personal (cribado de CVs, ranking, entrevistas, chatbots), salvo que tu organización genere o manipule imágenes o vídeo de personas con IA. Conviene conocerla porque es una práctica inaceptable, sujeta a las sanciones más altas del Reglamento (hasta 35 M€ o el 7% de la facturación mundial).",
+    action:
+      "Confirma que ningún sistema de tu inventario genere o manipule imágenes o vídeo de personas (deepfakes) sin salvaguardas. Si en el futuro incorporas IA generativa de imagen/vídeo, exige al proveedor evidencia de medidas técnicas que impidan estos usos. Para cribado de CVs y entrevistas, normalmente basta con dejar constancia de que no aplica.",
+    articles: ["Art. 5", "Directiva 2011/93/UE"],
+    source: {
+      label: "Consejo de la UE — luz verde final al Digital Omnibus (29 jun 2026)",
+      url: "https://www.consilium.europa.eu/en/press/press-releases/2026/06/29/artificial-intelligence-council-gives-final-green-light-to-simplify-and-streamline-rules/",
+    },
+    scope: { all: true },
   },
   {
     id: "eu-highrisk-annex-iii",

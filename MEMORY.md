@@ -317,11 +317,18 @@ diseño, nombre, features grandes); autónomo en lo demás.
     (el aplazamiento modifica las fechas de aplicación del 113; el 111 son transitorias) y `source` →
     nota oficial del **Consejo 29 jun 2026** (confirma 2 dic 2027 / 2 ago 2028); añadido `Cap. VII (gobernanza)`
     al evento de 2 ago 2025.
-  - **Pendiente de decidir (checkpoint del fundador):** el Digital Omnibus además (a) introdujo una
-    **nueva práctica prohibida del Art. 5** (contenido íntimo no consentido / CSAM, ~dic 2026) y
-    (b) pudo **reducir el periodo de gracia de transparencia del Art. 50**. No se añadieron al catálogo
-    (certeza media, dependen del texto final en el DOUE). Decidir si incluir (a) como evento y verificar (b).
-    Nota: 2 dic 2027 es fecha tope de un mecanismo condicional ("stop-the-clock" por normas armonizadas).
+  - **Checkpoint del fundador RESUELTO (2026-07-17, por decisión del fundador + experto):**
+    (a) **AÑADIDA** la nueva práctica prohibida del Art. 5 introducida por el Omnibus como evento
+    `eu-omnibus-art5-intimate` — **imágenes íntimas no consentidas + CSAM** (Directiva 2011/93/UE),
+    aplicable **2 dic 2026**, `scope: all`, sanción máxima (35 M€ / 7%). Encuadre honesto: prohibición
+    transversal que NO afecta a herramientas de selección salvo que se genere/manipule imagen o vídeo.
+    (b) **VERIFICADO el Art. 50:** el Omnibus **NO aplazó** la obligación del deployer (sigue el 2 ago 2026);
+    la única gracia (hasta 2 dic 2026) es del **marcado del proveedor (Art. 50.2)** para IA generativa legada.
+    Aclarado en el evento + fuente oficial (AI Act Service Desk de la Comisión). Certeza alta.
+  - **Caveat pendiente del DOUE:** falta confirmar el **punto/letra exacto** del Art. 5 para la nueva
+    prohibición (por eso `articles` cita solo "Art. 5", sin inventar el punto) y reconfirmar la fecha
+    del 2 dic 2026 con el texto consolidado. Nota: 2 dic 2027 (alto riesgo) es fecha tope de un mecanismo
+    condicional ("stop-the-clock" por normas armonizadas).
 - **Pendiente v2 de vigilancia:** persistir "marcar como revisado" (tabla + audit-trail), multi-marco
   (ISO 42001, NIST, leyes estatales EE.UU.), y la automatización de ingesta (los 4 agentes + RAG/pgvector).
 - _(las correcciones futuras del fundador se anotan aquí)_
