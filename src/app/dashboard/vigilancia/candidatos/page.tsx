@@ -171,12 +171,7 @@ function CandidateCard({
 
       {reviewable && c.status === "draft" ? (
         <div className="mt-5 border-t border-line pt-4">
-          <CandidateReviewControls
-            id={c.id}
-            proposedEventId={c.proposedEventId}
-            title={c.title}
-            publishable={Boolean(c.date && c.kind)}
-          />
+          <CandidateReviewControls c={c} />
         </div>
       ) : (
         c.status !== "draft" && (

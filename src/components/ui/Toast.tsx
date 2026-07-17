@@ -24,6 +24,7 @@ const MESSAGES: Record<string, string> = {
   "team-demo": "La gestión del equipo requiere conectar tu organización.",
   "team-error": "No se pudo completar la acción. Inténtalo de nuevo.",
   "cand-approved": "Candidato publicado en el radar regulatorio.",
+  "cand-saved": "Borrador del candidato guardado.",
   "cand-rejected": "Candidato descartado.",
   "cand-demo": "La validación de candidatos requiere conectar tu organización.",
   "cand-error": "No se pudo completar la acción. Revisa e inténtalo de nuevo.",
