@@ -47,6 +47,8 @@ create table if not exists public.reg_knowledge_chunks (
 alter table public.reg_knowledge_chunks enable row level security;
 
 -- Solo el equipo de plataforma lee/escribe el corpus (service_role bypassa RLS).
+-- (drop antes de create → re-ejecutable; create policy no es idempotente)
+drop policy if exists reg_knowledge_admin on public.reg_knowledge_chunks;
 create policy reg_knowledge_admin on public.reg_knowledge_chunks
   for all to authenticated
   using (public.is_platform_admin())

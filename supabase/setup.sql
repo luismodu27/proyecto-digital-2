@@ -1047,6 +1047,7 @@ create table if not exists public.reg_knowledge_chunks (
 
 alter table public.reg_knowledge_chunks enable row level security;
 
+drop policy if exists reg_knowledge_admin on public.reg_knowledge_chunks;
 create policy reg_knowledge_admin on public.reg_knowledge_chunks
   for all to authenticated
   using (public.is_platform_admin())
