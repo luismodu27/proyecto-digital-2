@@ -2,7 +2,12 @@ import Link from "next/link";
 import { SealMark } from "@/components/ui/SealMark";
 import { PrintButton } from "@/components/dashboard/PrintButton";
 import { LEGAL_PDF } from "@/components/ui/LegalNote";
-import { getAiSystems, getGapItems, getOrganizationName } from "@/lib/data";
+import {
+  getAiSystems,
+  getGapItems,
+  getOrganizationName,
+  getOrgJurisdictions,
+} from "@/lib/data";
 import {
   RISK_LABEL,
   RISK_ORDER,
@@ -34,10 +39,11 @@ const SEVERITY_COLOR = {
 } as const;
 
 export default async function InformeEjecutivoPage() {
-  const [systems, gaps, orgName] = await Promise.all([
+  const [systems, gaps, orgName, orgJur] = await Promise.all([
     getAiSystems(),
     getGapItems(),
     getOrganizationName(),
+    getOrgJurisdictions(),
   ]);
 
   const now = new Date();
@@ -67,7 +73,13 @@ export default async function InformeEjecutivoPage() {
     })
     .slice(0, 5);
 
-  const deadlines = upcomingDeadlines(now).slice(0, 3);
+  const deadlines = upcomingDeadlines(now)
+    .filter(
+      (e) =>
+        orgJur.length === 0 ||
+        orgJur.includes(FRAMEWORK_META[e.framework]?.jurisdiction ?? ""),
+    )
+    .slice(0, 3);
 
   const fecha = now.toLocaleDateString("es-ES", {
     day: "2-digit",

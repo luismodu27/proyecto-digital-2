@@ -9,8 +9,10 @@ import {
   getRegulatoryEvents,
   getCurrentMemberRole,
   getIsPlatformAdmin,
+  getOrgJurisdictions,
   isSupabaseConfigured,
 } from "@/lib/data";
+import { JurisdictionSettings } from "@/components/dashboard/JurisdictionSettings";
 import {
   REG_ACK_LABEL,
   type RegAck,
@@ -72,25 +74,33 @@ function FrameworkPill({ framework }: { framework: string }) {
   );
 }
 
-/** Chip de filtro por jurisdicción. */
+/** Chip de filtro por jurisdicción. `inNexus` marca las del nexo de la org. */
 function JurisdictionChip({
   label,
   href,
   active,
+  inNexus = false,
 }: {
   label: string;
   href: string;
   active: boolean;
+  inNexus?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
         active
           ? "border-brand bg-brand-soft text-brand-strong"
           : "border-line-strong text-ink-soft hover:bg-paper-sunken"
       }`}
     >
+      {inNexus && (
+        <span
+          className="size-1.5 rounded-full bg-brand"
+          aria-label="en tu nexo"
+        />
+      )}
       {label}
     </Link>
   );
@@ -153,33 +163,50 @@ export default async function VigilanciaPage({
   searchParams: Promise<{ j?: string }>;
 }) {
   const sp = await searchParams;
-  const [systems, acks, role, events, isAdmin] = await Promise.all([
+  const [systems, acks, role, events, isAdmin, orgJur] = await Promise.all([
     getAiSystems(),
     getRegulatoryAcks(),
     getCurrentMemberRole(),
     getRegulatoryEvents(),
     getIsPlatformAdmin(),
+    getOrgJurisdictions(),
   ]);
   const now = new Date();
   const canManage =
     isSupabaseConfigured && (role === "owner" || role === "admin");
 
+  const jurisdictionOf = (e: RegulatoryEvent) =>
+    FRAMEWORK_META[e.framework]?.jurisdiction;
+
   // Jurisdicciones presentes en el catálogo (para el filtro multi-marco).
   const present = new Set(
     events
-      .map((e) => FRAMEWORK_META[e.framework]?.jurisdiction)
+      .map(jurisdictionOf)
       .filter((j): j is RegJurisdiction => Boolean(j)),
   );
   const jurisdictions = JURISDICTION_ORDER.filter((j) => present.has(j));
-  const activeJ =
-    sp.j && jurisdictions.includes(sp.j as RegJurisdiction)
+
+  // Nexo de la organización (solo jurisdicciones que existen en el catálogo).
+  const nexus = orgJur.filter((j): j is RegJurisdiction =>
+    jurisdictions.includes(j as RegJurisdiction),
+  );
+
+  // Modo de vista: ?j=all → todas · ?j=<cód> → una · (sin ?j) → nexo (o todas).
+  const showAll = sp.j === "all";
+  const singleJ =
+    sp.j && sp.j !== "all" && jurisdictions.includes(sp.j as RegJurisdiction)
       ? (sp.j as RegJurisdiction)
       : null;
-  const shown = activeJ
-    ? events.filter(
-        (e) => FRAMEWORK_META[e.framework]?.jurisdiction === activeJ,
-      )
-    : events;
+  const usingNexus = !showAll && !singleJ && nexus.length > 0;
+
+  const shown = singleJ
+    ? events.filter((e) => jurisdictionOf(e) === singleJ)
+    : usingNexus
+      ? events.filter((e) => {
+          const j = jurisdictionOf(e);
+          return j != null && nexus.includes(j);
+        })
+      : events;
 
   const withDays = shown.map((e) => ({
     ev: e,
@@ -218,21 +245,38 @@ export default async function VigilanciaPage({
         }
       />
 
+      {/* Configurador del nexo de jurisdicción (owner/admin) */}
+      {canManage && jurisdictions.length > 1 && (
+        <JurisdictionSettings selected={nexus} />
+      )}
+
       {/* Filtro por jurisdicción (solo si hay más de un marco) */}
       {jurisdictions.length > 1 && (
         <div className="mb-6 flex flex-wrap items-center gap-2">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
             Jurisdicción
           </span>
-          <JurisdictionChip label="Todas" href="/dashboard/vigilancia" active={!activeJ} />
+          {nexus.length > 0 && (
+            <JurisdictionChip
+              label="Mis jurisdicciones"
+              href="/dashboard/vigilancia"
+              active={usingNexus}
+            />
+          )}
           {jurisdictions.map((j) => (
             <JurisdictionChip
               key={j}
               label={JURISDICTION_LABEL[j]}
               href={`/dashboard/vigilancia?j=${j}`}
-              active={activeJ === j}
+              active={singleJ === j}
+              inNexus={nexus.includes(j)}
             />
           ))}
+          <JurisdictionChip
+            label="Todas"
+            href="/dashboard/vigilancia?j=all"
+            active={showAll || (!singleJ && nexus.length === 0)}
+          />
         </div>
       )}
 
@@ -328,7 +372,11 @@ export default async function VigilanciaPage({
       <section>
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
           Cronología regulatoria
-          {activeJ ? ` · ${JURISDICTION_LABEL[activeJ]}` : ""}
+          {singleJ
+            ? ` · ${JURISDICTION_LABEL[singleJ]}`
+            : usingNexus
+              ? " · mis jurisdicciones"
+              : ""}
         </h3>
         <div className="space-y-3">
           {feed.map(({ ev, days, affected }) => (

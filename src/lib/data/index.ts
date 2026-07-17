@@ -27,6 +27,7 @@ export const getRegulatoryAcks = () => repo.getRegulatoryAcks();
 export const getRegulatoryEvents = () => repo.getRegulatoryEvents();
 export const getRegCandidates = () => repo.getRegCandidates();
 export const getIsPlatformAdmin = () => repo.getIsPlatformAdmin();
+export const getOrgJurisdictions = () => repo.getOrgJurisdictions();
 
 export { isSupabaseConfigured };
 export type {

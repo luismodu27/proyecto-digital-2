@@ -393,6 +393,20 @@ export async function getRegCandidates(): Promise<RegCandidate[]> {
   return (data as unknown as RegCandidateRow[]).map(rowToCandidate);
 }
 
+/** Jurisdicciones donde la organización activa tiene nexo (dónde contrata). */
+export async function getOrgJurisdictions(): Promise<string[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data } = await supabase
+    .from("organizations")
+    .select("jurisdictions")
+    .eq("id", org)
+    .maybeSingle();
+  const j = (data?.jurisdictions ?? []) as unknown;
+  return Array.isArray(j) ? j.map((x) => String(x)) : [];
+}
+
 /** ¿El usuario actual es validador de plataforma (personal de Attesta)? */
 export async function getIsPlatformAdmin(): Promise<boolean> {
   const supabase = await createClient();

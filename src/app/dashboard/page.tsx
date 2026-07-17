@@ -3,7 +3,7 @@ import { PageHeader, StatCard, Meter } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
-import { getAiSystems } from "@/lib/data";
+import { getAiSystems, getOrgJurisdictions } from "@/lib/data";
 import { avgCompliance, riskCounts } from "@/lib/mock-data";
 import {
   upcomingDeadlines,
@@ -17,7 +17,10 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function DashboardOverview() {
-  const systems = await getAiSystems();
+  const [systems, orgJur] = await Promise.all([
+    getAiSystems(),
+    getOrgJurisdictions(),
+  ]);
   const counts = riskCounts(systems);
   const avg = avgCompliance(systems);
   const highRisk = counts.high + counts.unacceptable;
@@ -26,7 +29,12 @@ export default async function DashboardOverview() {
     .slice(0, 4);
 
   const now = new Date();
-  const nextDeadline = upcomingDeadlines(now)[0];
+  // Respeta el nexo de jurisdicción: si está configurado, solo hitos de esas
+  // jurisdicciones; si no, todos.
+  const inNexus = (e: RegulatoryEvent) =>
+    orgJur.length === 0 ||
+    orgJur.includes(FRAMEWORK_META[e.framework]?.jurisdiction ?? "");
+  const nextDeadline = upcomingDeadlines(now).filter(inNexus)[0];
   const nextDays = nextDeadline ? daysUntil(nextDeadline.date, now) : 0;
   const nextAffected = nextDeadline
     ? affectedSystems(nextDeadline, systems).length

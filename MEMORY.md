@@ -492,6 +492,24 @@ diseño, nombre, features grandes); autónomo en lo demás.
     producción (certeza media). (d) Illinois: reconfirmar nº de ley pública de HB 3773 y deep-link IHRA.
   - Build/lint verdes; **demo verificado con capturas** (radar con chips de jurisdicción + 6 marcos; filtro
     NY deja solo los 2 eventos LL144). Detalle completo del experto en `scratchpad/us-frameworks.md`.
+- **2026-07-17** · **Radar v2 — nexo de jurisdicción por organización (Capa 7).** Cierra el caveat
+  territorial del multi-marco: las leyes US son territoriales, así que cada organización declara **dónde
+  contrata** y el radar prioriza/filtra por esas jurisdicciones (para no sobre-alarmar a un cliente que
+  solo opera en, p. ej., la UE).
+  - **Migración `0012_org_jurisdictions.sql`** (⚠️ aplicar; aditiva, sin `drop`): columna
+    `organizations.jurisdictions text[] default '{}'` + RPC **`set_org_jurisdictions(org, jur[])`**
+    (security definer, guard owner/admin vía `user_has_role`, valida que los códigos ∈
+    {eu,us-ny,us-co,us-il,us-federal} y deduplica). Añadida a setup.sql.
+  - **Data:** `getOrgJurisdictions()` (supabase lee la columna; mock devuelve `["eu","us-ny"]` para la
+    demo) + acción `setOrgJurisdictions` (`jurisdiction-actions.ts`, toasts `jur-*`). Fallback seguro: si
+    la columna aún no existe, devuelve [] → el radar muestra todas (comportamiento previo, no rompe).
+  - **UI radar:** modo de vista por `?j`: `all`→todas, `<cód>`→una, sin `?j`→**nexo** (o todas si vacío).
+    Chips: "Mis jurisdicciones" (default), cada jurisdicción presente (con **punto** si está en el nexo),
+    y "Todas". Configurador colapsable `JurisdictionSettings` (checkboxes, owner/admin — gated por
+    `canManage`, por eso NO se ve en demo). El resumen y el informe también respetan el nexo.
+  - Build/lint verdes; **demo verificado con capturas**: nexo UE+NY oculta CO/IL/Federal por defecto;
+    "Todas" las revela. **Pendiente:** el fundador aplica la 0012 → verifico e2e por curl (set/lectura +
+    guard owner/admin + validación de códigos).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -501,12 +519,12 @@ diseño, nombre, features grandes); autónomo en lo demás.
 > aplicada, el fundador es `platform_admin`) **+ multi-marco** (EU AI Act + 5 marcos US de IA-empleo —
 > NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto — con filtro por jurisdicción,
 > verificado por el experto). **NOTA:** el fundador **no quiere deploy aún** ("seguiremos con sugerencias
-> que me des") y nunca ha tenido app con botones (todo se opera vía Supabase + curl). **SIGUIENTES
-> CANDIDATOS (yo sugiero, él elige):** (Fase B) pgvector + embeddings + Analista con Claude API — necesita
-> **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic no da) + **llave/budget**; **v2 del
-> radar** = nexo de jurisdicción por organización (para no sobre-alarmar con leyes territoriales US);
-> **plan de acción editable** (Capa 2, tareas/responsables); **Vigía determinista** (monitor de fuentes).
-> Pendientes de siempre: (a) Deploy a Vercel; (c) Pulido (forgot-password, captcha/rate-limit waitlist).
+> que me des") y nunca ha tenido app con botones (todo se opera vía Supabase + curl). **v2 del radar
+> (nexo de jurisdicción por organización) HECHO** (migración `0012` pendiente de aplicar por el fundador →
+> luego verifico e2e). **SIGUIENTES CANDIDATOS (yo sugiero, él elige):** (Fase B) pgvector + embeddings +
+> Analista con Claude API — necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic no
+> da) + **llave/budget**; **plan de acción editable** (Capa 2, tareas/responsables); **Vigía determinista**
+> (monitor de fuentes). Pendientes de siempre: (a) Deploy a Vercel; (c) Pulido (forgot-password, captcha).
 
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅

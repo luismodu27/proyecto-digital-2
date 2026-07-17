@@ -86,6 +86,11 @@ export async function getIsPlatformAdmin(): Promise<boolean> {
   return true;
 }
 
+export async function getOrgJurisdictions(): Promise<string[]> {
+  // Demo: organización europea que además contrata en Nueva York.
+  return ["eu", "us-ny"];
+}
+
 /**
  * Dossier de un sistema de ejemplo (modo demo). `id` es el código (SYS-xxx).
  * No hay historial de evaluaciones porque los datos de ejemplo no son reales.

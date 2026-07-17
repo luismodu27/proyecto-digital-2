@@ -27,6 +27,9 @@ const MESSAGES: Record<string, string> = {
   "cand-rejected": "Candidato descartado.",
   "cand-demo": "La validación de candidatos requiere conectar tu organización.",
   "cand-error": "No se pudo completar la acción. Revisa e inténtalo de nuevo.",
+  "jur-saved": "Jurisdicciones actualizadas.",
+  "jur-demo": "Configurar jurisdicciones requiere conectar tu organización.",
+  "jur-error": "No se pudieron guardar las jurisdicciones.",
 };
 
 /**
