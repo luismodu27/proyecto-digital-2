@@ -1,12 +1,8 @@
 import { PageHeader } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
-import {
-  AI_SYSTEMS,
-  RISK_LABEL,
-  RISK_ORDER,
-  type RiskLevel,
-} from "@/lib/mock-data";
+import { getAiSystems } from "@/lib/data";
+import { RISK_LABEL, RISK_ORDER, type RiskLevel } from "@/lib/mock-data";
 
 const guidance: Record<RiskLevel, string> = {
   unacceptable: "Prohibido bajo el EU AI Act. Debe retirarse de uso.",
@@ -15,10 +11,11 @@ const guidance: Record<RiskLevel, string> = {
   minimal: "Sin obligaciones específicas. Buenas prácticas recomendadas.",
 };
 
-export default function RiesgoPage() {
+export default async function RiesgoPage() {
+  const allSystems = await getAiSystems();
   const grouped = RISK_ORDER.map((level) => ({
     level,
-    systems: AI_SYSTEMS.filter((s) => s.risk === level),
+    systems: allSystems.filter((s) => s.risk === level),
   }));
 
   return (

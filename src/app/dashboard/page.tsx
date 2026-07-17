@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { PageHeader, StatCard, Meter } from "@/components/dashboard/parts";
 import { RiskBadge } from "@/components/ui/RiskBadge";
+import { getAiSystems } from "@/lib/data";
 import {
-  AI_SYSTEMS,
   RISK_LABEL,
   RISK_ORDER,
   avgCompliance,
@@ -17,11 +17,12 @@ const RISK_COLOR: Record<RiskLevel, string> = {
   minimal: "#0b6b4e",
 };
 
-export default function DashboardOverview() {
-  const counts = riskCounts(AI_SYSTEMS);
-  const avg = avgCompliance(AI_SYSTEMS);
+export default async function DashboardOverview() {
+  const systems = await getAiSystems();
+  const counts = riskCounts(systems);
+  const avg = avgCompliance(systems);
   const highRisk = counts.high + counts.unacceptable;
-  const recent = [...AI_SYSTEMS]
+  const recent = [...systems]
     .sort((a, b) => a.compliance - b.compliance)
     .slice(0, 4);
 
@@ -33,7 +34,7 @@ export default function DashboardOverview() {
       />
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Sistemas de IA" value={AI_SYSTEMS.length} hint="en inventario" />
+        <StatCard label="Sistemas de IA" value={systems.length} hint="en inventario" />
         <StatCard
           label="Alto riesgo"
           value={highRisk}
@@ -52,7 +53,9 @@ export default function DashboardOverview() {
           <ul className="mt-5 space-y-4">
             {RISK_ORDER.map((level) => {
               const n = counts[level];
-              const pct = Math.round((n / AI_SYSTEMS.length) * 100);
+              const pct = systems.length
+                ? Math.round((n / systems.length) * 100)
+                : 0;
               return (
                 <li key={level} className="flex items-center gap-4">
                   <span className="w-32 shrink-0 text-sm text-ink-soft">

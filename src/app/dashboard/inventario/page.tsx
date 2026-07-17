@@ -1,9 +1,10 @@
 import { PageHeader, Meter } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
-import { AI_SYSTEMS } from "@/lib/mock-data";
+import { getAiSystems } from "@/lib/data";
 
-export default function InventarioPage() {
+export default async function InventarioPage() {
+  const systems = await getAiSystems();
   return (
     <>
       <PageHeader
@@ -30,7 +31,15 @@ export default function InventarioPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {AI_SYSTEMS.map((s) => (
+              {systems.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-12 text-center text-sm text-muted">
+                    Aún no hay sistemas registrados. Empieza con
+                    <span className="text-ink"> + Registrar sistema</span>.
+                  </td>
+                </tr>
+              )}
+              {systems.map((s) => (
                 <tr key={s.id} className="transition-colors hover:bg-paper-sunken/50">
                   <td className="px-5 py-4">
                     <p className="font-medium text-ink">{s.name}</p>

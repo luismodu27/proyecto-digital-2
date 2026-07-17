@@ -1,0 +1,68 @@
+import { createClient } from "@/lib/supabase/server";
+import { getActiveOrg } from "./context";
+import type {
+  AiSystem,
+  GapItem,
+  RiskLevel,
+} from "@/lib/mock-data";
+
+/** Mapea la severidad de BD (en) a la del modelo de UI (es). */
+const SEVERITY_ES: Record<string, GapItem["severity"]> = {
+  high: "alta",
+  medium: "media",
+  low: "baja",
+};
+
+/**
+ * Repositorio real sobre Supabase. RLS garantiza el aislamiento por tenant;
+ * además filtramos por la organización activa.
+ */
+export async function getAiSystems(): Promise<AiSystem[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+
+  const { data, error } = await supabase
+    .from("ai_systems")
+    .select("*")
+    .eq("organization_id", org)
+    .order("created_at", { ascending: true });
+
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.code ?? row.id,
+    name: row.name,
+    owner: row.owner ?? "",
+    domain: row.domain ?? "",
+    vendor: row.vendor ?? "",
+    risk: (row.risk_level ?? "minimal") as RiskLevel,
+    compliance: row.compliance_pct ?? 0,
+    lastReviewed: row.last_reviewed_at
+      ? String(row.last_reviewed_at).slice(0, 10)
+      : "",
+  }));
+}
+
+export async function getGapItems(): Promise<GapItem[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+
+  const { data, error } = await supabase
+    .from("gap_items")
+    .select("*, ai_systems(code)")
+    .eq("organization_id", org)
+    .order("created_at", { ascending: true });
+
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    requirement: row.requirement,
+    article: row.article ?? "",
+    status: row.status as GapItem["status"],
+    severity: SEVERITY_ES[row.severity] ?? "media",
+    system: row.ai_systems?.code ?? row.ai_system_id,
+  }));
+}

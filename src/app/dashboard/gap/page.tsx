@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
-import { GAP_ITEMS } from "@/lib/mock-data";
+import { getGapItems } from "@/lib/data";
 
 const statusMeta = {
   missing: { label: "Falta", cls: "bg-[#f7e4e2] text-[#8f271f] border-[#e6b6b1]" },
@@ -14,8 +14,9 @@ const severityMeta = {
   baja: "text-muted",
 } as const;
 
-export default function GapPage() {
-  const open = GAP_ITEMS.filter((g) => g.status !== "done").length;
+export default async function GapPage() {
+  const gapItems = await getGapItems();
+  const open = gapItems.filter((g) => g.status !== "done").length;
 
   return (
     <>
@@ -30,7 +31,7 @@ export default function GapPage() {
       />
 
       <div className="space-y-3">
-        {GAP_ITEMS.map((g) => {
+        {gapItems.map((g) => {
           const st = statusMeta[g.status];
           return (
             <article

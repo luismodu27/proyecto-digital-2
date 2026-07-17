@@ -85,8 +85,11 @@ captar leads + esqueleto del dashboard (app shell). (2) Backend real (datos) des
 - **Diseño UI:** Magic Patterns (MCP) para explorar diseño creativo/minimalista y original.
 - **Docs de librerías:** Context7 (MCP) — consultar SIEMPRE antes de asumir APIs.
 - **Despliegue objetivo:** Vercel (por confirmar).
-- **Datos/Backend:** por decidir (candidatos: Postgres + Prisma; Supabase para arrancar rápido).
-  → Decisión pendiente en checkpoint de arquitectura.
+- **Datos/Backend:** **Supabase** (Postgres + Auth + RLS) — DECIDIDO. Región **UE**.
+  Aislamiento multi-tenant por `organization_id` con RLS; audit-trail inmutable por triggers.
+  Un usuario puede pertenecer a **varias organizaciones** (N). Capa de datos `src/lib/data`
+  con switch demo/real (`isSupabaseConfigured`). Migraciones en `supabase/migrations/`.
+  Guía: `docs/supabase.md`.
 
 > Toda dependencia o API se verifica con Context7 antes de escribir código contra ella.
 
@@ -143,6 +146,14 @@ diseño, nombre, features grandes); autónomo en lo demás.
   1. La API devuelve un solo nivel; un sistema puede ser alto + limitado a la vez (transparencia se suma).
   2. Distinguir el **rol del cliente** (provider vs deployer): el ICP son deployers → foco en Arts. 26, 27, 50.
   3. La excepción del Art. 6(3) debe **documentarse** (Art. 6(4)+49(2)) → generar esa evidencia, no solo concluir.
+- **2026-07-17** · **Backend Supabase — fundación lista para conectar** (diseño por
+  `product-architect`). Migraciones SQL (`supabase/migrations/`): esquema (organizations,
+  memberships, ai_systems, risk_assessments, gap_items, audit_log), RLS multi-tenant con
+  funciones pivote `security definer`, audit-trail inmutable por triggers, y RPC de onboarding.
+  Capa `src/lib/data` con switch demo/real: el dashboard ya lee de la fachada; **la demo
+  sigue idéntica** sin credenciales. Clientes `@supabase/ssr` (browser/server). Build/lint verdes.
+  Defaults adoptados: región UE, N orgs por usuario, audit por triggers (hash-chain en fase 2).
+  **Falta credenciales del fundador** para activar (URL + anon key) + auth UI + write-path.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -151,7 +162,10 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - ~~Alcance del MVP~~ → confirmado ✅
 - ~~Landing + app shell~~ → hecho ✅ (con datos de ejemplo)
 - ~~Asistente de clasificación de riesgo~~ → hecho ✅ (lógica en memoria, sin persistir aún)
-- **Backend/datos** (Supabase vs Postgres+Prisma) — siguiente incremento grande.
+- ~~Backend/datos~~ → **Supabase**, fundación lista ✅ (falta conectar credenciales + auth + writes).
+- **Credenciales Supabase del fundador** (URL + anon key) para activar el modo real.
+- **Auth UI** (login/registro) + middleware de sesión + onboarding.
+- **Write-path**: persistir clasificación de riesgo, alta/edición de sistemas y brechas.
 - Conectar formulario de waitlist a un destino real (CRM / lista).
 - Exportación real a PDF + audit-trail íntegro.
 - Autenticación y multi-tenancy.
