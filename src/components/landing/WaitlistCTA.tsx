@@ -10,6 +10,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function WaitlistCTA() {
   const [email, setEmail] = useState("");
+  // Honeypot anti-bots: campo oculto que un humano nunca rellena.
+  const [company, setCompany] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -17,6 +19,12 @@ export function WaitlistCTA() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    // Bot detectado: fingimos éxito sin escribir nada.
+    if (company) {
+      setSubmitted(true);
+      return;
+    }
     if (!EMAIL_RE.test(email.trim())) {
       setError("Introduce un correo válido (p. ej. tu@empresa.com).");
       return;
@@ -69,6 +77,19 @@ export function WaitlistCTA() {
               <label htmlFor="waitlist-email" className="sr-only">
                 Correo de trabajo
               </label>
+              {/* Honeypot: fuera de pantalla y accesiblemente oculto. */}
+              <div className="absolute -left-[9999px]" aria-hidden>
+                <label htmlFor="waitlist-company">No rellenar</label>
+                <input
+                  id="waitlist-company"
+                  name="company"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                />
+              </div>
               <input
                 id="waitlist-email"
                 type="email"

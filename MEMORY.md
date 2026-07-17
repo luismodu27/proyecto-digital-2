@@ -553,6 +553,34 @@ diseño, nombre, features grandes); autónomo en lo demás.
   - **Demo:** cambiada la fecha de la tarea de ejemplo `task-demo-2` a una pasada (14-jul) para que el
     demo muestre 1 vencida + 1 próxima. Lint/tsc verdes; **verificado con capturas** (resumen y plan
     coherentes: badge "1 vencida", "venció hace 3 días" / "vence en 14 días").
+- **2026-07-17** · **Pulido de auth — recuperación de contraseña + honeypot (parte 1 de "opción 3").**
+  Flujo completo de "olvidé mi contraseña", sin dependencias externas.
+  - **Ruta `src/app/auth/callback/route.ts`** (GET): callback de enlaces de correo (confirmación y
+    recuperación). Robusto a los **dos** formatos de Supabase: `?code=` → `exchangeCodeForSession`;
+    `?token_hash=&type=` → `verifyOtp`. Sanea `next` (debe empezar por `/` → **sin open-redirects**);
+    enlace inválido → `/login?error=auth_link`.
+  - **Páginas** (patrón login: server→`AuthShell`→form client, gate `isSupabaseConfigured`):
+    `/reset-password` (pide correo → `resetPasswordForEmail` con `redirectTo=<origin>/auth/callback?next=/reset-password/update`)
+    y `/reset-password/update` (fija la nueva vía `updateUser({password})`; si no hay sesión de
+    recuperación → "Enlace no válido → Solicitar otro enlace"). Componentes `ResetRequestForm.tsx` /
+    `ResetUpdateForm.tsx`.
+  - **AuthForm:** enlace "¿Olvidaste tu contraseña?" (solo en login) + prop `initialError`; `login/page`
+    ahora async, lee `?error=auth_link` y lo muestra.
+  - **Anti-abuso sin dependencias:** honeypot (campo oculto `company`) en `ResetRequestForm` y
+    `WaitlistCTA` (bot → finge éxito, no escribe). **Anti-enumeración**: la solicitud de recuperación
+    siempre dice "revisa tu correo" salvo rate-limit o error de config de redirect (que sí se muestra
+    porque no filtra cuentas). El rate-limit real de auth lo aplica Supabase server-side por defecto.
+  - **Verificado:** build+lint+tsc verdes; **capturas** de las 3 pantallas (login con enlace, solicitud,
+    update sin sesión→"Enlace no válido"). **e2e curl**: `updateUser({password})` con sesión → **200**;
+    la contraseña **nueva inicia sesión ✓** y la **vieja se rechaza ✓**; guard anti open-redirect ✓.
+    El endpoint `recover` con `redirect_to` a localhost da **400** (no allowlisted) — **esperado**.
+  - **⚠️ CONFIG PENDIENTE DEL FUNDADOR (cuando haya deploy):** en Supabase → **Authentication → URL
+    Configuration**, añadir a **Redirect URLs** la del callback desplegado (p. ej.
+    `https://<dominio>/auth/callback`) y fijar el **Site URL**. Sin eso, `resetPasswordForEmail` con
+    nuestro `redirectTo` responde 400. (El cambio de contraseña en sí ya funciona.) Opcional: plantilla
+    de correo de recuperación con `token_hash` para robustez entre navegadores.
+  - **Pendiente de la opción 3 (checkpoint):** **captcha** (Cloudflare Turnstile/hCaptcha) — requiere
+    llave del proveedor (gratis) + activarlo en Supabase Auth; decisión del fundador.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación

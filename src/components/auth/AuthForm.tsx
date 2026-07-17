@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
@@ -32,7 +33,7 @@ function friendlyError(message: string): string {
   return "Algo salió mal. Inténtalo de nuevo.";
 }
 
-export function AuthForm() {
+export function AuthForm({ initialError }: { initialError?: string } = {}) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
@@ -42,7 +43,7 @@ export function AuthForm() {
     email?: string;
     password?: string;
   }>({});
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError ?? null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -149,9 +150,22 @@ export function AuthForm() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-ink">
-            Contraseña
-          </label>
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-ink"
+            >
+              Contraseña
+            </label>
+            {mode === "login" && (
+              <Link
+                href="/reset-password"
+                className="text-xs font-medium text-brand transition-colors hover:text-brand-strong"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            )}
+          </div>
           <div className="relative">
             <input
               id="password"
