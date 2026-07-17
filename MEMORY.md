@@ -189,6 +189,18 @@ diseño, nombre, features grandes); autónomo en lo demás.
   informe con formato de documento (`/dashboard/gap/informe`) + impresión a PDF del navegador
   (print CSS, sidebar oculto, marca Attesta). Verificado con captura y PDF real generado.
   Enfoque elegido: print-to-PDF (sin dependencias pesadas) en vez de @react-pdf/renderer.
+- **2026-07-17** · **Motor de recomendaciones + Plan de acción** (idea del fundador: dar
+  sugerencias de mejora, no solo diagnóstico). `src/lib/recommendations.ts` convierte nivel de
+  riesgo + brechas en recomendaciones accionables (título, acción, artículo, prioridad, esfuerzo).
+  Nueva vista `/dashboard/plan` (puntos críticos + priorizado + sistemas afectados) y sección
+  "Puntos críticos y próximos pasos" en el asistente. Verificado por `compliance-domain-expert`.
+- **Corrección clave del experto (rol provider vs deployer):** varias acciones estaban redactadas
+  como si el cliente FABRICARA el sistema. Reescritas para el DEPLOYER: Arts. 9/10/11/12/13/15 →
+  "verifica que el proveedor lo hizo / exige evidencia" (prioridad media); Arts. 14 y 26 críticas
+  (deberes propios del deployer); **Art. 12** añade conservar logs ≥6 meses (Art. 26.6); **Art. 27
+  (FRIA)** con alcance real (organismos públicos + Anexo III 5(b)/5(c): crédito y seguros vida/salud);
+  **Art. 49** corregido: un deployer privado mid-market normalmente NO registra (lo hace el proveedor).
+  Regla reforzada: distinguir SIEMPRE provider vs deployer en textos regulatorios (nuestro ICP = deployer).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
