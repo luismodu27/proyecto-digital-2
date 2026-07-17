@@ -428,6 +428,17 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
+> **▶ RETOMAR AQUÍ (2026-07-17, tras compact):** MVP funcional completo y verificado e2e —
+> inventario, riesgo (con evidencia), gap, plan, policy packs, dossier PDF, informe ejecutivo,
+> vigilancia regulatoria v1+v2 (radar + "marcar como revisado" auditado), equipo/roles, registro
+> de actividad. Todo pusheado a `claude/startup-project-setup-612pzs` (árbol limpio). Migraciones
+> aplicadas por el fundador hasta la **0010**. **El fundador va a elegir entre las alternativas que
+> propuse:** (a) **Deploy a Vercel** — está listo; yo preparo repo (verificar next.config/.gitignore/
+> sin secretos + documentar `NEXT_PUBLIC_SUPABASE_URL/ANON_KEY`) y guío los clics en Vercel + añadir
+> la Redirect URL en Supabase Auth. (b) **Automatización del foso** (RAG sobre la ley + agentes
+> Vigía→Analista→Actualizador→Validador; pgvector en Supabase) — el paso más ambicioso de la Capa 7.
+> (c) **Pulido**: forgot-password, captcha/rate-limit en waitlist. Esperar la señal del fundador.
+
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅
 - ~~Landing + app shell~~ → hecho ✅ (con datos de ejemplo)
