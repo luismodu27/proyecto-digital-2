@@ -1,5 +1,6 @@
 import { Logo } from "@/components/ui/Logo";
 import { ButtonLink } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const nav = [
   { label: "Producto", href: "#producto" },
@@ -25,6 +26,7 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <ButtonLink href="/login" variant="ghost" className="hidden sm:inline-flex">
             Entrar
           </ButtonLink>

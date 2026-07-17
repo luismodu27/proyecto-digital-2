@@ -241,7 +241,14 @@ diseño, nombre, features grandes); autónomo en lo demás.
   animados, sidebar con hover sutil. (3) Auth split-screen (`AuthShell`) para login/onboarding,
   sello en el formulario, y **toasts** sutiles (`Toaster`, disparados por `?toast=` tras server
   actions). Regla de diseño: animaciones **sutiles y suaves, nunca infantiles**.
-  Pendiente opcional: modo oscuro.
+- **2026-07-17** · **Modo oscuro.** Tokens de color conmutables por `data-theme` (override en
+  `[data-theme="dark"]` + `@media prefers-color-scheme`). Sistema de **tonos** semánticos
+  (`--tone-*`: danger/warn/gold/good/info/neutral) para que badges/estados adapten claro↔oscuro.
+  `ThemeToggle` (usa `useSyncExternalStore`) en header y sidebar; script anti-parpadeo en el
+  layout; respeta la preferencia del sistema. El informe PDF se mantiene claro siempre (documento).
+  **Regla:** todo color semántico nuevo va por token o tono, NUNCA hex hardcodeado en clases.
+- **Auth validación**: mensajes en español (traductor de errores de Supabase), validación por
+  campo, mostrar/ocultar contraseña. Hueco pendiente: flujo "olvidé mi contraseña".
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -319,9 +326,11 @@ diseño, nombre, features grandes); autónomo en lo demás.
   (Vigía → Analista → Actualizador → Validador con humano-en-el-bucle). Audit-trail ya lo tenemos.
 - **Pruebas/enforcement:** integrar Evidently (gratis) y, más adelante, OPA/Rego.
 
-### 13.5 Decisiones abiertas del fundador (pendientes)
-- **¿Vertical o horizontal?** (doc recomienda vertical para la cuña; candidatos: RRHH, crédito, seguros, salud, edtech).
-- **¿Región de arranque?** Europa (deadline) vs LatAm (menos competencia).
+### 13.5 Decisiones del fundador
+- **VERTICAL = RRHH / reclutamiento** ✅ (2026-07-17). Cuña: IA que filtra CVs (alto riesgo
+  directo, Anexo III empleo). Implicaciones futuras: mensajería, ejemplos y "policy pack"
+  orientados a RRHH; ICP concreto = responsable de RRHH/Talent + Legal en empresa mediana.
+- **REGIÓN = abierta** por ahora ✅ (foco en producto; decidir tras primeras entrevistas).
 - **Precios de mercado (referencia):** mid-market gobernanza de IA **30–50k $/año**; pyme desde ~5k €/año. (Nuestro €390/mes en la landing es orientativo/early-access.)
 - **Canal:** consultores/auditores como aliados ("powered by" + reparto), no competencia.
 

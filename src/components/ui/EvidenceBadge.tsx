@@ -1,9 +1,12 @@
 import { EVIDENCE_LABEL, type EvidenceState } from "@/lib/mock-data";
 
 const styles: Record<EvidenceState, string> = {
-  declared: "bg-paper-sunken text-ink-soft border-line-strong",
-  evidenced: "bg-brand-soft text-brand-strong border-[#bfdccf]",
-  reviewed: "bg-[#e8eef7] text-[#33507e] border-[#c3d2ea]",
+  declared:
+    "bg-[var(--tone-neutral-bg)] text-[var(--tone-neutral-fg)] border-[var(--tone-neutral-bd)]",
+  evidenced:
+    "bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)] border-[var(--tone-good-bd)]",
+  reviewed:
+    "bg-[var(--tone-info-bg)] text-[var(--tone-info-fg)] border-[var(--tone-info-bd)]",
 };
 
 /** Nivel de respaldo de una autoevaluación (declarado / con evidencia / revisado). */

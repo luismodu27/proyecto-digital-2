@@ -138,13 +138,13 @@ export function AuthForm() {
             aria-invalid={!!fieldErrors.email}
             className={`${inputBase} ${
               fieldErrors.email
-                ? "border-[#e6b6b1] focus:border-[#c9453b]"
+                ? "border-[var(--tone-danger-bd)] focus:border-[var(--tone-danger-fg)]"
                 : "border-line-strong focus:border-brand"
             }`}
             placeholder="tu@empresa.com"
           />
           {fieldErrors.email && (
-            <p className="mt-1.5 text-xs text-[#8f271f]">{fieldErrors.email}</p>
+            <p className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.email}</p>
           )}
         </div>
 
@@ -166,7 +166,7 @@ export function AuthForm() {
               aria-invalid={!!fieldErrors.password}
               className={`${inputBase} pr-12 ${
                 fieldErrors.password
-                  ? "border-[#e6b6b1] focus:border-[#c9453b]"
+                  ? "border-[var(--tone-danger-bd)] focus:border-[var(--tone-danger-fg)]"
                   : "border-line-strong focus:border-brand"
               }`}
               placeholder="••••••••"
@@ -181,7 +181,7 @@ export function AuthForm() {
             </button>
           </div>
           {fieldErrors.password && (
-            <p className="mt-1.5 text-xs text-[#8f271f]">{fieldErrors.password}</p>
+            <p className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.password}</p>
           )}
           {mode === "signup" && !fieldErrors.password && (
             <p className="mt-1.5 text-xs text-muted">Mínimo 6 caracteres.</p>
@@ -191,13 +191,13 @@ export function AuthForm() {
         {error && (
           <p
             role="alert"
-            className="rounded-lg border border-[#e6b6b1] bg-[#f7e4e2] px-3 py-2 text-sm text-[#8f271f]"
+            className="rounded-lg border border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)] px-3 py-2 text-sm text-[var(--tone-danger-fg)]"
           >
             {error}
           </p>
         )}
         {notice && (
-          <p className="rounded-lg border border-[#bfdccf] bg-brand-soft px-3 py-2 text-sm text-brand-strong">
+          <p className="rounded-lg border border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] px-3 py-2 text-sm text-[var(--tone-good-fg)]">
             {notice}
           </p>
         )}

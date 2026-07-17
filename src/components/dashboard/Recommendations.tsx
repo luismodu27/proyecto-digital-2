@@ -1,9 +1,11 @@
 import type { Priority, Recommendation } from "@/lib/recommendations";
 
 const priorityCls: Record<Priority, string> = {
-  crítica: "bg-[#f7e4e2] text-[#8f271f] border-[#e6b6b1]",
-  alta: "bg-[#f7ead8] text-[#8a4f14] border-[#e6cba3]",
-  media: "bg-paper-sunken text-ink-soft border-line-strong",
+  crítica:
+    "bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)] border-[var(--tone-danger-bd)]",
+  alta: "bg-[var(--tone-warn-bg)] text-[var(--tone-warn-fg)] border-[var(--tone-warn-bd)]",
+  media:
+    "bg-[var(--tone-neutral-bg)] text-[var(--tone-neutral-fg)] border-[var(--tone-neutral-bd)]",
 };
 
 function PriorityBadge({ p }: { p: Priority }) {

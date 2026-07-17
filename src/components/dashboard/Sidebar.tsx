@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { signOut } from "@/lib/auth/actions";
 
 const nav = [
@@ -18,8 +19,9 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
 
   return (
     <aside className="flex w-full shrink-0 flex-col border-b border-line bg-paper-raised md:h-dvh md:w-64 md:border-b-0 md:border-r print:hidden">
-      <div className="flex h-16 items-center border-b border-line px-5">
+      <div className="flex h-16 items-center justify-between border-b border-line px-5">
         <Logo href="/dashboard" />
+        <ThemeToggle />
       </div>
       <nav className="flex gap-1 overflow-x-auto p-3 md:flex-col md:overflow-visible">
         {nav.map((item) => {

@@ -133,7 +133,7 @@ export function RiskWizard({
         </p>
 
         {alsoTransparency && (
-          <p className="mt-4 rounded-lg border border-[#e6cba3] bg-[#f7ead8] px-4 py-3 text-sm text-[#8a4f14]">
+          <p className="mt-4 rounded-lg border border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] px-4 py-3 text-sm text-[var(--tone-warn-fg)]">
             Además, este sistema está sujeto a las obligaciones de transparencia
             del <span className="font-medium">Art. 50</span>, que se{" "}
             <span className="font-medium">suman</span> a las de alto riesgo.

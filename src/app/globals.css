@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Modo oscuro por atributo data-theme (lo controla el ThemeToggle). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* ===========================================================================
    Attesta — Sistema de diseño
    Estética: editorial, cálido-minimalista, de confianza. Jade = "atestiguado".
@@ -49,6 +52,72 @@
 :root {
   --background: var(--color-paper);
   --foreground: var(--color-ink);
+
+  /* Rejilla de fondo (se invierte en oscuro). */
+  --grid-line: rgba(15, 26, 20, 0.04);
+
+  /* Tonos semánticos para badges/estados (claro). */
+  --tone-danger-bg: #f7e4e2;   --tone-danger-fg: #8f271f;   --tone-danger-bd: #e6b6b1;
+  --tone-warn-bg:   #f7ead8;   --tone-warn-fg:   #8a4f14;   --tone-warn-bd:   #e6cba3;
+  --tone-gold-bg:   #f2e9d9;   --tone-gold-fg:   #7c5a2e;   --tone-gold-bd:   #e0d0b3;
+  --tone-good-bg:   #e4efe9;   --tone-good-fg:   #084d38;   --tone-good-bd:   #bfdccf;
+  --tone-info-bg:   #e8eef7;   --tone-info-fg:   #33507e;   --tone-info-bd:   #c3d2ea;
+  --tone-neutral-bg: #f3f0e7;  --tone-neutral-fg: #38443d;  --tone-neutral-bd: #d6d0bf;
+}
+
+/* Overrides oscuros: explícito (data-theme=dark) y por preferencia del sistema. */
+[data-theme="dark"] {
+  --color-paper: #0e1512;
+  --color-paper-raised: #151f19;
+  --color-paper-sunken: #0a0f0c;
+  --color-ink: #eef2ee;
+  --color-ink-soft: #aeb9b2;
+  --color-muted: #79857e;
+  --color-line: #232e28;
+  --color-line-strong: #33413a;
+  --color-brand: #12946a;
+  --color-brand-strong: #7fd8b4;
+  --color-brand-bright: #22b581;
+  --color-brand-soft: #16271f;
+  --color-seal: #c79a5f;
+  --color-seal-soft: #241d12;
+
+  --grid-line: rgba(238, 242, 238, 0.035);
+
+  --tone-danger-bg: #2a1614;   --tone-danger-fg: #f0a89f;   --tone-danger-bd: #4a221d;
+  --tone-warn-bg:   #2a2013;   --tone-warn-fg:   #e6b877;   --tone-warn-bd:   #4a3a1e;
+  --tone-gold-bg:   #241f14;   --tone-gold-fg:   #d8b781;   --tone-gold-bd:   #40361f;
+  --tone-good-bg:   #14261e;   --tone-good-fg:   #7fd8b4;   --tone-good-bd:   #24463a;
+  --tone-info-bg:   #16202e;   --tone-info-fg:   #9db8de;   --tone-info-bd:   #2a3a52;
+  --tone-neutral-bg: #1a231e;  --tone-neutral-fg: #b7c2bb;  --tone-neutral-bd: #33413a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-paper: #0e1512;
+    --color-paper-raised: #151f19;
+    --color-paper-sunken: #0a0f0c;
+    --color-ink: #eef2ee;
+    --color-ink-soft: #aeb9b2;
+    --color-muted: #79857e;
+    --color-line: #232e28;
+    --color-line-strong: #33413a;
+    --color-brand: #12946a;
+    --color-brand-strong: #7fd8b4;
+    --color-brand-bright: #22b581;
+    --color-brand-soft: #16271f;
+    --color-seal: #c79a5f;
+    --color-seal-soft: #241d12;
+
+    --grid-line: rgba(238, 242, 238, 0.035);
+
+    --tone-danger-bg: #2a1614;   --tone-danger-fg: #f0a89f;   --tone-danger-bd: #4a221d;
+    --tone-warn-bg:   #2a2013;   --tone-warn-fg:   #e6b877;   --tone-warn-bd:   #4a3a1e;
+    --tone-gold-bg:   #241f14;   --tone-gold-fg:   #d8b781;   --tone-gold-bd:   #40361f;
+    --tone-good-bg:   #14261e;   --tone-good-fg:   #7fd8b4;   --tone-good-bd:   #24463a;
+    --tone-info-bg:   #16202e;   --tone-info-fg:   #9db8de;   --tone-info-bd:   #2a3a52;
+    --tone-neutral-bg: #1a231e;  --tone-neutral-fg: #b7c2bb;  --tone-neutral-bd: #33413a;
+  }
 }
 
 @layer base {
@@ -154,7 +223,7 @@
 /* Rejilla de fondo sutil (papel técnico) */
 @utility grid-paper {
   background-image:
-    linear-gradient(to right, rgba(15, 26, 20, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15, 26, 20, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
   background-size: 40px 40px;
 }

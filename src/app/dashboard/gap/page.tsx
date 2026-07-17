@@ -4,14 +4,23 @@ import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
 import { getGapItems } from "@/lib/data";
 
 const statusMeta = {
-  missing: { label: "Falta", cls: "bg-[#f7e4e2] text-[#8f271f] border-[#e6b6b1]" },
-  partial: { label: "Parcial", cls: "bg-[#f7ead8] text-[#8a4f14] border-[#e6cba3]" },
-  done: { label: "Cubierto", cls: "bg-brand-soft text-brand-strong border-[#bfdccf]" },
+  missing: {
+    label: "Falta",
+    cls: "bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)] border-[var(--tone-danger-bd)]",
+  },
+  partial: {
+    label: "Parcial",
+    cls: "bg-[var(--tone-warn-bg)] text-[var(--tone-warn-fg)] border-[var(--tone-warn-bd)]",
+  },
+  done: {
+    label: "Cubierto",
+    cls: "bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)] border-[var(--tone-good-bd)]",
+  },
 } as const;
 
 const severityMeta = {
-  alta: "text-[#a3271f]",
-  media: "text-[#a4610f]",
+  alta: "text-[var(--tone-danger-fg)]",
+  media: "text-[var(--tone-warn-fg)]",
   baja: "text-muted",
 } as const;
 
