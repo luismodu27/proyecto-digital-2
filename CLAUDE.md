@@ -34,8 +34,31 @@ Detalles completos, ICP, MVP, posicionamiento y bitácora → **MEMORY.md**.
 - `ui-designer` — diseño UI creativo/minimalista (Magic Patterns).
 - `frontend-engineer` — implementación Next.js + TS + Tailwind.
 
-## Comandos (se irán completando al scaffoldear la app)
+## Comandos
 
 ```bash
-# pendiente: npm run dev / build / lint / test
+npm run dev     # desarrollo (http://localhost:3000)
+npm run build   # build de producción
+npm run start   # servir el build (usa PORT=xxxx para cambiar puerto)
+npm run lint    # ESLint
 ```
+
+## Estructura
+
+```
+src/
+  app/                  # rutas (App Router)
+    page.tsx            # landing
+    dashboard/          # app shell (resumen, inventario, riesgo, gap)
+  components/
+    ui/                 # primitivos (Logo, SealMark, Button, RiskBadge)
+    landing/            # secciones de la landing
+    dashboard/          # sidebar + partes del dashboard
+  lib/mock-data.ts      # datos de ejemplo (TODO: reemplazar por backend)
+```
+
+## Gotchas conocidos
+
+- **Tailwind v4** elimina las variables de `@theme` que no se usan en ninguna clase.
+  Para colores dinámicos por estilo inline, usa un mapa de hex en el componente
+  (no `var(--color-...)` de un token no referenciado). Ver `dashboard/page.tsx`.

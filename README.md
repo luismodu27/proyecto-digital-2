@@ -14,9 +14,21 @@ para auditoría y monitoreo de cambios regulatorios.
 
 ## Stack
 
-Next.js (App Router) · TypeScript · Tailwind CSS · Vercel (objetivo)
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · Vercel (objetivo)
+
+## Empezar
+
+```bash
+npm install
+npm run dev      # http://localhost:3000
+```
+
+- `/` — landing de lanzamiento.
+- `/dashboard` — esqueleto del producto (resumen, inventario, riesgo, gap) con datos de ejemplo.
 
 ## Estado
 
-🚧 En fase de fundación / setup. La app aún no está scaffoldeada — pendiente de
-confirmar nombre y alcance del MVP.
+✅ Landing + esqueleto de dashboard construidos (datos de ejemplo).
+🚧 Siguiente: capa de datos/backend, auth y multi-tenancy, export PDF real.
+
+Ver **[MEMORY.md](./MEMORY.md)** para el roadmap y las decisiones.

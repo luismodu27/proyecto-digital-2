@@ -18,7 +18,7 @@ Plataforma **SaaS B2B de compliance y gobernanza continua de IA** para empresas
 **medianas (mid-market)** que despliegan IA de "alto riesgo" (RRHH, crédito,
 seguros, salud, edtech) y que **no tienen un equipo GRC dedicado**.
 
-**Codename interno:** `pending` — nombre comercial por decidir (ver §10).
+**Nombre comercial:** **Attesta** (evoca *attestation* / evidencia lista para auditoría).
 
 ## 2. El problema (el dolor)
 
@@ -53,9 +53,12 @@ seguros, salud, edtech) y que **no tienen un equipo GRC dedicado**.
    conocimiento que mejora con cada norma y cada cliente).
 5. **Gap assessment** — qué falta para cumplir, con plan de remediación.
 
-**MVP propuesto (por confirmar en checkpoint):** Inventario + Clasificación de
-riesgo + Gap assessment exportable a PDF. Esto también es el **servicio-cebo**
-vendible manualmente ("AI inventory + gap assessment") para validar demanda.
+**MVP CONFIRMADO:** Inventario + Clasificación de riesgo + Gap assessment exportable
+a PDF. Esto también es el **servicio-cebo** vendible manualmente ("AI inventory + gap
+assessment") para validar demanda.
+
+**Orden de construcción acordado:** (1) Landing impactante para validar mensaje y
+captar leads + esqueleto del dashboard (app shell). (2) Backend real (datos) después.
 
 ## 5. Posicionamiento (cómo se vende)
 
@@ -76,8 +79,9 @@ vendible manualmente ("AI inventory + gap assessment") para validar demanda.
 
 ## 7. Stack técnico y decisiones de arquitectura
 
-- **Frontend/Framework:** Next.js (App Router) + TypeScript.
-- **Estilos:** Tailwind CSS.
+- **Frontend/Framework:** Next.js **16** (App Router, Turbopack) + React **19** + TypeScript.
+- **Estilos:** Tailwind CSS **v4** (config por CSS con `@theme` en `globals.css`).
+  ⚠️ v4 elimina tokens `@theme` no usados por ninguna clase → para color inline usa mapa de hex.
 - **Diseño UI:** Magic Patterns (MCP) para explorar diseño creativo/minimalista y original.
 - **Docs de librerías:** Context7 (MCP) — consultar SIEMPRE antes de asumir APIs.
 - **Despliegue objetivo:** Vercel (por confirmar).
@@ -115,13 +119,26 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 - **2026-07-17** · Se define la tesis (compliance de IA mid-market) y el stack
   (Next.js + TypeScript + Tailwind). Autonomía: checkpoints en decisiones clave.
+- **2026-07-17** · **Nombre = Attesta**. **MVP = Inventario + Riesgo + Gap (PDF)**.
+  **Arranque = landing + app shell primero; backend después.**
+- **2026-07-17** · Scaffold Next.js 16 + React 19 + Tailwind v4. Sistema de diseño
+  (jade/ivory/sello) + **landing completa** (hero, problema, 3 módulos, por qué ahora,
+  cómo funciona, waitlist) + **dashboard-esqueleto** (resumen, inventario, riesgo, gap)
+  con datos de ejemplo. Build y lint en verde; verificado con capturas.
+- **Aprendizaje:** Tailwind v4 tree-shakea variables `@theme` no referenciadas por
+  clases → los colores inline por CSS var salían vacíos. Solución: mapa de hex en el
+  componente. (Ver `src/app/dashboard/page.tsx`.)
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-- **Nombre comercial** del producto (proponer 5–8 opciones + dominio).
-- **Alcance exacto del MVP** (confirmar §4).
-- **Backend/datos** (Supabase vs Postgres+Prisma).
+- ~~Nombre comercial~~ → **Attesta** ✅
+- ~~Alcance del MVP~~ → confirmado ✅
+- ~~Landing + app shell~~ → hecho ✅ (con datos de ejemplo)
+- **Backend/datos** (Supabase vs Postgres+Prisma) — siguiente incremento grande.
+- Conectar formulario de waitlist a un destino real (CRM / lista).
+- Exportación real a PDF + audit-trail íntegro.
+- Autenticación y multi-tenancy.
 - Validación real (del propio thesis):
   1. 15 entrevistas a responsables de riesgo/legal en mid-market que ya usan IA en decisiones.
   2. Vender un "AI inventory + gap assessment" manual como servicio-cebo (¿pagan $2–5k?).

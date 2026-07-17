@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+/* ===========================================================================
+   Attesta — Sistema de diseño
+   Estética: editorial, cálido-minimalista, de confianza. Jade = "atestiguado".
+   =========================================================================== */
+
+@theme {
+  /* Superficies */
+  --color-paper: #faf8f2; /* ivory cálido */
+  --color-paper-raised: #ffffff;
+  --color-paper-sunken: #f3f0e7;
+
+  /* Tinta / texto */
+  --color-ink: #0f1a14; /* verde-negro profundo */
+  --color-ink-soft: #38443d;
+  --color-muted: #6b756e;
+
+  /* Líneas */
+  --color-line: #e6e1d4;
+  --color-line-strong: #d6d0bf;
+
+  /* Marca — jade */
+  --color-brand: #0b6b4e;
+  --color-brand-strong: #084d38;
+  --color-brand-bright: #11a071;
+  --color-brand-soft: #e4efe9;
+
+  /* Sello — oro apagado (uso mínimo) */
+  --color-seal: #b0824a;
+  --color-seal-soft: #f0e7d7;
+
+  /* Semántica de riesgo */
+  --color-risk-unacceptable: #b4322a;
+  --color-risk-high: #c9761f;
+  --color-risk-limited: #b0824a;
+  --color-risk-minimal: #0b6b4e;
+
+  /* Tipografía */
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Radios */
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+}
+
+:root {
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-brand);
+    color: #fff;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), Georgia, serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Utilidades de composición */
+@utility container-page {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+/* Rejilla de fondo sutil (papel técnico) */
+@utility grid-paper {
+  background-image:
+    linear-gradient(to right, rgba(15, 26, 20, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 26, 20, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
