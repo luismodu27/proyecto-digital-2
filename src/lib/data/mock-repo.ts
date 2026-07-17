@@ -5,8 +5,10 @@ import {
   SAMPLE_AUDIT,
   SAMPLE_INVITATIONS,
   SAMPLE_MEMBERS,
+  SAMPLE_ACTION_TASKS,
   SAMPLE_REG_ACKS,
   SAMPLE_REG_CANDIDATES,
+  type ActionTask,
   type AiSystem,
   type AssessmentRecord,
   type AuditEntry,
@@ -89,6 +91,10 @@ export async function getIsPlatformAdmin(): Promise<boolean> {
 export async function getOrgJurisdictions(): Promise<string[]> {
   // Demo: organización europea que además contrata en Nueva York.
   return ["eu", "us-ny"];
+}
+
+export async function getActionTasks(): Promise<ActionTask[]> {
+  return SAMPLE_ACTION_TASKS;
 }
 
 /**

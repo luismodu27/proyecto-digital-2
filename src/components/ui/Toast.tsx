@@ -30,6 +30,10 @@ const MESSAGES: Record<string, string> = {
   "jur-saved": "Jurisdicciones actualizadas.",
   "jur-demo": "Configurar jurisdicciones requiere conectar tu organización.",
   "jur-error": "No se pudieron guardar las jurisdicciones.",
+  "task-created": "Tarea añadida al plan.",
+  "task-deleted": "Tarea eliminada.",
+  "task-demo": "Editar el plan requiere conectar tu organización.",
+  "task-error": "No se pudo completar la acción. Inténtalo de nuevo.",
 };
 
 /**

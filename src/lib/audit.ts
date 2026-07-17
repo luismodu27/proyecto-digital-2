@@ -27,6 +27,7 @@ export const ENTITY_META: Record<
   gap_items: { label: "brecha", article: "la", tone: "warn" },
   memberships: { label: "miembro", article: "el", tone: "good" },
   regulatory_acks: { label: "revisión regulatoria", article: "la", tone: "info" },
+  action_tasks: { label: "tarea del plan", article: "la", tone: "gold" },
 };
 
 export const ACTION_META: Record<
@@ -60,6 +61,14 @@ const FIELD_LABELS: Record<string, Record<string, string>> = {
   },
   memberships: { role: "rol" },
   regulatory_acks: { status: "estado", note: "nota" },
+  action_tasks: {
+    status: "estado",
+    priority: "prioridad",
+    assignee_id: "responsable",
+    due_date: "fecha límite",
+    title: "título",
+    detail: "detalle",
+  },
 };
 
 /** Columnas técnicas que no aportan al usuario. */
@@ -76,6 +85,8 @@ const NOISE = new Set([
   "acknowledged_at",
   "acknowledged_by",
   "event_id",
+  "source",
+  "source_key",
 ]);
 
 type Json = Record<string, unknown> | null;
@@ -101,6 +112,8 @@ export function deriveLabel(table: string, data: Json): string {
       const title = eid ? EVENT_TITLE.get(eid) : undefined;
       return title ? `«${title}»` : (eid ?? "");
     }
+    case "action_tasks":
+      return data.title ? `«${String(data.title)}»` : "";
     default:
       return "";
   }

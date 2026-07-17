@@ -514,6 +514,112 @@ export const SAMPLE_REG_CANDIDATES: RegCandidate[] = [
   },
 ];
 
+/* -------------------------------------------------------------------------- */
+/* Plan de acción editable (Capa 2) — tablero de tareas                        */
+/* -------------------------------------------------------------------------- */
+
+export type TaskStatus = "todo" | "in_progress" | "blocked" | "done";
+export type TaskPriority = "critica" | "alta" | "media" | "baja";
+
+export const TASK_STATUS_LABEL: Record<TaskStatus, string> = {
+  todo: "Por hacer",
+  in_progress: "En curso",
+  blocked: "Bloqueada",
+  done: "Hecha",
+};
+
+export const TASK_STATUS_ORDER: TaskStatus[] = [
+  "todo",
+  "in_progress",
+  "blocked",
+  "done",
+];
+
+export const TASK_PRIORITY_LABEL: Record<TaskPriority, string> = {
+  critica: "Crítica",
+  alta: "Alta",
+  media: "Media",
+  baja: "Baja",
+};
+
+export const TASK_PRIORITY_ORDER: TaskPriority[] = [
+  "critica",
+  "alta",
+  "media",
+  "baja",
+];
+
+export type ActionTask = {
+  id: string;
+  title: string;
+  detail: string | null;
+  article: string | null;
+  priority: TaskPriority;
+  status: TaskStatus;
+  assigneeId: string | null;
+  assigneeEmail: string | null;
+  dueDate: string | null; // ISO date (YYYY-MM-DD)
+  systemId: string | null;
+  systemName: string | null;
+  source: "manual" | "recommendation";
+  sourceKey: string | null;
+  createdAt: string; // ISO
+};
+
+/** Tareas de ejemplo (modo demo) para enseñar el plan editable. */
+export const SAMPLE_ACTION_TASKS: ActionTask[] = [
+  {
+    id: "task-demo-1",
+    title: "Designar supervisión humana del cribado de CVs",
+    detail:
+      "Encargar la supervisión a una persona con competencia y autoridad para intervenir o detener el sistema (Art. 26.2).",
+    article: "Art. 14",
+    priority: "critica",
+    status: "in_progress",
+    assigneeId: "demo-2",
+    assigneeEmail: "legal@empresa-demo.com",
+    dueDate: "2026-07-31",
+    systemId: "SYS-001",
+    systemName: "Cribado de CVs — TalentFilter",
+    source: "recommendation",
+    sourceKey: "art-14",
+    createdAt: "2026-07-10T09:00:00Z",
+  },
+  {
+    id: "task-demo-2",
+    title: "Exigir al proveedor la documentación técnica (Anexo IV)",
+    detail:
+      "Pedir al proveedor la documentación técnica e instrucciones de uso y conservarla como evidencia de auditoría.",
+    article: "Art. 11",
+    priority: "media",
+    status: "todo",
+    assigneeId: "demo-3",
+    assigneeEmail: "talent@empresa-demo.com",
+    dueDate: "2026-08-15",
+    systemId: null,
+    systemName: null,
+    source: "recommendation",
+    sourceKey: "art-11",
+    createdAt: "2026-07-11T11:00:00Z",
+  },
+  {
+    id: "task-demo-3",
+    title: "Informar a los trabajadores del uso de IA en selección",
+    detail: "Aviso a las personas afectadas antes del despliegue en el puesto.",
+    article: "Art. 26",
+    priority: "alta",
+    status: "todo",
+    assigneeId: null,
+    assigneeEmail: null,
+    dueDate: null,
+    systemId: null,
+    systemName: null,
+    source: "manual",
+    sourceKey: null,
+    createdAt: "2026-07-12T08:30:00Z",
+  },
+];
+
 export const RISK_ORDER: RiskLevel[] = [
   "unacceptable",
   "high",

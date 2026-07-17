@@ -512,6 +512,27 @@ diseño, nombre, features grandes); autónomo en lo demás.
   - **Verificado e2e por curl (2026-07-17):** owner fija/actualiza/vacía sus jurisdicciones; la RPC
     **filtra códigos basura y deduplica** (`['eu','us-ny','marte','eu']`→`['eu','us-ny']`); un no-miembro
     recibe **"no autorizado"** y no cambia nada. Todo ✅.
+- **2026-07-17** · **Plan de acción editable (Capa 2).** El plan deja de ser solo-lectura derivado: ahora
+  es un **tablero de tareas** con responsable, fecha límite y estado, editable por el equipo. Las
+  recomendaciones derivadas siguen como **SUGERENCIAS** que se añaden al plan con un clic (dedupe por
+  `source_key`).
+  - **Migración `0013_action_tasks.sql`** (⚠️ aplicar; aditiva, sin `drop`): tabla `action_tasks`
+    (title, detail, article, `priority` critica/alta/media/baja, `status` todo/in_progress/blocked/done,
+    `assignee_id`→auth.users, `due_date`, `ai_system_id`, `source` manual/recommendation, `source_key`).
+    **Colaborativa** (RLS: cualquier miembro de la org lee y escribe, no solo owner/admin) + **trigger de
+    auditoría** `write_audit` (lleva organization_id → sí audita). Añadida a setup.sql.
+  - **Data:** `getActionTasks()` (resuelve email del responsable vía `list_org_members` y nombre del
+    sistema vía join `ai_systems(name)`; mock = 3 tareas de ejemplo). Acciones `action-tasks-actions.ts`:
+    create / updateStatus / updateAssignee / updateDueDate / delete (todas revalidan plan+dashboard+
+    actividad; validan uuid/fecha/enum; **fallback seguro** si la tabla no existe → []). Toasts `task-*`.
+    `audit.ts`: `action_tasks` → "tarea del plan «título»" + labels (estado/prioridad/responsable/fecha).
+  - **UI (`/dashboard/plan` reescrita):** resumen por estado (abiertas/en curso/vencidas/hechas), alta
+    manual colapsable, tablero ordenado por prioridad (hechas al final, con tachado y marca "vencida"),
+    controles inline autoenvío (`TaskControls.tsx`: estado, responsable, fecha, eliminar), y sección de
+    sugerencias con "+ Añadir al plan". Todo miembro edita (sin gating por rol).
+  - Build/lint verdes; **demo verificado con capturas** (3 tareas + controles + sugerencias con dedupe —
+    Art.14/Art.11 ya son tarea y no reaparecen como sugerencia). **Pendiente:** el fundador aplica la 0013
+    → verifico e2e por curl (crear/editar estado+responsable+fecha, RLS por miembro, auditoría).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
@@ -525,8 +546,9 @@ diseño, nombre, features grandes); autónomo en lo demás.
 > (nexo de jurisdicción por organización) HECHO y VERIFICADO e2e** (migración `0012` aplicada). **SIGUIENTES
 > CANDIDATOS (yo sugiero, él elige):** (Fase B) pgvector + embeddings +
 > Analista con Claude API — necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic no
-> da) + **llave/budget**; **plan de acción editable** (Capa 2, tareas/responsables); **Vigía determinista**
-> (monitor de fuentes). Pendientes de siempre: (a) Deploy a Vercel; (c) Pulido (forgot-password, captcha).
+> da) + **llave/budget**; **Vigía determinista** (monitor de fuentes, sin gasto). **Plan de acción editable
+> (Capa 2) HECHO** (migración `0013` pendiente de aplicar → luego e2e). Pendientes de siempre: (a) Deploy a
+> Vercel; (c) Pulido (forgot-password, captcha). Migraciones aplicadas por el fundador hasta la **0012**.
 
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅
@@ -582,7 +604,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
 ### 13.1 Torre de 10 capas · dónde estamos
 - **Capa 0 Inventario** ✅ (con alta manual; falta descubrimiento automático / shadow-AI).
 - **Capa 1 Clasificación de riesgo** ✅ (falta multi-marco: hoy solo EU AI Act).
-- **Capa 2 Evaluaciones + plan de riesgo** 🟡 (cuestionario + plan de acción; falta plan con tareas/responsables editable).
+- **Capa 2 Evaluaciones + plan de riesgo** 🟢 (cuestionario + **plan de acción editable**: tablero de tareas con responsable/fecha/estado + sugerencias derivadas con dedupe; falta opcional: notificaciones/recordatorios de vencimiento).
 - **Capa 3 Evidencia + documentación + audit-trail** ✅ (audit-trail ✅, evidencia declarada ✅, export PDF ✅, **generador de documentación técnica / dossier de gobernanza por sistema ✅**; futuro opcional: redacción asistida por LLM y firma/versión del dossier).
 - **Capa 4 Pruebas técnicas del modelo** ❌ (sesgo/explicabilidad/robustez — INTEGRAR, no construir).
 - **Capa 5 Monitoreo continuo en producción** ❌ (drift, incidentes).

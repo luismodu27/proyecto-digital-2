@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveOrg } from "./context";
 import { toAuditEntry, type RawAudit } from "@/lib/audit";
 import type {
+  ActionTask,
   AiSystem,
   AssessmentRecord,
   AuditEntry,
@@ -17,6 +18,8 @@ import type {
   RegCandidateProvenance,
   RegCandidateStatus,
   RiskLevel,
+  TaskPriority,
+  TaskStatus,
 } from "@/lib/mock-data";
 import {
   mergeCatalog,
@@ -405,6 +408,61 @@ export async function getOrgJurisdictions(): Promise<string[]> {
     .maybeSingle();
   const j = (data?.jurisdictions ?? []) as unknown;
   return Array.isArray(j) ? j.map((x) => String(x)) : [];
+}
+
+/** Tareas del plan de acción de la organización activa (con responsable y sistema). */
+export async function getActionTasks(): Promise<ActionTask[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const [tasksRes, membersRes] = await Promise.all([
+    supabase
+      .from("action_tasks")
+      .select(
+        "id, title, detail, article, priority, status, assignee_id, due_date, ai_system_id, source, source_key, created_at, ai_systems(name)",
+      )
+      .eq("organization_id", org)
+      .order("created_at", { ascending: true }),
+    supabase.rpc("list_org_members", { org }),
+  ]);
+  const emailById = new Map<string, string>();
+  for (const m of (membersRes.data ?? []) as { user_id: string; email: string }[]) {
+    emailById.set(m.user_id, m.email);
+  }
+  type Row = {
+    id: string;
+    title: string;
+    detail: string | null;
+    article: string | null;
+    priority: TaskPriority;
+    status: TaskStatus;
+    assignee_id: string | null;
+    due_date: string | null;
+    ai_system_id: string | null;
+    source: "manual" | "recommendation";
+    source_key: string | null;
+    created_at: string;
+    ai_systems: { name: string } | { name: string }[] | null;
+  };
+  return ((tasksRes.data ?? []) as Row[]).map((r) => {
+    const sys = Array.isArray(r.ai_systems) ? r.ai_systems[0] : r.ai_systems;
+    return {
+      id: r.id,
+      title: r.title,
+      detail: r.detail,
+      article: r.article,
+      priority: r.priority,
+      status: r.status,
+      assigneeId: r.assignee_id,
+      assigneeEmail: r.assignee_id ? emailById.get(r.assignee_id) ?? null : null,
+      dueDate: r.due_date,
+      systemId: r.ai_system_id,
+      systemName: sys?.name ?? null,
+      source: r.source,
+      sourceKey: r.source_key,
+      createdAt: String(r.created_at),
+    };
+  });
 }
 
 /** ¿El usuario actual es validador de plataforma (personal de Attesta)? */

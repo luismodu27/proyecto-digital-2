@@ -28,9 +28,11 @@ export const getRegulatoryEvents = () => repo.getRegulatoryEvents();
 export const getRegCandidates = () => repo.getRegCandidates();
 export const getIsPlatformAdmin = () => repo.getIsPlatformAdmin();
 export const getOrgJurisdictions = () => repo.getOrgJurisdictions();
+export const getActionTasks = () => repo.getActionTasks();
 
 export { isSupabaseConfigured };
 export type {
+  ActionTask,
   AiSystem,
   AuditEntry,
   DossierData,
