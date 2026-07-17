@@ -540,18 +540,22 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-> **▶ RETOMAR AQUÍ (2026-07-17):** Foso muy avanzado. Hecho y verificado: **Fase A del pipeline**
-> (candidato → Validador humano aprueba → publica en `reg_events`; RLS blinda la cola; migración `0011`
-> aplicada, el fundador es `platform_admin`) **+ multi-marco** (EU AI Act + 5 marcos US de IA-empleo —
-> NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto — con filtro por jurisdicción,
-> verificado por el experto). **NOTA:** el fundador **no quiere deploy aún** ("seguiremos con sugerencias
-> que me des") y nunca ha tenido app con botones (todo se opera vía Supabase + curl). **v2 del radar
-> (nexo de jurisdicción por organización) HECHO y VERIFICADO e2e** (migración `0012` aplicada). **SIGUIENTES
-> CANDIDATOS (yo sugiero, él elige):** (Fase B) pgvector + embeddings +
-> Analista con Claude API — necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic no
-> da) + **llave/budget**; **Vigía determinista** (monitor de fuentes, sin gasto). **Plan de acción editable
-> (Capa 2) HECHO y VERIFICADO e2e** (migración `0013` aplicada). Pendientes de siempre: (a) Deploy a
-> Vercel; (c) Pulido (forgot-password, captcha). Migraciones aplicadas por el fundador hasta la **0013**.
+> **▶ RETOMAR AQUÍ (2026-07-17, tras 2º compact):** Sesión muy productiva; TODO hecho y verificado e2e,
+> árbol limpio y sincronizado (último commit `488cd92`). **Migraciones aplicadas por el fundador hasta la
+> 0013.** Logrado esta tanda: **Capa 7 (foso) 🟢** = Fase A del pipeline (candidato→Validador humano→
+> `reg_events`; RLS blinda la cola; `platform_admin`) + **multi-marco** (EU AI Act + 5 marcos US de IA-
+> empleo: NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto; verificado por el experto)
+> + **nexo de jurisdicción por org** (0012). **Capa 2 🟢** = **plan de acción editable** (tablero
+> `action_tasks`, colaborativo, con responsable/fecha/estado + sugerencias con dedupe; 0013).
+> **CONTEXTO CLAVE:** el fundador **no quiere deploy aún** ("seguiremos con sugerencias que me des"); nunca
+> ha tenido app con botones (todo se opera vía Supabase SQL Editor + mi verificación por curl con usuarios
+> `*@attesta-test.dev`). Flujo: yo escribo migración → él la pega en SQL Editor → yo verifico por curl.
+> **SIGUIENTES CANDIDATOS (yo sugiero, él elige — le presenté estas 3 al final):** (1) **Vigía determinista**
+> — 1er agente del foso: monitor de fuentes (fetch+hash) que crea candidatos "algo cambió aquí"; sin gasto
+> (el cron espera al deploy). (2) **Recordatorios de vencimiento del plan** (widget en resumen + posible
+> email); bajo coste. (3) **Fase B del foso** — pgvector + embeddings + Analista LLM; necesita **proveedor
+> de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic NO da embeddings) + **llave/budget** (decisión del
+> fundador). Pendientes de siempre: (a) Deploy a Vercel; (c) Pulido (forgot-password, captcha/rate-limit).
 
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅
