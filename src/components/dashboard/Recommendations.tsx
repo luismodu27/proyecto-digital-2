@@ -19,7 +19,7 @@ function PriorityBadge({ p }: { p: Priority }) {
 
 export function RecommendationCard({ rec }: { rec: Recommendation }) {
   return (
-    <article className="rounded-2xl border border-line bg-paper-raised p-5">
+    <article className="card-lift rounded-2xl border border-line bg-paper-raised p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs font-medium text-seal">

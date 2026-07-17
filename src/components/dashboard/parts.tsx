@@ -40,7 +40,7 @@ export function StatCard({
     danger: "text-[#a3271f]",
   };
   return (
-    <div className="rounded-2xl border border-line bg-paper-raised p-5">
+    <div className="card-lift rounded-2xl border border-line bg-paper-raised p-5">
       <p className="text-xs font-medium uppercase tracking-wide text-muted">
         {label}
       </p>
@@ -58,7 +58,10 @@ export function Meter({ value }: { value: number }) {
   return (
     <div className="flex items-center gap-2">
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-paper-sunken">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${value}%` }} />
+        <div
+          className={`h-full rounded-full transition-[width] duration-700 ease-out ${color}`}
+          style={{ width: `${value}%` }}
+        />
       </div>
       <span className="w-9 shrink-0 text-right text-xs tabular-nums text-ink-soft">
         {value}%

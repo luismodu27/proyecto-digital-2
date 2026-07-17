@@ -1,21 +1,9 @@
 import Link from "next/link";
 import { PageHeader, StatCard, Meter } from "@/components/dashboard/parts";
 import { RiskBadge } from "@/components/ui/RiskBadge";
+import { RiskDonut } from "@/components/dashboard/RiskDonut";
 import { getAiSystems } from "@/lib/data";
-import {
-  RISK_LABEL,
-  RISK_ORDER,
-  avgCompliance,
-  riskCounts,
-  type RiskLevel,
-} from "@/lib/mock-data";
-
-const RISK_COLOR: Record<RiskLevel, string> = {
-  unacceptable: "#b4322a",
-  high: "#c9761f",
-  limited: "#b0824a",
-  minimal: "#0b6b4e",
-};
+import { avgCompliance, riskCounts } from "@/lib/mock-data";
 
 export default async function DashboardOverview() {
   const systems = await getAiSystems();
@@ -46,40 +34,16 @@ export default async function DashboardOverview() {
       </section>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-        <div className="rounded-2xl border border-line bg-paper-raised p-6">
+        <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">
           <h2 className="font-display text-lg font-semibold text-ink">
             Distribución de riesgo
           </h2>
-          <ul className="mt-5 space-y-4">
-            {RISK_ORDER.map((level) => {
-              const n = counts[level];
-              const pct = systems.length
-                ? Math.round((n / systems.length) * 100)
-                : 0;
-              return (
-                <li key={level} className="flex items-center gap-4">
-                  <span className="w-32 shrink-0 text-sm text-ink-soft">
-                    {RISK_LABEL[level]}
-                  </span>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-paper-sunken">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${pct}%`,
-                        backgroundColor: RISK_COLOR[level],
-                      }}
-                    />
-                  </div>
-                  <span className="w-6 text-right text-sm tabular-nums text-ink">
-                    {n}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="mt-6">
+            <RiskDonut counts={counts} />
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-line bg-paper-raised p-6">
+        <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-semibold text-ink">
               Requieren atención

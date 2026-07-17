@@ -31,10 +31,10 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              className={`relative flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
                 active
                   ? "bg-brand-soft text-brand-strong"
-                  : "text-ink-soft hover:bg-paper-sunken hover:text-ink"
+                  : "text-ink-soft hover:translate-x-0.5 hover:bg-paper-sunken hover:text-ink"
               }`}
             >
               <svg viewBox="0 0 24 24" className="size-4.5 shrink-0" fill="none" aria-hidden>
