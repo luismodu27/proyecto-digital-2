@@ -421,7 +421,9 @@ diseño, nombre, features grandes); autónomo en lo demás.
     en el detalle, control `EventStatusControl` (owner/admin) o badge de solo lectura. `audit.ts` mapea
     `regulatory_acks` → "revisión regulatoria «título del evento»" para que se lea bien en Actividad.
   - Demo: `SAMPLE_REG_ACKS` (Omnibus=Revisado, GPAI=No aplica). Build/lint verdes; demo verificado.
-    **Pendiente:** aplicar 0010 y verificar por curl (marcar → aparece → sale en el audit-trail).
+  - **Verificado e2e por API (2026-07-17):** marcar (insert 'reviewed' + nota) → leer por RLS → upsert
+    a 'planned' (on_conflict merge) → **ambas operaciones salen en `list_audit_log`** (insert + update
+    con `campos=['status']`, filtrando ruido) con el email del actor. Fundador aplicó 0010. Todo ✅.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
