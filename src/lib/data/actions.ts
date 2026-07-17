@@ -7,12 +7,58 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
 import type { Answers, ClassificationResult } from "@/lib/risk-assessment";
 import { AI_SYSTEMS, GAP_ITEMS } from "@/lib/mock-data";
+import { RRHH_PACK } from "@/lib/policy-packs/rrhh";
 
 const SEVERITY_EN: Record<string, string> = {
   alta: "high",
   media: "medium",
   baja: "low",
 };
+
+/**
+ * Aplica el policy pack RRHH a un sistema: precarga sus controles como brechas
+ * (gap_items), sin duplicar los que ya existen.
+ */
+export async function applyPolicyPack(formData: FormData) {
+  if (!isSupabaseConfigured) redirect("/dashboard/packs");
+
+  const systemId = String(formData.get("systemId") ?? "");
+  if (!systemId) redirect("/dashboard/packs");
+
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) redirect("/onboarding");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: existing } = await supabase
+    .from("gap_items")
+    .select("requirement")
+    .eq("organization_id", org)
+    .eq("ai_system_id", systemId);
+  const seen = new Set((existing ?? []).map((r) => r.requirement));
+
+  const rows = RRHH_PACK.controls
+    .filter((c) => !seen.has(c.title))
+    .map((c) => ({
+      organization_id: org,
+      ai_system_id: systemId,
+      requirement: c.title,
+      article: c.article,
+      status: "missing",
+      severity: SEVERITY_EN[c.severity] ?? "medium",
+      created_by: user?.id,
+    }));
+
+  if (rows.length > 0) await supabase.from("gap_items").insert(rows);
+
+  revalidatePath("/dashboard/gap");
+  revalidatePath("/dashboard/plan");
+  revalidatePath("/dashboard");
+  redirect("/dashboard/gap?toast=pack-applied");
+}
 
 /** Alta de un sistema de IA en el inventario (modo conectado). */
 export async function createAiSystem(formData: FormData) {

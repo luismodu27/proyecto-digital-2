@@ -7,6 +7,7 @@ import { SealMark } from "./SealMark";
 const MESSAGES: Record<string, string> = {
   "system-created": "Sistema registrado en el inventario.",
   seeded: "Datos de ejemplo cargados.",
+  "pack-applied": "Policy pack RRHH aplicado al sistema.",
 };
 
 /**
