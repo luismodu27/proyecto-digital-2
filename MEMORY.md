@@ -123,6 +123,34 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **2ª tanda de mejoras + cobro por suscripción (Stripe).**
+  - **Informe/dossier theme-aware:** dejaron de forzar blanco en pantalla (se veía informe
+    claro sobre panel oscuro). Ahora usan tokens (`bg-paper-raised`, `--tone-*-fg`) y `@media
+    print` fuerza claro SOLO al imprimir. Badges de riesgo → componente `RiskBadge`.
+  - **AccountMenu** (barra lateral): avatar+iniciales, nombre+correo, menú con "Plan y
+    facturación", "Ir al sitio público", "Cambiar de cuenta" (→login) y "Cerrar sesión".
+    Nueva action `switchAccount()`.
+  - **Guía de primer login** ahora con **mini-ejemplos visuales de UI** por sección.
+  - **Verificación de correo por código (OTP):** tras signup (sin sesión) se pide el código;
+    `verifyOtp(type='signup')` → sesión → onboarding; reenviar (`auth.resend`) + cambiar correo.
+    **REQUIERE** que la plantilla "Confirm signup" de Supabase incluya `{{ .Token }}` (pendiente
+    del fundador).
+  - **Pagos = Stripe** (decisión del fundador). Alcance = **suscripción completa con bloqueo**.
+    **Construido (env-gated, OFF hasta configurar):** migración **0017** (tabla `subscriptions`
+    1/org + RLS + `org_has_active_subscription`), `src/lib/stripe/*` + `src/lib/billing/*`
+    (`getOrgSubscription`, `orgHasAccess`, `isBillingEnforced` = supabase+stripe configurados),
+    Server Actions `startCheckout`/`openBillingPortal`, webhook `/api/stripe/webhook`
+    (service_role sincroniza estado), página `/dashboard/facturacion`, y **paywall** por plan
+    (layouts en gap/plan/packs/vigilancia + gate en informe/dossier; inventario+riesgo libres).
+    **El bloqueo solo se activa cuando `STRIPE_SECRET_KEY`+`STRIPE_PRICE_ID` estén en Vercel.**
+  - **⚠️ SEGURIDAD:** el fundador pegó una **`sk_live_` en el chat** → se le pidió **rotarla**
+    (Stripe → Developers → API keys → Roll). Las claves van SOLO a env de Vercel, nunca al repo.
+  - **PENDIENTE del fundador:** (1) rotar `sk_live`; (2) crear Producto/Precio €390/mes en Stripe
+    y su webhook → añadir a Vercel `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`,
+    `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` (+ confirmar `SUPABASE_SERVICE_ROLE_KEY`);
+    (3) aplicar migración **0017**; (4) plantilla "Confirm signup" con `{{ .Token }}`.
+    Recomendado: probar TODO en **modo Test** de Stripe antes de pasar a live.
+  - **PENDIENTE mío (item 7):** diferenciar planes en la landing + recortar la demo pública.
 - **2026-07-18** · **Lote de mejoras post-deploy (revisión a fondo del fundador).** Sobre la app en
   producción (`attesta-io.vercel.app`, modo conectado). Hechos y desplegados:
   - **Registro con identidad (item 3):** el signup pide **Nombre, Primer apellido, Segundo apellido**
