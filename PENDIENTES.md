@@ -38,6 +38,31 @@ completo (degradación segura). Para encenderla:
 4. Cuando Stripe esté activo (§1.2), una suscripción activa sube la org a **preparación** sola.
 
 ### 1.2 · Pagos con Stripe (cuando estés en una computadora, en modo Test)
+
+> **⏸️ ESTADO AL 2026-07-18 — a medio configurar, NO funciona todavía.**
+> El fundador ya hizo (en modo Test): producto/precio $350, webhook, y **añadió las variables en
+> Vercel**. PERO producción **sigue sin ver Stripe**: el webhook responde `{"error":"stripe no
+> configurado"}` (HTTP 503) → `isStripeConfigured` es `false` en el deploy activo.
+>
+> **Diagnóstico exacto para retomar** (sin necesidad de sesión):
+> ```bash
+> curl -sS -X POST https://attesta-io.vercel.app/api/stripe/webhook -d '{}' -w "\n[HTTP %{http_code}]\n"
+> ```
+> - `stripe no configurado` / **503** → las llaves NO están vivas (estado actual). Falta algo abajo.
+> - `firma inválida` / **400** → ✅ Stripe YA está configurado (las llaves están vivas); seguir a la prueba.
+>
+> **Causa más probable (por orden):**
+> 1. **Falta REDEPLOY.** Las env vars solo entran con un deploy nuevo → Vercel → Deployments → último → ⋯ → **Redeploy**.
+> 2. Las variables se marcaron solo para **Preview/Development**, no para **Production**. Reabrir cada
+>    una y confirmar que **Production** está marcado.
+> 3. Nombre/valor con typo o espacio. Deben ser exactos: `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`,
+>    `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`.
+> 4. Ojo: la prueba se hizo en una **URL de previsualización** (`...-a95qea6pd-attesta-io.vercel.app`),
+>    no en producción. Probar SIEMPRE en `https://attesta-io.vercel.app`.
+>
+> **Cómo retomar:** volver a la computadora → aplicar 1-2-3 → Redeploy → correr el `curl` de arriba.
+> Cuando devuelva `firma inválida`/400, avisar a Claude para verificar el pipeline de punta a punta.
+
 La integración **ya está construida y desplegada, pero dormida** (se activa sola al poner las llaves).
 Pasos, en orden:
 
