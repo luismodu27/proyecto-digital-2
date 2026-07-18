@@ -63,6 +63,43 @@ const tiers: Tier[] = [
   },
 ];
 
+/** Matriz de comparación: cada fila = una capacidad; celdas true/false/string. */
+type Cell = boolean | string;
+const COMPARE: { label: string; cells: [Cell, Cell, Cell] }[] = [
+  { label: "Inventario de sistemas de IA", cells: [true, true, true] },
+  { label: "Clasificación de riesgo (EU AI Act + EE. UU.)", cells: [true, true, true] },
+  { label: "Usuarios", cells: ["1", "Equipo", "Equipo"] },
+  { label: "Gap assessment + plan de acción", cells: [false, true, true] },
+  { label: "Vigilancia regulatoria continua", cells: [false, true, true] },
+  { label: "Dossier e informe ejecutivo (PDF)", cells: [false, true, true] },
+  { label: "Evidencia y audit-trail inmutable", cells: [false, true, true] },
+  { label: "Policy packs (RRHH)", cells: [false, true, true] },
+  { label: "Multi-organización", cells: [false, false, true] },
+  { label: "SSO y controles avanzados", cells: [false, false, true] },
+  { label: "Soporte prioritario", cells: [false, false, true] },
+];
+
+const COLS = ["Diagnóstico", "Preparación", "Enterprise"] as const;
+
+function CompareCell({ value }: { value: Cell }) {
+  if (value === true)
+    return (
+      <svg viewBox="0 0 16 16" className="mx-auto size-4 text-brand" aria-label="Incluido">
+        <path
+          d="m3.5 8.5 3 3 6-7"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  if (value === false)
+    return <span className="text-muted" aria-label="No incluido">—</span>;
+  return <span className="text-sm font-medium text-ink">{value}</span>;
+}
+
 export function Pricing() {
   return (
     <section id="precios" className="container-page py-20 md:py-28">
@@ -143,6 +180,51 @@ export function Pricing() {
           </Reveal>
         ))}
       </div>
+
+      {/* Comparativa de planes */}
+      <Reveal className="mt-16">
+        <h3 className="text-center font-display text-xl font-semibold text-ink">
+          Compara los planes
+        </h3>
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full min-w-[560px] border-collapse text-left">
+            <thead>
+              <tr className="border-b border-line-strong">
+                <th className="py-3 pr-4 text-sm font-medium text-ink-soft">
+                  Capacidad
+                </th>
+                {COLS.map((c, i) => (
+                  <th
+                    key={c}
+                    className={`px-3 py-3 text-center text-sm font-semibold ${
+                      i === 1 ? "text-brand-strong" : "text-ink"
+                    }`}
+                  >
+                    {c}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARE.map((row) => (
+                <tr key={row.label} className="border-b border-line">
+                  <td className="py-3 pr-4 text-sm text-ink">{row.label}</td>
+                  {row.cells.map((cell, i) => (
+                    <td
+                      key={i}
+                      className={`px-3 py-3 text-center align-middle ${
+                        i === 1 ? "bg-brand-soft/30" : ""
+                      }`}
+                    >
+                      <CompareCell value={cell} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Reveal>
     </section>
   );
 }

@@ -173,6 +173,16 @@
   to { opacity: 1; transform: translateX(0); }
 }
 
+@keyframes guide-row {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes guide-bar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 @layer utilities {
   /* Aparición al hacer scroll (lo activa el componente Reveal). */
   .reveal {
@@ -208,6 +218,15 @@
   .animate-guide-step {
     animation: guide-step 0.34s cubic-bezier(0.16, 1, 0.3, 1);
   }
+  /* Filas/ítems de los mini-ejemplos de la guía (aparición escalonada). */
+  .animate-guide-row {
+    animation: guide-row 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  /* Barras de los mini-ejemplos (se rellenan de izquierda a derecha). */
+  .animate-guide-bar {
+    transform-origin: left center;
+    animation: guide-bar 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -219,8 +238,12 @@
   .animate-float-soft {
     animation: none !important;
   }
-  .animate-guide-step {
+  .animate-guide-step,
+  .animate-guide-row,
+  .animate-guide-bar {
     animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
   }
   * {
     scroll-behavior: auto !important;

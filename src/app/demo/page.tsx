@@ -3,10 +3,16 @@ import type { ReactNode } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { SealMark } from "@/components/ui/SealMark";
 import { ButtonLink } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { Meter } from "@/components/dashboard/parts";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
-import { AI_SYSTEMS, riskCounts, avgCompliance } from "@/lib/mock-data";
+import {
+  AI_SYSTEMS,
+  riskCounts,
+  avgCompliance,
+  AUDIT_READY_THRESHOLD,
+} from "@/lib/mock-data";
 
 export const metadata = {
   title: "Demo · Attesta",
@@ -72,13 +78,24 @@ export default function DemoPage() {
       <header className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur">
         <div className="container-page flex h-16 items-center justify-between">
           <Logo />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/"
-              className="hidden text-sm font-medium text-ink-soft hover:text-ink sm:block"
+              className="flex items-center gap-1.5 rounded-full border border-line-strong px-3 py-1.5 text-sm font-medium text-ink-soft transition-colors hover:bg-paper-sunken hover:text-ink"
             >
-              ← Volver al sitio
+              <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden>
+                <path
+                  d="M19 12H5m0 0 6-6m-6 6 6 6"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="hidden sm:inline">Volver al sitio</span>
+              <span className="sm:hidden">Sitio</span>
             </Link>
+            <ThemeToggle />
             <ButtonLink href="/login" className="px-4 py-2 text-sm">
               Crear cuenta
             </ButtonLink>
@@ -111,7 +128,7 @@ export default function DemoPage() {
           {[
             { k: "Sistemas de IA", v: String(systems.length), hint: "en inventario" },
             { k: "Alto riesgo", v: String(high), hint: "obligaciones estrictas" },
-            { k: "Preparación media", v: `${avg}%`, hint: "% listo (muestra)" },
+            { k: "Preparación media", v: `${avg}%`, hint: `objetivo ≥ ${AUDIT_READY_THRESHOLD}%` },
             { k: "Marco", v: "EU AI Act", hint: "+ marcos de EE. UU." },
           ].map((c) => (
             <div key={c.k} className="rounded-2xl border border-line bg-paper-raised p-5">
@@ -144,7 +161,7 @@ export default function DemoPage() {
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
                     <div className="hidden w-24 sm:block">
-                      <Meter value={s.compliance} />
+                      <Meter value={s.compliance} target={AUDIT_READY_THRESHOLD} />
                     </div>
                     <RiskBadge level={s.risk} />
                   </div>

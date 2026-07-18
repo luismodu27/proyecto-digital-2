@@ -21,10 +21,23 @@ const C = {
   good: "var(--tone-good-fg)",
 };
 
-/* Fila de "sistema" para el mini-inventario. */
-function SysRow({ name, tag, tone }: { name: string; tag: string; tone: string }) {
+/* Fila de "sistema" para el mini-inventario (aparición escalonada). */
+function SysRow({
+  name,
+  tag,
+  tone,
+  delay = 0,
+}: {
+  name: string;
+  tag: string;
+  tone: string;
+  delay?: number;
+}) {
   return (
-    <div className="flex items-center justify-between gap-2 rounded-md border border-line bg-paper-raised px-2.5 py-1.5">
+    <div
+      className="animate-guide-row flex items-center justify-between gap-2 rounded-md border border-line bg-paper-raised px-2.5 py-1.5"
+      style={{ animationDelay: `${delay}ms` }}
+    >
       <span className="flex items-center gap-1.5 text-xs text-ink">
         <span className="flex size-4 items-center justify-center rounded bg-brand-soft text-[8px] font-semibold text-brand-strong">
           IA
@@ -41,21 +54,37 @@ function SysRow({ name, tag, tone }: { name: string; tag: string; tone: string }
   );
 }
 
-function Bar({ label, pct, tone }: { label: string; pct: number; tone: string }) {
+function Bar({
+  label,
+  pct,
+  tone,
+  delay = 0,
+}: {
+  label: string;
+  pct: number;
+  tone: string;
+  delay?: number;
+}) {
   return (
     <div className="flex items-center gap-2">
       <span className="w-16 shrink-0 text-[10px] text-ink-soft">{label}</span>
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-paper-sunken">
-        <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: tone }} />
+        <div
+          className="animate-guide-bar h-full rounded-full"
+          style={{ width: `${pct}%`, backgroundColor: tone, animationDelay: `${delay}ms` }}
+        />
       </div>
       <span className="w-7 shrink-0 text-right text-[10px] tabular-nums text-ink">{pct}%</span>
     </div>
   );
 }
 
-function Check({ children }: { children: ReactNode }) {
+function Check({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   return (
-    <div className="flex items-center gap-1.5 text-[11px] text-ink-soft">
+    <div
+      className="animate-guide-row flex items-center gap-1.5 text-[11px] text-ink-soft"
+      style={{ animationDelay: `${delay}ms` }}
+    >
       <svg viewBox="0 0 24 24" className="size-3.5 shrink-0" fill="none" aria-hidden>
         <path
           d="M9 11l3 3 8-8M4 12a8 8 0 108-8"
@@ -101,8 +130,12 @@ const STEPS: Step[] = [
             { k: "Sistemas", v: "6" },
             { k: "Alto riesgo", v: "4", tone: C.danger },
             { k: "% listo", v: "59%" },
-          ].map((c) => (
-            <div key={c.k} className="rounded-lg border border-line bg-paper-raised p-2">
+          ].map((c, idx) => (
+            <div
+              key={c.k}
+              className="animate-guide-row rounded-lg border border-line bg-paper-raised p-2"
+              style={{ animationDelay: `${60 + idx * 110}ms` }}
+            >
               <p
                 className="font-display text-base font-semibold"
                 style={c.tone ? { color: c.tone } : undefined}
@@ -123,9 +156,9 @@ const STEPS: Step[] = [
     visual: (
       <Frame label="Inventario · 3 sistemas">
         <div className="space-y-1.5">
-          <SysRow name="Cribado de CVs" tag="Alto riesgo" tone={C.danger} />
-          <SysRow name="Scoring de candidatos" tag="Alto riesgo" tone={C.danger} />
-          <SysRow name="Chatbot de entrevistas" tag="Riesgo limitado" tone={C.gold} />
+          <SysRow name="Cribado de CVs" tag="Alto riesgo" tone={C.danger} delay={60} />
+          <SysRow name="Scoring de candidatos" tag="Alto riesgo" tone={C.danger} delay={170} />
+          <SysRow name="Chatbot de entrevistas" tag="Riesgo limitado" tone={C.gold} delay={280} />
         </div>
       </Frame>
     ),
@@ -137,9 +170,9 @@ const STEPS: Step[] = [
     visual: (
       <Frame label="Distribución de riesgo">
         <div className="space-y-2">
-          <Bar label="Alto" pct={67} tone={C.danger} />
-          <Bar label="Limitado" pct={17} tone={C.gold} />
-          <Bar label="Mínimo" pct={16} tone={C.good} />
+          <Bar label="Alto" pct={67} tone={C.danger} delay={80} />
+          <Bar label="Limitado" pct={17} tone={C.gold} delay={220} />
+          <Bar label="Mínimo" pct={16} tone={C.good} delay={360} />
         </div>
       </Frame>
     ),
@@ -155,11 +188,14 @@ const STEPS: Step[] = [
           <span className="font-display text-lg font-semibold text-ink">78%</span>
         </div>
         <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-paper-sunken">
-          <div className="h-full rounded-full" style={{ width: "78%", backgroundColor: C.good }} />
+          <div
+            className="animate-guide-bar h-full rounded-full"
+            style={{ width: "78%", backgroundColor: C.good, animationDelay: "80ms" }}
+          />
         </div>
         <div className="mt-2 space-y-1">
-          <Check>Supervisión humana (Art. 14)</Check>
-          <Check>Transparencia a candidatos (Art. 50)</Check>
+          <Check delay={220}>Supervisión humana (Art. 14)</Check>
+          <Check delay={340}>Transparencia a candidatos (Art. 50)</Check>
         </div>
       </Frame>
     ),
@@ -174,11 +210,11 @@ const STEPS: Step[] = [
           {[
             { t: "Documentar supervisión humana", who: "Ana · 12 jul", tone: C.danger },
             { t: "Publicar aviso de transparencia", who: "Luis · 20 jul", tone: C.gold },
-          ].map((task) => (
+          ].map((task, idx) => (
             <div
               key={task.t}
-              className="flex items-center justify-between gap-2 rounded-md border border-line bg-paper-raised px-2.5 py-1.5"
-              style={{ borderLeftColor: task.tone, borderLeftWidth: 3 }}
+              className="animate-guide-row flex items-center justify-between gap-2 rounded-md border border-line bg-paper-raised px-2.5 py-1.5"
+              style={{ borderLeftColor: task.tone, borderLeftWidth: 3, animationDelay: `${80 + idx * 130}ms` }}
             >
               <span className="text-[11px] text-ink">{task.t}</span>
               <span className="shrink-0 text-[9px] text-muted">{task.who}</span>

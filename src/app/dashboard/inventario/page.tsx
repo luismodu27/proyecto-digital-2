@@ -4,6 +4,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { EvidenceBadge } from "@/components/ui/EvidenceBadge";
 import { getAiSystems, isSupabaseConfigured } from "@/lib/data";
+import { AUDIT_READY_THRESHOLD } from "@/lib/mock-data";
 import { seedSampleData } from "@/lib/data/actions";
 
 export default async function InventarioPage() {
@@ -88,7 +89,7 @@ export default async function InventarioPage() {
                     </td>
                     <td className="px-5 py-4">
                       <div className="w-32">
-                        <Meter value={s.compliance} />
+                        <Meter value={s.compliance} target={AUDIT_READY_THRESHOLD} />
                       </div>
                     </td>
                     <td className="px-5 py-4 tabular-nums text-ink-soft">

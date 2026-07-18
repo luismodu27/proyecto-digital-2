@@ -5,7 +5,12 @@ import { RiskBadge } from "@/components/ui/RiskBadge";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
 import { DeadlineReminders } from "@/components/dashboard/DeadlineReminders";
 import { getAiSystems, getOrgJurisdictions, getActionTasks } from "@/lib/data";
-import { avgCompliance, riskCounts } from "@/lib/mock-data";
+import {
+  avgCompliance,
+  riskCounts,
+  AUDIT_READY_THRESHOLD,
+  isAuditReady,
+} from "@/lib/mock-data";
 import {
   upcomingDeadlines,
   daysUntil,
@@ -62,9 +67,22 @@ export default async function DashboardOverview() {
           hint="requieren obligaciones estrictas"
           accent="danger"
         />
-        <StatCard label="Preparación media" value={`${avg}%`} hint="% listo para auditoría" accent={avg >= 60 ? "brand" : "warn"} />
+        <StatCard
+          label="Preparación media"
+          value={`${avg}%`}
+          hint={`objetivo ≥ ${AUDIT_READY_THRESHOLD}% para estar listo`}
+          accent={isAuditReady(avg) ? "brand" : "warn"}
+        />
         <StatCard label="Brechas abiertas" value={4} hint="ver gap assessment" accent="warn" />
       </section>
+
+      <p className="mt-3 flex items-center gap-2 text-xs text-muted">
+        <span className="inline-block h-3 w-0.5 rounded-full bg-ink/45" aria-hidden />
+        La marca en las barras señala el objetivo orientativo de{" "}
+        <span className="font-medium text-ink-soft">{AUDIT_READY_THRESHOLD}% listo</span>{" "}
+        para considerar un sistema preparado para auditoría. No es un juicio de
+        cumplimiento.
+      </p>
 
       {nextDeadline && (
         <Link
@@ -146,7 +164,7 @@ export default async function DashboardOverview() {
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <div className="w-24">
-                    <Meter value={s.compliance} />
+                    <Meter value={s.compliance} target={AUDIT_READY_THRESHOLD} />
                   </div>
                   <RiskBadge level={s.risk} />
                 </div>

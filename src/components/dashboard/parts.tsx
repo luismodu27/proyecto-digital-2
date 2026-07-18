@@ -52,16 +52,24 @@ export function StatCard({
   );
 }
 
-export function Meter({ value }: { value: number }) {
+export function Meter({ value, target }: { value: number; target?: number }) {
   const color =
     value >= 75 ? "bg-brand" : value >= 50 ? "bg-[#c9761f]" : "bg-[#b4322a]";
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-paper-sunken">
+      <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-paper-sunken">
         <div
           className={`h-full rounded-full transition-[width] duration-700 ease-out ${color}`}
           style={{ width: `${value}%` }}
         />
+        {target != null && (
+          <span
+            className="absolute inset-y-0 w-0.5 -translate-x-1/2 rounded-full bg-ink/45"
+            style={{ left: `${target}%` }}
+            title={`Objetivo: ${target}%`}
+            aria-hidden
+          />
+        )}
       </div>
       <span className="w-9 shrink-0 text-right text-xs tabular-nums text-ink-soft">
         {value}%

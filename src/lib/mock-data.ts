@@ -727,3 +727,15 @@ export function avgCompliance(systems: AiSystem[]): number {
     systems.reduce((sum, s) => sum + s.compliance, 0) / systems.length,
   );
 }
+
+/**
+ * Umbral ORIENTATIVO de preparación: a partir de este % consideramos un sistema
+ * "listo para auditoría" (nunca es una certificación ni un juicio de cumplimiento;
+ * es la meta de preparación de la organización). Ajustable en un único lugar.
+ */
+export const AUDIT_READY_THRESHOLD = 80;
+
+/** ¿La preparación declarada alcanza el umbral orientativo? */
+export function isAuditReady(pct: number): boolean {
+  return pct >= AUDIT_READY_THRESHOLD;
+}
