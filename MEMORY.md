@@ -123,6 +123,13 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **Documento maestro (guía completa) como artifact interactivo.** A petición del fundador,
+  guía HTML autocontenida con la identidad de Attesta: qué es, problema, ICP/cuña, principios (no certifica),
+  recorrido guiado por CADA pantalla con **capturas reales anotadas** (señalamientos numerados + leyenda),
+  planes, foso y glosario. Capturas tomadas en modo demo (build sin `.env.local`); imágenes JPEG incrustadas
+  como data URIs vía script (sin cargar base64 en contexto). Publicado como artifact privado en claude.ai.
+  Fuentes/plantilla en scratchpad (efímero); si hay que regenerarlo, rehacer capturas + `embed.mjs`.
+
 - **2026-07-18** · **Foso — Incrementos 2 y 3: registro de auditoría de sesgo (NYC LL144) + dossier.**
   - **Incremento 2 (registro con caducidad):** migración **0019** (campos en `ai_systems`: `is_aedt`,
     `last_bias_audit_date`, `independent_auditor_name`, `auditor_independence_confirmed`,
