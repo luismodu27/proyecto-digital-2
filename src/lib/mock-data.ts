@@ -485,7 +485,7 @@ export const SAMPLE_REG_CANDIDATES: RegCandidate[] = [
     summary:
       "Borrador detectado: la Oficina Europea de IA habría publicado directrices interpretativas sobre el uso de sistemas de IA de alto riesgo en contratación (Anexo III, empleo), con criterios de supervisión humana e información a los candidatos.",
     impact:
-      "Afinaría cómo un deployer de RRHH cumple el Art. 26 en cribado de CVs y entrevistas: expectativas concretas de supervisión humana y transparencia hacia el candidato.",
+      "Afinaría cómo un deployer de RRHH aborda las obligaciones del Art. 26 en cribado de CVs y entrevistas: expectativas concretas de supervisión humana y transparencia hacia el candidato.",
     action:
       "Revisar el policy pack de RRHH contra las nuevas directrices y ajustar la evidencia de supervisión humana.",
     articles: ["Art. 26", "Anexo III"],

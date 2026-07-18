@@ -135,11 +135,12 @@ las notificaciones al buzón nuevo **no llegarán** hasta verificar dominio.
 ### 2.1 · Diferido de la auditoría de calidad (2026-07-18)
 La 1ª tanda de pulido ya está hecha (manejo de errores, toasts por tipo, carga/error del dashboard, empty-states).
 Queda pendiente:
-- **Copy prohibido en textos estáticos** (⚠️ delicado, es contenido legal — revisar con el `compliance-domain-expert`
-  antes de tocar): `recommendations.ts:53` ("marcado CE"), `:101` ("garantizar"); `regulatory-watch.ts:286`
-  ("marcado CE"); `policy-packs/rrhh.ts:58` ("garantiza"); `mock-data.ts:465` ("cumple el Art. 26"). Neutralizar
-  SOLO los que son afirmación indebida; conservar los que son referencia correcta a obligación del **proveedor**
-  (p. ej. el proveedor lleva marcado CE — eso es verdad y debe quedarse, reformulado como "exige/verifica que…").
+- ✅ **Copy prohibido en textos estáticos — HECHO (2026-07-18, revisado con el experto).** Neutralizados 3:
+  `recommendations.ts` ("garantizar"→"alcanzar y mantener", Art. 15), `mock-data.ts` ("cumple el Art. 26"→"aborda
+  las obligaciones del Art. 26"), `policy-packs/rrhh.ts` ("garantiza"→"asegura"). CONSERVADOS 2 (referencias
+  correctas a obligación del proveedor): los "marcado CE" de `recommendations.ts:53` y `regulatory-watch.ts:286`
+  (el verbo es del deployer: "exige/verifica que el proveedor lleve marcado CE"). El disclaimer de `LegalNote`
+  usa los términos en negativo ("No es un certificado…") — correcto, se conserva.
 - **`window.confirm` nativo** en borrados (`DeleteSystemButton.tsx`, `RevokeInviteButton.tsx`, etc.) → modal propio
   con marca para acciones irreversibles.
 - **Estados vacíos menores**: `riesgo/page.tsx` muestra las 4 secciones con "0 sistemas" en cuenta nueva.

@@ -98,7 +98,7 @@ const REMEDIATION: Record<string, CatalogEntry> = {
   "Art. 15": {
     title: "Exactitud, robustez y ciberseguridad (verificación)",
     action:
-      "Obligación principalmente del proveedor: garantizar niveles adecuados de exactitud, robustez y ciberseguridad y declarar las métricas en las instrucciones. Como deployer, revisa esas métricas frente a tu caso de uso y protege el entorno en el que operas el sistema.",
+      "Obligación principalmente del proveedor: alcanzar y mantener niveles adecuados de exactitud, robustez y ciberseguridad y declarar las métricas en las instrucciones. Como deployer, revisa esas métricas frente a tu caso de uso y protege el entorno en el que operas el sistema.",
     article: "Art. 15",
     priority: "media",
     effort: "medio",

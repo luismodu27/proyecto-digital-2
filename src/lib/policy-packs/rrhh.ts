@@ -41,7 +41,7 @@ export const RRHH_PACK: PolicyPack = {
       id: "decision-automatizada",
       title: "Decisión no meramente automatizada (GDPR)",
       description:
-        "Si hay decisiones con efecto significativo (p. ej. descarte automático), garantiza intervención humana real y el derecho del candidato a obtener explicación y a impugnar la decisión (GDPR Art. 22). El AI Act refuerza esto con el derecho del afectado a una explicación clara del papel del sistema en decisiones basadas en IA de alto riesgo del Anexo III (Art. 86).",
+        "Si hay decisiones con efecto significativo (p. ej. descarte automático), asegura una intervención humana real y el derecho del candidato a obtener explicación y a impugnar la decisión (GDPR Art. 22). El AI Act refuerza esto con el derecho del afectado a una explicación clara del papel del sistema en decisiones basadas en IA de alto riesgo del Anexo III (Art. 86).",
       article: "GDPR Art. 22 (y Art. 86)",
       severity: "alta",
     },
