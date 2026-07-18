@@ -1,7 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { isStripeConfigured } from "@/lib/stripe/config";
 
 export type OrgSubscription = {
   status: string;
@@ -11,17 +10,6 @@ export type OrgSubscription = {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
 };
-
-const ACTIVE = new Set(["active", "trialing"]);
-
-/**
- * ¿Se aplica el bloqueo por suscripción? Solo cuando hay backend real Y Stripe
- * configurado. Si falta cualquiera de los dos, la app queda abierta (como antes
- * de conectar el cobro): así el deploy nunca bloquea a nadie por sorpresa.
- */
-export function isBillingEnforced(): boolean {
-  return isSupabaseConfigured && isStripeConfigured;
-}
 
 /** Suscripción de la organización (o null si no hay / tabla ausente). */
 export const getOrgSubscription = cache(
@@ -51,14 +39,3 @@ export const getOrgSubscription = cache(
     }
   },
 );
-
-/**
- * ¿La organización puede usar las funciones de pago?
- * - Si el cobro no se aplica (demo o Stripe sin configurar) → siempre sí.
- * - Si se aplica → solo con suscripción activa/en prueba.
- */
-export async function orgHasAccess(orgId: string): Promise<boolean> {
-  if (!isBillingEnforced()) return true;
-  const sub = await getOrgSubscription(orgId);
-  return !!sub && ACTIVE.has(sub.status);
-}

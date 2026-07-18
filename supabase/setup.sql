@@ -1175,3 +1175,22 @@ $$;
 
 revoke all on function public.org_has_active_subscription(uuid) from anon;
 grant execute on function public.org_has_active_subscription(uuid) to authenticated;
+
+
+-- ============================================================================
+-- 0018_org_plan.sql — plan (nivel de acceso) por organización
+-- ============================================================================
+
+alter table public.organizations
+  add column if not exists plan text not null default 'free';
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'organizations_plan_check'
+  ) then
+    alter table public.organizations
+      add constraint organizations_plan_check
+      check (plan in ('free', 'preparacion', 'enterprise'));
+  end if;
+end $$;

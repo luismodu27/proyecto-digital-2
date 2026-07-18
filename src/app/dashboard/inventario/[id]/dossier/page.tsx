@@ -7,7 +7,7 @@ import { LEGAL_PDF } from "@/components/ui/LegalNote";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { Paywall } from "@/components/dashboard/Paywall";
 import { getActiveOrg } from "@/lib/data/context";
-import { orgHasAccess } from "@/lib/billing/subscription";
+import { orgHasTier } from "@/lib/billing/plan";
 import { OBLIGATIONS_BY_LEVEL } from "@/lib/risk-assessment";
 import { recommendationsForLevel } from "@/lib/recommendations";
 import {
@@ -98,7 +98,7 @@ export default async function DossierPage({
   const { id } = await params;
 
   const gateOrg = await getActiveOrg();
-  if (gateOrg && !(await orgHasAccess(gateOrg))) {
+  if (gateOrg && !(await orgHasTier(gateOrg, "preparacion"))) {
     return (
       <Paywall
         feature="Dossier de evidencia"

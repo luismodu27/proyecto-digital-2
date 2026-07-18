@@ -9,7 +9,7 @@ import {
   getOrgJurisdictions,
 } from "@/lib/data";
 import { getActiveOrg } from "@/lib/data/context";
-import { orgHasAccess } from "@/lib/billing/subscription";
+import { orgHasTier } from "@/lib/billing/plan";
 import { Paywall } from "@/components/dashboard/Paywall";
 import {
   RISK_LABEL,
@@ -44,7 +44,7 @@ const SEVERITY_COLOR = {
 
 export default async function InformeEjecutivoPage() {
   const gateOrg = await getActiveOrg();
-  if (gateOrg && !(await orgHasAccess(gateOrg))) {
+  if (gateOrg && !(await orgHasTier(gateOrg, "preparacion"))) {
     return (
       <Paywall
         feature="Informe ejecutivo"

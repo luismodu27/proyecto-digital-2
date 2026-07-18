@@ -5,6 +5,7 @@ import { WelcomeGuide } from "@/components/dashboard/WelcomeGuide";
 import { Toaster } from "@/components/ui/Toast";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
+import { getOrgPlan, type PlanTier } from "@/lib/billing/plan";
 
 export default async function DashboardLayout({
   children,
@@ -15,6 +16,7 @@ export default async function DashboardLayout({
   let userName: string | undefined;
   let userId: string | undefined;
   let showGuide = false;
+  let plan: PlanTier | undefined;
 
   // En modo conectado, exige sesión y organización. En modo demo, abierto.
   if (isSupabaseConfigured) {
@@ -24,6 +26,7 @@ export default async function DashboardLayout({
     if (!org) redirect("/onboarding");
     userEmail = user.email ?? undefined;
     userId = user.id;
+    plan = await getOrgPlan(org);
     const meta = user.user_metadata ?? {};
     const rawName =
       (typeof meta.full_name === "string" && meta.full_name) ||
@@ -37,7 +40,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-dvh flex-col bg-paper md:flex-row">
-      <Sidebar userEmail={userEmail} userName={userName} />
+      <Sidebar userEmail={userEmail} userName={userName} plan={plan} />
       <div className="flex-1 md:h-dvh md:overflow-y-auto">
         <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">{children}</div>
       </div>

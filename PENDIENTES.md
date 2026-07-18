@@ -17,6 +17,26 @@ En una sesión anterior se pegó una **clave secreta LIVE de Stripe (`sk_live_�
 tratarla como comprometida. **Rótala**: Stripe → *Developers → API keys* → en la Secret key →
 **Roll key**. La nueva NUNCA se pega en el chat; va solo a variables de entorno de Vercel.
 
+### 1.1-bis · Aplicar migración 0018 (diferenciación de planes) — RÁPIDO
+La diferenciación de planes (free / preparación / enterprise) **ya está construida**, pero el
+bloqueo por plan **solo se activa al aplicar la migración**. Sin aplicarla, la app sigue con acceso
+completo (degradación segura). Para encenderla:
+1. Pega **`supabase/migrations/0018_org_plan.sql`** en el SQL Editor de Supabase (solo ese archivo).
+2. A partir de ahí, las cuentas nuevas entran como **gratis** (solo Inventario + Riesgo). Tu cuenta,
+   al ser `platform_admin`, **conserva acceso completo** automáticamente.
+3. Para dar acceso de pago a un cliente **sin Stripe** (cortesía o Enterprise), en el SQL Editor:
+   ```sql
+   -- hallar el id de la org por el email de un miembro:
+   select o.id, o.name, o.plan from public.organizations o
+   join public.memberships m on m.organization_id = o.id
+   join auth.users u on u.id = m.user_id
+   where u.email = '<correo>';
+   -- elevar el plan:
+   update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
+   -- o 'enterprise'
+   ```
+4. Cuando Stripe esté activo (§1.2), una suscripción activa sube la org a **preparación** sola.
+
 ### 1.2 · Pagos con Stripe (cuando estés en una computadora, en modo Test)
 La integración **ya está construida y desplegada, pero dormida** (se activa sola al poner las llaves).
 Pasos, en orden:

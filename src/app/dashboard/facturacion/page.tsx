@@ -1,7 +1,8 @@
 import { PageHeader } from "@/components/dashboard/parts";
 import { Button } from "@/components/ui/Button";
 import { getActiveOrg } from "@/lib/data/context";
-import { getOrgSubscription, isBillingEnforced } from "@/lib/billing/subscription";
+import { getOrgSubscription } from "@/lib/billing/subscription";
+import { getOrgPlan, TIER_LABEL } from "@/lib/billing/plan";
 import { startCheckout, openBillingPortal } from "@/lib/billing/actions";
 import { PLAN_PRICE_LABEL, isStripeConfigured } from "@/lib/stripe/config";
 
@@ -43,9 +44,14 @@ export default async function FacturacionPage({
 }) {
   const { estado } = await searchParams;
   const orgId = await getActiveOrg();
-  const sub = orgId ? await getOrgSubscription(orgId) : null;
-  const enforced = isBillingEnforced();
-  const isActive = sub?.status === "active" || sub?.status === "trialing";
+  const [sub, plan] = await Promise.all([
+    orgId ? getOrgSubscription(orgId) : Promise.resolve(null),
+    orgId ? getOrgPlan(orgId) : Promise.resolve("free" as const),
+  ]);
+  const hasStripeSub = sub?.status === "active" || sub?.status === "trialing";
+  // "Desbloqueado" = alcanza Preparación o más (por Stripe, plan manual o Enterprise).
+  const unlocked = plan === "preparacion" || plan === "enterprise";
+  const isEnterprise = plan === "enterprise";
 
   return (
     <>
@@ -71,39 +77,51 @@ export default async function FacturacionPage({
         <div className="rounded-2xl border border-line bg-paper-raised p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-semibold text-ink">
-              {isActive ? "Plan Preparación" : "Plan Diagnóstico"}
+              Plan {TIER_LABEL[plan]}
             </h2>
             <span
               className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${
-                isActive
+                unlocked
                   ? "border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)]"
                   : "border-line-strong bg-paper-sunken text-muted"
               }`}
             >
-              {isActive
+              {hasStripeSub
                 ? STATUS_LABEL[sub!.status] ?? "Activa"
-                : enforced
-                  ? "Gratuito"
-                  : "Acceso completo"}
+                : isEnterprise
+                  ? "Enterprise"
+                  : unlocked
+                    ? "Desbloqueado"
+                    : "Gratuito"}
             </span>
           </div>
 
-          {isActive ? (
+          {unlocked ? (
             <>
-              <p className="mt-2 text-sm text-ink-soft">
-                {sub?.cancelAtPeriodEnd
-                  ? `Se cancelará el ${fmtDate(sub.currentPeriodEnd)}. Hasta entonces conservas el acceso.`
-                  : `Se renueva el ${fmtDate(sub?.currentPeriodEnd ?? null)}.`}
-              </p>
-              <form action={openBillingPortal} className="mt-5">
-                <Button type="submit" variant="outline">
-                  Gestionar suscripción
-                </Button>
-              </form>
-              <p className="mt-3 text-xs text-muted">
-                Cambiar método de pago, ver facturas o cancelar — todo en el portal
-                seguro de Stripe.
-              </p>
+              {hasStripeSub ? (
+                <>
+                  <p className="mt-2 text-sm text-ink-soft">
+                    {sub?.cancelAtPeriodEnd
+                      ? `Se cancelará el ${fmtDate(sub.currentPeriodEnd)}. Hasta entonces conservas el acceso.`
+                      : `Se renueva el ${fmtDate(sub?.currentPeriodEnd ?? null)}.`}
+                  </p>
+                  <form action={openBillingPortal} className="mt-5">
+                    <Button type="submit" variant="outline">
+                      Gestionar suscripción
+                    </Button>
+                  </form>
+                  <p className="mt-3 text-xs text-muted">
+                    Cambiar método de pago, ver facturas o cancelar — todo en el
+                    portal seguro de Stripe.
+                  </p>
+                </>
+              ) : (
+                <p className="mt-2 text-sm text-ink-soft">
+                  {isEnterprise
+                    ? "Tu organización tiene el plan Enterprise: acceso completo, varias entidades, SSO y soporte prioritario."
+                    : "Tu organización tiene desbloqueada la preparación completa para auditoría. ¡A por ello!"}
+                </p>
+              )}
             </>
           ) : (
             <>

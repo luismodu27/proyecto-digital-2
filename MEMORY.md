@@ -123,6 +123,30 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **Diferenciación de planes por acceso (enforcement real, 3 niveles).** Hasta ahora el
+  paywall era binario y solo se activaba con Stripe → todos veían todo. Ahora el acceso se rige por un
+  **plan efectivo** por organización: `free` (Diagnóstico) < `preparacion` < `enterprise`.
+  - **Nuevo `src/lib/billing/plan.ts`:** `getOrgPlan(orgId)` (cache) resuelve el nivel: modo demo →
+    `enterprise` (muestra completa); **staff de Attesta (`platform_admins`) → `enterprise`** siempre
+    (así el fundador NO se autobloquea); **suscripción Stripe activa → mín. `preparacion`**; si no, la
+    columna `organizations.plan` (por defecto `free`). `orgHasTier(org, req)` compara por rango.
+  - **Degradación segura:** si la columna `plan` aún no existe (migración 0018 sin aplicar), devuelve
+    `enterprise` → nadie se bloquea. **El bloqueo por plan solo empieza al aplicar 0018.**
+  - **Migración `0018_org_plan.sql`** (⚠️ el fundador la aplica; aditiva, sin drop): `organizations.plan`
+    text default `'free'` + check. Concatenada en `setup.sql`. Incluye SQL de ayuda para elevar una org
+    (`update organizations set plan='enterprise'/'preparacion' where id=...`) y para hallar el id por email.
+  - **Gating actualizado:** `PaidGate` ahora acepta `requires` (default `preparacion`) y usa `orgHasTier`.
+    Secciones de pago = **gap, plan, packs, vigilancia, equipo, actividad** (layouts) + **informe** y
+    **dossier** (gate inline). Libres en `free`: **Resumen, Inventario, Riesgo**. (Coincide con la
+    comparativa de la landing.) Nuevos layouts en `equipo/` y `actividad/`.
+  - **UX:** la barra lateral muestra un **candado** en las secciones por encima del plan (siguen siendo
+    clicables → llevan al paywall). El `Paywall` distingue nivel (Preparación / Enterprise). La página
+    `/dashboard/facturacion` muestra el **nivel real** (Diagnóstico/Preparación/Enterprise) y su estado.
+  - **Limpieza:** se retiraron `orgHasAccess`/`isBillingEnforced` de `subscription.ts` (su lógica vive
+    ahora en `plan.ts`). Build/lint/tsc verdes.
+  - **PENDIENTE del fundador:** aplicar **0018** en el SQL Editor. Su cuenta es `platform_admin` → conserva
+    acceso completo automáticamente. Para dar Preparación/Enterprise a un cliente sin Stripe: `update`
+    manual (ver comentarios de 0018). Con Stripe activo, la suscripción sube a Preparación sola.
 - **2026-07-18** · **3ª tanda de detalles.** (1) Guía de primer login: los mini-ejemplos ahora
   animan por dentro (filas/KPIs escalonados, barras que se rellenan; keyframes `guide-row`/`guide-bar`,
   respeta reduce-motion). (2) **Umbral orientativo de preparación** `AUDIT_READY_THRESHOLD = 80`

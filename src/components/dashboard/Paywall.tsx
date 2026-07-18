@@ -1,18 +1,24 @@
 import { ButtonLink } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
 import { PLAN_PRICE_LABEL } from "@/lib/stripe/config";
+import { TIER_LABEL, type PlanTier } from "@/lib/billing/plan";
 
 /**
- * Pantalla de bloqueo para funciones del plan Preparación cuando la organización
- * no tiene suscripción activa. Se muestra en lugar del contenido de la sección.
+ * Pantalla de bloqueo para una función que requiere un plan superior. Se muestra
+ * en lugar del contenido de la sección cuando la organización no alcanza el nivel.
  */
 export function Paywall({
   feature,
   description,
+  tier = "preparacion",
 }: {
   feature: string;
   description?: string;
+  tier?: PlanTier;
 }) {
+  const isEnterprise = tier === "enterprise";
+  const tierName = TIER_LABEL[tier];
+
   return (
     <div className="mx-auto max-w-xl py-10 text-center">
       <div className="rounded-3xl border border-line bg-paper-raised p-10">
@@ -28,18 +34,22 @@ export function Paywall({
           </svg>
         </span>
         <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted">
-          Función del plan Preparación
+          Función del plan {tierName}
         </p>
         <h1 className="mt-2 font-display text-2xl font-semibold text-ink">
           {feature}
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-soft">
           {description ??
-            "Desbloquea esta sección con el plan Preparación: la preparación completa para auditoría de tu organización."}
+            (isEnterprise
+              ? "Esta función forma parte del plan Enterprise (varias entidades, SSO y soporte prioritario)."
+              : "Desbloquea esta sección con el plan Preparación: la preparación completa para auditoría de tu organización.")}
         </p>
         <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <ButtonLink href="/dashboard/facturacion">
-            Ver planes · {PLAN_PRICE_LABEL}/mes
+            {isEnterprise
+              ? "Ver planes y contacto"
+              : `Ver planes · ${PLAN_PRICE_LABEL}/mes`}
           </ButtonLink>
           <ButtonLink href="/dashboard" variant="ghost">
             Volver al resumen
