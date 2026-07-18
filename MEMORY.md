@@ -123,6 +123,34 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **Lote de pulido/confianza (1ª tanda de la auditoría de calidad).** El fundador pidió
+  "pulido y confianza" + "ampliar el foso". Auditoría (subagente Explore) → arreglado lo de severidad ALTA:
+  - **Server Actions dejaban de "fingir éxito":** `data/actions.ts` (createAiSystem, updateAiSystem,
+    deleteAiSystem, createGapItem, deleteGapItem, updateGapStatus, applyPolicyPack, seedSampleData) y
+    `team-actions.ts` (updateMemberRole, removeMember, revokeInvitation) ahora **comprueban el `error`**
+    de Supabase y redirigen a un toast de error en vez de mostrar "✓ guardado" siempre. `updateGapStatus`
+    además da feedback de éxito (antes: ninguno). Crítico en un producto de compliance ("lo guardé" = verdad).
+  - **Toaster con tono por tipo** (`Toast.tsx`): éxito (verde/sello), **error (rojo/triángulo, `role=alert`)**,
+    info (neutro). Antes TODO salía verde de éxito, incluidos los errores (team-error, cand-error, etc.).
+    Nuevas claves: `system-error`, `gap-error`, `gap-updated`, `pack-error`, `seed-error`.
+  - **Faltaban estados de carga y error:** nuevos `dashboard/loading.tsx` (esqueleto) y `dashboard/error.tsx`
+    (frontera de error con marca + reintentar). Antes: pantalla en blanco / error genérico de Next.
+  - **Remates:** empty-state en "Requieren atención" del resumen; copy de demo del sidebar menos "a medio hacer".
+  - **DIFERIDO de la auditoría** (ver PENDIENTES): (a) **copy prohibido** en textos estáticos legales
+    (recommendations.ts, regulatory-watch.ts, rrhh.ts, mock-data.ts) — delicado, hay que neutralizar solo
+    los reales sin romper exactitud (algunos "marcado CE" son referencia correcta a obligación del proveedor);
+    se revisa con el experto. (b) `window.confirm` nativo en borrados → modal propio. (c) TODOs de andamiaje.
+- **2026-07-18** · **[CHECKPOINT PENDIENTE] Recomendación del experto para ampliar el foso.** Consultado el
+  `compliance-domain-expert`: el 2º marco de mayor valor/menor riesgo = **leyes de EE. UU. de contratación con
+  IA** (encaja con la cuña RRHH y, a diferencia del AI Act aplazado a dic-2027, **ya están en vigor**):
+  **NYC Local Law 144** (auditoría de sesgo por tercero independiente + notificación al candidato) y
+  **Illinois HB 3773** (en vigor 1 ene 2026, responsabilidad objetiva). **Colorado (SB 205→SB 189, aplazada a
+  2027) y EEOC (guía retirada) = solo eventos de radar**, no módulo. Encuadre clave: aquí el **deployer ES el
+  obligado directo** (más limpio que el AI Act) y **Attesta REGISTRA la evidencia de la auditoría independiente,
+  NO la realiza ni certifica** (refuerza "Attesta no certifica"). NO construir aún: motor propio de bias-testing
+  (pasivo legal), ISO 42001/NIST (voluntarios), shadow-AI (otra tecnología, secuenciar después). Reutiliza
+  `regulatory-watch.ts` + nuevo `policy-packs/` + modelo de evidencia. **Falta el visto bueno del fundador**
+  sobre el alcance antes de construir contenido legal.
 - **2026-07-18** · **Diferenciación de planes por acceso (enforcement real, 3 niveles).** Hasta ahora el
   paywall era binario y solo se activaba con Stripe → todos veían todo. Ahora el acceso se rige por un
   **plan efectivo** por organización: `free` (Diagnóstico) < `preparacion` < `enterprise`.

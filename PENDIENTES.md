@@ -127,6 +127,25 @@ las notificaciones al buzón nuevo **no llegarán** hasta verificar dominio.
 - **Landing (item 5, mejoras de conversión)**: hecho lo principal; queda pulir con más ejemplos/animaciones
   si quieres seguir iterando.
 
+### 2.1 · Diferido de la auditoría de calidad (2026-07-18)
+La 1ª tanda de pulido ya está hecha (manejo de errores, toasts por tipo, carga/error del dashboard, empty-states).
+Queda pendiente:
+- **Copy prohibido en textos estáticos** (⚠️ delicado, es contenido legal — revisar con el `compliance-domain-expert`
+  antes de tocar): `recommendations.ts:53` ("marcado CE"), `:101` ("garantizar"); `regulatory-watch.ts:286`
+  ("marcado CE"); `policy-packs/rrhh.ts:58` ("garantiza"); `mock-data.ts:465` ("cumple el Art. 26"). Neutralizar
+  SOLO los que son afirmación indebida; conservar los que son referencia correcta a obligación del **proveedor**
+  (p. ej. el proveedor lleva marcado CE — eso es verdad y debe quedarse, reformulado como "exige/verifica que…").
+- **`window.confirm` nativo** en borrados (`DeleteSystemButton.tsx`, `RevokeInviteButton.tsx`, etc.) → modal propio
+  con marca para acciones irreversibles.
+- **Estados vacíos menores**: `riesgo/page.tsx` muestra las 4 secciones con "0 sistemas" en cuenta nueva.
+- **TODOs de andamiaje**: `context.ts:21` (selector de org activa), `analista/voyage.ts` (placeholder de embeddings).
+
+### 2.2 · Ampliar el foso — leyes de EE. UU. de contratación con IA (esperando visto bueno)
+Recomendación del experto lista (ver MEMORY §10, 2026-07-18). **2º marco** = NYC LL144 + Illinois HB 3773 (en vigor),
+con Attesta **registrando evidencia** de la auditoría independiente (NO auditando ni certificando). Colorado/EEOC
+solo como radar. **Falta que el fundador apruebe el alcance**; luego se construye por incrementos reutilizando
+`regulatory-watch.ts` + nuevo policy pack + modelo de evidencia. NO construir aún: bias-testing propio, ISO/NIST, shadow-AI.
+
 ---
 
 ## 🟢 3. Ideas / capas futuras del producto (no pedidas aún, para no olvidar)
