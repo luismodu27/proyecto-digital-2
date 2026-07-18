@@ -696,6 +696,23 @@ diseño, nombre, features grandes); autónomo en lo demás.
     `vigia-test` si quedó, y candidatos de prueba (el corpus se queda).
   - **Llaves que el fundador me pasó por chat (rotar tras verificar si quiere):** Voyage `pa-...`, Anthropic
     `sk-ant-...` (sin saldo, inútil por ahora). Supabase URL `flesaxlgtvhewwcvzrxs` + anon key (pública).
+- **2026-07-17** · **DEPLOY A PRODUCCIÓN (Vercel) — modo real con login.** La app está **EN VIVO** en
+  **https://attesta-io.vercel.app** (el fundador renombró el proyecto a `attesta-io`, acorde a la marca).
+  - **Rama de producción = `main`** (antes solo tenía un README; se hizo `git push --force` de
+    `claude/init-3bwfhm` → `main`, ahora ambas apuntan al mismo commit). Vercel despliega `main` → **cada
+    push a main redespliega solo**. (Yo sigo trabajando en `claude/init-3bwfhm`; hay que mantener `main` al
+    día para que la demo se actualice — empujar a ambas o fast-forward main.)
+  - **Env vars en Vercel:** `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` (por eso arrancó en
+    modo CONECTADO, verificado: `/dashboard`→307 a `/login`). Falta añadir para el cron del foso:
+    `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `VOYAGE_API_KEY`, `ANALISTA_API_KEY` (+ opcional `ANALISTA_MODEL`).
+  - **Supabase Auth URL Configuration:** Site URL + Redirect URL `.../auth/callback` (el fundador lo hizo).
+  - **Fundador:** email **`luisscmorenod@gmail.com`** (registrado en prod, org creada). Se auto-promovió a
+    `platform_admin` por SQL (con el email correcto). Usuarios de prueba `analista-test`/`vigia-test`: pendiente
+    confirmar que se borraron (SQL dado).
+  - **PENDIENTE / SIGUIENTE:** (a) **revisión/pulido a fondo** de la app en vivo (el fundador lo pidió: "que no
+    falte nada, bien optimizado") — lista priorizada. (b) **cron automático** del Vigía/Analista (env vars +
+    `vercel.json` con crons; ojo: las rutas son POST, el cron de Vercel manda GET → habría que añadir handler GET
+    o adaptarlas). (c) Capas nuevas: 0 (shadow-AI) / 4 (sesgo, Evidently).
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
