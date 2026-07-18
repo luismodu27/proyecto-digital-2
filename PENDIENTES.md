@@ -37,6 +37,12 @@ completo (degradación segura). Para encenderla:
    ```
 4. Cuando Stripe esté activo (§1.2), una suscripción activa sube la org a **preparación** sola.
 
+### 1.1-ter · Aplicar migración 0019 (auditoría de sesgo NYC LL144) — RÁPIDO
+El foso (leyes US de contratación) está completo, pero el **registro de auditoría de sesgo con cuenta atrás**
+solo aparece al aplicar la migración. Pega **`supabase/migrations/0019_bias_audit.sql`** en el SQL Editor (solo
+ese archivo; es aditiva y segura). Luego, en **Inventario → un sistema**, marca si es AEDT y registra la fecha/
+auditor/URL de su auditoría de sesgo → verás el estado y la cuenta atrás ("vence en N días"), también en el dossier.
+
 ### 1.2 · Pagos con Stripe (cuando estés en una computadora, en modo Test)
 
 > **⏸️ ESTADO AL 2026-07-18 — a medio configurar, NO funciona todavía.**

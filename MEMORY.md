@@ -123,6 +123,24 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **Foso — Incrementos 2 y 3: registro de auditoría de sesgo (NYC LL144) + dossier.**
+  - **Incremento 2 (registro con caducidad):** migración **0019** (campos en `ai_systems`: `is_aedt`,
+    `last_bias_audit_date`, `independent_auditor_name`, `auditor_independence_confirmed`,
+    `bias_audit_summary_url`, `summary_published_date`; +setup.sql). Lógica en `src/lib/bias-audit.ts`:
+    estado (no_aplica/sin_auditoria/vencida/por_vencer/vigente), **caducidad rotatoria de 12 meses por
+    herramienta**, umbral `BIAS_AUDIT_WARN_DAYS=60`, publicación comprobada aparte del estado. Getter
+    `getSystemBiasAudit` (supabase con **fallback seguro** si faltan columnas; mock null) + action
+    `saveBiasAudit` (Attesta REGISTRA, no audita). `BiasAuditBadge` (estado + cuenta atrás). Sección en la
+    ficha del sistema (`inventario/[id]/editar`, `force-dynamic`) para registrar la evidencia.
+  - **Incremento 3 (dossier):** el dossier del sistema muestra, para un AEDT, la sección "Auditoría de sesgo —
+    EE. UU. (NYC LL144)" con estado+countdown, auditor, publicación y disclaimer. `DossierData.biasAudit`
+    poblado por supabase (desde `row.*`, seguro) y mock (`SAMPLE_BIAS_AUDITS` de ejemplo). **Verificado con
+    captura en modo demo** (badge "Próxima a vencer · vence en 14 días").
+  - **BUG pre-existente corregido (destapado al verificar):** `getCurrentUser` lanzaba en modo demo
+    (`createClient` exige credenciales) → rompía dossier/informe y secciones con PaidGate en demo. Ahora
+    devuelve null si `!isSupabaseConfigured`. La nueva `dashboard/error.tsx` capturó el fallo (validó el pulido).
+  - **PENDIENTE del fundador:** aplicar **migración 0019** en el SQL Editor (aditiva y segura). Sin ella, la
+    sección de auditoría de sesgo simplemente no aparece (degradación segura). **Foso = 3 incrementos COMPLETOS.**
 - **2026-07-18** · **Foso — Incremento 1: policy pack "Contratación con IA — EE. UU." (APROBADO por el fundador).**
   El fundador dio luz verde a ampliar el foso con el 2º marco (leyes US de contratación con IA). Hallazgo: el
   **radar US ya existía** (NYC/IL/CO/EEOC con contenido verificado) + jurisdicciones + UI multi-marco → solo
