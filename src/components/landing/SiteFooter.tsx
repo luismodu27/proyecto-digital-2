@@ -19,10 +19,10 @@ export function SiteFooter() {
           <ul className="mt-3 space-y-1.5 text-ink-soft">
             <li>
               <a
-                href="mailto:luisscmorenod@gmail.com"
+                href="mailto:attesta.io.mx@gmail.com"
                 className="font-medium text-brand hover:text-brand-strong"
               >
-                luisscmorenod@gmail.com
+                attesta.io.mx@gmail.com
               </a>
             </li>
             <li>

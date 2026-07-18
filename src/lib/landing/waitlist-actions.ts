@@ -7,7 +7,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Correo del fundador que recibe la notificación de solicitudes de acceso. */
 const FOUNDER_EMAIL =
-  process.env.FOUNDER_NOTIFY_EMAIL ?? "luisscmorenod@gmail.com";
+  process.env.FOUNDER_NOTIFY_EMAIL ?? "attesta.io.mx@gmail.com";
 /** Remitente. Sin dominio verificado, Resend permite `onboarding@resend.dev`. */
 const RESEND_FROM = process.env.RESEND_FROM ?? "Attesta <onboarding@resend.dev>";
 
