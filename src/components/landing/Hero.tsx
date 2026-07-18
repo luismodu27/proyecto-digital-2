@@ -39,7 +39,7 @@ export function Hero() {
             <ButtonLink href="#waitlist" variant="primary" className="px-6 py-3">
               Solicitar acceso anticipado
             </ButtonLink>
-            <ButtonLink href="/dashboard" variant="outline" className="px-6 py-3">
+            <ButtonLink href="/demo" variant="outline" className="px-6 py-3">
               Explorar la demo
             </ButtonLink>
           </div>

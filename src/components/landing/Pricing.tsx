@@ -1,17 +1,32 @@
 import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 
-const tiers = [
+type Tier = {
+  name: string;
+  price: string;
+  unit?: string;
+  note: string;
+  lead?: string;
+  features: string[];
+  limits?: string;
+  cta: string;
+  href: string;
+  highlight: boolean;
+};
+
+const tiers: Tier[] = [
   {
     name: "Diagnóstico",
     price: "Gratis",
-    note: "Para empezar hoy",
+    note: "Una muestra para empezar hoy",
     features: [
       "Inventario de sistemas de IA",
-      "Clasificación de riesgo (EU AI Act)",
+      "Clasificación de riesgo (EU AI Act + EE. UU.)",
       "1 usuario",
     ],
-    cta: "Empezar",
+    limits: "Sin evidencia en PDF, sin vigilancia ni plan de acción.",
+    cta: "Empezar gratis",
+    href: "/login",
     highlight: false,
   },
   {
@@ -19,28 +34,31 @@ const tiers = [
     price: "€390",
     unit: "/mes",
     note: "El sistema de registro de tu gobernanza",
+    lead: "Todo lo del plan gratis, y además desbloqueas:",
     features: [
-      "Todo lo de Diagnóstico",
       "Gap assessment + plan de acción",
-      "Vigilancia regulatoria",
+      "Vigilancia regulatoria continua",
       "Dossier e informe ejecutivo (PDF)",
-      "Evidencia y audit-trail",
+      "Evidencia y audit-trail inmutable",
+      "Policy packs (RRHH)",
       "Equipo y roles",
     ],
     cta: "Solicitar acceso",
+    href: "#waitlist",
     highlight: true,
   },
   {
     name: "Enterprise",
     price: "A medida",
     note: "Para varias entidades y necesidades avanzadas",
+    lead: "Todo lo de Preparación, y además:",
     features: [
-      "Todo lo de Preparación",
       "Multi-organización",
       "SSO y controles avanzados",
       "Soporte prioritario",
     ],
     cta: "Hablar con nosotros",
+    href: "#waitlist",
     highlight: false,
   },
 ];
@@ -86,26 +104,36 @@ export function Pricing() {
                 {t.unit && <span className="text-sm text-muted">{t.unit}</span>}
               </div>
 
-              <ul className="mt-6 flex-1 space-y-3 border-t border-line pt-6">
-                {t.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-ink">
-                    <svg viewBox="0 0 16 16" className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden>
-                      <path
-                        d="m3.5 8.5 3 3 6-7"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-6 flex-1 border-t border-line pt-6">
+                {t.lead && (
+                  <p className="mb-3 text-xs font-medium text-ink-soft">{t.lead}</p>
+                )}
+                <ul className="space-y-3">
+                  {t.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-ink">
+                      <svg viewBox="0 0 16 16" className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden>
+                        <path
+                          d="m3.5 8.5 3 3 6-7"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                {t.limits && (
+                  <p className="mt-4 border-t border-line pt-3 text-xs text-muted">
+                    {t.limits}
+                  </p>
+                )}
+              </div>
 
               <ButtonLink
-                href="#waitlist"
+                href={t.href}
                 variant={t.highlight ? "primary" : "outline"}
                 className="mt-7 w-full py-2.5"
               >
