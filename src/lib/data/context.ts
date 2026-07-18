@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 /**
  * Usuario autenticado actual (o null en modo demo / sin sesión).
@@ -9,6 +10,8 @@ import { createClient } from "@/lib/supabase/server";
  * una llamada de red a Supabase Auth por request (menos latencia percibida).
  */
 export const getCurrentUser = cache(async () => {
+  // En modo demo no hay backend: createClient lanzaría por falta de credenciales.
+  if (!isSupabaseConfigured) return null;
   const supabase = await createClient();
   const {
     data: { user },

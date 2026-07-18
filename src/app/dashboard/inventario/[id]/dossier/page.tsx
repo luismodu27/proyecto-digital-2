@@ -10,6 +10,13 @@ import { getActiveOrg } from "@/lib/data/context";
 import { orgHasTier } from "@/lib/billing/plan";
 import { OBLIGATIONS_BY_LEVEL } from "@/lib/risk-assessment";
 import { recommendationsForLevel } from "@/lib/recommendations";
+import { BiasAuditBadge } from "@/components/dashboard/BiasAuditBadge";
+import {
+  biasAuditStatus,
+  nextBiasAuditDue,
+  daysUntilDate,
+  publicationComplete,
+} from "@/lib/bias-audit";
 import {
   EVIDENCE_LABEL,
   RISK_LABEL,
@@ -137,7 +144,12 @@ export default async function DossierPage({
     );
   }
 
-  const { system, gaps, assessments } = dossier;
+  const { system, gaps, assessments, biasAudit } = dossier;
+  const now = new Date();
+  const biasStatus =
+    biasAudit && biasAudit.isAedt ? biasAuditStatus(biasAudit, now) : null;
+  const biasDue = biasAudit ? nextBiasAuditDue(biasAudit.lastAuditDate) : null;
+  const biasDays = daysUntilDate(biasDue, now);
   const level = system.risk;
   const latest = assessments[0];
   const rationale = latest?.rationale ?? RATIONALE_FALLBACK[level];
@@ -283,6 +295,54 @@ export default async function DossierPage({
             ))}
           </ul>
         </section>
+
+        {/* Anexo · Auditoría de sesgo (EE. UU. · NYC LL144) — solo si es AEDT */}
+        {biasAudit && biasStatus && (
+          <section className="mt-9 break-inside-avoid">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="font-display text-lg font-semibold text-ink">
+                Auditoría de sesgo — EE. UU. (NYC LL144)
+              </h2>
+              <BiasAuditBadge status={biasStatus} days={biasDays} />
+            </div>
+            <div className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+              <Field
+                label="Última auditoría de sesgo"
+                value={biasAudit.lastAuditDate ?? "—"}
+              />
+              <Field
+                label="Próxima auditoría (12 meses)"
+                value={biasDue ?? "—"}
+              />
+              <Field
+                label="Auditor independiente"
+                value={biasAudit.auditorName ?? "—"}
+              />
+              <Field
+                label="Independencia confirmada"
+                value={biasAudit.auditorIndependenceConfirmed ? "Sí (declarado)" : "No"}
+              />
+              <Field
+                label="Resumen publicado"
+                value={
+                  publicationComplete(biasAudit)
+                    ? `Sí · ${biasAudit.summaryPublishedDate}`
+                    : "Pendiente"
+                }
+              />
+              <Field
+                label="URL del resumen"
+                value={biasAudit.summaryUrl ?? "—"}
+              />
+            </div>
+            <p className="mt-4 text-xs leading-relaxed text-muted">
+              La auditoría de sesgo la realiza un auditor independiente; Attesta
+              registra esta evidencia declarada por la organización y no la realiza,
+              valida ni certifica. La vigencia (12 meses desde la última auditoría) y
+              este estado son orientativos, no un juicio de cumplimiento.
+            </p>
+          </section>
+        )}
 
         {/* 4 · Controles y brechas */}
         <section className="mt-9">

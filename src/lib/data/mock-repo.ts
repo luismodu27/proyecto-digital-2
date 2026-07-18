@@ -2,6 +2,7 @@ import {
   AI_SYSTEMS,
   GAP_ITEMS,
   SAMPLE_ASSESSMENTS,
+  SAMPLE_BIAS_AUDITS,
   SAMPLE_AUDIT,
   SAMPLE_INVITATIONS,
   SAMPLE_MEMBERS,
@@ -122,5 +123,6 @@ export async function getSystemDossier(
     system: { ...system, actorRole: "deployer" },
     gaps: GAP_ITEMS.filter((g) => g.system === system.id),
     assessments: SAMPLE_ASSESSMENTS[system.id] ?? [],
+    biasAudit: SAMPLE_BIAS_AUDITS[system.id] ?? null,
   };
 }

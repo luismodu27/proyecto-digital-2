@@ -222,6 +222,19 @@ export async function getSystemDossier(
       system: code,
     })),
     assessments,
+    // Auditoría de sesgo (si la migración 0019 está aplicada; si no, campos ausentes).
+    biasAudit: {
+      isAedt: !!row.is_aedt,
+      lastAuditDate: row.last_bias_audit_date
+        ? String(row.last_bias_audit_date).slice(0, 10)
+        : null,
+      auditorName: row.independent_auditor_name ?? null,
+      auditorIndependenceConfirmed: !!row.auditor_independence_confirmed,
+      summaryUrl: row.bias_audit_summary_url ?? null,
+      summaryPublishedDate: row.summary_published_date
+        ? String(row.summary_published_date).slice(0, 10)
+        : null,
+    },
   };
 }
 

@@ -125,6 +125,7 @@ export type DossierData = {
   system: AiSystem & { actorRole: string };
   gaps: GapItem[];
   assessments: AssessmentRecord[];
+  biasAudit?: import("./bias-audit").BiasAudit | null;
 };
 
 export const GAP_ITEMS: GapItem[] = [
@@ -174,6 +175,28 @@ export const GAP_ITEMS: GapItem[] = [
  * Historial de evaluaciones de ejemplo (modo demo), indexado por código de
  * sistema. Da vida al dossier y a la ficha del sistema sin backend.
  */
+/** Auditorías de sesgo de ejemplo (NYC LL144) para la demo/dossier. */
+export const SAMPLE_BIAS_AUDITS: Record<string, import("./bias-audit").BiasAudit> = {
+  // Cribado de CVs (AEDT) con auditoría antigua → estado "vencida/por vencer" en el radar.
+  "SYS-001": {
+    isAedt: true,
+    lastAuditDate: "2025-08-01",
+    auditorName: "Fairwatch Audits LLP (auditor independiente)",
+    auditorIndependenceConfirmed: true,
+    summaryUrl: "https://talenta-rh.example.com/ley144/resumen-auditoria",
+    summaryPublishedDate: "2025-08-12",
+  },
+  // Ranking de candidatos (AEDT) con auditoría reciente → "vigente".
+  "SYS-002": {
+    isAedt: true,
+    lastAuditDate: "2026-05-15",
+    auditorName: "Fairwatch Audits LLP (auditor independiente)",
+    auditorIndependenceConfirmed: true,
+    summaryUrl: "https://talenta-rh.example.com/ley144/ranking-resumen",
+    summaryPublishedDate: "2026-05-20",
+  },
+};
+
 export const SAMPLE_ASSESSMENTS: Record<string, AssessmentRecord[]> = {
   "SYS-002": [
     {
