@@ -7,6 +7,7 @@ import { Modules } from "@/components/landing/Modules";
 import { Platform } from "@/components/landing/Platform";
 import { WhyNow } from "@/components/landing/WhyNow";
 import { HowItWorks } from "@/components/landing/HowItWorks";
+import { UseCaseStory } from "@/components/landing/UseCaseStory";
 import { Pricing } from "@/components/landing/Pricing";
 import { FAQ } from "@/components/landing/FAQ";
 import { WaitlistCTA } from "@/components/landing/WaitlistCTA";
@@ -40,6 +41,7 @@ export default function Home() {
         <Reveal>
           <HowItWorks />
         </Reveal>
+        <UseCaseStory />
         <Reveal>
           <Pricing />
         </Reveal>

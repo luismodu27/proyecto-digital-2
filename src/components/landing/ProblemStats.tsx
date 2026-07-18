@@ -1,18 +1,28 @@
+import { CountUp } from "@/components/ui/CountUp";
+import { Reveal } from "@/components/ui/Reveal";
+
 const stats = [
   {
-    value: "78%",
-    label: "de las organizaciones no ha dado pasos significativos hacia el cumplimiento del AI Act.",
+    value: 78,
+    suffix: "%",
+    label:
+      "de las organizaciones no ha dado pasos significativos hacia el cumplimiento del AI Act.",
   },
   {
-    value: "83%",
+    value: 83,
+    suffix: "%",
     label: "no tiene un inventario formal de sus sistemas de IA.",
   },
   {
-    value: "€35M",
+    value: 35,
+    prefix: "€",
+    suffix: "M",
     label: "o el 7% de la facturación: multas más duras que el GDPR.",
   },
   {
-    value: "$500/h",
+    value: 500,
+    prefix: "$",
+    suffix: "/h",
     label: "es lo que hoy cuesta resolverlo con consultores y hojas de cálculo.",
   },
 ];
@@ -36,15 +46,19 @@ export function ProblemStats() {
         </div>
 
         <dl className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((s) => (
-            <div key={s.value} className="bg-paper-raised p-6">
+          {stats.map((s, i) => (
+            <Reveal
+              key={s.label}
+              delay={i * 90}
+              className="group bg-paper-raised p-6 transition-colors duration-300 hover:bg-paper"
+            >
               <dt className="font-display text-4xl font-semibold text-ink">
-                {s.value}
+                <CountUp value={s.value} prefix={s.prefix} suffix={s.suffix} />
               </dt>
               <dd className="mt-2 text-sm leading-relaxed text-ink-soft">
                 {s.label}
               </dd>
-            </div>
+            </Reveal>
           ))}
         </dl>
       </div>
