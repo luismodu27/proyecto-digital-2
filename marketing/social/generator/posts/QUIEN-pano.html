@@ -16,7 +16,9 @@
   .hl{position:absolute;top:302px;left:80px;width:940px;font-family:"Fraunces",serif;font-weight:600;font-size:72px;line-height:1.03;letter-spacing:-.015em;color:#0f1a14}
   .hl .em{color:#0b6b4e;font-style:italic}
   .cap{position:absolute;top:580px;left:80px;width:920px;font-family:"Geist",sans-serif;font-size:31px;line-height:1.45;color:#38443d}
-  .medlabel{position:absolute;top:846px;left:80px;width:920px;text-align:center;font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:#6b756e}
+  .sup{position:absolute;top:850px;left:80px;width:900px;display:flex;flex-direction:column;gap:16px}
+  .sup .it{display:flex;align-items:flex-start;gap:18px;font-family:"Geist",sans-serif;font-size:26px;line-height:1.3;color:#38443d}
+  .sup .it::before{content:"";flex:none;width:24px;height:3px;margin-top:16px;background:#0b6b4e;border-radius:2px}
   .icon{position:absolute;top:718px;left:496px;width:88px;height:88px;color:#0b6b4e;z-index:3}
   .bigbrand{position:absolute;top:696px;left:474px;z-index:3}
   .bigbrand .s{display:block;width:132px;height:132px;background:url("../assets/sealmark.png") center/contain no-repeat}
@@ -49,6 +51,11 @@
     <div class="hl">El sistema de registro de la <span class="em">gobernanza de IA.</span></div>
     <div class="cap">Inventaría tu IA, clasifica su riesgo y genera evidencia lista para auditoría.</div>
     <div class="bigbrand"><span class="s"></span></div>
+    <div class="sup">
+      <div class="it">Inventario de tus sistemas de IA</div>
+      <div class="it">Clasificación de riesgo (EU AI Act)</div>
+      <div class="it">Evidencia lista para auditoría</div>
+    </div>
     <div class="foot">@attesta.io</div>
     <div class="swipe">Desliza <span style="font-size:22px">→</span></div>
   </div>
@@ -60,7 +67,11 @@
     <div class="hl">Inventario, riesgo y <span class="em">evidencia.</span></div>
     <div class="cap">Un flujo continuo, no un informe que envejece: del EU AI Act a pasos claros.</div>
     <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6 L42 15 L24 24 L6 15 Z"/><path d="M6 24 L24 33 L42 24"/><path d="M6 33 L24 42 L42 33"/></svg>
-    <div class="medlabel">Producto</div>
+    <div class="sup">
+      <div class="it">Un flujo continuo, no un informe</div>
+      <div class="it">Del EU AI Act a pasos claros</div>
+      <div class="it">Textos legales verificados, sin invención</div>
+    </div>
   </div>
 
   <!-- S3: para quién -->
@@ -70,7 +81,11 @@
     <div class="hl">Medianas que deciden sobre <span class="em">personas.</span></div>
     <div class="cap">Empresas que usan IA sin equipo de compliance. Cuña: RRHH y reclutamiento.</div>
     <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="17" r="7"/><path d="M6 40 c0 -8 6 -13 12 -13 c6 0 12 5 12 13"/><circle cx="34" cy="15" r="5.5"/><path d="M30 27 c7 0 12 5 12 13"/></svg>
-    <div class="medlabel">Nuestro ICP · deployer</div>
+    <div class="sup">
+      <div class="it">Riesgo · Legal · Compliance · RRHH</div>
+      <div class="it">Sin equipo GRC dedicado</div>
+      <div class="it">Empezamos por reclutamiento</div>
+    </div>
   </div>
 
   <!-- S4: nuestro rol -->
@@ -80,6 +95,11 @@
     <div class="hl">No certificamos. <span class="em">Te preparamos.</span></div>
     <div class="cap">Somos tu sistema de registro de evidencia y preparación para auditoría.</div>
     <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 5 L40 11 V24 C40 34 33 40 24 43 C15 40 8 34 8 24 V11 Z"/><path d="M17 24 l5 5 l10 -12"/></svg>
+    <div class="sup">
+      <div class="it">No certificamos: te preparamos</div>
+      <div class="it">Somos deployer, no fabricante</div>
+      <div class="it">Tu sistema de registro de evidencia</div>
+    </div>
     <div class="cta">Conoce Attesta <span style="font-size:22px">→</span></div>
   </div>
 

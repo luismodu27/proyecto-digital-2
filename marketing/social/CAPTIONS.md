@@ -4,9 +4,11 @@
 **Handle:** @attesta.io
 
 **Contenido:**
-- **3 carruseles conectados** (seamless — el recorrido cruza de una slide a la siguiente):
-  `Quiénes somos` (apertura) · `Gobernanza en 4 pasos` · `Del dolor a la preparación`.
+- **5 carruseles conectados** (seamless — el recorrido cruza de una slide a la siguiente):
+  `Quiénes somos` (apertura) · `Gobernanza en 4 pasos` · `Del dolor a la preparación` ·
+  `RRHH bajo la lupa` · `Fechas clave del EU AI Act`.
 - **11 publicaciones sueltas** (8 claras / 3 oscuras).
+- Todo disponible además en **9:16 (stories/reels)**.
 
 > Reglas de copy respetadas en todo el pack: cero términos prohibidos
 > (certifica/cumple/garantiza/aprobado/etc.). Los verbos son de la organización; puntaje = "% listo".
@@ -234,6 +236,46 @@ La tranquilidad se construye antes, no después. Empieza gratis 👇
 ```
 Slides en orden: `NARR-1` · `NARR-2` · `NARR-3` · `NARR-4`. El camino asciende y conecta las 4.
 #EUAIAct #AIGovernance #GobernanzaDeIA #Compliance #IAResponsable #RRHH #GRC #MidMarket #Legaltech #Attesta #AuditReady
+
+---
+
+# ★ CARRUSEL · «RRHH — tu proceso bajo la lupa»  ·  🟢 claro  ·  `RRHH-slide1…4.png`
+
+```
+¿Tu proceso de selección usa IA? Probablemente, en más de un punto. 🔍
+
+1 · Cribado de CVs — filtra qué currículos pasan. Alto riesgo (Anexo III).
+2 · Ranking de candidatos — ordena por un "encaje" calculado. Alto riesgo.
+3 · Entrevistas por vídeo — analiza respuestas (y a veces voz). Alto riesgo.
+4 · Chatbot de selección — conversa con candidatos. Transparencia (Art. 50).
+
+No es para asustarte: es para saber qué IA usas y prepararte. Empieza por el
+inventario 👇
+
+ℹ️ Contenido informativo, no asesoría legal.
+```
+Slides: `RRHH-slide1` · `slide2` · `slide3` · `slide4`.
+#RRHH #TechHR #Reclutamiento #EUAIAct #AIGovernance #GobernanzaDeIA #Compliance #FutureOfWork #MidMarket #Attesta #AuditReady
+
+---
+
+# ★ CARRUSEL · «Fechas clave del EU AI Act»  ·  ⚫ oscuro  ·  `FECHAS-slide1…4.png`
+
+```
+Las fechas del EU AI Act que sí te importan si usas IA con personas 📅
+
+· 2 feb 2025 — prácticas prohibidas (Art. 5).
+· 2 ago 2025 — modelos de propósito general (GPAI) + gobernanza.
+· 2 ago 2026 — transparencia: avisar cuando hay IA de por medio (Art. 50).
+· 2 dic 2027 — alto riesgo, Anexo III (RRHH). Aplazado desde 2026 por el
+  Digital Omnibus.
+
+Más tiempo no es menos trabajo: es la ventana para prepararte bien. 👇
+
+ℹ️ Contenido informativo, no asesoría legal · fechas sujetas a publicación oficial.
+```
+Slides: `FECHAS-slide1` · `slide2` · `slide3` · `slide4`.
+#EUAIAct #AIGovernance #GobernanzaDeIA #Compliance #IAResponsable #Legaltech #GRC #RiesgoTecnológico #Attesta #AuditReady #ResponsibleAI
 
 ---
 

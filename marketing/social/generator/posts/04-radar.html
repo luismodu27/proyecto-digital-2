@@ -1,12 +1,32 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../brand.css">
 <style>
-  .stage{flex:1 1 auto;display:flex;align-items:center;justify-content:center;position:relative}
-  .radar-glow{filter:drop-shadow(0 0 34px rgba(34,181,129,.28))}
-  .countchip{display:inline-flex;align-items:center;gap:14px;font-family:"Geist Mono",monospace;font-size:17px;
-    letter-spacing:.16em;text-transform:uppercase;color:var(--brand-strong);border:1px solid var(--line-strong);
-    padding:14px 22px;border-radius:100px;background:var(--paper-raised)}
-  .countchip b{color:var(--brand-strong);font-weight:600}
+  .subhead{font-family:"Geist",sans-serif;font-size:27px;line-height:1.45;color:var(--ink-soft);max-width:820px}
+  .subhead b{color:var(--ink);font-weight:600}
+
+  .radar-mini{position:absolute;top:150px;right:64px;filter:drop-shadow(0 0 30px rgba(34,181,129,.26));opacity:.9}
+
+  .kick{font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.2em;text-transform:uppercase;color:var(--brand-strong);font-weight:500}
+
+  .wl{display:flex;align-items:flex-start;gap:24px;padding:26px 0;border-bottom:1px solid var(--line)}
+  .wl:first-of-type{border-top:1px solid var(--line)}
+  .wl .ic{width:52px;height:52px;flex:none;color:var(--brand-strong)}
+  .wl .body{flex:1 1 auto;min-width:0}
+  .wl .t{font-family:"Fraunces",serif;font-weight:600;font-size:33px;color:var(--ink);letter-spacing:-.01em;line-height:1.06}
+  .wl .d{font-family:"Geist",sans-serif;font-size:23px;line-height:1.4;color:var(--muted);margin-top:8px}
+  .wl .n{font-family:"Geist Mono",monospace;font-size:19px;color:var(--brand-strong);flex:none;width:38px;text-align:right;margin-top:8px}
+
+  .cdpanel{margin-top:34px;background:var(--paper-raised);border:1px solid var(--line-strong);border-radius:20px;
+    padding:28px 32px;display:flex;align-items:center;gap:26px}
+  .cdpanel .pulse{width:56px;height:56px;flex:none;position:relative;color:var(--seal)}
+  .cdpanel .meta{flex:1 1 auto;min-width:0}
+  .cdpanel .lb{font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .cdpanel .dt{font-family:"Fraunces",serif;font-weight:600;font-size:38px;color:var(--ink);letter-spacing:-.01em;line-height:1.08;margin-top:6px}
+  .cdpanel .dt .em{color:var(--brand-strong)}
+  .cdpanel .rt{flex:none;font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--seal);border:1px solid var(--seal);background:var(--seal-soft);padding:12px 18px;border-radius:100px;white-space:nowrap}
+
+  .disc{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.1em;color:var(--muted);margin-top:22px}
 </style></head>
 <body>
 <div class="canvas dark">
@@ -16,51 +36,82 @@
       <span class="kicker">Vigilancia regulatoria</span>
     </div>
 
-    <div class="headline mt-l" style="max-width:900px;font-size:64px">
-      Las reglas de la IA cambian cada mes. <span class="em">¿Quién te avisa?</span>
+    <svg class="radar-mini" width="230" height="230" viewBox="0 0 230 230" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="sweep" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#22b581" stop-opacity="0.5"/>
+          <stop offset="70%" stop-color="#22b581" stop-opacity="0.08"/>
+          <stop offset="100%" stop-color="#22b581" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g transform="translate(115 115)" fill="none" stroke="#2c4a3d" stroke-width="1.3">
+        <circle r="34"/><circle r="66"/><circle r="98"/>
+      </g>
+      <g transform="translate(115 115)" stroke="#243b31" stroke-width="1">
+        <line x1="-98" y1="0" x2="98" y2="0"/><line x1="0" y1="-98" x2="0" y2="98"/>
+        <line x1="-69" y1="-69" x2="69" y2="69"/><line x1="-69" y1="69" x2="69" y2="-69"/>
+      </g>
+      <path d="M115 115 L115 17 A98 98 0 0 1 198 70 Z" fill="url(#sweep)"/>
+      <line x1="115" y1="115" x2="115" y2="17" stroke="#22b581" stroke-width="2"/>
+      <circle cx="163" cy="72" r="6" fill="#c79a5f"/><circle cx="163" cy="72" r="12" fill="none" stroke="#c79a5f" stroke-width="1.2" opacity=".5"/>
+      <circle cx="78" cy="150" r="4.5" fill="#22b581"/>
+      <circle cx="150" cy="158" r="4" fill="#7fd8b4"/>
+      <circle cx="115" cy="115" r="4.5" fill="#eef2ee"/>
+    </svg>
+
+    <div class="headline mt-l" style="max-width:640px;font-size:60px">
+      Las reglas de la IA cambian cada mes. <span class="em">Attesta las vigila por ti.</span>
+    </div>
+    <div class="subhead mt-s" style="max-width:640px">
+      Un radar regulatorio que traduce el <b>EU AI Act</b> en avisos concretos para tu inventario.
     </div>
 
-    <div class="stage">
-      <svg width="620" height="500" viewBox="0 0 620 500" class="radar-glow" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="sweep" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#22b581" stop-opacity="0.55"/>
-            <stop offset="70%" stop-color="#22b581" stop-opacity="0.10"/>
-            <stop offset="100%" stop-color="#22b581" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <g transform="translate(310 250)" fill="none" stroke="#2c4a3d" stroke-width="1.6">
-          <circle r="60"/><circle r="120"/><circle r="180"/><circle r="235"/>
-        </g>
-        <g transform="translate(310 250)" stroke="#243b31" stroke-width="1.2">
-          <line x1="-235" y1="0" x2="235" y2="0"/><line x1="0" y1="-235" x2="0" y2="235"/>
-          <line x1="-166" y1="-166" x2="166" y2="166"/><line x1="-166" y1="166" x2="166" y2="-166"/>
-        </g>
-        <!-- sweep wedge -->
-        <path d="M310 250 L310 20 A230 230 0 0 1 505 130 Z" fill="url(#sweep)"/>
-        <line x1="310" y1="250" x2="310" y2="20" stroke="#22b581" stroke-width="2.4"/>
-        <!-- nodes -->
-        <g>
-          <circle cx="392" cy="140" r="9" fill="#c79a5f"/><circle cx="392" cy="140" r="18" fill="none" stroke="#c79a5f" stroke-width="1.4" opacity=".5"/>
-          <circle cx="200" cy="300" r="7" fill="#22b581"/>
-          <circle cx="430" cy="330" r="6" fill="#7fd8b4"/>
-          <circle cx="250" cy="150" r="5" fill="#c79a5f" opacity=".8"/>
-          <circle cx="360" cy="360" r="5" fill="#22b581" opacity=".7"/>
-        </g>
-        <circle cx="310" cy="250" r="6" fill="#eef2ee"/>
-      </svg>
+    <div class="kick mt-l">Qué vigila Attesta por ti</div>
+    <div class="mt-s">
+      <div class="wl">
+        <span class="n">01</span>
+        <svg class="ic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="18"/><path d="M24 13v11l7 5"/></svg>
+        <div class="body">
+          <div class="t">Cada nuevo plazo del EU AI Act</div>
+          <div class="d">Fechas de aplicación por fases, con cuenta atrás a la próxima obligación.</div>
+        </div>
+      </div>
+      <div class="wl">
+        <span class="n">02</span>
+        <svg class="ic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M42 12v10H32"/><path d="M6 36V26h10"/><path d="M40 22a16 16 0 0 0-30-4M8 26a16 16 0 0 0 30 4"/></svg>
+        <div class="body">
+          <div class="t">Cada cambio normativo</div>
+          <div class="d">Guías, actos delegados y estándares nuevos, resumidos y fechados.</div>
+        </div>
+      </div>
+      <div class="wl">
+        <span class="n">03</span>
+        <svg class="ic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="9" width="34" height="26" rx="3"/><path d="M16 41h16M24 35v6"/><path d="M15 24l5 5 12-12"/></svg>
+        <div class="body">
+          <div class="t">Qué sistemas <span style="color:var(--brand-strong)">tuyos</span> afecta</div>
+          <div class="d">Cruza cada cambio con tu inventario y marca lo que te toca revisar.</div>
+        </div>
+      </div>
     </div>
 
-    <div class="countchip"><span class="dot" style="background:var(--seal)"></span>Obligación alto riesgo · <b>2 dic 2027</b> · Anexo III</div>
-
-    <hr class="rule full mt-l">
-    <div class="lead mt-m" style="max-width:900px">
-      Attesta vigila el EU AI Act por ti: <b>cada plazo, cada cambio</b> y qué sistemas tuyos afecta. Con cuenta atrás a la próxima obligación.
+    <div class="cdpanel">
+      <span class="pulse">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="28" cy="28" r="6" fill="currentColor" stroke="none"/><circle cx="28" cy="28" r="14" opacity=".55"/><circle cx="28" cy="28" r="22" opacity=".25"/></svg>
+      </span>
+      <div class="meta">
+        <div class="lb">Próxima obligación de alto riesgo</div>
+        <div class="dt"><span class="em">2 dic 2027</span> · Anexo III</div>
+      </div>
+      <span class="rt">Cuenta atrás activa</span>
     </div>
 
-    <div class="footer mt-l">
+    <div class="disc">Contenido informativo, no asesoría legal.</div>
+
+    <div class="spacer"></div>
+
+    <div class="footer">
       <span class="handle">@attesta.io</span>
-      <span class="footnote">Radar regulatorio</span>
+      <span class="footnote">Radar regulatorio · EU AI Act</span>
     </div>
   </div>
 </div>

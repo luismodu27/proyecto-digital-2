@@ -1,46 +1,73 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../brand.css">
 <style>
-  .panel{margin-top:8px;background:var(--paper-raised);border:1px solid var(--line);border-radius:22px;
+  .intro{font-family:"Geist",sans-serif;font-size:29px;line-height:1.45;color:var(--ink-soft);max-width:900px;margin-top:22px}
+  .panel{margin-top:34px;background:var(--paper-raised);border:1px solid var(--line);border-radius:22px;
     overflow:hidden;box-shadow:0 30px 50px rgba(15,26,20,.08)}
-  .phead{display:flex;align-items:center;justify-content:space-between;padding:26px 34px;border-bottom:1px solid var(--line);background:var(--paper-sunken)}
-  .phead .t{font-family:"Geist",sans-serif;font-weight:600;font-size:26px;color:var(--ink)}
-  .phead .c{font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
-  .prow{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:25px 34px;border-bottom:1px solid var(--line)}
+  .phead{display:flex;align-items:center;justify-content:space-between;padding:24px 34px;border-bottom:1px solid var(--line);background:var(--paper-sunken)}
+  .phead .t{font-family:"Geist",sans-serif;font-weight:600;font-size:25px;color:var(--ink)}
+  .phead .c{font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+  .prow{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 34px;border-bottom:1px solid var(--line)}
   .prow:last-child{border-bottom:0}
-  .prow .name{display:flex;align-items:center;gap:18px;font-family:"Geist",sans-serif;font-size:27px;color:var(--ink);font-weight:500}
+  .prow .name{display:flex;align-items:center;gap:18px;min-width:0}
+  .prow .name>span:not(.g){display:flex;flex-direction:column;min-width:0}
   .prow .name .g{width:12px;height:12px;border-radius:3px;flex:none}
-  .rb{font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.12em;text-transform:uppercase;
-    padding:8px 16px;border-radius:100px;white-space:nowrap}
+  .prow .name .nm{font-family:"Geist",sans-serif;font-size:26px;color:var(--ink);font-weight:500;line-height:1.15}
+  .prow .name .sub{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+  .rb{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.1em;text-transform:uppercase;
+    padding:8px 15px;border-radius:100px;white-space:nowrap;flex:none}
   .rb.hi{color:#8a4f14;background:#f7ead8;border:1px solid #e6cba3}
   .rb.lim{color:#7c5a2e;background:#f2e9d9;border:1px solid #e0d0b3}
   .rb.min{color:#084d38;background:#e4efe9;border:1px solid #bfdccf}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
+  .lg{display:inline-flex;align-items:center;gap:11px;font-family:"Geist Mono",monospace;font-size:15px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);padding:9px 16px;border:1px solid var(--line);border-radius:100px;background:var(--paper-raised)}
+  .lg .sw{width:12px;height:12px;border-radius:3px;flex:none}
+  .summ{display:flex;align-items:baseline;gap:16px;margin-top:26px;font-family:"Geist",sans-serif}
+  .summ .big{font-family:"Fraunces",serif;font-weight:600;font-size:46px;color:var(--brand);line-height:1}
+  .summ .txt{font-size:26px;color:var(--ink-soft)}
+  .summ .txt b{color:var(--ink);font-weight:600}
 </style></head>
 <body>
 <div class="canvas">
   <div class="frame">
     <div class="brandbar">
       <div class="brandmark"><span class="seal"></span><span class="wordmark">Attesta</span></div>
-      <span class="kicker">Inventario</span>
+      <span class="kicker">Inventario · Paso 1</span>
     </div>
 
-    <div class="headline mt-l" style="max-width:900px;font-size:64px">
+    <div class="headline mt-l" style="max-width:920px;font-size:56px">
       No puedes gobernar <span class="em">lo que no sabes que tienes.</span>
     </div>
+    <p class="intro">
+      El primer paso siempre es el mismo: reunir <b style="color:var(--ink)">toda</b> la IA que tu
+      organización usa en un solo registro y darle a cada sistema una clasificación orientativa de riesgo.
+    </p>
 
     <div class="panel">
-      <div class="phead"><span class="t">Inventario de IA</span><span class="c">5 de 12 sistemas</span></div>
-      <div class="prow"><span class="name"><span class="g" style="background:#c9761f"></span>Cribado de CVs · ATS</span><span class="rb hi">Alto riesgo</span></div>
-      <div class="prow"><span class="name"><span class="g" style="background:#c9761f"></span>Ranking de candidatos</span><span class="rb hi">Alto riesgo</span></div>
-      <div class="prow"><span class="name"><span class="g" style="background:#b0824a"></span>Chatbot de selección</span><span class="rb lim">Riesgo limitado</span></div>
-      <div class="prow"><span class="name"><span class="g" style="background:#0b6b4e"></span>Copiloto de código</span><span class="rb min">Riesgo mínimo</span></div>
+      <div class="phead"><span class="t">Inventario de IA</span><span class="c">Vista de ejemplo</span></div>
+      <div class="prow"><span class="name"><span class="g" style="background:#c9761f"></span><span><span class="nm">Cribado de CVs</span><span class="sub">ATS · Anexo III</span></span></span><span class="rb hi">Alto</span></div>
+      <div class="prow"><span class="name"><span class="g" style="background:#c9761f"></span><span><span class="nm">Ranking de candidatos</span><span class="sub">Scoring · Anexo III</span></span></span><span class="rb hi">Alto</span></div>
+      <div class="prow"><span class="name"><span class="g" style="background:#b0824a"></span><span><span class="nm">Chatbot de selección</span><span class="sub">Interacción · Art. 50</span></span></span><span class="rb lim">Limitado</span></div>
+      <div class="prow"><span class="name"><span class="g" style="background:#0b6b4e"></span><span><span class="nm">Copiloto de código</span><span class="sub">Productividad interna</span></span></span><span class="rb min">Mínimo</span></div>
+    </div>
+
+    <div class="legend">
+      <span class="lg"><span class="sw" style="background:#b4322a"></span>Inaceptable</span>
+      <span class="lg"><span class="sw" style="background:#c9761f"></span>Alto</span>
+      <span class="lg"><span class="sw" style="background:#b0824a"></span>Limitado</span>
+      <span class="lg"><span class="sw" style="background:#0b6b4e"></span>Mínimo</span>
+    </div>
+
+    <div class="summ">
+      <span class="big">12</span>
+      <span class="txt">sistemas inventariados · <b>5 de alto riesgo</b> que exigen evidencia.</span>
     </div>
 
     <div class="spacer"></div>
     <hr class="rule">
-    <div class="lead mt-m" style="max-width:900px">
-      El primer paso siempre es el mismo: inventaría <b>toda</b> la IA que usas. Attesta
-      <b>propone una clasificación orientativa</b> por sistema.
+    <div class="lead mt-m" style="max-width:920px">
+      Attesta <b>propone una clasificación orientativa</b> por sistema. Ver el mapa completo es lo que convierte el riesgo invisible en un plan.
     </div>
 
     <div class="footer mt-l">

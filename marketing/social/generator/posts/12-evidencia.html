@@ -1,17 +1,31 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../brand.css">
 <style>
-  .badges{display:flex;gap:26px;margin-top:8px;flex-wrap:wrap}
-  .bcard{flex:1 1 0;min-width:340px;border-radius:20px;padding:38px 34px}
+  .badges{display:flex;gap:24px;margin-top:8px}
+  .bcard{flex:1 1 0;min-width:0;border-radius:20px;padding:30px 30px}
   .bcard.decl{background:transparent;border:1.5px dashed var(--line-strong)}
   .bcard.evid{background:var(--brand-soft);border:1.5px solid var(--brand)}
-  .bcard .st{display:inline-flex;align-items:center;gap:12px;font-family:"Geist Mono",monospace;font-size:17px;
-    letter-spacing:.14em;text-transform:uppercase;padding:10px 18px;border-radius:100px}
+  .bcard .st{display:inline-flex;align-items:center;gap:11px;font-family:"Geist Mono",monospace;font-size:16px;
+    letter-spacing:.14em;text-transform:uppercase;padding:9px 16px;border-radius:100px}
   .bcard.decl .st{color:var(--muted);border:1px solid var(--line-strong)}
   .bcard.evid .st{color:var(--brand-strong);border:1px solid var(--brand)}
-  .bcard .desc{font-family:"Geist",sans-serif;font-size:25px;line-height:1.4;margin-top:22px}
+  .bcard .desc{font-family:"Geist",sans-serif;font-size:23px;line-height:1.35;margin-top:18px}
   .bcard.decl .desc{color:var(--muted)}
   .bcard.evid .desc{color:var(--ink)}
+  .exrow{margin-top:32px;background:var(--paper-raised);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+  .exhead{display:flex;align-items:center;gap:12px;padding:20px 30px;border-bottom:1px solid var(--line);background:var(--paper-sunken)}
+  .exhead .ec{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .exhead .en{font-family:"Geist",sans-serif;font-size:25px;font-weight:600;color:var(--ink)}
+  .excell{display:flex;gap:0}
+  .excell .cell{flex:1 1 0;min-width:0;padding:24px 30px}
+  .excell .cell:first-child{border-right:1px solid var(--line)}
+  .excell .cl{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .excell .cv{font-family:"Geist",sans-serif;font-size:23px;line-height:1.3;color:var(--ink);margin-top:12px}
+  .excell .cell.d .cv{color:var(--muted)}
+  .why{margin-top:30px;display:flex;flex-direction:column;gap:15px}
+  .why li{display:flex;gap:14px;font-family:"Geist",sans-serif;font-size:24px;line-height:1.3;color:var(--ink-soft);list-style:none}
+  .why li b{color:var(--ink);font-weight:600}
+  .why .mk{flex:none;color:var(--brand-strong);margin-top:1px}
 </style></head>
 <body>
 <div class="canvas dark">
@@ -21,27 +35,44 @@
       <span class="kicker">Evidencia &gt; promesas</span>
     </div>
 
-    <div class="headline mt-l" style="max-width:920px;font-size:62px">
-      Decir “sí, cumplimos” no vale nada. <span class="em">Hay que demostrarlo.</span>
+    <div class="headline mt-m" style="max-width:920px;font-size:52px">
+      Decir &ldquo;sí, lo hacemos&rdquo; no vale nada. <span class="em">Hay que demostrarlo.</span>
     </div>
 
-    <div class="spacer"></div>
-
-    <div class="badges">
+    <div class="badges mt-l">
       <div class="bcard decl">
         <span class="st"><span class="dot" style="background:var(--muted)"></span>Declarado</span>
-        <div class="desc">Alguien dijo que el control existe. Una casilla marcada.</div>
+        <div class="desc">Alguien afirma que el control existe. Una casilla marcada, sin respaldo.</div>
       </div>
       <div class="bcard evid">
         <span class="st">✓ Con evidencia</span>
-        <div class="desc">Un documento, un registro, una prueba que lo respalda.</div>
+        <div class="desc">Un documento, un registro, una prueba fechada que lo sostiene.</div>
       </div>
     </div>
+
+    <div class="exrow">
+      <div class="exhead"><span class="en">Supervisión humana</span><span class="ec">Art. 14</span></div>
+      <div class="excell">
+        <div class="cell d">
+          <div class="cl">Declarado</div>
+          <div class="cv">Una casilla marcada: &ldquo;sí, hay revisión humana&rdquo;.</div>
+        </div>
+        <div class="cell">
+          <div class="cl jade">Con evidencia</div>
+          <div class="cv">Acta de revisión firmada + registro inmutable de quién y cuándo.</div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="why">
+      <li><span class="mk">✓</span><span><b>Ante una auditoría,</b> solo cuenta lo que puedes mostrar.</span></li>
+      <li><span class="mk">✓</span><span>El <b>registro inmutable</b> no se puede reescribir después.</span></li>
+    </ul>
 
     <div class="spacer"></div>
     <hr class="rule">
     <div class="lead mt-m" style="max-width:920px;color:var(--ink-soft)">
-      Cada control en Attesta distingue entre los dos. <b style="color:var(--ink)">Honestidad radical, registro inmutable.</b>
+      Cada control distingue entre los dos. <b style="color:var(--ink)">Honestidad radical, registro inmutable.</b>
     </div>
 
     <div class="footer mt-l">

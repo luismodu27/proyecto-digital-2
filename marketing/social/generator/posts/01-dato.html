@@ -1,48 +1,55 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../brand.css">
 <style>
-  .stat-wrap{display:flex;align-items:flex-start;gap:8px}
-  .stat-wrap .pct{font-size:150px;line-height:.9;font-weight:600;font-family:"Fraunces",serif;color:var(--brand);margin-top:34px;letter-spacing:-.02em}
-  .sub{display:flex;align-items:baseline;gap:22px;margin-top:8px}
-  .sub .n{font-family:"Fraunces",serif;font-weight:600;font-size:104px;color:var(--ink);line-height:1;letter-spacing:-.02em}
+  .statrow{display:flex;align-items:center;gap:34px;padding:30px 0}
+  .statrow .n{font-family:"Fraunces",serif;font-weight:600;font-size:150px;line-height:.82;letter-spacing:-.03em;color:var(--brand);width:340px;flex:none}
+  .statrow .n.ink{color:var(--ink)}
+  .statrow .tx .lb{font-family:"Geist",sans-serif;font-size:33px;font-weight:600;line-height:1.25;color:var(--ink)}
+  .statrow .tx .sb{font-family:"Geist",sans-serif;font-size:26px;line-height:1.4;color:var(--muted);margin-top:8px}
+  .take{background:var(--brand);color:#fff;border-radius:20px;padding:34px 38px;margin-top:10px}
+  .take .k{font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.16em;text-transform:uppercase;color:#bfe6d4}
+  .take .t{font-family:"Fraunces",serif;font-weight:600;font-size:40px;line-height:1.14;letter-spacing:-.01em;margin-top:12px}
+  .take .t .em{font-style:italic;color:#7fd8b4}
 </style></head>
 <body>
 <div class="canvas">
   <div class="frame">
-
     <div class="brandbar">
       <div class="brandmark"><span class="seal"></span><span class="wordmark">Attesta</span></div>
-      <span class="kicker">EU&nbsp;AI&nbsp;Act</span>
+      <span class="kicker">EU&nbsp;AI&nbsp;Act · El estado real</span>
+    </div>
+
+    <div class="headline mt-l" style="max-width:900px;font-size:60px">
+      La gobernanza de IA, <span class="em">en dos cifras que duelen.</span>
+    </div>
+
+    <div class="mt-m">
+      <div class="statrow" style="border-bottom:1px solid var(--line)">
+        <span class="n">78%</span>
+        <span class="tx">
+          <div class="lb">aún no ha dado pasos serios hacia el EU AI Act</div>
+          <div class="sb">La mayoría de las organizaciones todavía no ha empezado a prepararse.</div>
+        </span>
+      </div>
+      <div class="statrow">
+        <span class="n ink">83%</span>
+        <span class="tx">
+          <div class="lb">no tiene un inventario formal de sus sistemas de IA</div>
+          <div class="sb">No puedes gobernar —ni clasificar el riesgo de— lo que no sabes que usas.</div>
+        </span>
+      </div>
+    </div>
+
+    <div class="take">
+      <div class="k">Por qué te importa</div>
+      <div class="t">Si usas IA para decidir sobre personas, prepararte es cuestión de <span class="em">cuándo</span>, no de <span class="em">si</span>.</div>
     </div>
 
     <div class="spacer"></div>
-
-    <div class="kicker bronze">El dato que duele</div>
-
-    <div class="stat-wrap mt-m">
-      <span class="stat">78</span><span class="pct">%</span>
-    </div>
-    <div class="lead mt-s" style="max-width:820px">
-      de las organizaciones aún <b>no ha dado pasos serios</b> hacia el EU&nbsp;AI&nbsp;Act.
-    </div>
-
-    <div class="sub mt-l">
-      <span class="n">83%</span>
-      <span class="lead" style="margin:0">ni siquiera tiene un <b>inventario</b> de sus sistemas de IA.</span>
-    </div>
-
-    <div class="spacer"></div>
-
-    <hr class="rule">
-    <div class="lead mt-m" style="max-width:760px;color:var(--ink)">
-      Si usas IA para decidir sobre personas, la pregunta no es <span class="serif" style="font-style:italic">si</span> te tocará prepararte, sino <span class="serif" style="font-style:italic">cuándo</span>.
-    </div>
-
-    <div class="footer mt-l">
+    <div class="footer">
       <span class="handle">@attesta.io</span>
       <span class="footnote">Autoevaluación · Preparación para auditoría</span>
     </div>
-
   </div>
 </div>
 </body></html>
