@@ -580,33 +580,73 @@ diseño, nombre, features grandes); autónomo en lo demás.
     nuestro `redirectTo` responde 400. (El cambio de contraseña en sí ya funciona.) Opcional: plantilla
     de correo de recuperación con `token_hash` para robustez entre navegadores.
   - **Pendiente de la opción 3 (checkpoint):** **captcha** (Cloudflare Turnstile/hCaptcha) — requiere
-    llave del proveedor (gratis) + activarlo en Supabase Auth; decisión del fundador.
+    llave del proveedor (gratis) + activarlo en Supabase Auth; decisión del fundador. **DIFERIDO al deploy**
+    (el fundador dijo "lo que tú me recomiendes"; honeypot + rate-limit de Supabase bastan pre-lanzamiento).
+- **2026-07-17** · **Vigía determinista (1er agente del foso, Capa 7).** Solo-código, **sin migración**
+  (el esquema 0011 ya tenía `reg_sources.last_hash/last_checked_at` y `reg_candidates.source_id/provenance`).
+  El Vigía monitorea fuentes: descarga → normaliza → **hash SHA-256** → compara con la última huella; si
+  cambió, deja un **candidato "algo cambió aquí"** en la cola del Validador. NO interpreta la norma (eso es
+  del Analista, Fase B): solo señala. Filosofía intacta (humano-en-el-bucle).
+  - **`src/lib/vigia/core.ts`** (puro): `normalizeContent` (quita scripts/estilos/etiquetas, colapsa
+    espacios → reduce ruido), `contentHash` (sha256 hex), `excerptOf`, `buildDetectionCandidate` (fila de
+    `reg_candidates`: kind/event_date **null** a propósito → NO publicable directo; provenance
+    `{agent:'Vigía', model:null, previous_hash, new_hash, excerpt, detected_at}`). Tipos de outcome.
+  - **`src/lib/vigia/run.ts`** (`import "server-only"`): `runVigia(supabase, detectedAtIso)` — lee fuentes
+    activas, por cada una fetch (AbortController 12s) → hash → compara. Outcomes: **baseline** (1ª vez, fija
+    huella sin candidato), **unchanged**, **changed** (crea candidato + actualiza huella), **duplicate**
+    (idempotente: ya hay draft con ese `new_hash` → no duplica), **error**. Agnóstico del cliente (sirve
+    sesión de admin o service_role).
+  - **`src/lib/supabase/admin.ts`**: `createAdminClient()` con `SUPABASE_SERVICE_ROLE_KEY` (server-only,
+    salta RLS); null si falta la llave.
+  - **`src/app/api/cron/vigia/route.ts`** (GET+POST): endpoint del cron. Exige `Authorization: Bearer
+    <CRON_SECRET>` (o `?key=`). Sin CRON_SECRET → 503; secreto incorrecto → 401; sin service key → 503.
+    Corre `runVigia` con service_role. Para scheduler tras deploy (Vercel Cron / GitHub Action).
+  - **`src/lib/data/vigia-actions.ts`**: `runVigiaNow()` server action — **disparo manual** desde la UI con
+    la sesión del usuario (solo `platform_admin`; RLS autoriza las escrituras). Toasts `vigia-*`.
+  - **Getter `getRegSources()`** (supabase + mock `SAMPLE_REG_SOURCES`) + tipo `RegSource`; facade actualizado.
+  - **UI** (`/dashboard/vigilancia/candidatos`): panel **"Fuentes vigiladas"** (lista con marco, última
+    revisión, "sin línea base") + botón **"Ejecutar Vigía ahora"** (platform_admin). `CandidateReviewControls`
+    ahora recibe `canPublish`: las detecciones del Vigía (sin tipo/fecha) muestran "Requiere análisis antes
+    de publicar" en vez del botón Publicar (solo se pueden Descartar). Toasts `vigia-*` en `Toast.tsx`.
+  - **Verificado:** build+lint+tsc **verdes**. **Test de lógica pura 17/17** (normaliza sin etiquetas/
+    scripts/estilos; hash determinista + sensible al contenido; **ruido en script/estilo NO cambia el hash**;
+    excerpt; forma del candidato). **Gating del cron 4/4 por curl**: sin header→401, bearer malo→401, bearer
+    ok sin service key→503, `?key=` ok→503.
+  - **⚠️ CONFIG PENDIENTE DEL FUNDADOR para activarlo de verdad:** (1) **sembrar `reg_sources`** con URLs
+    oficiales (SQL en `scratchpad` o panel Supabase); (2) para el **cron**: añadir `SUPABASE_SERVICE_ROLE_KEY`
+    (Supabase → Settings → API) + `CRON_SECRET` al entorno del deploy, y programar el scheduler que pegue
+    `GET /api/cron/vigia` con `Authorization: Bearer <CRON_SECRET>`; (3) para el **disparo manual** desde la
+    UI basta con ser `platform_admin` (ya funciona). **e2e del path de escritura en BD**: pendiente — necesita
+    fuentes sembradas + (service key en env O un platform_admin de prueba) para verificar por curl.
 - _(las correcciones futuras del fundador se anotan aquí)_
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
-> **▶ RETOMAR AQUÍ (2026-07-17, tras pulido de auth):** TODO hecho y verificado, árbol limpio y sincronizado.
-> **Migraciones aplicadas por el fundador hasta la 0013.** Estado: **Capa 7 (foso) 🟢** = Fase A del pipeline
-> (candidato→Validador humano→`reg_events`; RLS blinda la cola; `platform_admin`) + **multi-marco** (EU AI Act
-> + 5 marcos US de IA-empleo: NYC LL144, Colorado SB 26-189, Illinois AIVIA + IHRA, EEOC-contexto; verificado
-> por el experto) + **nexo de jurisdicción por org** (0012). **Capa 2 🟢** = **plan de acción editable**
-> (tablero `action_tasks`, colaborativo; 0013) + **recordatorios de vencimiento** (widget en el resumen;
-> `task-reminders.ts` + `DeadlineReminders.tsx`; sin migración). **Auth 🟢** = **recuperación de contraseña**
-> completa (`/reset-password` + `/auth/callback` + `/reset-password/update`; `updateUser` probado e2e) +
-> **honeypot** anti-bots (recuperación + waitlist); **captcha DIFERIDO al deploy** (mi recomendación: honeypot
-> + rate-limit server-side de Supabase bastan pre-lanzamiento; Turnstile necesita dominio).
-> **CONTEXTO CLAVE:** el fundador **no quiere deploy aún** ("seguiremos con sugerencias que me des"); nunca
-> ha tenido app con botones (todo se opera vía Supabase SQL Editor + mi verificación por curl con usuarios
-> `*@attesta-test.dev`). Flujo: yo escribo migración → él la pega en SQL Editor → yo verifico por curl.
-> **SIGUIENTES CANDIDATOS (yo sugiero, él elige):** (1) **Vigía determinista** — 1er agente del foso: monitor
-> de fuentes (fetch+hash) que crea candidatos "algo cambió aquí"; sin gasto (el cron real espera al deploy,
-> pero la lógica queda lista y verificable por curl). (2) **Fase B del foso** — pgvector + embeddings +
-> Analista LLM; necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic NO da embeddings)
-> + **llave/budget** (decisión del fundador).
-> **PENDIENTES DE CONFIG/DEPLOY:** (a) Deploy a Vercel. (b) Al desplegar: en Supabase → URL Configuration,
-> añadir `https://<dominio>/auth/callback` a Redirect URLs + fijar Site URL (si no, `resetPasswordForEmail`
-> da 400). (c) Captcha Turnstile (llave gratis + toggle en Supabase). (d) Idea del recordatorio: email de
-> aviso de vencimientos (requiere deploy + proveedor de correo).
+> **▶ RETOMAR AQUÍ (2026-07-18, tras Vigía):** TODO verificado y **subido a la rama
+> `claude/startup-project-setup-612pzs`** (hay **PR #1** abierto; push actualiza el PR). **Migraciones del
+> fundador aplicadas hasta la 0013; el Vigía NO añade migración.** Estado por capas:
+> **Capa 7 (foso) 🟢** = Fase A del pipeline (candidato→Validador humano→`reg_events`; RLS blinda la cola;
+> `platform_admin`) + **multi-marco** (EU AI Act + 5 marcos US de IA-empleo: NYC LL144, Colorado SB 26-189,
+> Illinois AIVIA + IHRA, EEOC-contexto) + **nexo de jurisdicción por org** (0012) + **Vigía determinista**
+> (1er agente: fetch+hash+diff → candidatos "algo cambió"; `src/lib/vigia/*`, ruta cron
+> `/api/cron/vigia`, acción `runVigiaNow`, panel "Fuentes vigiladas"; lógica pura 17/17, gating 4/4).
+> **Capa 2 🟢** = **plan de acción editable** (tablero `action_tasks`, colaborativo; 0013) + **recordatorios
+> de vencimiento** (widget en el resumen). **Auth 🟢** = **recuperación de contraseña** completa + honeypot;
+> **captcha DIFERIDO al deploy**.
+> **CONTEXTO CLAVE:** el fundador **no quiere deploy aún**; nunca ha tenido app con botones (todo se opera
+> vía Supabase SQL Editor + verificación por curl con usuarios `*@attesta-test.dev`). Flujo: yo escribo
+> migración → él la pega en SQL Editor → yo verifico por curl. El fundador tiene **solo la anon key** en
+> `.env.local`; para positivos admin-gated me promueve un usuario de prueba o añade la service key.
+> **SIGUIENTE CANDIDATO GRANDE:** **Fase B del foso** — pgvector + embeddings + Analista LLM que redacta el
+> borrador leyendo el texto real de la norma (RAG) y enriquece las detecciones del Vigía (les pone tipo/fecha
+> → pasan a publicables). Necesita **proveedor de embeddings** (OpenAI 1536 / Voyage 1024; Anthropic NO da
+> embeddings) + **llave/budget** (decisión del fundador). Alternativas menores: pulir el Vigía (UI de gestión
+> de fuentes, no solo SQL), o retomar deploy.
+> **PENDIENTES DE CONFIG/DEPLOY (anotados para no perderlos):** (a) Deploy a Vercel. (b) Auth al desplegar:
+> Supabase → URL Configuration → añadir `https://<dominio>/auth/callback` a Redirect URLs + fijar Site URL
+> (si no, `resetPasswordForEmail` da 400). (c) Vigía cron: `SUPABASE_SERVICE_ROLE_KEY` + `CRON_SECRET` en el
+> deploy + scheduler que pegue `/api/cron/vigia`; y **sembrar `reg_sources`** con URLs oficiales. (d) Captcha
+> Turnstile. (e) Email de aviso de vencimientos (requiere deploy + proveedor de correo).
 
 - ~~Nombre comercial~~ → **Attesta** ✅
 - ~~Alcance del MVP~~ → confirmado ✅

@@ -415,12 +415,60 @@ export const REG_CANDIDATE_STATUS_LABEL: Record<RegCandidateStatus, string> = {
 
 /** Procedencia del borrador: qué agente lo generó y con qué señal. */
 export type RegCandidateProvenance = {
-  agent?: string; // p. ej. "Analista"
+  agent?: string; // p. ej. "Analista" o "Vigía"
   model?: string | null; // modelo LLM usado (null si aún determinista)
   confidence?: number | null; // 0..1
   excerpt?: string | null; // fragmento de la fuente que lo motivó
   detected_at?: string | null; // ISO
+  previous_hash?: string | null; // huella anterior (detección del Vigía)
+  new_hash?: string | null; // huella nueva (detección del Vigía)
 };
+
+/** Fuente vigilada por el Vigía (watchlist). */
+export type RegSource = {
+  id: string;
+  framework: string;
+  label: string;
+  url: string;
+  sourceKind: "page" | "feed" | "api";
+  active: boolean;
+  lastCheckedAt: string | null; // ISO
+  hasBaseline: boolean; // ya tiene huella registrada
+};
+
+/** Fuentes de ejemplo (modo demo) para el panel de fuentes vigiladas. */
+export const SAMPLE_REG_SOURCES: RegSource[] = [
+  {
+    id: "src-demo-1",
+    framework: "eu-ai-act",
+    label: "EUR-Lex — Reglamento de IA (texto consolidado)",
+    url: "https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX:32024R1689",
+    sourceKind: "page",
+    active: true,
+    lastCheckedAt: "2026-07-17T06:00:00Z",
+    hasBaseline: true,
+  },
+  {
+    id: "src-demo-2",
+    framework: "us-nyc-ll144",
+    label: "NYC DCWP — Automated Employment Decision Tools",
+    url: "https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page",
+    sourceKind: "page",
+    active: true,
+    lastCheckedAt: "2026-07-17T06:00:00Z",
+    hasBaseline: true,
+  },
+  {
+    id: "src-demo-3",
+    framework: "us-co-aiact",
+    label: "Colorado AG — Inteligencia Artificial",
+    url: "https://coag.gov/artificial-intelligence/",
+    sourceKind: "page",
+    active: true,
+    lastCheckedAt: null,
+    hasBaseline: false,
+  },
+];
 
 /** Borrador de evento regulatorio propuesto por el pipeline. */
 export type RegCandidate = {

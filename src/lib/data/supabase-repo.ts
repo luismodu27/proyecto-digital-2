@@ -17,6 +17,7 @@ import type {
   RegCandidate,
   RegCandidateProvenance,
   RegCandidateStatus,
+  RegSource,
   RiskLevel,
   TaskPriority,
   TaskStatus,
@@ -471,6 +472,40 @@ export async function getIsPlatformAdmin(): Promise<boolean> {
   const { data, error } = await supabase.rpc("is_platform_admin");
   if (error) return false;
   return data === true;
+}
+
+type RegSourceRow = {
+  id: string;
+  framework: string;
+  label: string;
+  url: string;
+  source_kind: RegSource["sourceKind"];
+  active: boolean;
+  last_hash: string | null;
+  last_checked_at: string | null;
+};
+
+/**
+ * Fuentes vigiladas por el Vigía. RLS solo la deja ver a validadores de
+ * plataforma; un no-validador recibe [] silenciosamente.
+ */
+export async function getRegSources(): Promise<RegSource[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("reg_sources")
+    .select("id, framework, label, url, source_kind, active, last_hash, last_checked_at")
+    .order("created_at", { ascending: true });
+  if (error || !data) return [];
+  return (data as RegSourceRow[]).map((r) => ({
+    id: r.id,
+    framework: r.framework,
+    label: r.label,
+    url: r.url,
+    sourceKind: r.source_kind,
+    active: r.active,
+    lastCheckedAt: r.last_checked_at,
+    hasBaseline: r.last_hash != null,
+  }));
 }
 
 /** Registro de actividad (audit-trail) de la organización activa. */

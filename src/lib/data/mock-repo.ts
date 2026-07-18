@@ -8,6 +8,7 @@ import {
   SAMPLE_ACTION_TASKS,
   SAMPLE_REG_ACKS,
   SAMPLE_REG_CANDIDATES,
+  SAMPLE_REG_SOURCES,
   type ActionTask,
   type AiSystem,
   type AssessmentRecord,
@@ -19,6 +20,7 @@ import {
   type PendingInvitation,
   type RegAck,
   type RegCandidate,
+  type RegSource,
 } from "@/lib/mock-data";
 import { mergeCatalog, type RegulatoryEvent } from "@/lib/regulatory-watch";
 
@@ -86,6 +88,10 @@ export async function getRegCandidates(): Promise<RegCandidate[]> {
 export async function getIsPlatformAdmin(): Promise<boolean> {
   // En demo mostramos la bandeja del Validador para poder enseñarla.
   return true;
+}
+
+export async function getRegSources(): Promise<RegSource[]> {
+  return SAMPLE_REG_SOURCES;
 }
 
 export async function getOrgJurisdictions(): Promise<string[]> {

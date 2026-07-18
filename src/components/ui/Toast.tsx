@@ -34,6 +34,11 @@ const MESSAGES: Record<string, string> = {
   "task-deleted": "Tarea eliminada.",
   "task-demo": "Editar el plan requiere conectar tu organización.",
   "task-error": "No se pudo completar la acción. Inténtalo de nuevo.",
+  "vigia-done": "El Vigía detectó cambios: hay nuevos candidatos en la cola.",
+  "vigia-none": "El Vigía revisó las fuentes: sin cambios nuevos.",
+  "vigia-error": "El Vigía no pudo leer alguna fuente. Revisa la lista.",
+  "vigia-demo": "Ejecutar el Vigía requiere conectar tu organización.",
+  "vigia-denied": "Solo el equipo de Attesta puede ejecutar el Vigía.",
 };
 
 /**

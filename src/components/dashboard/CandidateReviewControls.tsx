@@ -11,40 +11,50 @@ export function CandidateReviewControls({
   id,
   proposedEventId,
   title,
+  canPublish = true,
 }: {
   id: string;
   proposedEventId: string | null;
   title: string;
+  /** Falso para detecciones del Vigía (sin tipo/fecha): aún no publicables. */
+  canPublish?: boolean;
 }) {
   const [eventId, setEventId] = useState(proposedEventId ?? "");
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <form action={approveCandidate} className="flex flex-col gap-1">
-        <input type="hidden" name="id" value={id} />
-        <label
-          htmlFor={`eid-${id}`}
-          className="text-[11px] font-medium uppercase tracking-wide text-muted"
-        >
-          Id del evento al publicar
-        </label>
-        <div className="flex items-center gap-2">
-          <input
-            id={`eid-${id}`}
-            name="eventId"
-            value={eventId}
-            onChange={(e) => setEventId(e.target.value)}
-            placeholder="se genera si lo dejas vacío"
-            className="w-56 rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
-          />
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+      {canPublish ? (
+        <form action={approveCandidate} className="flex flex-col gap-1">
+          <input type="hidden" name="id" value={id} />
+          <label
+            htmlFor={`eid-${id}`}
+            className="text-[11px] font-medium uppercase tracking-wide text-muted"
           >
-            Publicar
-          </button>
-        </div>
-      </form>
+            Id del evento al publicar
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              id={`eid-${id}`}
+              name="eventId"
+              value={eventId}
+              onChange={(e) => setEventId(e.target.value)}
+              placeholder="se genera si lo dejas vacío"
+              className="w-56 rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
+            />
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+            >
+              Publicar
+            </button>
+          </div>
+        </form>
+      ) : (
+        <p className="max-w-md text-xs text-muted">
+          Detección del Vigía. Requiere análisis (clasificar tipo y fecha) antes
+          de poder publicarse en el radar. Puedes descartarla si es ruido.
+        </p>
+      )}
 
       <form
         action={rejectCandidate}

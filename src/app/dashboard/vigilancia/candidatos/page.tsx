@@ -3,14 +3,17 @@ import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
 import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
 import { CandidateReviewControls } from "@/components/dashboard/CandidateReviewControls";
+import { runVigiaNow } from "@/lib/data/vigia-actions";
 import {
   getRegCandidates,
+  getRegSources,
   getIsPlatformAdmin,
   isSupabaseConfigured,
 } from "@/lib/data";
 import {
   REG_CANDIDATE_STATUS_LABEL,
   type RegCandidate,
+  type RegSource,
   type RegCandidateStatus,
 } from "@/lib/mock-data";
 import {
@@ -175,6 +178,7 @@ function CandidateCard({
             id={c.id}
             proposedEventId={c.proposedEventId}
             title={c.title}
+            canPublish={c.kind != null && c.date != null}
           />
         </div>
       ) : (
@@ -191,10 +195,102 @@ function CandidateCard({
   );
 }
 
+function formatChecked(iso: string | null): string {
+  if (!iso) return "nunca";
+  return new Date(iso).toLocaleString("es-ES", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function SourcesPanel({
+  sources,
+  canRun,
+}: {
+  sources: RegSource[];
+  canRun: boolean;
+}) {
+  const activeCount = sources.filter((s) => s.active).length;
+  return (
+    <section className="mb-8 rounded-2xl border border-line bg-paper-raised p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg font-semibold text-ink">
+            Fuentes vigiladas
+          </h2>
+          <p className="mt-0.5 text-sm text-muted">
+            El Vigía compara la huella de cada fuente y deja un candidato cuando
+            algo cambia. {activeCount} activa{activeCount === 1 ? "" : "s"}.
+          </p>
+        </div>
+        {canRun && (
+          <form action={runVigiaNow}>
+            <button
+              type="submit"
+              className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+            >
+              Ejecutar Vigía ahora
+            </button>
+          </form>
+        )}
+      </div>
+
+      {sources.length === 0 ? (
+        <p className="mt-4 text-sm text-ink-soft">
+          Aún no hay fuentes en la watchlist. Se cargan en{" "}
+          <code className="rounded bg-paper-sunken px-1 py-0.5 text-xs">
+            reg_sources
+          </code>{" "}
+          (panel de Supabase).
+        </p>
+      ) : (
+        <ul className="mt-4 divide-y divide-line">
+          {sources.map((s) => (
+            <li
+              key={s.id}
+              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2.5"
+            >
+              <div className="min-w-0">
+                <a
+                  href={s.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="truncate text-sm font-medium text-ink hover:text-brand"
+                >
+                  {s.label} ↗
+                </a>
+                <p className="text-xs text-muted">
+                  {FRAMEWORK_LABEL[s.framework as RegFramework] ?? s.framework}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2 text-xs text-muted">
+                {!s.hasBaseline && (
+                  <span className="rounded-full border border-[var(--tone-gold-bd)] bg-[var(--tone-gold-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--tone-gold-fg)]">
+                    sin línea base
+                  </span>
+                )}
+                {!s.active && (
+                  <span className="rounded-full border border-line px-2 py-0.5 text-[10px]">
+                    inactiva
+                  </span>
+                )}
+                <span>revisada {formatChecked(s.lastCheckedAt)}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export default async function CandidatosPage() {
-  const [isAdmin, candidates] = await Promise.all([
+  const [isAdmin, candidates, sources] = await Promise.all([
     getIsPlatformAdmin(),
     getRegCandidates(),
+    getRegSources(),
   ]);
 
   // En modo conectado, la bandeja es solo para el equipo de Attesta.
@@ -238,6 +334,8 @@ export default async function CandidatosPage() {
           </Link>
         }
       />
+
+      <SourcesPanel sources={sources} canRun={isAdmin} />
 
       <div className="mb-6 flex items-center gap-3">
         <span className="font-display text-2xl font-semibold tabular-nums text-ink">
