@@ -1,0 +1,67 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../brand.css">
+<style>
+  .stage{flex:1 1 auto;display:flex;align-items:center;justify-content:center;position:relative}
+  .radar-glow{filter:drop-shadow(0 0 34px rgba(34,181,129,.28))}
+  .countchip{display:inline-flex;align-items:center;gap:14px;font-family:"Geist Mono",monospace;font-size:17px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--brand-strong);border:1px solid var(--line-strong);
+    padding:14px 22px;border-radius:100px;background:var(--paper-raised)}
+  .countchip b{color:var(--brand-strong);font-weight:600}
+</style></head>
+<body>
+<div class="canvas dark">
+  <div class="frame">
+    <div class="brandbar">
+      <div class="brandmark"><span class="seal"></span><span class="wordmark">Attesta</span></div>
+      <span class="kicker">Vigilancia regulatoria</span>
+    </div>
+
+    <div class="headline mt-l" style="max-width:900px;font-size:64px">
+      Las reglas de la IA cambian cada mes. <span class="em">¿Quién te avisa?</span>
+    </div>
+
+    <div class="stage">
+      <svg width="620" height="500" viewBox="0 0 620 500" class="radar-glow" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="sweep" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#22b581" stop-opacity="0.55"/>
+            <stop offset="70%" stop-color="#22b581" stop-opacity="0.10"/>
+            <stop offset="100%" stop-color="#22b581" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <g transform="translate(310 250)" fill="none" stroke="#2c4a3d" stroke-width="1.6">
+          <circle r="60"/><circle r="120"/><circle r="180"/><circle r="235"/>
+        </g>
+        <g transform="translate(310 250)" stroke="#243b31" stroke-width="1.2">
+          <line x1="-235" y1="0" x2="235" y2="0"/><line x1="0" y1="-235" x2="0" y2="235"/>
+          <line x1="-166" y1="-166" x2="166" y2="166"/><line x1="-166" y1="166" x2="166" y2="-166"/>
+        </g>
+        <!-- sweep wedge -->
+        <path d="M310 250 L310 20 A230 230 0 0 1 505 130 Z" fill="url(#sweep)"/>
+        <line x1="310" y1="250" x2="310" y2="20" stroke="#22b581" stroke-width="2.4"/>
+        <!-- nodes -->
+        <g>
+          <circle cx="392" cy="140" r="9" fill="#c79a5f"/><circle cx="392" cy="140" r="18" fill="none" stroke="#c79a5f" stroke-width="1.4" opacity=".5"/>
+          <circle cx="200" cy="300" r="7" fill="#22b581"/>
+          <circle cx="430" cy="330" r="6" fill="#7fd8b4"/>
+          <circle cx="250" cy="150" r="5" fill="#c79a5f" opacity=".8"/>
+          <circle cx="360" cy="360" r="5" fill="#22b581" opacity=".7"/>
+        </g>
+        <circle cx="310" cy="250" r="6" fill="#eef2ee"/>
+      </svg>
+    </div>
+
+    <div class="countchip"><span class="dot" style="background:var(--seal)"></span>Obligación alto riesgo · <b>2 dic 2027</b> · Anexo III</div>
+
+    <hr class="rule full mt-l">
+    <div class="lead mt-m" style="max-width:900px">
+      Attesta vigila el EU AI Act por ti: <b>cada plazo, cada cambio</b> y qué sistemas tuyos afecta. Con cuenta atrás a la próxima obligación.
+    </div>
+
+    <div class="footer mt-l">
+      <span class="handle">@attesta.io</span>
+      <span class="footnote">Radar regulatorio</span>
+    </div>
+  </div>
+</div>
+</body></html>

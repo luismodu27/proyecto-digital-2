@@ -1,0 +1,87 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../brand.css">
+<style>
+  .pano{position:relative;width:4320px;height:1350px;background:#faf8f2;color:#0f1a14;overflow:hidden;font-family:"Geist",sans-serif}
+  .pano::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity:.022;mix-blend-mode:multiply}
+  .track{position:absolute;left:0;top:0;width:4320px;height:1350px;z-index:1}
+  .col{position:absolute;top:0;width:1080px;height:1350px;z-index:2}
+  .c0{left:0}.c1{left:1080px}.c2{left:2160px}.c3{left:3240px}
+  .brand{position:absolute;top:86px;left:80px;display:flex;align-items:center;gap:15px}
+  .brand .seal{width:52px;height:52px;background:url("../assets/sealmark.png") center/contain no-repeat}
+  .brand .wm{font-family:"Fraunces",serif;font-weight:600;font-size:31px;color:#0f1a14}
+  .idx{position:absolute;top:96px;right:80px;font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.2em;color:#6b756e}
+  .kick{position:absolute;top:250px;left:80px;font-family:"Geist Mono",monospace;font-size:17px;letter-spacing:.2em;text-transform:uppercase;color:#b0824a}
+  .hl{position:absolute;top:306px;left:80px;width:930px;font-family:"Fraunces",serif;font-weight:600;font-size:62px;line-height:1.04;letter-spacing:-.015em;color:#0f1a14}
+  .hl .em{color:#0b6b4e;font-style:italic}
+  .cap{position:absolute;top:560px;left:80px;width:910px;font-family:"Geist",sans-serif;font-size:28px;line-height:1.45;color:#38443d}
+  .medlabel{position:absolute;top:846px;left:80px;width:920px;text-align:center;font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:#6b756e}
+  .icon{position:absolute;top:718px;left:496px;width:88px;height:88px;color:#0b6b4e;z-index:3}
+  .bigbrand{position:absolute;top:696px;left:474px;z-index:3}
+  .bigbrand .s{display:block;width:132px;height:132px;background:url("../assets/sealmark.png") center/contain no-repeat}
+  .foot{position:absolute;bottom:92px;left:80px;font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:#6b756e}
+  .cta{position:absolute;bottom:86px;left:80px;display:inline-flex;align-items:center;gap:12px;background:#0b6b4e;color:#fff;font-family:"Geist",sans-serif;font-weight:600;font-size:27px;padding:18px 30px;border-radius:100px}
+  .swipe{position:absolute;bottom:92px;right:80px;font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:#0b6b4e;display:flex;align-items:center;gap:10px}
+</style></head>
+<body>
+<div class="pano">
+  <svg class="track" viewBox="0 0 4320 1350" xmlns="http://www.w3.org/2000/svg">
+    <line x1="40" y1="762" x2="4210" y2="762" stroke="#0b6b4e" stroke-width="3"/>
+    <g stroke="#0b6b4e" stroke-width="3" fill="none" opacity="0.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1060 747 l14 15 l-14 15"/><path d="M2140 747 l14 15 l-14 15"/><path d="M3220 747 l14 15 l-14 15"/>
+    </g>
+    <!-- medallones (uno por slide); el de S1 aloja el sello -->
+    <circle cx="540" cy="762" r="72" fill="#faf8f2"/>
+    <circle cx="1620" cy="762" r="52" fill="#faf8f2" stroke="#0b6b4e" stroke-width="3"/>
+    <circle cx="2700" cy="762" r="52" fill="#faf8f2" stroke="#0b6b4e" stroke-width="3"/>
+    <circle cx="3780" cy="762" r="52" fill="#0b6b4e"/>
+    <path d="M3760 762 l13 13 l24 -28" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M3832 762 h320" stroke="#0b6b4e" stroke-width="3" fill="none"/>
+    <path d="M4138 750 l16 12 l-16 12" stroke="#0b6b4e" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+
+  <!-- S1 principal: marca -->
+  <div class="col c0">
+    <div class="brand"><span class="seal"></span><span class="wm">Attesta</span></div>
+    <div class="idx">01 / 04</div>
+    <div class="kick">Quiénes somos</div>
+    <div class="hl">El sistema de registro de la <span class="em">gobernanza de IA.</span></div>
+    <div class="cap">Inventaría tu IA, clasifica su riesgo y genera evidencia lista para auditoría.</div>
+    <div class="bigbrand"><span class="s"></span></div>
+    <div class="foot">@attesta.io</div>
+    <div class="swipe">Desliza <span style="font-size:22px">→</span></div>
+  </div>
+
+  <!-- S2: qué hacemos -->
+  <div class="col c1">
+    <div class="idx">02 / 04</div>
+    <div class="kick">Qué hacemos</div>
+    <div class="hl">Inventario, riesgo y <span class="em">evidencia.</span></div>
+    <div class="cap">Un flujo continuo, no un informe que envejece: del EU AI Act a pasos claros.</div>
+    <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6 L42 15 L24 24 L6 15 Z"/><path d="M6 24 L24 33 L42 24"/><path d="M6 33 L24 42 L42 33"/></svg>
+    <div class="medlabel">Producto</div>
+  </div>
+
+  <!-- S3: para quién -->
+  <div class="col c2">
+    <div class="idx">03 / 04</div>
+    <div class="kick">Para quién</div>
+    <div class="hl">Medianas que deciden sobre <span class="em">personas.</span></div>
+    <div class="cap">Empresas que usan IA sin equipo de compliance. Cuña: RRHH y reclutamiento.</div>
+    <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="17" r="7"/><path d="M6 40 c0 -8 6 -13 12 -13 c6 0 12 5 12 13"/><circle cx="34" cy="15" r="5.5"/><path d="M30 27 c7 0 12 5 12 13"/></svg>
+    <div class="medlabel">Nuestro ICP · deployer</div>
+  </div>
+
+  <!-- S4: nuestro rol -->
+  <div class="col c3">
+    <div class="idx">04 / 04</div>
+    <div class="kick">Nuestro rol</div>
+    <div class="hl">No certificamos. <span class="em">Te preparamos.</span></div>
+    <div class="cap">Somos tu sistema de registro de evidencia y preparación para auditoría.</div>
+    <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 5 L40 11 V24 C40 34 33 40 24 43 C15 40 8 34 8 24 V11 Z"/><path d="M17 24 l5 5 l10 -12"/></svg>
+    <div class="cta">Conoce Attesta <span style="font-size:22px">→</span></div>
+  </div>
+
+</div>
+</body></html>
