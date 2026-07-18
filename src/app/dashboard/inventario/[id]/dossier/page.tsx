@@ -4,6 +4,7 @@ import { SealMark } from "@/components/ui/SealMark";
 import { PrintButton } from "@/components/dashboard/PrintButton";
 import { getSystemDossier, getOrganizationName } from "@/lib/data";
 import { LEGAL_PDF } from "@/components/ui/LegalNote";
+import { RiskBadge } from "@/components/ui/RiskBadge";
 import { OBLIGATIONS_BY_LEVEL } from "@/lib/risk-assessment";
 import { recommendationsForLevel } from "@/lib/recommendations";
 import {
@@ -13,30 +14,30 @@ import {
   type RiskLevel,
 } from "@/lib/mock-data";
 
-/* Colores fijos (documento en blanco, a prueba de impresión). */
+/* Colores por tono semántico (theme-aware: adaptan a claro/oscuro e impresión). */
 const RISK_COLOR: Record<RiskLevel, string> = {
-  unacceptable: "#8f271f",
-  high: "#8f271f",
-  limited: "#8a4f14",
-  minimal: "#1f7a54",
+  unacceptable: "var(--tone-danger-fg)",
+  high: "var(--tone-warn-fg)",
+  limited: "var(--tone-gold-fg)",
+  minimal: "var(--tone-good-fg)",
 };
 
 const SEVERITY_COLOR = {
-  alta: "#8f271f",
-  media: "#8a4f14",
-  baja: "#5b6b62",
+  alta: "var(--tone-danger-fg)",
+  media: "var(--tone-warn-fg)",
+  baja: "var(--tone-neutral-fg)",
 } as const;
 
 const PRIORITY_COLOR = {
-  crítica: "#8f271f",
-  alta: "#8a4f14",
-  media: "#5b6b62",
+  crítica: "var(--tone-danger-fg)",
+  alta: "var(--tone-warn-fg)",
+  media: "var(--tone-neutral-fg)",
 } as const;
 
 const STATUS_META = {
-  missing: { label: "Falta", color: "#8f271f" },
-  partial: { label: "Parcial", color: "#8a4f14" },
-  done: { label: "Cubierto", color: "#1f7a54" },
+  missing: { label: "Falta", color: "var(--tone-danger-fg)" },
+  partial: { label: "Parcial", color: "var(--tone-warn-fg)" },
+  done: { label: "Cubierto", color: "var(--tone-good-fg)" },
 } as const;
 
 const ROLE_LABEL: Record<string, string> = {
@@ -156,7 +157,7 @@ export default async function DossierPage({
       </div>
 
       {/* Documento */}
-      <article className="rounded-2xl border border-line bg-white p-8 text-ink print:rounded-none print:border-0 print:p-0">
+      <article className="rounded-2xl border border-line bg-paper-raised p-8 text-ink print:rounded-none print:border-0 print:p-0">
         {/* Portada */}
         <header className="flex items-start justify-between border-b border-line pb-6">
           <div className="flex items-center gap-2">
@@ -228,12 +229,7 @@ export default async function DossierPage({
           <SectionTitle n={2}>Clasificación de riesgo</SectionTitle>
           <div className="rounded-xl border border-line p-5">
             <div className="flex items-center gap-3">
-              <span
-                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white"
-                style={{ backgroundColor: RISK_COLOR[level] }}
-              >
-                {RISK_LABEL[level]}
-              </span>
+              <RiskBadge level={level} />
               <span className="text-xs text-muted">
                 Respaldo: {EVIDENCE_LABEL[evidenceState]}
               </span>
@@ -381,12 +377,7 @@ export default async function DossierPage({
                   className="break-inside-avoid border-b border-line pb-3 text-sm"
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white"
-                      style={{ backgroundColor: RISK_COLOR[a.level] }}
-                    >
-                      {RISK_LABEL[a.level]}
-                    </span>
+                    <RiskBadge level={a.level} />
                     <span className="text-xs text-muted">
                       {EVIDENCE_LABEL[a.evidenceState]}
                     </span>

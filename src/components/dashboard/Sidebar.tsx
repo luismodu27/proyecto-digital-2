@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { signOut } from "@/lib/auth/actions";
+import { AccountMenu } from "@/components/dashboard/AccountMenu";
 
 const nav = [
   { label: "Resumen", href: "/dashboard", icon: "M3 12h7V3H3v9Zm0 9h7v-7H3v7Zm11 0h7V12h-7v9Zm0-18v7h7V3h-7Z" },
@@ -65,41 +65,7 @@ export function Sidebar({
       </nav>
       <div className="p-4 md:mt-auto">
         {userEmail ? (
-          <div className="rounded-xl border border-line bg-paper-sunken/60 p-4">
-            {userName ? (
-              <>
-                <p className="truncate text-sm font-medium text-ink" title={userName}>
-                  {userName}
-                </p>
-                <p className="truncate text-[11px] text-muted" title={userEmail}>
-                  {userEmail}
-                </p>
-              </>
-            ) : (
-              <p className="truncate text-xs font-medium text-ink" title={userEmail}>
-                {userEmail}
-              </p>
-            )}
-            <div className="mt-2.5 flex items-center gap-3">
-              <Link
-                href="/"
-                className="text-xs font-medium text-brand hover:text-brand-strong"
-              >
-                Ir al inicio
-              </Link>
-              <span className="text-line-strong" aria-hidden>
-                ·
-              </span>
-              <form action={signOut}>
-                <button
-                  type="submit"
-                  className="text-xs font-medium text-muted transition-colors hover:text-[var(--tone-danger-fg)]"
-                >
-                  Cerrar sesión
-                </button>
-              </form>
-            </div>
-          </div>
+          <AccountMenu userEmail={userEmail} userName={userName} />
         ) : (
           <div className="rounded-xl border border-line bg-paper-sunken/60 p-4">
             <p className="text-xs font-medium text-ink">Demo con datos de ejemplo</p>

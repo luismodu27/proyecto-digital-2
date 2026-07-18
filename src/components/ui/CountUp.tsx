@@ -32,10 +32,6 @@ export function CountUp({
     const reduce =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      setDisplay(value);
-      return;
-    }
 
     let raf = 0;
     let start = 0;
@@ -52,7 +48,10 @@ export function CountUp({
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          raf = requestAnimationFrame(run);
+          // El setState vive en el callback del observer (no en el cuerpo del
+          // effect): sin movimiento, salta al valor final; si no, anima.
+          if (reduce) setDisplay(value);
+          else raf = requestAnimationFrame(run);
           io.disconnect();
         }
       },

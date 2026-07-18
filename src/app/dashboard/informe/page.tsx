@@ -25,17 +25,18 @@ import {
 
 export const dynamic = "force-dynamic";
 
+// Colores por tono semántico (theme-aware: adaptan a claro/oscuro y a impresión).
 const RISK_COLOR: Record<RiskLevel, string> = {
-  unacceptable: "#8f271f",
-  high: "#a4610f",
-  limited: "#7c5a2e",
-  minimal: "#1f7a54",
+  unacceptable: "var(--tone-danger-fg)",
+  high: "var(--tone-warn-fg)",
+  limited: "var(--tone-gold-fg)",
+  minimal: "var(--tone-good-fg)",
 };
 
 const SEVERITY_COLOR = {
-  alta: "#8f271f",
-  media: "#8a4f14",
-  baja: "#5b6b62",
+  alta: "var(--tone-danger-fg)",
+  media: "var(--tone-warn-fg)",
+  baja: "var(--tone-neutral-fg)",
 } as const;
 
 export default async function InformeEjecutivoPage() {
@@ -107,7 +108,7 @@ export default async function InformeEjecutivoPage() {
         <PrintButton label="Descargar informe (PDF)" />
       </div>
 
-      <article className="rounded-2xl border border-line bg-white p-8 text-ink print:rounded-none print:border-0 print:p-0">
+      <article className="rounded-2xl border border-line bg-paper-raised p-8 text-ink print:rounded-none print:border-0 print:p-0">
         {/* Portada */}
         <header className="flex items-start justify-between border-b border-line pb-6">
           <div className="flex items-center gap-2">
@@ -166,7 +167,7 @@ export default async function InformeEjecutivoPage() {
                   <span className="w-28 shrink-0 text-sm text-ink-soft">
                     {RISK_LABEL[level]}
                   </span>
-                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-[#eee7d8]">
+                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-paper-sunken">
                     <div
                       className="h-full rounded-full"
                       style={{

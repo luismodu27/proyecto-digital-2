@@ -6,8 +6,8 @@ import { LEGAL_PDF } from "@/components/ui/LegalNote";
 
 const statusLabel = { missing: "Falta", partial: "Parcial", done: "Cubierto" } as const;
 const statusCls = {
-  missing: "text-[#8f271f]",
-  partial: "text-[#8a4f14]",
+  missing: "text-[var(--tone-danger-fg)]",
+  partial: "text-[var(--tone-warn-fg)]",
   done: "text-brand-strong",
 } as const;
 
@@ -45,7 +45,7 @@ export default async function InformeGapPage() {
       </div>
 
       {/* Documento */}
-      <article className="rounded-2xl border border-line bg-white p-8 text-ink print:rounded-none print:border-0 print:p-0">
+      <article className="rounded-2xl border border-line bg-paper-raised p-8 text-ink print:rounded-none print:border-0 print:p-0">
         <header className="flex items-start justify-between border-b border-line pb-6">
           <div className="flex items-center gap-2">
             <SealMark size={34} className="text-brand" />
