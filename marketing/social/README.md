@@ -7,10 +7,11 @@ producto: usa el **logo real** (`sealmark`), las **fuentes** (Fraunces + Geist) 
 ## Qué hay aquí
 
 - **`CAPTIONS.md`** — captions listos para pegar + hashtags + calendario sugerido + notas de compliance.
-- **`images/`** — imágenes de referencia a **1×** (1080×1350). Full-res 2× regenerable con el generador.
-  - `publicaciones/` — 11 posts sueltos.
-  - `carruseles/` — 3 carruseles **conectados** (el recorrido cruza de una slide a la siguiente):
+- **`images/`** — imágenes de referencia a **1×**. Full-res 2× regenerable con el generador.
+  - `publicaciones/` — 11 posts sueltos (4:5, 1080×1350).
+  - `carruseles/` — 3 carruseles **conectados** 4:5 (el recorrido cruza de una slide a la siguiente):
     `quienes-somos` (apertura) · `4-pasos` · `del-dolor-a-la-preparacion`.
+  - `9-16-stories/` — **todo en 9:16 (1080×1920)** para stories/reels (mismos posts y carruseles).
   - `_feed-overview.png` — vista del feed.
 - **`generator/`** — el sistema con el que se crean las imágenes (ver `generator/README.md`).
 
