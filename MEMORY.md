@@ -150,7 +150,16 @@ diseño, nombre, features grandes); autónomo en lo demás.
     `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` (+ confirmar `SUPABASE_SERVICE_ROLE_KEY`);
     (3) aplicar migración **0017**; (4) plantilla "Confirm signup" con `{{ .Token }}`.
     Recomendado: probar TODO en **modo Test** de Stripe antes de pasar a live.
-  - **PENDIENTE mío (item 7):** diferenciar planes en la landing + recortar la demo pública.
+  - **Item 7 ✅ (hecho):** demo pública recortada a **muestra** en **`/demo`** (inventario + riesgo
+    abiertos con datos mock; gap/plan/vigilancia/PDF como tarjetas bloqueadas con CTA de registro;
+    "Explorar la demo" del hero → `/demo`). **Diferenciación de planes** en Pricing (gratis marcado
+    como muestra con límites explícitos; Preparación "Todo lo gratis + desbloqueas:"; Enterprise idem).
+  - **Verificación de correo → DESACTIVADA por ahora** (decisión del fundador): Supabase no deja
+    editar plantillas sin SMTP propio, y el envío a cualquiera necesita dominio. Se apagó "Confirm
+    email" en Supabase → el registro entra directo (la app ya lo soporta; el flujo de código OTP
+    queda construido para cuando haya dominio+SMTP). **Nuevo buzón `attesta.io.mx@gmail.com`** =
+    contacto del footer + destinatario de notificaciones de waitlist (ojo Resend: solo llega si es
+    el correo de la cuenta Resend o hay dominio verificado) + platform_admin (SQL aplicado por el fundador).
 - **2026-07-18** · **Lote de mejoras post-deploy (revisión a fondo del fundador).** Sobre la app en
   producción (`attesta-io.vercel.app`, modo conectado). Hechos y desplegados:
   - **Registro con identidad (item 3):** el signup pide **Nombre, Primer apellido, Segundo apellido**
