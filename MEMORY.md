@@ -145,7 +145,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
     **El bloqueo solo se activa cuando `STRIPE_SECRET_KEY`+`STRIPE_PRICE_ID` estén en Vercel.**
   - **⚠️ SEGURIDAD:** el fundador pegó una **`sk_live_` en el chat** → se le pidió **rotarla**
     (Stripe → Developers → API keys → Roll). Las claves van SOLO a env de Vercel, nunca al repo.
-  - **PENDIENTE del fundador:** (1) rotar `sk_live`; (2) crear Producto/Precio €390/mes en Stripe
+  - **PENDIENTE del fundador:** (1) rotar `sk_live`; (2) crear Producto/Precio 350 USD/mes en Stripe
     y su webhook → añadir a Vercel `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`,
     `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` (+ confirmar `SUPABASE_SERVICE_ROLE_KEY`);
     (3) aplicar migración **0017**; (4) plantilla "Confirm signup" con `{{ .Token }}`.
@@ -908,7 +908,7 @@ diseño, nombre, features grandes); autónomo en lo demás.
   directo, Anexo III empleo). Implicaciones futuras: mensajería, ejemplos y "policy pack"
   orientados a RRHH; ICP concreto = responsable de RRHH/Talent + Legal en empresa mediana.
 - **REGIÓN = abierta** por ahora ✅ (foco en producto; decidir tras primeras entrevistas).
-- **Precios de mercado (referencia):** mid-market gobernanza de IA **30–50k $/año**; pyme desde ~5k €/año. (Nuestro €390/mes en la landing es orientativo/early-access.)
+- **Precios de mercado (referencia):** mid-market gobernanza de IA **30–50k $/año**; pyme desde ~5k €/año. (Nuestro precio en la landing = 350 USD/mes, orientativo/early-access.)
 - **Canal:** consultores/auditores como aliados ("powered by" + reparto), no competencia.
 
 ### 13.6 Corrección de fechas vs el doc

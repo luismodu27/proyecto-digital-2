@@ -31,7 +31,7 @@ const tiers: Tier[] = [
   },
   {
     name: "Preparación",
-    price: "€390",
+    price: "$350",
     unit: "/mes",
     note: "El sistema de registro de tu gobernanza",
     lead: "Todo lo del plan gratis, y además desbloqueas:",
@@ -74,7 +74,7 @@ export function Pricing() {
           Empieza gratis. Escala cuando lo necesites.
         </h2>
         <p className="mt-4 text-lg text-ink-soft">
-          Precios orientativos durante el acceso anticipado.
+          Precios en dólares (USD), orientativos durante el acceso anticipado.
         </p>
       </div>
 

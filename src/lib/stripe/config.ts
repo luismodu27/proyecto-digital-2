@@ -12,8 +12,8 @@ export const STRIPE_PRICE_ID = process.env.STRIPE_PRICE_ID ?? "";
 export const STRIPE_PUBLISHABLE_KEY =
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
 
-/** Precio mostrado en la UI (informativo). */
-export const PLAN_PRICE_LABEL = process.env.NEXT_PUBLIC_PLAN_PRICE ?? "€390";
+/** Precio mostrado en la UI (informativo). Moneda: USD. */
+export const PLAN_PRICE_LABEL = process.env.NEXT_PUBLIC_PLAN_PRICE ?? "$350";
 
 /** ¿Está Stripe listo para cobrar? (clave secreta + precio) */
 export const isStripeConfigured =
