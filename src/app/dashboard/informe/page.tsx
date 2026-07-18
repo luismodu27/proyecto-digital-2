@@ -8,6 +8,9 @@ import {
   getOrganizationName,
   getOrgJurisdictions,
 } from "@/lib/data";
+import { getActiveOrg } from "@/lib/data/context";
+import { orgHasAccess } from "@/lib/billing/subscription";
+import { Paywall } from "@/components/dashboard/Paywall";
 import {
   RISK_LABEL,
   RISK_ORDER,
@@ -40,6 +43,16 @@ const SEVERITY_COLOR = {
 } as const;
 
 export default async function InformeEjecutivoPage() {
+  const gateOrg = await getActiveOrg();
+  if (gateOrg && !(await orgHasAccess(gateOrg))) {
+    return (
+      <Paywall
+        feature="Informe ejecutivo"
+        description="Genera el informe ejecutivo de gobernanza en PDF, listo para dirección y auditoría."
+      />
+    );
+  }
+
   const [systems, gaps, orgName, orgJur] = await Promise.all([
     getAiSystems(),
     getGapItems(),

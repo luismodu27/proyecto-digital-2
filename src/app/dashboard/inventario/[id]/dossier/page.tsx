@@ -5,6 +5,9 @@ import { PrintButton } from "@/components/dashboard/PrintButton";
 import { getSystemDossier, getOrganizationName } from "@/lib/data";
 import { LEGAL_PDF } from "@/components/ui/LegalNote";
 import { RiskBadge } from "@/components/ui/RiskBadge";
+import { Paywall } from "@/components/dashboard/Paywall";
+import { getActiveOrg } from "@/lib/data/context";
+import { orgHasAccess } from "@/lib/billing/subscription";
 import { OBLIGATIONS_BY_LEVEL } from "@/lib/risk-assessment";
 import { recommendationsForLevel } from "@/lib/recommendations";
 import {
@@ -93,6 +96,17 @@ export default async function DossierPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  const gateOrg = await getActiveOrg();
+  if (gateOrg && !(await orgHasAccess(gateOrg))) {
+    return (
+      <Paywall
+        feature="Dossier de evidencia"
+        description="Genera el dossier de evidencia por sistema en PDF, listo para presentar al auditor."
+      />
+    );
+  }
+
   const [dossier, orgName] = await Promise.all([
     getSystemDossier(id),
     getOrganizationName(),

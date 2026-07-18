@@ -85,10 +85,28 @@ export function AccountMenu({
           className="absolute inset-x-0 top-full z-40 mt-2 origin-top overflow-hidden rounded-xl border border-line bg-paper-raised shadow-lg md:bottom-full md:top-auto md:mb-2 md:mt-0 md:origin-bottom"
         >
           <Link
-            href="/"
+            href="/dashboard/facturacion"
             role="menuitem"
             onClick={() => setOpen(false)}
             className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft transition-colors hover:bg-paper-sunken hover:text-ink"
+          >
+            <svg viewBox="0 0 24 24" className="size-4 shrink-0" fill="none" aria-hidden>
+              <path
+                d="M3 10h18M6 15h4m-5 5h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2Z"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Plan y facturación
+          </Link>
+
+          <Link
+            href="/"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 border-t border-line px-4 py-2.5 text-sm text-ink-soft transition-colors hover:bg-paper-sunken hover:text-ink"
           >
             <svg viewBox="0 0 24 24" className="size-4 shrink-0" fill="none" aria-hidden>
               <path
