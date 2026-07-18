@@ -155,22 +155,40 @@ export default async function DashboardOverview() {
               Ver todos →
             </Link>
           </div>
-          <ul className="mt-4 divide-y divide-line">
-            {recent.map((s) => (
-              <li key={s.id} className="flex items-center justify-between gap-3 py-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-ink">{s.name}</p>
-                  <p className="text-xs text-muted">{s.owner}</p>
-                </div>
-                <div className="flex shrink-0 items-center gap-3">
-                  <div className="w-24">
-                    <Meter value={s.compliance} target={AUDIT_READY_THRESHOLD} />
+          {recent.length === 0 ? (
+            <div className="mt-4 rounded-xl border border-dashed border-line-strong px-4 py-8 text-center">
+              <p className="text-sm font-medium text-ink">
+                Nada que requiera atención
+              </p>
+              <p className="mx-auto mt-1 max-w-xs text-xs text-ink-soft">
+                Cuando registres sistemas de IA, aquí verás los que necesitan
+                revisión o tienen menor preparación.
+              </p>
+              <Link
+                href="/dashboard/inventario/nuevo"
+                className="mt-3 inline-block text-xs font-semibold text-brand hover:text-brand-strong"
+              >
+                + Registrar sistema
+              </Link>
+            </div>
+          ) : (
+            <ul className="mt-4 divide-y divide-line">
+              {recent.map((s) => (
+                <li key={s.id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-ink">{s.name}</p>
+                    <p className="text-xs text-muted">{s.owner}</p>
                   </div>
-                  <RiskBadge level={s.risk} />
-                </div>
-              </li>
-            ))}
-          </ul>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <div className="w-24">
+                      <Meter value={s.compliance} target={AUDIT_READY_THRESHOLD} />
+                    </div>
+                    <RiskBadge level={s.risk} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
     </>

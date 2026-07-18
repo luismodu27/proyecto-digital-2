@@ -52,7 +52,10 @@ export async function applyPolicyPack(formData: FormData) {
       created_by: user?.id,
     }));
 
-  if (rows.length > 0) await supabase.from("gap_items").insert(rows);
+  if (rows.length > 0) {
+    const { error } = await supabase.from("gap_items").insert(rows);
+    if (error) redirect("/dashboard/packs?toast=pack-error");
+  }
 
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/plan");
@@ -75,7 +78,7 @@ export async function createAiSystem(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) redirect("/dashboard/inventario/nuevo");
 
-  await supabase.from("ai_systems").insert({
+  const { error } = await supabase.from("ai_systems").insert({
     organization_id: org,
     name,
     owner: (String(formData.get("owner") ?? "").trim() || null) as string | null,
@@ -85,6 +88,7 @@ export async function createAiSystem(formData: FormData) {
       "deployer") as string,
     created_by: user?.id,
   });
+  if (error) redirect("/dashboard/inventario/nuevo?toast=system-error");
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
@@ -107,7 +111,7 @@ export async function seedSampleData() {
   } = await supabase.auth.getUser();
 
   // Inserta los sistemas (upsert por (organization_id, code)) y recupera sus ids.
-  const { data: systems } = await supabase
+  const { data: systems, error: seedError } = await supabase
     .from("ai_systems")
     .upsert(
       AI_SYSTEMS.map((s) => ({
@@ -126,6 +130,7 @@ export async function seedSampleData() {
       { onConflict: "organization_id,code" },
     )
     .select("id, code");
+  if (seedError) redirect("/dashboard/inventario?toast=seed-error");
 
   // Mapa code → id para enlazar las brechas a sus sistemas.
   const idByCode = new Map((systems ?? []).map((r) => [r.code, r.id]));
@@ -144,7 +149,8 @@ export async function seedSampleData() {
   }).filter(Boolean);
 
   if (gapRows.length > 0) {
-    await supabase.from("gap_items").insert(gapRows as never[]);
+    const { error } = await supabase.from("gap_items").insert(gapRows as never[]);
+    if (error) redirect("/dashboard/inventario?toast=seed-error");
   }
 
   revalidatePath("/dashboard");
@@ -171,7 +177,7 @@ export async function updateAiSystem(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) redirect(`/dashboard/inventario/${id}/editar`);
 
-  await supabase
+  const { error } = await supabase
     .from("ai_systems")
     .update({
       name,
@@ -183,6 +189,7 @@ export async function updateAiSystem(formData: FormData) {
     })
     .eq("organization_id", org)
     .eq("id", id);
+  if (error) redirect(`/dashboard/inventario/${id}/editar?toast=system-error`);
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
@@ -199,11 +206,12 @@ export async function deleteAiSystem(formData: FormData) {
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
 
-  await supabase
+  const { error } = await supabase
     .from("ai_systems")
     .delete()
     .eq("organization_id", org)
     .eq("id", id);
+  if (error) redirect("/dashboard/inventario?toast=system-error");
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
@@ -228,7 +236,7 @@ export async function createGapItem(formData: FormData) {
   if (!aiSystemId || !requirement) redirect("/dashboard/gap/nuevo");
 
   const status = String(formData.get("status") ?? "missing");
-  await supabase.from("gap_items").insert({
+  const { error } = await supabase.from("gap_items").insert({
     organization_id: org,
     ai_system_id: aiSystemId,
     requirement,
@@ -237,6 +245,7 @@ export async function createGapItem(formData: FormData) {
     status: ["missing", "partial", "done"].includes(status) ? status : "missing",
     created_by: user?.id,
   });
+  if (error) redirect("/dashboard/gap/nuevo?toast=gap-error");
 
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/plan");
@@ -254,11 +263,12 @@ export async function deleteGapItem(formData: FormData) {
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
 
-  await supabase
+  const { error } = await supabase
     .from("gap_items")
     .delete()
     .eq("organization_id", org)
     .eq("id", id);
+  if (error) redirect("/dashboard/gap?toast=gap-error");
 
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/plan");
@@ -279,16 +289,17 @@ export async function updateGapStatus(formData: FormData) {
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
 
-  await supabase
+  const { error } = await supabase
     .from("gap_items")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("organization_id", org)
     .eq("id", id);
+  if (error) redirect("/dashboard/gap?toast=gap-error");
 
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/plan");
   revalidatePath("/dashboard");
-  redirect("/dashboard/gap");
+  redirect("/dashboard/gap?toast=gap-updated");
 }
 
 export type EvidenceInput = {

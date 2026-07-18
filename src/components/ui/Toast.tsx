@@ -8,10 +8,15 @@ const MESSAGES: Record<string, string> = {
   "system-created": "Sistema registrado en el inventario.",
   "system-updated": "Sistema actualizado.",
   "system-deleted": "Sistema eliminado.",
+  "system-error": "No se pudo guardar el sistema. Inténtalo de nuevo.",
   seeded: "Datos de ejemplo cargados.",
+  "seed-error": "No se pudieron cargar los datos de ejemplo. Inténtalo de nuevo.",
   "pack-applied": "Policy pack RRHH aplicado al sistema.",
+  "pack-error": "No se pudo aplicar el policy pack. Inténtalo de nuevo.",
   "gap-created": "Brecha añadida.",
   "gap-deleted": "Brecha eliminada.",
+  "gap-updated": "Estado de la brecha actualizado.",
+  "gap-error": "No se pudo completar la acción. Inténtalo de nuevo.",
   "member-added": "Miembro añadido al equipo.",
   "member-invited": "Invitación enviada.",
   "member-exists": "Esa persona ya es miembro del equipo.",
@@ -41,6 +46,47 @@ const MESSAGES: Record<string, string> = {
   "vigia-error": "El Vigía no pudo completar la revisión. Inténtalo de nuevo.",
 };
 
+/** Claves que son ERRORES o bloqueos → se pintan en tono de peligro (rojo). */
+const DANGER = new Set([
+  "system-error",
+  "seed-error",
+  "pack-error",
+  "gap-error",
+  "team-forbidden",
+  "team-lastowner",
+  "team-bademail",
+  "team-error",
+  "cand-error",
+  "jur-error",
+  "task-error",
+  "vigia-error",
+  "vigia-denied",
+]);
+
+/** Claves informativas (avisos de modo demo o duplicados) → tono neutro. */
+const INFO = new Set([
+  "member-exists",
+  "team-demo",
+  "cand-demo",
+  "jur-demo",
+  "task-demo",
+  "vigia-demo",
+]);
+
+type Tone = "success" | "danger" | "info";
+
+function toneOf(key: string): Tone {
+  if (DANGER.has(key)) return "danger";
+  if (INFO.has(key)) return "info";
+  return "success";
+}
+
+const TONE_STYLES: Record<Tone, string> = {
+  success: "border-[var(--tone-good-bd)]",
+  danger: "border-[var(--tone-danger-bd)]",
+  info: "border-[var(--tone-neutral-bd)]",
+};
+
 /**
  * Toast sutil disparado por un parámetro `?toast=` en la URL (tras un server
  * action con redirect). Se anima, se autodescarta y limpia el parámetro.
@@ -52,6 +98,7 @@ export function Toaster() {
   const key = params.get("toast");
 
   const [msg, setMsg] = useState("");
+  const [tone, setTone] = useState<Tone>("success");
   const [show, setShow] = useState(false);
   const handled = useRef<string | null>(null);
 
@@ -59,6 +106,7 @@ export function Toaster() {
     if (!key || !MESSAGES[key] || handled.current === key) return;
     handled.current = key;
     setMsg(MESSAGES[key]);
+    setTone(toneOf(key));
     setShow(true);
 
     const clean = new URLSearchParams(Array.from(params.entries()));
@@ -79,8 +127,43 @@ export function Toaster() {
         show ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"
       }`}
     >
-      <div className="pointer-events-auto flex items-center gap-2.5 rounded-xl border border-[#bfdccf] bg-paper-raised py-3 pl-4 pr-3 text-sm font-medium text-ink shadow-[0_18px_44px_-24px_rgba(15,26,20,0.5)]">
-        <SealMark size={20} className="text-brand" />
+      <div
+        role={tone === "danger" ? "alert" : "status"}
+        className={`pointer-events-auto flex items-center gap-2.5 rounded-xl border ${TONE_STYLES[tone]} bg-paper-raised py-3 pl-4 pr-3 text-sm font-medium text-ink shadow-[0_18px_44px_-24px_rgba(15,26,20,0.5)]`}
+      >
+        {tone === "danger" ? (
+          <svg
+            viewBox="0 0 24 24"
+            className="size-5 shrink-0 text-[var(--tone-danger-fg)]"
+            fill="none"
+            aria-hidden
+          >
+            <path
+              d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        ) : tone === "info" ? (
+          <svg
+            viewBox="0 0 24 24"
+            className="size-5 shrink-0 text-muted"
+            fill="none"
+            aria-hidden
+          >
+            <path
+              d="M12 16v-4m0-4h.01M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        ) : (
+          <SealMark size={20} className="text-brand" />
+        )}
         <span>{msg}</span>
         <button
           type="button"

@@ -86,11 +86,12 @@ export async function updateMemberRole(formData: FormData) {
   // Solo un owner puede degradar a otro owner.
   if (target.role === "owner" && ctx.role !== "owner") back("team-forbidden");
 
-  await ctx.supabase
+  const { error } = await ctx.supabase
     .from("memberships")
     .update({ role })
     .eq("organization_id", ctx.org)
     .eq("user_id", userId);
+  if (error) back("team-error");
 
   revalidatePath(TEAM);
   back("role-updated");
@@ -118,11 +119,12 @@ export async function removeMember(formData: FormData) {
   if (target.role === "owner" && owners.length <= 1) back("team-lastowner");
   if (target.role === "owner" && ctx.role !== "owner") back("team-forbidden");
 
-  await ctx.supabase
+  const { error } = await ctx.supabase
     .from("memberships")
     .delete()
     .eq("organization_id", ctx.org)
     .eq("user_id", userId);
+  if (error) back("team-error");
 
   revalidatePath(TEAM);
   back("member-removed");
@@ -138,11 +140,12 @@ export async function revokeInvitation(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) back("team-error");
 
-  await ctx.supabase
+  const { error } = await ctx.supabase
     .from("invitations")
     .delete()
     .eq("organization_id", ctx.org)
     .eq("id", id);
+  if (error) back("team-error");
 
   revalidatePath(TEAM);
   back("invite-revoked");

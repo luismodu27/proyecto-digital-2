@@ -99,9 +99,10 @@ export function Sidebar({
           <AccountMenu userEmail={userEmail} userName={userName} />
         ) : (
           <div className="rounded-xl border border-line bg-paper-sunken/60 p-4">
-            <p className="text-xs font-medium text-ink">Demo con datos de ejemplo</p>
+            <p className="text-xs font-medium text-ink">Vista de demostración</p>
             <p className="mt-1 text-xs text-muted">
-              Backend real pendiente. Los datos no son reales.
+              Explora Attesta con datos de ejemplo. Crea tu cuenta para usar los
+              tuyos.
             </p>
             <Link
               href="/"
