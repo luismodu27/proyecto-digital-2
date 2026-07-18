@@ -123,6 +123,29 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **Lote de mejoras post-deploy (revisión a fondo del fundador).** Sobre la app en
+  producción (`attesta-io.vercel.app`, modo conectado). Hechos y desplegados:
+  - **Registro con identidad (item 3):** el signup pide **Nombre, Primer apellido, Segundo apellido**
+    (opcional) + **Confirmar contraseña**; se guardan en `user_metadata` (`nombre`, `apellido_paterno`,
+    `apellido_materno`, `full_name`, `display_name`). La barra lateral muestra el **nombre como apodo**
+    sobre el correo (los roles en Equipo siguen por correo). `AuthForm.tsx` + `dashboard/layout.tsx`.
+  - **Guía de primer login (item 7):** overlay animado (`WelcomeGuide.tsx`, 7 pasos, keyframe
+    `guide-step`, respeta reduce-motion) que recorre cada apartado, con **Omitir**. Se muestra **solo la
+    primera vez**: marca `user_metadata.guide_seen=true` (persiste por cuenta) + guardia en localStorage
+    (anti-parpadeo). El layout la monta solo si `guide_seen !== true`.
+  - **Waitlist → aviso al fundador:** `submitWaitlist` Server Action (`src/lib/landing/waitlist-actions.ts`)
+    inserta en `waitlist` y **notifica por email al fundador** (`luisscmorenod@gmail.com`) vía **Resend**,
+    **env-gated** (`RESEND_API_KEY`; sin dominio verificado se envía desde `onboarding@resend.dev` al propio
+    correo del fundador, que Resend permite). Sin la key, la solicitud igual se guarda; nunca rompe el alta.
+  - **Latencia (item 6):** `vercel.json` fija región de funciones en **`fra1`** (junto a Supabase UE, evita
+    ida/vuelta transatlántica) + **dedup de `auth.getUser()`/org activa por request** con React `cache()`
+    en `context.ts` (antes 3 llamadas seriadas por carga de dashboard).
+  - Ya estaban de un lote previo (Batch A): PDF siempre en claro al imprimir (item 1), cerrar sesión +
+    "Ir al inicio" en la barra (items 2/4), datos de contacto en el footer (item 8), toasts con "x" y
+    auto-cierre (item 10), y fix de URLs muertas de Illinois (item 9, **migración 0016 pendiente de aplicar**).
+  - **PENDIENTE del fundador:** (1) aplicar `0016_fix_illinois_urls.sql` en SQL Editor. (2) Para el aviso de
+    waitlist: crear cuenta gratis en **resend.com**, generar API key y añadir `RESEND_API_KEY` en Vercel.
+  - **DIFERIDO al final:** item 5 (mejorar la landing con ejemplos + animaciones).
 - **2026-07-17** · Se define la tesis (compliance de IA mid-market) y el stack
   (Next.js + TypeScript + Tailwind). Autonomía: checkpoints en decisiones clave.
 - **2026-07-17** · **Nombre = Attesta**. **MVP = Inventario + Riesgo + Gap (PDF)**.
