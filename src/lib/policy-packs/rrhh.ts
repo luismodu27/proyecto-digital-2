@@ -11,27 +11,13 @@
  * verificaron contra artificialintelligenceact.eu.
  */
 
-export type PolicySeverity = "alta" | "media" | "baja";
-
-export type PolicyControl = {
-  id: string;
-  title: string;
-  /** Qué hacer, en contexto de reclutamiento. */
-  description: string;
-  article: string;
-  severity: PolicySeverity;
-};
-
-export type PolicyPack = {
-  id: string;
-  name: string;
-  summary: string;
-  controls: PolicyControl[];
-};
+export type { PolicySeverity, PolicyControl, PolicyPack } from "./types";
+import type { PolicyPack } from "./types";
 
 export const RRHH_PACK: PolicyPack = {
   id: "rrhh",
-  name: "Reclutamiento y selección",
+  name: "Reclutamiento y selección (EU AI Act)",
+  tag: "UE · Reclutamiento",
   summary:
     "Controles típicos para IA de selección de personal (alto riesgo, Anexo III). Aplícalo a un sistema para precargar sus brechas.",
   controls: [

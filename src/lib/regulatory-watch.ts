@@ -356,8 +356,8 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     action:
       "Lleva un registro de la fecha de la última auditoría de sesgo por cada AEDT y agenda su renovación antes de cumplir 12 meses. Ata en el inventario de Attesta la fecha de auditoría a cada sistema de selección y trátala como evidencia con caducidad.",
     articles: [
-      "6 RCNY § 5-301 (definición de bias audit)",
-      "6 RCNY § 5-303 (publicación del resumen de resultados)",
+      "6 RCNY § 5-301 (bias audit)",
+      "6 RCNY § 5-302 (publicación del resumen de resultados)",
     ],
     source: {
       label: "DCWP — AEDT FAQ (PDF oficial de la Ciudad de Nueva York)",
@@ -427,7 +427,8 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
       "Antes de cada video-entrevista analizada por IA: entrega el aviso y la explicación de qué evalúa el sistema, recoge consentimiento y ofrece alternativa a quien no consienta. Habilita el borrado del vídeo en 30 días a petición. Guarda el consentimiento como evidencia.",
     articles: [
       "820 ILCS 42/5 (consentimiento e información)",
-      "820 ILCS 42/10 (límite de compartición y borrado en 30 días)",
+      "820 ILCS 42/10 (límite de con quién se comparte el vídeo)",
+      "820 ILCS 42/15 (borrado en 30 días a petición)",
       "820 ILCS 42/20 (reporte demográfico si solo se usa IA para cribar a entrevista presencial)",
     ],
     source: {
@@ -453,7 +454,7 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     articles: [
       "775 ILCS 5/2-102 (prácticas de empleo, enmendado)",
       "775 ILCS 5/1-103 (definiciones, IA y ZIP como proxy)",
-      "HB 3773 (103ª Asamblea General; nº de ley pública a reconfirmar)",
+      "HB 3773 (Public Act 103-0804)",
     ],
     source: {
       label:

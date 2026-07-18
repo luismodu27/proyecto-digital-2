@@ -7,7 +7,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
 import type { Answers, ClassificationResult } from "@/lib/risk-assessment";
 import { AI_SYSTEMS, GAP_ITEMS } from "@/lib/mock-data";
-import { RRHH_PACK } from "@/lib/policy-packs/rrhh";
+import { getPolicyPack } from "@/lib/policy-packs";
 
 const SEVERITY_EN: Record<string, string> = {
   alta: "high",
@@ -16,14 +16,18 @@ const SEVERITY_EN: Record<string, string> = {
 };
 
 /**
- * Aplica el policy pack RRHH a un sistema: precarga sus controles como brechas
- * (gap_items), sin duplicar los que ya existen.
+ * Aplica un policy pack a un sistema: precarga sus controles como brechas
+ * (gap_items), sin duplicar los que ya existen. El pack se elige por `packId`
+ * (por defecto, el de RRHH, por compatibilidad).
  */
 export async function applyPolicyPack(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/dashboard/packs");
 
   const systemId = String(formData.get("systemId") ?? "");
   if (!systemId) redirect("/dashboard/packs");
+
+  const pack = getPolicyPack(String(formData.get("packId") ?? "rrhh"));
+  if (!pack) redirect("/dashboard/packs");
 
   const supabase = await createClient();
   const org = await getActiveOrg();
@@ -40,7 +44,7 @@ export async function applyPolicyPack(formData: FormData) {
     .eq("ai_system_id", systemId);
   const seen = new Set((existing ?? []).map((r) => r.requirement));
 
-  const rows = RRHH_PACK.controls
+  const rows = pack.controls
     .filter((c) => !seen.has(c.title))
     .map((c) => ({
       organization_id: org,
