@@ -928,8 +928,8 @@ insert into public.reg_sources (framework, label, url, source_kind) values
   ('eu-ai-act',    'AI Act Service Desk — Art. 50',                    'https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50', 'page'),
   ('us-nyc-ll144', 'NYC DCWP — Automated Employment Decision Tools',   'https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page', 'page'),
   ('us-co-aiact',  'Colorado General Assembly — SB 26-189',            'https://leg.colorado.gov/bills/sb26-189', 'page'),
-  ('us-il-aivia',  'Illinois General Assembly — 820 ILCS 42 (AIVIA)',  'https://www.ilga.gov/legislation/ilcs/ilcs3.asp?ActID=4015&ChapterID=68', 'page'),
-  ('us-il-hra',    'Illinois General Assembly — 775 ILCS 5 (IHRA)',    'https://www.ilga.gov/legislation/ilcs/ilcs3.asp?ActID=2266&ChapterID=64', 'page'),
+  ('us-il-aivia',  'Illinois General Assembly — 820 ILCS 42 (AIVIA)',  'https://www.ilga.gov/Legislation/ILCS/Articles?ActID=4015&ChapterID=68', 'page'),
+  ('us-il-hra',    'Illinois General Assembly — 775 ILCS 5 (IHRA)',    'https://www.ilga.gov/Legislation/ILCS/Articles?ActID=2266&ChapterID=64', 'page'),
   ('us-eeoc',      'EEOC — Artificial Intelligence and the ADA',       'https://www.eeoc.gov/eeoc-disability-related-resources/artificial-intelligence-and-ada', 'page')
 on conflict (url) do nothing;
 
@@ -1106,3 +1106,16 @@ end $$;
 
 revoke all on function public.enrich_reg_candidate_ai(uuid, jsonb, jsonb) from anon;
 grant execute on function public.enrich_reg_candidate_ai(uuid, jsonb, jsonb) to authenticated;
+
+
+-- ==========================================================================
+-- 0016_fix_illinois_urls.sql — corrige URLs muertas de Illinois (ilga.gov)
+-- ==========================================================================
+update public.reg_sources
+   set url = 'https://www.ilga.gov/Legislation/ILCS/Articles?ActID=4015&ChapterID=68',
+       last_status = null, fail_count = 0, last_hash = null, last_change_at = null
+ where url = 'https://www.ilga.gov/legislation/ilcs/ilcs3.asp?ActID=4015&ChapterID=68';
+update public.reg_sources
+   set url = 'https://www.ilga.gov/Legislation/ILCS/Articles?ActID=2266&ChapterID=64',
+       last_status = null, fail_count = 0, last_hash = null, last_change_at = null
+ where url = 'https://www.ilga.gov/legislation/ilcs/ilcs3.asp?ActID=2266&ChapterID=64';

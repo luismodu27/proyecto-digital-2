@@ -432,7 +432,7 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     ],
     source: {
       label: "Illinois General Assembly — 820 ILCS 42 (texto legal oficial)",
-      url: "https://www.ilga.gov/legislation/ilcs/ilcs3.asp?ActID=4015&ChapterID=68",
+      url: "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=4015&ChapterID=68",
     },
     scope: { riskLevels: ["high"] },
   },
@@ -458,7 +458,7 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     source: {
       label:
         "Illinois General Assembly — Illinois Human Rights Act (775 ILCS 5)",
-      url: "https://www.ilga.gov/legislation/ilcs/ilcs3.asp?ActID=2266&ChapterID=64",
+      url: "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=2266&ChapterID=64",
     },
     scope: { riskLevels: ["high"] },
   },
