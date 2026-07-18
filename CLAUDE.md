@@ -5,6 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 > La memoria completa del proyecto vive en **[MEMORY.md](./MEMORY.md)** — **léela siempre
 > antes de trabajar** y **actualízala** (bitácora §10) cuando el fundador dé una corrección o
 > se tome una decisión clave. Este CLAUDE.md es solo el mapa técnico; el "por qué" está en MEMORY.
+>
+> **Tareas abiertas y cómo retomar → [PENDIENTES.md](./PENDIENTES.md)** (pendientes del fundador
+> —Stripe, dominio/SMTP— y míos; consúltalo al empezar cada sesión).
 
 ## Resumen del proyecto
 

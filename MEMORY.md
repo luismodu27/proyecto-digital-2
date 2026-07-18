@@ -786,6 +786,16 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 ## 11. Preguntas abiertas / próximos pasos de validación
 
+> **▶▶ RETOMAR AQUÍ (2026-07-18):** La lista de mejoras del fundador (3 tandas) está **completa y
+> desplegada**. Lo que queda vive, ordenado, en **[PENDIENTES.md](./PENDIENTES.md)** — léelo primero.
+> Resumen: (1) **Stripe** construido pero dormido → el fundador lo configura en una computadora (modo
+> Test): aplicar migración `0017`, crear producto/precio **$350 USD/mes**, llaves + webhook, env vars
+> en Vercel, redeploy, probar con tarjeta `4242…`. (2) **Verificación de correo por código** construida
+> pero desactivada → necesita **dominio propio + custom SMTP (Resend)** para reactivarse. (3) Ideas de
+> capas futuras: shadow-AI (Capa 0), pruebas de sesgo (Capa 4). Rama `claude/init-3bwfhm` → push también
+> a `main`. **Seguridad:** el fundador debe rotar una `sk_live` que se expuso en el chat. El bloque de
+> abajo es el contexto del FOSO (sigue vigente).
+
 > **▶ RETOMAR AQUÍ (2026-07-17, FASE B / FOSO COMPLETO):** El **foso automatizado está COMPLETO y
 > verificado e2e**: Vigía (detecta) → señal → **Analista (RAG + LLM redacta borrador grounded)** → editor →
 > Validador humano publica. Árbol limpio y sincronizado. **Migraciones aplicadas hasta la 0015.**
