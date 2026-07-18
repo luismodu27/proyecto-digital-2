@@ -214,10 +214,40 @@
   }
 }
 
-/* Impresión: documento limpio (informes/evidencia) */
+/* Impresión: documento limpio SIEMPRE en claro (aunque la app esté en oscuro).
+   Un PDF claro se ve más profesional. Reponemos los tokens claros con la misma
+   especificidad que los overrides oscuros para que ganen en @media print. */
 @media print {
+  :root:not([data-theme="light"]),
+  [data-theme="dark"] {
+    --color-paper: #faf8f2;
+    --color-paper-raised: #ffffff;
+    --color-paper-sunken: #f3f0e7;
+    --color-ink: #0f1a14;
+    --color-ink-soft: #38443d;
+    --color-muted: #6b756e;
+    --color-line: #e6e1d4;
+    --color-line-strong: #d6d0bf;
+    --color-brand: #0b6b4e;
+    --color-brand-strong: #084d38;
+    --color-brand-bright: #11a071;
+    --color-brand-soft: #e4efe9;
+    --color-seal: #b0824a;
+    --color-seal-soft: #f0e7d7;
+    --grid-line: rgba(15, 26, 20, 0.04);
+    --seal-img: url("/sealmark.png");
+
+    --tone-danger-bg: #f7e4e2;   --tone-danger-fg: #8f271f;   --tone-danger-bd: #e6b6b1;
+    --tone-warn-bg:   #f7ead8;   --tone-warn-fg:   #8a4f14;   --tone-warn-bd:   #e6cba3;
+    --tone-gold-bg:   #f2e9d9;   --tone-gold-fg:   #7c5a2e;   --tone-gold-bd:   #e0d0b3;
+    --tone-good-bg:   #e4efe9;   --tone-good-fg:   #084d38;   --tone-good-bd:   #bfdccf;
+    --tone-info-bg:   #e8eef7;   --tone-info-fg:   #33507e;   --tone-info-bd:   #c3d2ea;
+    --tone-neutral-bg: #f3f0e7;  --tone-neutral-fg: #38443d;  --tone-neutral-bd: #d6d0bf;
+  }
+  html,
   body {
     background: #fff;
+    color-scheme: light;
   }
   * {
     -webkit-print-color-adjust: exact;

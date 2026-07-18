@@ -18,7 +18,13 @@ const nav = [
   { label: "Actividad", href: "/dashboard/actividad", icon: "M12 7v5l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0Z" },
 ];
 
-export function Sidebar({ userEmail }: { userEmail?: string }) {
+export function Sidebar({
+  userEmail,
+  userName,
+}: {
+  userEmail?: string;
+  userName?: string;
+}) {
   const pathname = usePathname();
 
   return (
@@ -57,20 +63,42 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
           );
         })}
       </nav>
-      <div className="mt-auto hidden p-4 md:block">
+      <div className="p-4 md:mt-auto">
         {userEmail ? (
           <div className="rounded-xl border border-line bg-paper-sunken/60 p-4">
-            <p className="truncate text-xs font-medium text-ink" title={userEmail}>
-              {userEmail}
-            </p>
-            <form action={signOut} className="mt-2">
-              <button
-                type="submit"
+            {userName ? (
+              <>
+                <p className="truncate text-sm font-medium text-ink" title={userName}>
+                  {userName}
+                </p>
+                <p className="truncate text-[11px] text-muted" title={userEmail}>
+                  {userEmail}
+                </p>
+              </>
+            ) : (
+              <p className="truncate text-xs font-medium text-ink" title={userEmail}>
+                {userEmail}
+              </p>
+            )}
+            <div className="mt-2.5 flex items-center gap-3">
+              <Link
+                href="/"
                 className="text-xs font-medium text-brand hover:text-brand-strong"
               >
-                Cerrar sesión
-              </button>
-            </form>
+                Ir al inicio
+              </Link>
+              <span className="text-line-strong" aria-hidden>
+                ·
+              </span>
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="text-xs font-medium text-muted transition-colors hover:text-[var(--tone-danger-fg)]"
+                >
+                  Cerrar sesión
+                </button>
+              </form>
+            </div>
           </div>
         ) : (
           <div className="rounded-xl border border-line bg-paper-sunken/60 p-4">

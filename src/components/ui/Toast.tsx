@@ -67,7 +67,7 @@ export function Toaster() {
       scroll: false,
     });
 
-    const t = setTimeout(() => setShow(false), 3500);
+    const t = setTimeout(() => setShow(false), 4000);
     return () => clearTimeout(t);
   }, [key, params, pathname, router]);
 
@@ -76,12 +76,22 @@ export function Toaster() {
   return (
     <div
       className={`pointer-events-none fixed bottom-6 right-6 z-50 transition-all duration-300 ease-out ${
-        show ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+        show ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"
       }`}
     >
-      <div className="pointer-events-auto flex items-center gap-2.5 rounded-xl border border-[#bfdccf] bg-paper-raised px-4 py-3 text-sm font-medium text-ink shadow-[0_18px_44px_-24px_rgba(15,26,20,0.5)]">
+      <div className="pointer-events-auto flex items-center gap-2.5 rounded-xl border border-[#bfdccf] bg-paper-raised py-3 pl-4 pr-3 text-sm font-medium text-ink shadow-[0_18px_44px_-24px_rgba(15,26,20,0.5)]">
         <SealMark size={20} className="text-brand" />
-        {msg}
+        <span>{msg}</span>
+        <button
+          type="button"
+          onClick={() => setShow(false)}
+          aria-label="Cerrar notificación"
+          className="ml-1 -mr-1 grid size-6 shrink-0 place-items-center rounded-md text-muted transition-colors hover:bg-paper-sunken hover:text-ink"
+        >
+          <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden>
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+        </button>
       </div>
     </div>
   );
