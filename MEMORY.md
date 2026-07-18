@@ -123,6 +123,28 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **Foso — Incremento 1: policy pack "Contratación con IA — EE. UU." (APROBADO por el fundador).**
+  El fundador dio luz verde a ampliar el foso con el 2º marco (leyes US de contratación con IA). Hallazgo: el
+  **radar US ya existía** (NYC/IL/CO/EEOC con contenido verificado) + jurisdicciones + UI multi-marco → solo
+  faltaba hacerlo accionable. Construido:
+  - **Nuevo pack `policy-packs/us-hiring.ts`** (11 controles del **deployer**, verificados por el experto contra
+    DCWP/NYC Rules + Illinois GA): NYC LL144 (identificar AEDT §5-300, auditoría de sesgo independiente <12m
+    §5-301, publicar resumen §5-302, aviso al candidato ≥10 días hábiles §5-303) + Illinois HRA HB 3773 (aviso
+    de IA, efecto discriminatorio/proxy ZIP) + AIVIA (consentimiento §42/5, borrado 30d §42/15, reporte demográfico
+    §42/20) + baseline federal (Title VII/ADA/ADEA). **Encuadre clave: el deployer ES el obligado directo** (sin
+    reencuadre provider); **Attesta REGISTRA la evidencia, NO audita ni certifica** (auditor independiente);
+    controles territoriales → cada uno con su `conditional` de aplicabilidad; todo "orientativo".
+  - **Infra de packs generalizada:** `policy-packs/types.ts` (tipos + `conditional`, `tag`, `note`) e `index.ts`
+    (`POLICY_PACKS` + `getPolicyPack`); `rrhh.ts` migrado a tipos comunes; `applyPolicyPack` ahora por `packId`;
+    `/dashboard/packs` lista AMBOS packs con la condición de cada control.
+  - **2 erratas de cita corregidas** en el radar (halladas por el experto): NYC resumen publicado §5-303→**§5-302**;
+    AIVIA borrado 820 ILCS 42/10→**/15**; HB 3773 → **Public Act 103-0804**. Build/lint/tsc verdes; desplegado.
+  - **SIGUIENTE — Incremento 2 (requiere migración del fundador):** registro de evidencia de auditoría de sesgo con
+    **caducidad rotatoria de 12 meses por herramienta** (campos en `ai_systems`: `is_aedt`, `last_bias_audit_date`,
+    `independent_auditor_name`, `auditor_independence_confirmed`, `bias_audit_summary_url`, `summary_published_date`;
+    derivados `next_bias_audit_due` = fecha+12 meses y `audit_status` sin_auditoria/vencida/por_vencer/vigente,
+    umbral `BIAS_AUDIT_WARN_DAYS`). Publicación se comprueba aparte del estado de auditoría (no colapsar en un
+    semáforo). Countdown `force-dynamic`, orientativo. Luego Incremento 3 (superficie en dossier/informe).
 - **2026-07-18** · **Lote de pulido/confianza (1ª tanda de la auditoría de calidad).** El fundador pidió
   "pulido y confianza" + "ampliar el foso". Auditoría (subagente Explore) → arreglado lo de severidad ALTA:
   - **Server Actions dejaban de "fingir éxito":** `data/actions.ts` (createAiSystem, updateAiSystem,
