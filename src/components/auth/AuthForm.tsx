@@ -28,6 +28,8 @@ function friendlyError(message: string): string {
     return "El registro por correo está deshabilitado. Contacta al administrador.";
   if (m.includes("for security purposes") || m.includes("rate limit"))
     return "Demasiados intentos. Espera un momento e inténtalo de nuevo.";
+  if (m.includes("expired") || m.includes("invalid") || m.includes("token"))
+    return "El código es incorrecto o expiró. Revisa el correo o reenvíalo.";
   if (m.includes("fetch") || m.includes("network"))
     return "No pudimos conectar. Revisa tu conexión e inténtalo de nuevo.";
   return "Algo salió mal. Inténtalo de nuevo.";
@@ -55,6 +57,10 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
   const [error, setError] = useState<string | null>(initialError ?? null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // Verificación por código: correo pendiente + código de 6 dígitos.
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const [resending, setResending] = useState(false);
 
   function validate(): boolean {
     const errs: FieldErrors = {};
@@ -115,10 +121,9 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
           router.push("/onboarding");
           router.refresh();
         } else {
-          setNotice(
-            "Te enviamos un correo de confirmación. Confírmalo y luego inicia sesión.",
-          );
-          setMode("login");
+          // Sin sesión: hay que confirmar el correo. Pasamos a introducir el código.
+          setPendingEmail(email.trim());
+          setNotice(null);
         }
       }
     } catch (err) {
@@ -126,6 +131,63 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    const token = code.trim();
+    if (!/^\d{4,8}$/.test(token)) {
+      setError("Introduce el código que te enviamos por correo.");
+      return;
+    }
+    setLoading(true);
+    const supabase = createClient();
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: pendingEmail!,
+        token,
+        type: "signup",
+      });
+      if (error) throw error;
+      if (data.session) {
+        router.push("/onboarding");
+        router.refresh();
+      } else {
+        setError("No pudimos verificar el código. Inténtalo de nuevo.");
+      }
+    } catch (err) {
+      setError(friendlyError(err instanceof Error ? err.message : ""));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function resendCode() {
+    if (!pendingEmail) return;
+    setError(null);
+    setNotice(null);
+    setResending(true);
+    const supabase = createClient();
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: pendingEmail,
+      });
+      if (error) throw error;
+      setNotice("Te reenviamos el código. Revisa tu correo (y la carpeta de spam).");
+    } catch (err) {
+      setError(friendlyError(err instanceof Error ? err.message : ""));
+    } finally {
+      setResending(false);
+    }
+  }
+
+  function backToSignup() {
+    setPendingEmail(null);
+    setCode("");
+    setError(null);
+    setNotice(null);
   }
 
   function switchMode() {
@@ -142,6 +204,87 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
     "border-[var(--tone-danger-bd)] focus:border-[var(--tone-danger-fg)]";
   const clearErr = (k: keyof FieldErrors) =>
     setFieldErrors((f) => (f[k] ? { ...f, [k]: undefined } : f));
+
+  // Etapa de verificación por código (tras registrarse).
+  if (pendingEmail) {
+    return (
+      <div className="rounded-2xl border border-line bg-paper-raised p-8">
+        <SealMark size={36} className="text-brand" />
+        <h1 className="mt-4 font-display text-2xl font-semibold text-ink">
+          Verifica tu correo
+        </h1>
+        <p className="mt-1 text-sm text-ink-soft">
+          Te enviamos un código de verificación a{" "}
+          <span className="font-medium text-ink">{pendingEmail}</span>. Introdúcelo
+          para activar tu cuenta.
+        </p>
+
+        <form onSubmit={handleVerify} noValidate className="mt-6 space-y-4">
+          <div>
+            <label htmlFor="code" className="block text-sm font-medium text-ink">
+              Código de verificación
+            </label>
+            <input
+              id="code"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={code}
+              onChange={(e) => {
+                setCode(e.target.value.replace(/\D/g, ""));
+                if (error) setError(null);
+              }}
+              className={`${inputBase} text-center text-lg tracking-[0.5em] ${okBorder}`}
+              placeholder="••••••"
+              maxLength={8}
+              autoFocus
+            />
+          </div>
+
+          {error && (
+            <p
+              role="alert"
+              className="rounded-lg border border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)] px-3 py-2 text-sm text-[var(--tone-danger-fg)]"
+            >
+              {error}
+            </p>
+          )}
+          {notice && (
+            <p className="rounded-lg border border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] px-3 py-2 text-sm text-[var(--tone-good-fg)]">
+              {notice}
+            </p>
+          )}
+
+          <Button type="submit" disabled={loading} className="w-full py-2.5">
+            {loading ? "Verificando…" : "Verificar y continuar"}
+          </Button>
+        </form>
+
+        <div className="mt-6 flex items-center justify-between text-sm">
+          <button
+            type="button"
+            onClick={resendCode}
+            disabled={resending}
+            className="font-medium text-brand transition-colors hover:text-brand-strong disabled:opacity-50"
+          >
+            {resending ? "Reenviando…" : "Reenviar código"}
+          </button>
+          <button
+            type="button"
+            onClick={backToSignup}
+            className="font-medium text-muted transition-colors hover:text-ink"
+          >
+            ← Cambiar correo
+          </button>
+        </div>
+
+        <p className="mt-4 text-xs text-muted">
+          ¿Recibiste un enlace en lugar de un código? Ábrelo desde el correo para
+          confirmar tu cuenta.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-line bg-paper-raised p-8">
