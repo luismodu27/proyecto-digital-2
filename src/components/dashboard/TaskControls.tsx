@@ -11,6 +11,7 @@ import {
   TASK_STATUS_ORDER,
   type TaskStatus,
 } from "@/lib/mock-data";
+import { ConfirmSubmit } from "@/components/dashboard/ConfirmSubmit";
 
 const selectCls =
   "rounded-lg border border-line-strong bg-paper px-2.5 py-1 text-xs text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
@@ -100,21 +101,15 @@ export function TaskDueDateControl({
 /** Botón para eliminar una tarea (con confirmación). */
 export function DeleteTaskButton({ id, title }: { id: string; title: string }) {
   return (
-    <form
+    <ConfirmSubmit
       action={deleteActionTask}
-      onSubmit={(e) => {
-        if (!window.confirm(`¿Eliminar la tarea «${title}»?`))
-          e.preventDefault();
-      }}
-    >
-      <input type="hidden" name="id" value={id} />
-      <button
-        type="submit"
-        aria-label="Eliminar tarea"
-        className="text-xs font-medium text-muted transition-colors hover:text-[var(--tone-danger-fg)]"
-      >
-        Eliminar
-      </button>
-    </form>
+      fields={{ id }}
+      title="Eliminar tarea"
+      message={`Se eliminará la tarea «${title}» del plan. Esta acción no se puede deshacer.`}
+      confirmLabel="Eliminar"
+      triggerLabel="Eliminar"
+      triggerAriaLabel="Eliminar tarea"
+      triggerClassName="text-xs font-medium text-muted transition-colors hover:text-[var(--tone-danger-fg)]"
+    />
   );
 }

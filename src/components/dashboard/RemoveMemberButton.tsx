@@ -1,6 +1,7 @@
 "use client";
 
 import { removeMember } from "@/lib/data/team-actions";
+import { ConfirmSubmit } from "@/components/dashboard/ConfirmSubmit";
 
 export function RemoveMemberButton({
   userId,
@@ -10,20 +11,14 @@ export function RemoveMemberButton({
   email: string;
 }) {
   return (
-    <form
+    <ConfirmSubmit
       action={removeMember}
-      onSubmit={(e) => {
-        if (!window.confirm(`¿Quitar a ${email} de la organización?`))
-          e.preventDefault();
-      }}
-    >
-      <input type="hidden" name="userId" value={userId} />
-      <button
-        type="submit"
-        className="text-xs font-medium text-muted transition-colors hover:text-[var(--tone-danger-fg)]"
-      >
-        Quitar
-      </button>
-    </form>
+      fields={{ userId }}
+      title="Quitar del equipo"
+      message={`${email} dejará de tener acceso a esta organización. Podrás volver a invitarle más tarde.`}
+      confirmLabel="Quitar"
+      triggerLabel="Quitar"
+      triggerClassName="text-xs font-medium text-muted transition-colors hover:text-[var(--tone-danger-fg)]"
+    />
   );
 }
