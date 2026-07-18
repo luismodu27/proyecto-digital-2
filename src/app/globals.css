@@ -168,6 +168,11 @@
   to { background-position: -200% 0; }
 }
 
+@keyframes guide-step {
+  from { opacity: 0; transform: translateX(14px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 @layer utilities {
   /* Aparición al hacer scroll (lo activa el componente Reveal). */
   .reveal {
@@ -198,6 +203,11 @@
   .animate-float-soft {
     animation: float-soft 7s ease-in-out infinite;
   }
+
+  /* Entrada de cada paso de la guía de uso. */
+  .animate-guide-step {
+    animation: guide-step 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -207,6 +217,9 @@
     transition: none !important;
   }
   .animate-float-soft {
+    animation: none !important;
+  }
+  .animate-guide-step {
     animation: none !important;
   }
   * {

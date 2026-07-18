@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
-import { createClient } from "@/lib/supabase/client";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { submitWaitlist } from "@/lib/landing/waitlist-actions";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -31,12 +30,10 @@ export function WaitlistCTA() {
     }
     setLoading(true);
     try {
-      if (isSupabaseConfigured) {
-        const supabase = createClient();
-        const { error } = await supabase
-          .from("waitlist")
-          .insert({ email: email.trim(), source: "landing" });
-        if (error) throw error;
+      const res = await submitWaitlist(email.trim(), "landing");
+      if (!res.ok) {
+        setError(res.error ?? "No pudimos registrarte. Inténtalo de nuevo.");
+        return;
       }
       setSubmitted(true);
     } catch {

@@ -33,28 +33,45 @@ function friendlyError(message: string): string {
   return "Algo salió mal. Inténtalo de nuevo.";
 }
 
+type FieldErrors = {
+  nombre?: string;
+  apellido1?: string;
+  email?: string;
+  password?: string;
+  confirm?: string;
+};
+
 export function AuthForm({ initialError }: { initialError?: string } = {}) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
+  const [nombre, setNombre] = useState("");
+  const [apellido1, setApellido1] = useState("");
+  const [apellido2, setApellido2] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{
-    email?: string;
-    password?: string;
-  }>({});
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState<string | null>(initialError ?? null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   function validate(): boolean {
-    const errs: { email?: string; password?: string } = {};
+    const errs: FieldErrors = {};
+    if (mode === "signup") {
+      if (!nombre.trim()) errs.nombre = "Introduce tu nombre.";
+      if (!apellido1.trim()) errs.apellido1 = "Introduce tu primer apellido.";
+    }
     if (!email.trim()) errs.email = "Introduce tu correo de trabajo.";
     else if (!EMAIL_RE.test(email.trim()))
       errs.email = "Introduce un correo válido (p. ej. tu@empresa.com).";
     if (!password) errs.password = "Introduce tu contraseña.";
     else if (mode === "signup" && password.length < 6)
       errs.password = "La contraseña debe tener al menos 6 caracteres.";
+    if (mode === "signup") {
+      if (!confirm) errs.confirm = "Repite la contraseña.";
+      else if (confirm !== password) errs.confirm = "Las contraseñas no coinciden.";
+    }
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -77,9 +94,21 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
         router.push("/dashboard");
         router.refresh();
       } else {
+        const fullName = [nombre.trim(), apellido1.trim(), apellido2.trim()]
+          .filter(Boolean)
+          .join(" ");
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
+          options: {
+            data: {
+              nombre: nombre.trim(),
+              apellido_paterno: apellido1.trim(),
+              apellido_materno: apellido2.trim(),
+              full_name: fullName,
+              display_name: fullName,
+            },
+          },
         });
         if (error) throw error;
         if (data.session) {
@@ -108,6 +137,11 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
 
   const inputBase =
     "mt-1.5 w-full rounded-lg border bg-paper px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:ring-2 focus:ring-brand/30";
+  const okBorder = "border-line-strong focus:border-brand";
+  const errBorder =
+    "border-[var(--tone-danger-bd)] focus:border-[var(--tone-danger-fg)]";
+  const clearErr = (k: keyof FieldErrors) =>
+    setFieldErrors((f) => (f[k] ? { ...f, [k]: undefined } : f));
 
   return (
     <div className="rounded-2xl border border-line bg-paper-raised p-8">
@@ -122,6 +156,71 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
       </p>
 
       <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
+        {mode === "signup" && (
+          <>
+            <div>
+              <label htmlFor="nombre" className="block text-sm font-medium text-ink">
+                Nombre
+              </label>
+              <input
+                id="nombre"
+                type="text"
+                autoComplete="given-name"
+                value={nombre}
+                onChange={(e) => {
+                  setNombre(e.target.value);
+                  clearErr("nombre");
+                }}
+                aria-invalid={!!fieldErrors.nombre}
+                className={`${inputBase} ${fieldErrors.nombre ? errBorder : okBorder}`}
+                placeholder="Tu nombre"
+              />
+              {fieldErrors.nombre && (
+                <p className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.nombre}</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="apellido1" className="block text-sm font-medium text-ink">
+                  Primer apellido
+                </label>
+                <input
+                  id="apellido1"
+                  type="text"
+                  autoComplete="family-name"
+                  value={apellido1}
+                  onChange={(e) => {
+                    setApellido1(e.target.value);
+                    clearErr("apellido1");
+                  }}
+                  aria-invalid={!!fieldErrors.apellido1}
+                  className={`${inputBase} ${fieldErrors.apellido1 ? errBorder : okBorder}`}
+                  placeholder="Apellido"
+                />
+                {fieldErrors.apellido1 && (
+                  <p className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.apellido1}</p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="apellido2" className="block text-sm font-medium text-ink">
+                  Segundo apellido{" "}
+                  <span className="font-normal text-muted">(opcional)</span>
+                </label>
+                <input
+                  id="apellido2"
+                  type="text"
+                  autoComplete="additional-name"
+                  value={apellido2}
+                  onChange={(e) => setApellido2(e.target.value)}
+                  className={`${inputBase} ${okBorder}`}
+                  placeholder="Apellido"
+                />
+              </div>
+            </div>
+          </>
+        )}
+
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-ink">
             Correo de trabajo
@@ -133,15 +232,10 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
-              if (fieldErrors.email)
-                setFieldErrors((f) => ({ ...f, email: undefined }));
+              clearErr("email");
             }}
             aria-invalid={!!fieldErrors.email}
-            className={`${inputBase} ${
-              fieldErrors.email
-                ? "border-[var(--tone-danger-bd)] focus:border-[var(--tone-danger-fg)]"
-                : "border-line-strong focus:border-brand"
-            }`}
+            className={`${inputBase} ${fieldErrors.email ? errBorder : okBorder}`}
             placeholder="tu@empresa.com"
           />
           {fieldErrors.email && (
@@ -151,10 +245,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
 
         <div>
           <div className="flex items-center justify-between">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-ink"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-ink">
               Contraseña
             </label>
             {mode === "login" && (
@@ -174,15 +265,10 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
-                if (fieldErrors.password)
-                  setFieldErrors((f) => ({ ...f, password: undefined }));
+                clearErr("password");
               }}
               aria-invalid={!!fieldErrors.password}
-              className={`${inputBase} pr-12 ${
-                fieldErrors.password
-                  ? "border-[var(--tone-danger-bd)] focus:border-[var(--tone-danger-fg)]"
-                  : "border-line-strong focus:border-brand"
-              }`}
+              className={`${inputBase} pr-12 ${fieldErrors.password ? errBorder : okBorder}`}
               placeholder="••••••••"
             />
             <button
@@ -201,6 +287,30 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
             <p className="mt-1.5 text-xs text-muted">Mínimo 6 caracteres.</p>
           )}
         </div>
+
+        {mode === "signup" && (
+          <div>
+            <label htmlFor="confirm" className="block text-sm font-medium text-ink">
+              Confirmar contraseña
+            </label>
+            <input
+              id="confirm"
+              type={showPass ? "text" : "password"}
+              autoComplete="new-password"
+              value={confirm}
+              onChange={(e) => {
+                setConfirm(e.target.value);
+                clearErr("confirm");
+              }}
+              aria-invalid={!!fieldErrors.confirm}
+              className={`${inputBase} ${fieldErrors.confirm ? errBorder : okBorder}`}
+              placeholder="••••••••"
+            />
+            {fieldErrors.confirm && (
+              <p className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.confirm}</p>
+            )}
+          </div>
+        )}
 
         {error && (
           <p
