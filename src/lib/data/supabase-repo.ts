@@ -27,6 +27,7 @@ import {
   type RegulatoryEvent,
   type RegKind,
 } from "@/lib/regulatory-watch";
+import type { BiasAudit } from "@/lib/bias-audit";
 
 /** Mapea la severidad de BD (en) a la del modelo de UI (es). */
 const SEVERITY_ES: Record<string, GapItem["severity"]> = {
@@ -127,6 +128,40 @@ export async function getSystemById(
     domain: data.domain ?? "",
     vendor: data.vendor ?? "",
     actorRole: data.actor_role ?? "deployer",
+  };
+}
+
+/**
+ * Evidencia de auditoría de sesgo (NYC LL144) de un sistema. Fallback seguro: si
+ * las columnas aún no existen (migración 0019 sin aplicar), devuelve null y la
+ * sección simplemente no aparece — la app no se rompe.
+ */
+export async function getSystemBiasAudit(
+  id: string,
+): Promise<BiasAudit | null> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return null;
+  const { data, error } = await supabase
+    .from("ai_systems")
+    .select(
+      "is_aedt, last_bias_audit_date, independent_auditor_name, auditor_independence_confirmed, bias_audit_summary_url, summary_published_date",
+    )
+    .eq("organization_id", org)
+    .eq("id", id)
+    .maybeSingle();
+  if (error || !data) return null;
+  return {
+    isAedt: !!data.is_aedt,
+    lastAuditDate: data.last_bias_audit_date
+      ? String(data.last_bias_audit_date).slice(0, 10)
+      : null,
+    auditorName: data.independent_auditor_name ?? null,
+    auditorIndependenceConfirmed: !!data.auditor_independence_confirmed,
+    summaryUrl: data.bias_audit_summary_url ?? null,
+    summaryPublishedDate: data.summary_published_date
+      ? String(data.summary_published_date).slice(0, 10)
+      : null,
   };
 }
 

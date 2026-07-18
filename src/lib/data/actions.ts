@@ -306,6 +306,47 @@ export async function updateGapStatus(formData: FormData) {
   redirect("/dashboard/gap?toast=gap-updated");
 }
 
+/**
+ * Registra la evidencia de auditoría de sesgo (NYC LL144) de un sistema.
+ * Attesta REGISTRA lo declarado; no realiza ni valida la auditoría.
+ */
+export async function saveBiasAudit(formData: FormData) {
+  if (!isSupabaseConfigured) redirect("/dashboard/inventario");
+  const id = String(formData.get("id") ?? "");
+  if (!id) redirect("/dashboard/inventario");
+
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) redirect("/onboarding");
+
+  const dateOrNull = (key: string) => {
+    const v = String(formData.get(key) ?? "").trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
+  };
+  const textOrNull = (key: string) => String(formData.get(key) ?? "").trim() || null;
+
+  const back = `/dashboard/inventario/${id}/editar`;
+  const { error } = await supabase
+    .from("ai_systems")
+    .update({
+      is_aedt: formData.get("is_aedt") === "on",
+      last_bias_audit_date: dateOrNull("last_bias_audit_date"),
+      independent_auditor_name: textOrNull("independent_auditor_name"),
+      auditor_independence_confirmed:
+        formData.get("auditor_independence_confirmed") === "on",
+      bias_audit_summary_url: textOrNull("bias_audit_summary_url"),
+      summary_published_date: dateOrNull("summary_published_date"),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("organization_id", org)
+    .eq("id", id);
+  if (error) redirect(`${back}?toast=bias-error`);
+
+  revalidatePath(back);
+  revalidatePath("/dashboard/inventario");
+  redirect(`${back}?toast=bias-saved`);
+}
+
 export type EvidenceInput = {
   attestedByName?: string;
   note?: string;

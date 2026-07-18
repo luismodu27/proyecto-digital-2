@@ -1194,3 +1194,16 @@ begin
       check (plan in ('free', 'preparacion', 'enterprise'));
   end if;
 end $$;
+
+
+-- ============================================================================
+-- 0019_bias_audit.sql — evidencia de auditoría de sesgo (NYC LL144)
+-- ============================================================================
+
+alter table public.ai_systems
+  add column if not exists is_aedt boolean not null default false,
+  add column if not exists last_bias_audit_date date,
+  add column if not exists independent_auditor_name text,
+  add column if not exists auditor_independence_confirmed boolean not null default false,
+  add column if not exists bias_audit_summary_url text,
+  add column if not exists summary_published_date date;

@@ -6,9 +6,19 @@ import { AssessmentHistory } from "@/components/dashboard/AssessmentHistory";
 import {
   getSystemById,
   getSystemAssessments,
+  getSystemBiasAudit,
   isSupabaseConfigured,
 } from "@/lib/data";
-import { updateAiSystem } from "@/lib/data/actions";
+import { updateAiSystem, saveBiasAudit } from "@/lib/data/actions";
+import { BiasAuditBadge } from "@/components/dashboard/BiasAuditBadge";
+import {
+  biasAuditStatus,
+  nextBiasAuditDue,
+  daysUntilDate,
+  publicationComplete,
+} from "@/lib/bias-audit";
+
+export const dynamic = "force-dynamic";
 
 const field =
   "mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
@@ -21,6 +31,11 @@ export default async function EditarSistemaPage({
   const { id } = await params;
   const system = isSupabaseConfigured ? await getSystemById(id) : null;
   const assessments = system ? await getSystemAssessments(id) : [];
+  const bias = system ? await getSystemBiasAudit(id) : null;
+  const now = new Date();
+  const biasStatus = bias ? biasAuditStatus(bias, now) : null;
+  const biasDue = bias ? nextBiasAuditDue(bias.lastAuditDate) : null;
+  const biasDays = daysUntilDate(biasDue, now);
 
   return (
     <>
@@ -128,6 +143,136 @@ export default async function EditarSistemaPage({
             </p>
             <AssessmentHistory assessments={assessments} />
           </div>
+
+          {bias && biasStatus && (
+            <div className="mt-6 max-w-xl rounded-2xl border border-line bg-paper-raised p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="font-display text-base font-semibold text-ink">
+                  Auditoría de sesgo (EE. UU. · NYC LL144)
+                </h2>
+                {bias.isAedt && <BiasAuditBadge status={biasStatus} days={biasDays} />}
+              </div>
+              <p className="mb-4 mt-1 text-sm text-ink-soft">
+                Si esta herramienta es un AEDT usado en Nueva York, registra la
+                evidencia de su auditoría de sesgo independiente. Attesta{" "}
+                <span className="font-medium text-ink">registra</span> lo que declaras;
+                no realiza ni valida la auditoría. Orientativo, no asesoría legal.
+              </p>
+
+              {bias.isAedt && !publicationComplete(bias) && (
+                <p className="mb-4 rounded-lg border border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] px-3 py-2 text-xs text-[var(--tone-warn-fg)]">
+                  Falta registrar la publicación del resumen (URL y fecha). LL144 exige
+                  auditoría, publicación y aviso — se comprueban por separado.
+                </p>
+              )}
+
+              <form action={saveBiasAudit} className="space-y-4">
+                <input type="hidden" name="id" value={system.id} />
+
+                <label className="flex items-start gap-2.5 text-sm text-ink">
+                  <input
+                    type="checkbox"
+                    name="is_aedt"
+                    defaultChecked={bias.isAedt}
+                    className="mt-0.5 size-4 rounded border-line-strong text-brand focus:ring-brand/30"
+                  />
+                  <span>
+                    Es un <span className="font-medium">AEDT</span> (herramienta
+                    automatizada de decisión de empleo) usado para puestos en NYC.
+                  </span>
+                </label>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="last_bias_audit_date"
+                      className="block text-sm font-medium text-ink"
+                    >
+                      Fecha de la última auditoría
+                    </label>
+                    <input
+                      id="last_bias_audit_date"
+                      name="last_bias_audit_date"
+                      type="date"
+                      defaultValue={bias.lastAuditDate ?? ""}
+                      className={field}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="independent_auditor_name"
+                      className="block text-sm font-medium text-ink"
+                    >
+                      Auditor independiente
+                    </label>
+                    <input
+                      id="independent_auditor_name"
+                      name="independent_auditor_name"
+                      defaultValue={bias.auditorName ?? ""}
+                      placeholder="Nombre del despacho / auditor"
+                      className={field}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="bias_audit_summary_url"
+                      className="block text-sm font-medium text-ink"
+                    >
+                      URL del resumen publicado
+                    </label>
+                    <input
+                      id="bias_audit_summary_url"
+                      name="bias_audit_summary_url"
+                      type="url"
+                      defaultValue={bias.summaryUrl ?? ""}
+                      placeholder="https://…"
+                      className={field}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="summary_published_date"
+                      className="block text-sm font-medium text-ink"
+                    >
+                      Fecha de publicación del resumen
+                    </label>
+                    <input
+                      id="summary_published_date"
+                      name="summary_published_date"
+                      type="date"
+                      defaultValue={bias.summaryPublishedDate ?? ""}
+                      className={field}
+                    />
+                  </div>
+                </div>
+
+                <label className="flex items-start gap-2.5 text-sm text-ink">
+                  <input
+                    type="checkbox"
+                    name="auditor_independence_confirmed"
+                    defaultChecked={bias.auditorIndependenceConfirmed}
+                    className="mt-0.5 size-4 rounded border-line-strong text-brand focus:ring-brand/30"
+                  />
+                  <span>
+                    Confirmo que el auditor cumple los criterios de{" "}
+                    <span className="font-medium">independencia</span> (sin implicación
+                    en desarrollar/usar la herramienta ni interés financiero).
+                  </span>
+                </label>
+
+                {biasDue && bias.isAedt && (
+                  <p className="text-xs text-muted">
+                    Próxima auditoría (12 meses desde la última):{" "}
+                    <span className="font-medium tabular-nums text-ink-soft">
+                      {biasDue}
+                    </span>
+                  </p>
+                )}
+
+                <Button type="submit">Guardar auditoría de sesgo</Button>
+              </form>
+            </div>
+          )}
 
           <div className="mt-6 max-w-xl rounded-2xl border border-line bg-paper-raised p-6">
             <h2 className="font-display text-sm font-semibold text-ink">Zona de peligro</h2>
