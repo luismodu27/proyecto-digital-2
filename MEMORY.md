@@ -123,6 +123,15 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **3ª tanda de detalles.** (1) Guía de primer login: los mini-ejemplos ahora
+  animan por dentro (filas/KPIs escalonados, barras que se rellenan; keyframes `guide-row`/`guide-bar`,
+  respeta reduce-motion). (2) **Umbral orientativo de preparación** `AUDIT_READY_THRESHOLD = 80`
+  (en `mock-data.ts`, ajustable en un sitio) + `isAuditReady`; el `Meter` dibuja una marca de objetivo;
+  se muestra en resumen (hint + caption "no es un juicio de cumplimiento"), inventario y demo. (3) Landing:
+  **tabla comparativa** de planes (Diagnóstico/Preparación/Enterprise) capacidad por capacidad, columna
+  Preparación resaltada. (4) **Demo `/demo`**: "Volver al sitio" visible también en móvil + **ThemeToggle**
+  (claro/oscuro). Precio del plan = **$350 USD/mes** (cambiado desde €390). Stripe sigue construido y
+  dormido (pendiente: el fundador lo configura desde una computadora, en modo Test).
 - **2026-07-18** · **2ª tanda de mejoras + cobro por suscripción (Stripe).**
   - **Informe/dossier theme-aware:** dejaron de forzar blanco en pantalla (se veía informe
     claro sobre panel oscuro). Ahora usan tokens (`bg-paper-raised`, `--tone-*-fg`) y `@media
