@@ -141,8 +141,8 @@ Queda pendiente:
   correctas a obligación del proveedor): los "marcado CE" de `recommendations.ts:53` y `regulatory-watch.ts:286`
   (el verbo es del deployer: "exige/verifica que el proveedor lleve marcado CE"). El disclaimer de `LegalNote`
   usa los términos en negativo ("No es un certificado…") — correcto, se conserva.
-- **`window.confirm` nativo** en borrados (`DeleteSystemButton.tsx`, `RevokeInviteButton.tsx`, etc.) → modal propio
-  con marca para acciones irreversibles.
+- ✅ **`window.confirm` → modal propio — HECHO (2026-07-18).** Nuevo `ConfirmSubmit` (modal accesible con marca)
+  aplicado a los 5 borrados (sistema, brecha, tarea, miembro, invitación). Verificado con captura.
 - **Estados vacíos menores**: `riesgo/page.tsx` muestra las 4 secciones con "0 sistemas" en cuenta nueva.
 - **TODOs de andamiaje**: `context.ts:21` (selector de org activa), `analista/voyage.ts` (placeholder de embeddings).
 
