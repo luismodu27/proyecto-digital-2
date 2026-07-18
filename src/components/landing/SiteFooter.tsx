@@ -33,6 +33,29 @@ export function SiteFooter() {
                 +52 662 462 8851
               </a>
             </li>
+            <li>
+              <a
+                href="https://instagram.com/attesta.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-medium text-brand hover:text-brand-strong"
+              >
+                <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden>
+                  <rect
+                    x="3"
+                    y="3"
+                    width="18"
+                    height="18"
+                    rx="5"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                  />
+                  <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.6" />
+                  <circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" />
+                </svg>
+                @attesta.io
+              </a>
+            </li>
           </ul>
         </div>
         <div className="text-sm text-muted">
