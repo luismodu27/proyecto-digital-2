@@ -123,6 +123,14 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **Activación (Frente 2): checklist de primeros pasos en el resumen.** `OnboardingChecklist`
+  (client) sobre el resumen: 4 pasos hasta el primer valor (registrar sistema · clasificar riesgo · detectar
+  brechas · invitar equipo) con barra de progreso. Refleja estado real (systems/gaps/members vía la fachada),
+  se oculta solo al completarse o con "Ocultar" (localStorage + `user_metadata.onboarding_dismissed`, patrón
+  rAF anti-flash como WelcomeGuide). Pasos de pago con chip "Preparación" (nudge de conversión → paywall).
+  Verificado con captura (estado 1/4). Build/lint/tsc verdes. **Quedan del Frente 2** (si se quiere seguir):
+  SEO/Open Graph de la landing y pulir empty-states menores. **Frente 3 pendiente:** selector de org activa.
+
 - **2026-07-18** · **Recordatorios de gobernanza por correo (digest semanal) — nuevo, env-gated.** El fundador
   eligió 3 frentes nuevos (recordatorios, activación/conversión, enterprise); se empieza por recordatorios.
   Hace real la promesa de "gobernanza continua": un cron semanal (lunes 08:00 UTC, `vercel.json`) manda a cada
