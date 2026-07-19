@@ -18,16 +18,44 @@ const fraunces = Fraunces({
   axes: ["opsz", "SOFT"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://attesta-io.vercel.app";
+const OG_DESC =
+  "Inventaría tus sistemas de IA, clasifica su riesgo (EU AI Act + EE. UU.) y genera evidencia lista para auditoría. Compliance de IA sin equipo GRC.";
+
 export const metadata: Metadata = {
-  title: "Attesta — Gobernanza continua de IA para el mid-market",
-  description:
-    "Inventaría tus sistemas de IA, clasifica su riesgo según el EU AI Act y genera evidencia lista para auditoría. Compliance de IA sin equipo GRC.",
-  metadataBase: new URL("https://attesta.example"),
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Attesta — Gobernanza continua de IA para el mid-market",
+    template: "%s · Attesta",
+  },
+  description: OG_DESC,
+  applicationName: "Attesta",
+  keywords: [
+    "EU AI Act",
+    "gobernanza de IA",
+    "compliance de IA",
+    "AI governance",
+    "RRHH",
+    "reclutamiento con IA",
+    "preparación para auditoría",
+    "NYC Local Law 144",
+    "auditoría de sesgo",
+    "mid-market",
+  ],
+  authors: [{ name: "Attesta" }],
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Attesta — Gobernanza continua de IA",
-    description:
-      "Compliance de IA continuo para empresas medianas: inventario, clasificación de riesgo y evidencia de auditoría.",
+    description: OG_DESC,
     type: "website",
+    siteName: "Attesta",
+    locale: "es_ES",
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Attesta — Gobernanza continua de IA",
+    description: OG_DESC,
   },
 };
 
