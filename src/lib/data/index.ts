@@ -15,6 +15,7 @@ export const getAiSystems = () => repo.getAiSystems();
 export const getGapItems = () => repo.getGapItems();
 export const getSystemsForSelect = () => repo.getSystemsForSelect();
 export const getOrganizationName = () => repo.getOrganizationName();
+export const getUserOrgs = () => repo.getUserOrgs();
 export const getSystemById = (id: string) => repo.getSystemById(id);
 export const getSystemBiasAudit = (id: string) => repo.getSystemBiasAudit(id);
 export const getSystemAssessments = (id: string) =>

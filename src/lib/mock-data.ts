@@ -271,6 +271,13 @@ export type OrgMember = {
   joinedAt: string; // ISO
 };
 
+/** Organización a la que pertenece el usuario (para el selector de org activa). */
+export type UserOrg = {
+  id: string;
+  name: string;
+  role: MemberRole;
+};
+
 export type PendingInvitation = {
   id: string;
   email: string;

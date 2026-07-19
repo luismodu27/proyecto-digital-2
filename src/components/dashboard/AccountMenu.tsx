@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { signOut, switchAccount } from "@/lib/auth/actions";
+import { switchOrg } from "@/lib/data/org-actions";
+import type { UserOrg } from "@/lib/mock-data";
 
 /** Iniciales a partir del nombre (2 palabras) o, si no hay, del correo. */
 function initials(name?: string, email?: string): string {
@@ -16,9 +18,13 @@ function initials(name?: string, email?: string): string {
 export function AccountMenu({
   userEmail,
   userName,
+  orgs = [],
+  activeOrgId,
 }: {
   userEmail: string;
   userName?: string;
+  orgs?: UserOrg[];
+  activeOrgId?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -84,6 +90,45 @@ export function AccountMenu({
           role="menu"
           className="absolute inset-x-0 top-full z-40 mt-2 origin-top overflow-hidden rounded-xl border border-line bg-paper-raised shadow-lg md:bottom-full md:top-auto md:mb-2 md:mt-0 md:origin-bottom"
         >
+          {orgs.length > 1 && (
+            <div className="border-b border-line">
+              <p className="px-4 pb-1 pt-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
+                Organización
+              </p>
+              {orgs.map((o) =>
+                o.id === activeOrgId ? (
+                  <div
+                    key={o.id}
+                    className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-ink"
+                  >
+                    <svg viewBox="0 0 16 16" className="size-4 shrink-0 text-brand" fill="none" aria-hidden>
+                      <path
+                        d="m3.5 8.5 3 3 6-7"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <span className="truncate">{o.name}</span>
+                  </div>
+                ) : (
+                  <form key={o.id} action={switchOrg}>
+                    <input type="hidden" name="orgId" value={o.id} />
+                    <button
+                      type="submit"
+                      role="menuitem"
+                      className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm text-ink-soft transition-colors hover:bg-paper-sunken hover:text-ink"
+                    >
+                      <span className="size-4 shrink-0" aria-hidden />
+                      <span className="truncate">{o.name}</span>
+                    </button>
+                  </form>
+                ),
+              )}
+            </div>
+          )}
+
           <Link
             href="/dashboard/facturacion"
             role="menuitem"

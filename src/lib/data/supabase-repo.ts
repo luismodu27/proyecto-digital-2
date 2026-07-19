@@ -21,6 +21,7 @@ import type {
   RiskLevel,
   TaskPriority,
   TaskStatus,
+  UserOrg,
 } from "@/lib/mock-data";
 import {
   mergeCatalog,
@@ -236,6 +237,37 @@ export async function getSystemDossier(
         : null,
     },
   };
+}
+
+/** Organizaciones a las que pertenece el usuario actual (para el selector). */
+export async function getUserOrgs(): Promise<UserOrg[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: mems } = await supabase
+    .from("memberships")
+    .select("organization_id, role")
+    .eq("user_id", user.id);
+  const rows = mems ?? [];
+  if (rows.length === 0) return [];
+
+  const ids = rows.map((r) => r.organization_id as string);
+  const { data: orgs } = await supabase
+    .from("organizations")
+    .select("id, name")
+    .in("id", ids);
+  const nameById = new Map((orgs ?? []).map((o) => [o.id as string, o.name as string]));
+
+  return rows
+    .map((r) => ({
+      id: r.organization_id as string,
+      name: nameById.get(r.organization_id as string) ?? "Organización",
+      role: (r.role ?? "member") as UserOrg["role"],
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /** Nombre de la organización activa (para informes/cabeceras). */

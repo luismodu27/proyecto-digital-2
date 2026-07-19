@@ -5,7 +5,9 @@ import { WelcomeGuide } from "@/components/dashboard/WelcomeGuide";
 import { Toaster } from "@/components/ui/Toast";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
+import { getUserOrgs } from "@/lib/data";
 import { getOrgPlan, type PlanTier } from "@/lib/billing/plan";
+import type { UserOrg } from "@/lib/mock-data";
 
 export default async function DashboardLayout({
   children,
@@ -17,6 +19,8 @@ export default async function DashboardLayout({
   let userId: string | undefined;
   let showGuide = false;
   let plan: PlanTier | undefined;
+  let orgs: UserOrg[] = [];
+  let activeOrgId: string | undefined;
 
   // En modo conectado, exige sesión y organización. En modo demo, abierto.
   if (isSupabaseConfigured) {
@@ -26,7 +30,8 @@ export default async function DashboardLayout({
     if (!org) redirect("/onboarding");
     userEmail = user.email ?? undefined;
     userId = user.id;
-    plan = await getOrgPlan(org);
+    activeOrgId = org;
+    [plan, orgs] = await Promise.all([getOrgPlan(org), getUserOrgs()]);
     const meta = user.user_metadata ?? {};
     const rawName =
       (typeof meta.full_name === "string" && meta.full_name) ||
@@ -40,7 +45,13 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-dvh flex-col bg-paper md:flex-row">
-      <Sidebar userEmail={userEmail} userName={userName} plan={plan} />
+      <Sidebar
+        userEmail={userEmail}
+        userName={userName}
+        plan={plan}
+        orgs={orgs}
+        activeOrgId={activeOrgId}
+      />
       <div className="flex-1 md:h-dvh md:overflow-y-auto">
         <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">{children}</div>
       </div>

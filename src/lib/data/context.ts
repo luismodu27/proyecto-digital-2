@@ -1,6 +1,10 @@
 import { cache } from "react";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+
+/** Nombre de la cookie que guarda la organización activa elegida por el usuario. */
+export const ACTIVE_ORG_COOKIE = "attesta_org";
 
 /**
  * Usuario autenticado actual (o null en modo demo / sin sesión).
@@ -20,9 +24,9 @@ export const getCurrentUser = cache(async () => {
 });
 
 /**
- * Organización activa del usuario. MVP: la primera de sus memberships.
- * TODO: soportar selector de org activa (usuario en varias orgs) vía cookie
- * validada + JWT, según el plan de arquitectura.
+ * Organización activa del usuario. Si el usuario pertenece a varias, respeta su
+ * elección (cookie `attesta_org`) **solo si sigue siendo miembro** de esa org
+ * (validación de seguridad); si no, la primera de sus memberships (orden estable).
  */
 export const getActiveOrg = cache(async (): Promise<string | null> => {
   const user = await getCurrentUser();
@@ -33,8 +37,12 @@ export const getActiveOrg = cache(async (): Promise<string | null> => {
     .from("memberships")
     .select("organization_id")
     .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
+    .order("organization_id", { ascending: true });
 
-  return data?.organization_id ?? null;
+  const orgIds = (data ?? []).map((m) => m.organization_id as string);
+  if (orgIds.length === 0) return null;
+
+  const preferred = (await cookies()).get(ACTIVE_ORG_COOKIE)?.value;
+  if (preferred && orgIds.includes(preferred)) return preferred;
+  return orgIds[0];
 });

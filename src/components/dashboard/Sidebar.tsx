@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AccountMenu } from "@/components/dashboard/AccountMenu";
+import type { UserOrg } from "@/lib/mock-data";
 
 type PlanTier = "free" | "preparacion" | "enterprise";
 const RANK: Record<PlanTier, number> = { free: 0, preparacion: 1, enterprise: 2 };
@@ -30,10 +31,14 @@ export function Sidebar({
   userEmail,
   userName,
   plan,
+  orgs,
+  activeOrgId,
 }: {
   userEmail?: string;
   userName?: string;
   plan?: PlanTier;
+  orgs?: UserOrg[];
+  activeOrgId?: string;
 }) {
   const pathname = usePathname();
   const planRank = plan ? RANK[plan] : RANK.enterprise;
@@ -96,7 +101,12 @@ export function Sidebar({
       </nav>
       <div className="p-4 md:mt-auto">
         {userEmail ? (
-          <AccountMenu userEmail={userEmail} userName={userName} />
+          <AccountMenu
+            userEmail={userEmail}
+            userName={userName}
+            orgs={orgs}
+            activeOrgId={activeOrgId}
+          />
         ) : (
           <div className="rounded-xl border border-line bg-paper-sunken/60 p-4">
             <p className="text-xs font-medium text-ink">Vista de demostración</p>

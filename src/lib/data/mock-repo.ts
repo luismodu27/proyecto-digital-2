@@ -50,6 +50,11 @@ export async function getSystemBiasAudit(_id: string): Promise<null> {
   return null;
 }
 
+export async function getUserOrgs(): Promise<[]> {
+  // En modo demo no hay sesión ni múltiples organizaciones.
+  return [];
+}
+
 export async function getSystemById(_id: string): Promise<null> {
   // En modo demo no se edita: los datos de ejemplo no son reales.
   void _id;
