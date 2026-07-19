@@ -123,6 +123,20 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **Frente 2 cerrado (SEO/OG) + Frente 3 iniciado (selector de org activa).**
+  - **SEO/Open Graph:** `metadataBase` corregido (era placeholder `attesta.example`) al dominio real;
+    metadata enriquecida (title template, keywords, twitter summary_large_image, siteName, locale, canonical).
+    **Imagen OG con la identidad REAL de Attesta** (a petición del fundador): en vez de una imagen dinámica con
+    tipografía genérica, se generó una estática con la app real (sello propio `sealmark.png` + tipografía
+    **Fraunces**) → `src/app/opengraph-image.png` + `twitter-image.png` (+ alt). Verificado (se sirve 200, meta OK).
+  - **Selector de organización activa (Frente 3, enterprise):** cierra el TODO de multi-org. `getActiveOrg` ahora
+    respeta la cookie `attesta_org` **solo si el usuario sigue siendo miembro** (validación de seguridad); si no,
+    la primera (orden estable). Nuevos `getUserOrgs` (fachada) y `switchOrg` (`org-actions.ts`, valida membresía
+    antes de fijar cookie + revalida layout). UI: sección "Organización" en `AccountMenu` (activa marcada, demás
+    clicables; solo si >1), threaded por Sidebar+layout. Verificado con captura. Build/lint/tsc verdes.
+  - **Pendiente Frente 3 (si se sigue):** exportar datos, SSO, cadena-hash del audit-log. **Frentes previos:**
+    recordatorios por correo (§1.5 config) y checklist de activación ya hechos.
+
 - **2026-07-18** · **Activación (Frente 2): checklist de primeros pasos en el resumen.** `OnboardingChecklist`
   (client) sobre el resumen: 4 pasos hasta el primer valor (registrar sistema · clasificar riesgo · detectar
   brechas · invitar equipo) con barra de progreso. Refleja estado real (systems/gaps/members vía la fachada),
