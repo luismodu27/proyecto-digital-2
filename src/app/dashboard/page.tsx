@@ -4,7 +4,15 @@ import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
 import { DeadlineReminders } from "@/components/dashboard/DeadlineReminders";
-import { getAiSystems, getOrgJurisdictions, getActionTasks } from "@/lib/data";
+import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
+import {
+  getAiSystems,
+  getOrgJurisdictions,
+  getActionTasks,
+  getGapItems,
+  getOrgMembers,
+} from "@/lib/data";
+import { getCurrentUser } from "@/lib/data/context";
 import {
   avgCompliance,
   riskCounts,
@@ -23,11 +31,48 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function DashboardOverview() {
-  const [systems, orgJur, tasks] = await Promise.all([
+  const [systems, orgJur, tasks, gaps, members, user] = await Promise.all([
     getAiSystems(),
     getOrgJurisdictions(),
     getActionTasks(),
+    getGapItems(),
+    getOrgMembers(),
+    getCurrentUser(),
   ]);
+
+  // Pasos de activación (primeros pasos). Se ocultan solos al completarse.
+  const onboardingSteps = [
+    {
+      key: "system",
+      label: "Registra tu primer sistema de IA",
+      hint: "Empieza tu inventario de IA",
+      href: "/dashboard/inventario/nuevo",
+      done: systems.length > 0,
+    },
+    {
+      key: "risk",
+      label: "Clasifica el riesgo de un sistema",
+      hint: "Con el asistente del EU AI Act",
+      href: "/dashboard/riesgo/evaluar",
+      done: systems.some((s) => !!s.evidenceState),
+    },
+    {
+      key: "gap",
+      label: "Detecta tus brechas",
+      hint: "Aplica un policy pack a un sistema",
+      href: "/dashboard/packs",
+      done: gaps.length > 0,
+      paid: true,
+    },
+    {
+      key: "team",
+      label: "Invita a tu equipo",
+      hint: "Gobernar es cosa de varios",
+      href: "/dashboard/equipo",
+      done: members.length > 1,
+      paid: true,
+    },
+  ];
   const counts = riskCounts(systems);
   const avg = avgCompliance(systems);
   const highRisk = counts.high + counts.unacceptable;
@@ -58,6 +103,8 @@ export default async function DashboardOverview() {
           </ButtonLink>
         }
       />
+
+      <OnboardingChecklist steps={onboardingSteps} userId={user?.id} />
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label="Sistemas de IA" value={systems.length} hint="en inventario" />
