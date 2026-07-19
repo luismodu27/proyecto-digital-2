@@ -123,6 +123,18 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **Recordatorios de gobernanza por correo (digest semanal) — nuevo, env-gated.** El fundador
+  eligió 3 frentes nuevos (recordatorios, activación/conversión, enterprise); se empieza por recordatorios.
+  Hace real la promesa de "gobernanza continua": un cron semanal (lunes 08:00 UTC, `vercel.json`) manda a cada
+  organización un digest con lo que necesita atención — **auditorías de sesgo vencidas/por vencer** (NYC LL144)
+  y **próximos plazos regulatorios** (con nº de sistemas afectados). Determinista, reutiliza `bias-audit.ts` +
+  `regulatory-watch` (`upcomingDeadlines`/`affectedSystems`). `src/lib/reminders/collect.ts` (qué avisar, ventana
+  30 días) + `email.ts` (render HTML/texto + envío Resend, env-gated) + `/api/reminders/run` (auth: Bearer
+  `CRON_SECRET` o platform_admin; `service_role` para leer orgs/sistemas y correos de owners/admins; *dry-run* si
+  no hay Resend). **Dormido hasta configurar** `RESEND_API_KEY` + `CRON_SECRET` (+ confirmar `SERVICE_ROLE`) en
+  Vercel — ver PENDIENTES §1.5. Auth/env-gating verificados por curl (403/500); build/lint/tsc verdes.
+  **Siguiente de los 3 frentes:** activación/conversión, luego preparar-enterprise (selector de org activa).
+
 - **2026-07-18** · **Documento maestro (guía completa) como artifact interactivo.** A petición del fundador,
   guía HTML autocontenida con la identidad de Attesta: qué es, problema, ICP/cuña, principios (no certifica),
   recorrido guiado por CADA pantalla con **capturas reales anotadas** (señalamientos numerados + leyenda),

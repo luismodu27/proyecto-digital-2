@@ -121,6 +121,21 @@ El destinatario ya es **`attesta.io.mx@gmail.com`**. Para que lleguen, la cuenta
 bajo ese mismo correo (o tener un dominio verificado). Si tu `RESEND_API_KEY` en Vercel es de otra cuenta,
 las notificaciones al buzón nuevo **no llegarán** hasta verificar dominio.
 
+### 1.5 · Recordatorios de gobernanza por correo (digest semanal) — construido, dormido
+**Ya construido y desplegado** (env-gated): cada **lunes 08:00 UTC** un cron manda a cada organización un
+digest con lo que necesita atención (auditorías de sesgo vencidas/por vencer + próximos plazos regulatorios).
+Para **encenderlo** en Vercel → *Settings → Environment Variables* (Production):
+1. **`RESEND_API_KEY`** — tu clave de Resend (la misma que la waitlist). Sin ella, el cron calcula pero no envía.
+2. **`CRON_SECRET`** — cualquier cadena aleatoria larga. **Vercel la usa para autenticar el cron** (sin ella, el
+   cron responde 403 y no envía). Imprescindible.
+3. Confirmar que exista **`SUPABASE_SERVICE_ROLE_KEY`** (el cron lee organizaciones/sistemas y correos con ella).
+4. (Recomendado) **`NEXT_PUBLIC_APP_URL`** = `https://attesta-io.vercel.app` para los enlaces del correo.
+5. Redeploy. Para **probar sin esperar al lunes**: como platform_admin, abre `/api/reminders/run` (o `curl` con
+   `Authorization: Bearer <CRON_SECRET>`). Devuelve un resumen (orgs, destinatarios, correos enviados). Si aún no
+   hay `RESEND_API_KEY`, es un *dry-run* (cuenta pero no envía) — útil para comprobar que detecta bien.
+> Deliverabilidad: sin dominio propio verificado en Resend, los correos salen de `onboarding@resend.dev` y pueden
+> caer en spam. Verificar un dominio (§1.3) mejora esto y es lo mismo que hace falta para el código de correo.
+
 ---
 
 ## 🟡 2. Pendiente MÍO (desarrollo, cuando desbloquees lo de arriba)
