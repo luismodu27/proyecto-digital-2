@@ -31,7 +31,7 @@ const tiers: Tier[] = [
   },
   {
     name: "Preparación",
-    price: "$350",
+    price: "$120",
     unit: "/mes",
     note: "El sistema de registro de tu gobernanza",
     lead: "Todo lo del plan gratis, y además desbloqueas:",

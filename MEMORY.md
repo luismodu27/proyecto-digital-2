@@ -123,6 +123,13 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-20** · **Precio de Preparación: $350 → $120 USD/mes (early-access, más accesible).** Decisión del
+  fundador para bajar la barrera de entrada y atraer más clientes al arrancar. Cambiado en el código: default
+  `PLAN_PRICE_LABEL` (`stripe/config.ts`) y la tarjeta de la landing (`Pricing.tsx`). La UI de facturación y el
+  paywall usan `PLAN_PRICE_LABEL`, así que quedan en $120 solos. **En Stripe LIVE el producto/precio se crea a
+  120 USD** (ojo: moneda USD, la cuenta liquida en MXN). Si alguna vez se fijó `NEXT_PUBLIC_PLAN_PRICE` en Vercel,
+  actualizarla o quitarla (si no, pisaría el default).
+
 - **2026-07-20** · **SSO / acceso corporativo (login social Google + Microsoft).** Botones "Continuar con
   Google/Microsoft" en login y registro (`SsoButtons.tsx`, logos oficiales, temas claro/oscuro verificados por
   captura). Usa `supabase.auth.signInWithOAuth` (provider `google`/`azure`); el retorno lo maneja el

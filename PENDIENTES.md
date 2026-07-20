@@ -76,8 +76,8 @@ que se expuso en el chat. Mientras, en Test no se cobra dinero real.
 1. **Aplica la migración** `supabase/migrations/0017_subscriptions.sql` en el SQL Editor de Supabase
    (solo ese archivo). *← YA APLICADA.*
 2. Entra a Stripe en **`dashboard.stripe.com/test`** (modo Test / Sandbox).
-3. **Products → Add product**: `Attesta — Preparación`, **350 USD**, *Recurring / Monthly* → copia el
-   **Price ID** (`price_…`).
+3. **Products → Add product**: `Attesta — Preparación`, **120 USD** (¡moneda **USD**, no MXN!), *Recurring /
+   Monthly* → copia el **Price ID** (`price_…`).
 4. **Developers → API keys**: copia `pk_test_…` y `sk_test_…`.
 5. **Developers → Webhooks → Add endpoint**:
    - URL: `https://attesta-io.vercel.app/api/stripe/webhook`
