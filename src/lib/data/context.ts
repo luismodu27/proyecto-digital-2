@@ -41,8 +41,26 @@ export const getActiveOrg = cache(async (): Promise<string | null> => {
 
   const orgIds = (data ?? []).map((m) => m.organization_id as string);
   if (orgIds.length === 0) return null;
+  if (orgIds.length === 1) return orgIds[0];
 
+  // 1) Elección explícita del usuario (cookie), si sigue siendo miembro.
   const preferred = (await cookies()).get(ACTIVE_ORG_COOKIE)?.value;
   if (preferred && orgIds.includes(preferred)) return preferred;
+
+  // 2) Si no eligió, prioriza una org con suscripción activa (la que pagó): así,
+  //    tras pagar, se ve el plan correcto aunque pertenezca a varias orgs.
+  try {
+    const { data: subs } = await supabase
+      .from("subscriptions")
+      .select("organization_id, status")
+      .in("organization_id", orgIds)
+      .in("status", ["active", "trialing"]);
+    const subOrg = (subs ?? [])[0]?.organization_id as string | undefined;
+    if (subOrg && orgIds.includes(subOrg)) return subOrg;
+  } catch {
+    // Tabla ausente u otro fallo → seguimos con la primera.
+  }
+
+  // 3) Por defecto, la primera (orden estable).
   return orgIds[0];
 });

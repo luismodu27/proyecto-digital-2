@@ -1,10 +1,14 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { getStripe } from "@/lib/stripe/server";
 import { STRIPE_PRICE_ID, isStripeConfigured } from "@/lib/stripe/config";
-import { getCurrentUser, getActiveOrg } from "@/lib/data/context";
+import {
+  getCurrentUser,
+  getActiveOrg,
+  ACTIVE_ORG_COOKIE,
+} from "@/lib/data/context";
 import { getOrgSubscription } from "./subscription";
 
 async function baseUrl(): Promise<string> {
@@ -40,6 +44,16 @@ export async function startCheckout() {
   });
 
   if (!session.url) throw new Error("No se pudo crear el checkout.");
+
+  // Fija la organización activa a la que se está suscribiendo, para que al volver
+  // de Stripe se vea el plan correcto aunque el usuario pertenezca a varias orgs.
+  (await cookies()).set(ACTIVE_ORG_COOKIE, orgId, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+
   redirect(session.url);
 }
 
