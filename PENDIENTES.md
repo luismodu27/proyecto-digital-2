@@ -51,10 +51,22 @@ Aplicada y **verificada por API** (las 6 columnas existen en `ai_systems`). El r
 con cuenta atrás ya está activo. Para usarlo: **Inventario → un sistema** → marca si es AEDT y registra fecha/
 auditor/URL de su auditoría → verás el estado y la cuenta atrás ("vence en N días"), también en el dossier.
 
-### 1.2 · Pagos con Stripe — ✅ FUNCIONANDO en modo Test (2026-07-18)
+### 1.2 · Pagos con Stripe — ✅ LIVE configurado (2026-07-20)
 
-> **✅ RESUELTO.** Stripe está configurado y verificado de punta a punta en **modo Test**: pago con tarjeta
-> `4242…` → webhook 200 → suscripción `active` → se desbloquea el plan Preparación. Migración 0017 aplicada.
+> **✅ LIVE ACTIVO.** El fundador configuró Stripe en modo **Live** (producto/precio **$120 USD/mes**, webhook,
+> variables en Vercel). Verificado por API: `POST /api/stripe/webhook` → `400 firma inválida` = llaves live
+> cargadas y verificando firmas ✅. Cobros reales habilitados.
+>
+> **Falta comprobar el flujo de pago end-to-end** (cuando el fundador quiera): crear un **cupón 100% off** en
+> Stripe Live y pasar por *Suscribirse* → "Add promotion code" → total $0 → suscripción `active` sin cobrar.
+>
+> **⚠️ Seguridad pendiente:** si el `sk_live` que está ahora en Vercel es **el mismo** que se expuso en el chat
+> en una sesión anterior, **rótalo**: Stripe → *Developers → API keys* → Secret key → **Roll key** → pon el
+> nuevo `sk_live` en `STRIPE_SECRET_KEY` (Vercel, Production) → **Redeploy**. La nueva nunca se pega en el chat.
+>
+> ---
+> **Historial (modo Test, 2026-07-18):** verificado e2e con tarjeta `4242…` → webhook 200 → suscripción
+> `active` → plan Preparación desbloqueado. Migración 0017 aplicada.
 >
 > **Causa del atasco (ya corregida):** había un **typo** en el nombre de la variable en Vercel
 > (`STRPE_PRICE_ID` en vez de `STRIPE_PRICE_ID`). Al corregirlo + redeploy, empezó a funcionar.
