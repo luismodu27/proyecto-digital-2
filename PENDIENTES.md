@@ -42,37 +42,30 @@ Aplicada y **verificada por API** (las 6 columnas existen en `ai_systems`). El r
 con cuenta atrás ya está activo. Para usarlo: **Inventario → un sistema** → marca si es AEDT y registra fecha/
 auditor/URL de su auditoría → verás el estado y la cuenta atrás ("vence en N días"), también en el dossier.
 
-### 1.2 · Pagos con Stripe (cuando estés en una computadora, en modo Test)
+### 1.2 · Pagos con Stripe — ✅ FUNCIONANDO en modo Test (2026-07-18)
 
-> **⏸️ ESTADO AL 2026-07-18 — a medio configurar, NO funciona todavía.**
-> El fundador ya hizo (en modo Test): producto/precio $350, webhook, y **añadió las variables en
-> Vercel**. PERO producción **sigue sin ver Stripe**: el webhook responde `{"error":"stripe no
-> configurado"}` (HTTP 503) → `isStripeConfigured` es `false` en el deploy activo.
+> **✅ RESUELTO.** Stripe está configurado y verificado de punta a punta en **modo Test**: pago con tarjeta
+> `4242…` → webhook 200 → suscripción `active` → se desbloquea el plan Preparación. Migración 0017 aplicada.
 >
-> **Diagnóstico exacto para retomar** (sin necesidad de sesión):
-> ```bash
-> curl -sS -X POST https://attesta-io.vercel.app/api/stripe/webhook -d '{}' -w "\n[HTTP %{http_code}]\n"
-> ```
-> - `stripe no configurado` / **503** → las llaves NO están vivas (estado actual). Falta algo abajo.
-> - `firma inválida` / **400** → ✅ Stripe YA está configurado (las llaves están vivas); seguir a la prueba.
+> **Causa del atasco (ya corregida):** había un **typo** en el nombre de la variable en Vercel
+> (`STRPE_PRICE_ID` en vez de `STRIPE_PRICE_ID`). Al corregirlo + redeploy, empezó a funcionar.
 >
-> **Causa más probable (por orden):**
-> 1. **Falta REDEPLOY.** Las env vars solo entran con un deploy nuevo → Vercel → Deployments → último → ⋯ → **Redeploy**.
-> 2. Las variables se marcaron solo para **Preview/Development**, no para **Production**. Reabrir cada
->    una y confirmar que **Production** está marcado.
-> 3. Nombre/valor con typo o espacio. Deben ser exactos: `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`,
->    `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`.
-> 4. Ojo: la prueba se hizo en una **URL de previsualización** (`...-a95qea6pd-attesta-io.vercel.app`),
->    no en producción. Probar SIEMPRE en `https://attesta-io.vercel.app`.
+> **Bug encontrado y arreglado al probar (multi-org):** un usuario en varias organizaciones pagaba con una
+> org pero la sesión resolvía otra (gratis) → veía "Suscribirse" pese a estar `active`. Fix desplegado:
+> `startCheckout` fija la cookie de org activa a la que paga, y `getActiveOrg` prioriza la org con
+> suscripción activa cuando no hay elección explícita (commit 51ab9f1).
 >
-> **Cómo retomar:** volver a la computadora → aplicar 1-2-3 → Redeploy → correr el `curl` de arriba.
-> Cuando devuelva `firma inválida`/400, avisar a Claude para verificar el pipeline de punta a punta.
+> **Diagnóstico rápido** (por si se rompe): `curl -sS -X POST https://attesta-io.vercel.app/api/stripe/webhook
+> -d '{}'` → `firma inválida`/400 = configurado ✅ · `stripe no configurado`/503 = las llaves no están vivas.
 
-La integración **ya está construida y desplegada, pero dormida** (se activa sola al poner las llaves).
-Pasos, en orden:
+**PENDIENTE (cuando quieras cobrar de verdad):** repetir la configuración con llaves **LIVE** de Stripe
+(producto/precio live, `sk_live`/`pk_live`, webhook live → sus variables en Vercel) y **rotar** la `sk_live`
+que se expuso en el chat. Mientras, en Test no se cobra dinero real.
+
+<details><summary>Pasos originales de configuración (referencia)</summary>
 
 1. **Aplica la migración** `supabase/migrations/0017_subscriptions.sql` en el SQL Editor de Supabase
-   (solo ese archivo). *← probablemente aún no aplicada.*
+   (solo ese archivo). *← YA APLICADA.*
 2. Entra a Stripe en **`dashboard.stripe.com/test`** (modo Test / Sandbox).
 3. **Products → Add product**: `Attesta — Preparación`, **350 USD**, *Recurring / Monthly* → copia el
    **Price ID** (`price_…`).
@@ -97,7 +90,9 @@ Pasos, en orden:
    CP cualesquiera) → al volver, recarga: suscripción **Activa** y paywall desbloqueado.
 9. Cuando funcione en Test, repetir con llaves **live** para cobrar de verdad.
 
-> ⚠️ Al poner las llaves, **el bloqueo por plan se activa** para toda cuenta sin suscripción (es lo
+</details>
+
+> ⚠️ Con las llaves puestas, **el bloqueo por plan está activo** para toda cuenta sin suscripción (es lo
 > esperado). Inventario y riesgo siguen libres.
 
 ### 1.3 · Correo de verificación por código (requiere dominio)

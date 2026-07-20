@@ -123,6 +123,18 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-18** · **Stripe FUNCIONANDO (modo Test) + bug multi-org del cobro corregido.** El fundador configuró
+  Stripe (producto/precio $350, webhook, variables en Vercel) pero producción daba `503 "stripe no configurado"`.
+  **Causa:** un **typo** en el nombre de la variable (`STRPE_PRICE_ID` en vez de `STRIPE_PRICE_ID`) → corregido +
+  redeploy → webhook pasó a `400 firma inválida` = configurado. Prueba e2e OK: tarjeta `4242` → webhook 200 →
+  suscripción `active` → plan Preparación desbloqueado. (Migración 0017 ya aplicada.)
+  - **Bug encontrado y corregido al probar (multi-org):** un usuario en varias orgs pagaba con una org, pero al
+    volver la sesión resolvía OTRA (gratis) → veía "Suscribirse" pese a estar `active` para la org correcta.
+    **Fix (commit 51ab9f1):** `startCheckout` fija la cookie de org activa (`attesta_org`) a la que se suscribe;
+    `getActiveOrg` prioriza la org con suscripción activa cuando el usuario no eligió una explícitamente. Verificado
+    por el fundador ("ya está todo perfecto"). Lo destapó el selector de organización recién añadido.
+  - **PENDIENTE (cobro real):** repetir con llaves **LIVE** + **rotar la `sk_live`** expuesta. Ver PENDIENTES §1.2.
+
 - **2026-07-18** · **Frente 2 cerrado (SEO/OG) + Frente 3 iniciado (selector de org activa).**
   - **SEO/Open Graph:** `metadataBase` corregido (era placeholder `attesta.example`) al dominio real;
     metadata enriquecida (title template, keywords, twitter summary_large_image, siteName, locale, canonical).
