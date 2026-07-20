@@ -191,6 +191,10 @@ primer login con mini-ejemplos animados · demo pública `/demo` recortada a mue
 móvil + tema claro/oscuro) · planes diferenciados **$350 USD/mes** + tabla comparativa · umbral de auditoría
 80% · datos de contacto y notificaciones a `attesta.io.mx@gmail.com` · toasts con cierre.
 
+**Enterprise (Frente 3)**: selector de organización activa · audit-trail a prueba de manipulación (hash-chain
+SHA-256, migración 0020) · **exportación de datos** (JSON portable en *Plan y facturación*, sin migración,
+disponible en todos los planes a propósito). Pendiente del frente: SSO / acceso corporativo (opcional).
+
 **Construido pero inactivo hasta configurar**: cobro por suscripción Stripe (migración 0017 + webhook +
 paywall) y verificación de correo por código OTP.
 

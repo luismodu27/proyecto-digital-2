@@ -26,6 +26,7 @@ export const getPendingInvitations = () => repo.getPendingInvitations();
 export const getCurrentMemberRole = () => repo.getCurrentMemberRole();
 export const getAuditLog = () => repo.getAuditLog();
 export const verifyAuditChain = () => repo.verifyAuditChain();
+export const getExportBundle = () => repo.getExportBundle();
 export const getRegulatoryAcks = () => repo.getRegulatoryAcks();
 export const getRegulatoryEvents = () => repo.getRegulatoryEvents();
 export const getRegCandidates = () => repo.getRegCandidates();
@@ -41,6 +42,7 @@ export type {
   AuditChainStatus,
   AuditEntry,
   DossierData,
+  ExportBundle,
   GapItem,
   MemberRole,
   OrgMember,

@@ -178,6 +178,46 @@ export default async function FacturacionPage({
           </p>
         </div>
       </div>
+
+      {/* Exportación de datos (portabilidad) */}
+      <div className="mt-6 rounded-2xl border border-line bg-paper-raised p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <h2 className="font-display text-lg font-semibold text-ink">
+              Exportar datos
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm text-ink-soft">
+              Descarga una copia completa de la evidencia declarada de tu
+              organización en un archivo <span className="font-medium">JSON</span>{" "}
+              portable: inventario de sistemas, evaluaciones de riesgo, brechas,
+              plan de acción, auditorías de sesgo, equipo, revisiones regulatorias
+              y el registro de actividad con su verificación de integridad. Tus
+              datos son tuyos: úsalo para respaldo o para llevártelos.
+            </p>
+          </div>
+          <a
+            href="/api/export"
+            download
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
+          >
+            <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden>
+              <path
+                d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Descargar JSON
+          </a>
+        </div>
+        <p className="mt-4 text-xs text-muted">
+          Es un volcado de tus datos, no un informe ni una certificación. Para el
+          dossier o el informe ejecutivo en PDF, usa las secciones de Inventario e
+          Informe.
+        </p>
+      </div>
     </>
   );
 }

@@ -9,6 +9,8 @@ import type {
   AuditEntry,
   DossierData,
   EvidenceState,
+  ExportBundle,
+  ExportedSystem,
   GapItem,
   MemberRole,
   OrgMember,
@@ -635,6 +637,61 @@ export async function verifyAuditChain(): Promise<AuditChainStatus | null> {
     ok: row.ok === true,
     brokenId: row.broken_id === null ? null : Number(row.broken_id),
     checkedAt: String(row.checked_at),
+  };
+}
+
+/**
+ * Paquete de exportación de datos de la organización activa: toda su evidencia
+ * declarada en JSON portable. Compone los getters existentes (deduplicados por el
+ * cache de getActiveOrg). Es un volcado de los datos propios del cliente, no un
+ * informe ni una certificación.
+ */
+export async function getExportBundle(): Promise<ExportBundle | null> {
+  const org = await getActiveOrg();
+  if (!org) return null;
+
+  const supabase = await createClient();
+  const [orgName, systems, gapItems, actionTasks, members, regulatoryAcks, integrity] =
+    await Promise.all([
+      getOrganizationName(),
+      getAiSystems(),
+      getGapItems(),
+      getActionTasks(),
+      getOrgMembers(),
+      getRegulatoryAcks(),
+      verifyAuditChain(),
+    ]);
+
+  // Registro completo (hasta el tope de la función, 500) para la exportación.
+  const { data: rawLog } = await supabase.rpc("list_audit_log", { org, lim: 500 });
+  const auditLog = ((rawLog ?? []) as RawAudit[]).map(toAuditEntry);
+
+  // Evidencia por sistema (historial de evaluaciones + auditoría de sesgo).
+  const exportedSystems: ExportedSystem[] = await Promise.all(
+    systems.map(async (system): Promise<ExportedSystem> => {
+      if (!system.dbId) return { system, assessments: [], biasAudit: null };
+      const [assessments, biasAudit] = await Promise.all([
+        getSystemAssessments(system.dbId),
+        getSystemBiasAudit(system.dbId),
+      ]);
+      return { system, assessments, biasAudit };
+    }),
+  );
+
+  return {
+    meta: {
+      application: "Attesta",
+      organization: orgName ?? "Mi organización",
+      exportedAt: new Date().toISOString(),
+      schemaVersion: 1,
+    },
+    integrity,
+    systems: exportedSystems,
+    gapItems,
+    actionTasks,
+    members,
+    regulatoryAcks,
+    auditLog,
   };
 }
 

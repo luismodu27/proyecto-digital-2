@@ -2,6 +2,7 @@
  * Datos de ejemplo para el esqueleto del dashboard (app shell).
  * TODO(backend): reemplazar por datos reales cuando exista la capa de datos.
  */
+import type { BiasAudit } from "./bias-audit";
 
 export type RiskLevel = "unacceptable" | "high" | "limited" | "minimal";
 
@@ -344,6 +345,34 @@ export type AuditChainStatus = {
   ok: boolean;
   brokenId: number | null;
   checkedAt: string; // ISO
+};
+
+/** Un sistema con toda su evidencia asociada, para la exportación de datos. */
+export type ExportedSystem = {
+  system: AiSystem;
+  assessments: AssessmentRecord[];
+  biasAudit: BiasAudit | null;
+};
+
+/**
+ * Paquete de exportación de datos de una organización: toda su evidencia
+ * declarada en formato portable (JSON). Es un volcado de los datos propios del
+ * cliente para respaldo/portabilidad, no un informe ni una certificación.
+ */
+export type ExportBundle = {
+  meta: {
+    application: "Attesta";
+    organization: string;
+    exportedAt: string; // ISO
+    schemaVersion: number;
+  };
+  integrity: AuditChainStatus | null;
+  systems: ExportedSystem[];
+  gapItems: GapItem[];
+  actionTasks: ActionTask[];
+  members: OrgMember[];
+  regulatoryAcks: Record<string, RegAck>;
+  auditLog: AuditEntry[];
 };
 
 /** Registro de actividad de ejemplo (modo demo). */

@@ -123,6 +123,18 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-20** · **Exportación de datos (portabilidad enterprise).** Botón "Descargar JSON" en *Plan y
+  facturación* que baja **toda la evidencia declarada** de la organización activa en un JSON portable:
+  meta, verificación de integridad de la cadena, sistemas (con historial de evaluaciones + auditoría de sesgo),
+  brechas, plan de acción, equipo, revisiones regulatorias y registro de actividad. Route handler
+  `src/app/api/export/route.ts` (GET, force-dynamic, `Content-Disposition: attachment`); getter `getExportBundle`
+  en la fachada (index + mock + supabase) que **compone getters existentes** (deduplicados por el cache de
+  getActiveOrg); tipos `ExportBundle`/`ExportedSystem` en mock-data. Verificado e2e en modo demo por curl
+  (HTTP 200, filename `attesta-<org>-<fecha>.json`, JSON válido y completo) + captura de la tarjeta.
+  - **Decisión — NO se bloquea por plan:** exportar tus **propios** datos es portabilidad/respaldo (buen argumento
+    de confianza y saludable ante RGPD), no una "herramienta" de pago. Disponible en todos los planes a propósito.
+  - Sin migración: es solo lectura. El registro de actividad se exporta hasta el tope de `list_audit_log` (500).
+
 - **2026-07-20** · **Audit-trail a prueba de manipulación (tamper-evident, hash-chain SHA-256).** El `audit_log`
   ya era inmutable por triggers (`block_mutation`); ahora además es **verificable**: cada evento incorpora el hash
   del anterior (cadena por organización). Alterar o borrar cualquier fila —incluso con acceso directo a la BD—

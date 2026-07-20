@@ -16,6 +16,8 @@ import {
   type AuditChainStatus,
   type AuditEntry,
   type DossierData,
+  type ExportBundle,
+  type ExportedSystem,
   type GapItem,
   type MemberRole,
   type OrgMember,
@@ -92,6 +94,34 @@ export async function verifyAuditChain(): Promise<AuditChainStatus | null> {
     ok: true,
     brokenId: null,
     checkedAt: new Date().toISOString(),
+  };
+}
+
+export async function getExportBundle(): Promise<ExportBundle | null> {
+  const systems: ExportedSystem[] = AI_SYSTEMS.map((system) => ({
+    system,
+    assessments: SAMPLE_ASSESSMENTS[system.id] ?? [],
+    biasAudit: SAMPLE_BIAS_AUDITS[system.id] ?? null,
+  }));
+  return {
+    meta: {
+      application: "Attesta",
+      organization: "Organización demo",
+      exportedAt: new Date().toISOString(),
+      schemaVersion: 1,
+    },
+    integrity: {
+      total: SAMPLE_AUDIT.length,
+      ok: true,
+      brokenId: null,
+      checkedAt: new Date().toISOString(),
+    },
+    systems,
+    gapItems: GAP_ITEMS,
+    actionTasks: SAMPLE_ACTION_TASKS,
+    members: SAMPLE_MEMBERS,
+    regulatoryAcks: SAMPLE_REG_ACKS,
+    auditLog: SAMPLE_AUDIT,
   };
 }
 
