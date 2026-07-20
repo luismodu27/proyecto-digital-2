@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 
 export function PageHeader({
   title,
@@ -27,11 +28,13 @@ export function StatCard({
   value,
   hint,
   accent = "ink",
+  href,
 }: {
   label: string;
   value: ReactNode;
   hint?: string;
   accent?: "ink" | "brand" | "warn" | "danger";
+  href?: string;
 }) {
   const accents = {
     ink: "text-ink",
@@ -39,17 +42,35 @@ export function StatCard({
     warn: "text-[#a4610f]",
     danger: "text-[#a3271f]",
   };
-  return (
-    <div className="card-lift rounded-2xl border border-line bg-paper-raised p-5">
+  const inner = (
+    <>
       <p className="text-xs font-medium uppercase tracking-wide text-muted">
         {label}
       </p>
       <p className={`mt-2 font-display text-3xl font-semibold ${accents[accent]}`}>
         {value}
       </p>
-      {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
-    </div>
+      {hint && (
+        <p className="mt-1 flex items-center gap-1 text-xs text-muted">
+          {hint}
+          {href && (
+            <span className="text-brand transition-transform group-hover:translate-x-0.5">
+              →
+            </span>
+          )}
+        </p>
+      )}
+    </>
   );
+  const cls = "card-lift block rounded-2xl border border-line bg-paper-raised p-5";
+  if (href) {
+    return (
+      <Link href={href} className={`group ${cls} hover:border-brand/40`}>
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={cls}>{inner}</div>;
 }
 
 export function Meter({ value, target }: { value: number; target?: number }) {

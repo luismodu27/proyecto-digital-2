@@ -11,14 +11,26 @@ const styles: Record<EvidenceState, string> = {
 
 /** Nivel de respaldo de una autoevaluación (declarado / con evidencia / revisado). */
 export function EvidenceBadge({ state }: { state?: EvidenceState }) {
-  const s = state ?? "declared";
+  // Sin estado = el sistema aún no se ha clasificado (no hay autoevaluación).
+  // Lo mostramos como pendiente, no como "declarado", para no simular respaldo.
+  if (!state) {
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-line-strong px-2 py-0.5 text-xs font-medium text-muted"
+        title="Este sistema aún no se ha clasificado"
+      >
+        <span className="size-1.5 rounded-full bg-current opacity-60" />
+        Sin clasificar
+      </span>
+    );
+  }
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium ${styles[s]}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium ${styles[state]}`}
       title="Nivel de respaldo de la autoevaluación"
     >
       <span className="size-1.5 rounded-full bg-current" />
-      {EVIDENCE_LABEL[s]}
+      {EVIDENCE_LABEL[state]}
     </span>
   );
 }

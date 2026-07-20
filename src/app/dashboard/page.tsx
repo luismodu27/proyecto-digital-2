@@ -76,6 +76,7 @@ export default async function DashboardOverview() {
   const counts = riskCounts(systems);
   const avg = avgCompliance(systems);
   const highRisk = counts.high + counts.unacceptable;
+  const openGaps = gaps.filter((g) => g.status !== "done").length;
   const recent = [...systems]
     .sort((a, b) => a.compliance - b.compliance)
     .slice(0, 4);
@@ -107,7 +108,12 @@ export default async function DashboardOverview() {
       <OnboardingChecklist steps={onboardingSteps} userId={user?.id} />
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Sistemas de IA" value={systems.length} hint="en inventario" />
+        <StatCard
+          label="Sistemas de IA"
+          value={systems.length}
+          hint="ver inventario"
+          href="/dashboard/inventario"
+        />
         <StatCard
           label="Alto riesgo"
           value={highRisk}
@@ -120,7 +126,13 @@ export default async function DashboardOverview() {
           hint={`objetivo ≥ ${AUDIT_READY_THRESHOLD}% para estar listo`}
           accent={isAuditReady(avg) ? "brand" : "warn"}
         />
-        <StatCard label="Brechas abiertas" value={4} hint="ver gap assessment" accent="warn" />
+        <StatCard
+          label="Brechas abiertas"
+          value={openGaps}
+          hint="ver gap assessment"
+          accent="warn"
+          href="/dashboard/gap"
+        />
       </section>
 
       <p className="mt-3 flex items-center gap-2 text-xs text-muted">

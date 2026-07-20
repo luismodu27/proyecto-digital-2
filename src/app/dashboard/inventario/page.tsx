@@ -96,26 +96,50 @@ export default async function InventarioPage() {
                       {s.lastReviewed}
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <Link
-                        href={`/dashboard/inventario/${s.dbId ?? s.id}/dossier`}
-                        className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-brand transition-colors hover:text-brand-strong"
-                      >
-                        <svg
-                          viewBox="0 0 20 20"
-                          className="size-4"
-                          fill="none"
-                          aria-hidden
+                      <div className="flex items-center justify-end gap-4">
+                        {isSupabaseConfigured && s.dbId && !s.evidenceState && (
+                          <Link
+                            href={`/dashboard/riesgo/evaluar?system=${s.dbId}`}
+                            className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-brand transition-colors hover:text-brand-strong"
+                          >
+                            <svg
+                              viewBox="0 0 20 20"
+                              className="size-4"
+                              fill="none"
+                              aria-hidden
+                            >
+                              <path
+                                d="M10 2.5 3 6v4.5c0 3.5 2.8 6.2 7 7 4.2-.8 7-3.5 7-7V6l-7-3.5Zm-2.5 8L9.5 12.5l3.5-4"
+                                stroke="currentColor"
+                                strokeWidth="1.4"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            Clasificar
+                          </Link>
+                        )}
+                        <Link
+                          href={`/dashboard/inventario/${s.dbId ?? s.id}/dossier`}
+                          className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-brand transition-colors hover:text-brand-strong"
                         >
-                          <path
-                            d="M6 2.5h5L15.5 7v10.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Zm5 0V7h4.5M7 11h6M7 14h4"
-                            stroke="currentColor"
-                            strokeWidth="1.4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        Dossier
-                      </Link>
+                          <svg
+                            viewBox="0 0 20 20"
+                            className="size-4"
+                            fill="none"
+                            aria-hidden
+                          >
+                            <path
+                              d="M6 2.5h5L15.5 7v10.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Zm5 0V7h4.5M7 11h6M7 14h4"
+                              stroke="currentColor"
+                              strokeWidth="1.4"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          Dossier
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

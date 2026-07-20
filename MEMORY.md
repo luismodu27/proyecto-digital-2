@@ -123,6 +123,20 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-20** · **Activación / primer día: dashboard más honesto y con más caminos de salida.** Foco elegido
+  por el fundador: convertir registros en usuarios activos. Cambios (todos verificados con build+lint+tsc):
+  - **Bug de credibilidad corregido:** el stat "Brechas abiertas" del resumen estaba **hardcodeado a `4`** —
+    una cuenta vacía mostraba 4 brechas inexistentes (mal en una demo a un prospecto). Ahora cuenta las brechas
+    reales abiertas (`gaps.status !== "done"`).
+  - **Tarjetas de stats navegables:** `StatCard` acepta `href` opcional (se vuelve `Link` con hover + flecha);
+    "Sistemas de IA" → inventario, "Brechas abiertas" → gap. El resumen pasa a ser un punto de partida.
+  - **Empujón al paso 2 (clasificar riesgo):** en el inventario, cada sistema **sin clasificar** muestra un CTA
+    "Clasificar" que abre el asistente EU AI Act preseleccionado (`?system=<dbId>`). Antes solo había "Dossier",
+    así que un sistema recién registrado se quedaba sin siguiente paso obvio.
+  - **`EvidenceBadge` honesto:** un sistema sin autoevaluación mostraba "Declarado" por defecto (simulaba
+    respaldo). Ahora muestra "Sin clasificar" (borde punteado, muted) — coherente con el nuevo CTA. Solo afecta
+    a sistemas sin `evidenceState`; los usos con estado concreto (historial) no cambian.
+
 - **2026-07-20** · **Foso ampliado: pack RRHH-EU completado (Art. 4 + Art. 50) + briefing "aclaración de plazos".**
   Verificado con el `compliance-domain-expert` (fuentes). Hallazgo: el radar ya reflejaba bien el Digital Omnibus
   (alto riesgo Anexo III → **2-dic-2027**, NO 2-ago-2026) y Colorado (SB 26-189 → 1-ene-2027, se queda en radar,
