@@ -17,10 +17,17 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
+  // El proveedor OAuth devuelve error/error_description si el usuario cancela o
+  // falla el consentimiento.
+  const providerError = searchParams.get("error");
 
   // `next` debe ser una ruta relativa para evitar open-redirects.
   let next = searchParams.get("next") ?? "/dashboard";
   if (!next.startsWith("/")) next = "/dashboard";
+
+  if (providerError) {
+    return NextResponse.redirect(`${origin}/login?error=sso`);
+  }
 
   const supabase = await createClient();
 

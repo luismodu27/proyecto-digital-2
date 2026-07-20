@@ -6,6 +6,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 const ERROR_MESSAGES: Record<string, string> = {
   auth_link:
     "El enlace no es válido o caducó. Inicia sesión o solicita uno nuevo.",
+  sso: "No se completó el acceso con el proveedor. Inténtalo de nuevo o usa tu correo.",
 };
 
 export default async function LoginPage({

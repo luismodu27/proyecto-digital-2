@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
+import { SsoButtons } from "@/components/auth/SsoButtons";
 import { createClient } from "@/lib/supabase/client";
+import { isAnySsoEnabled } from "@/lib/supabase/config";
 
 type Mode = "login" | "signup";
 
@@ -298,7 +300,19 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
           : "Empieza a inventariar y clasificar tu IA."}
       </p>
 
-      <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
+      {isAnySsoEnabled && (
+        <div className="mt-6">
+          {/* Un único destino: el layout del dashboard envía a /onboarding si aún
+              no hay organización (usuario nuevo por OAuth). */}
+          <SsoButtons next="/dashboard" />
+        </div>
+      )}
+
+      <form
+        onSubmit={handleSubmit}
+        noValidate
+        className={`${isAnySsoEnabled ? "mt-4" : "mt-6"} space-y-4`}
+      >
         {mode === "signup" && (
           <>
             <div>

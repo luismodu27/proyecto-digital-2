@@ -104,6 +104,33 @@ que se expuso en el chat. Mientras, en Test no se cobra dinero real.
 > ⚠️ Con las llaves puestas, **el bloqueo por plan está activo** para toda cuenta sin suscripción (es lo
 > esperado). Inventario y riesgo siguen libres.
 
+### 1.6 · Encender SSO / acceso corporativo (Google + Microsoft) — config sin código
+Los botones **"Continuar con Google / Microsoft"** ya están construidos en login y registro; **aparecen solo
+cuando pones su variable** en Vercel (degradación segura). Falta registrar las apps OAuth (una vez):
+
+> **URL de retorno de Supabase (la necesitarás abajo):**
+> `https://flesaxlgtvhewwcvzrxs.supabase.co/auth/v1/callback`
+
+**Google (Google Workspace / cuentas Google):**
+1. [Google Cloud Console](https://console.cloud.google.com) → crea un proyecto → **APIs y servicios → Pantalla
+   de consentimiento OAuth** (tipo *External*, nombre "Attesta", correo de soporte).
+2. **Credenciales → Crear credenciales → ID de cliente de OAuth → Aplicación web**. En *URIs de redirección
+   autorizados* pega la **URL de retorno de Supabase** de arriba. Guarda y copia **Client ID** y **Client Secret**.
+3. Supabase → **Authentication → Providers → Google** → actívalo → pega Client ID + Secret → *Save*.
+4. Vercel → *Environment Variables* (Production): **`NEXT_PUBLIC_SSO_GOOGLE=1`** → **Redeploy**.
+
+**Microsoft (Microsoft 365 / Azure AD):**
+1. [Azure Portal](https://portal.azure.com) → **App registrations → New registration**. Nombre "Attesta";
+   *Supported account types*: cuentas de cualquier directorio + personales. *Redirect URI* (tipo **Web**): la
+   **URL de retorno de Supabase** de arriba. Crea.
+2. Copia el **Application (client) ID**. Luego **Certificates & secrets → New client secret** → copia el **Value**.
+3. Supabase → **Authentication → Providers → Azure** → actívalo → pega el Application ID + Secret → *Save*.
+4. Vercel → **`NEXT_PUBLIC_SSO_MICROSOFT=1`** → **Redeploy**.
+
+**Importante (una sola vez):** Supabase → *Authentication → URL Configuration → Redirect URLs* debe incluir
+`https://attesta-io.vercel.app/auth/callback` (probablemente ya está, se añadió para el reset de contraseña).
+> Un usuario que entra por SSO por primera vez y aún no tiene organización cae automáticamente en el onboarding.
+
 ### 1.3 · Correo de verificación por código (requiere dominio)
 Hoy la **confirmación de correo está DESACTIVADA** (el registro entra directo). El flujo de **código OTP
 ya está construido** en la app; para encenderlo hace falta:
@@ -193,7 +220,8 @@ móvil + tema claro/oscuro) · planes diferenciados **$350 USD/mes** + tabla com
 
 **Enterprise (Frente 3)**: selector de organización activa · audit-trail a prueba de manipulación (hash-chain
 SHA-256, migración 0020) · **exportación de datos** (JSON portable en *Plan y facturación*, sin migración,
-disponible en todos los planes a propósito). Pendiente del frente: SSO / acceso corporativo (opcional).
+disponible en todos los planes a propósito) · **SSO social** (Google + Microsoft; código listo, se enciende
+con config del fundador → §1.6). Futuro opcional: SAML empresarial (requiere Supabase Pro).
 
 **Construido pero inactivo hasta configurar**: cobro por suscripción Stripe (migración 0017 + webhook +
 paywall) y verificación de correo por código OTP.

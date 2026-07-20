@@ -123,6 +123,19 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-20** · **SSO / acceso corporativo (login social Google + Microsoft).** Botones "Continuar con
+  Google/Microsoft" en login y registro (`SsoButtons.tsx`, logos oficiales, temas claro/oscuro verificados por
+  captura). Usa `supabase.auth.signInWithOAuth` (provider `google`/`azure`); el retorno lo maneja el
+  `/auth/callback` existente (ya soportaba el intercambio PKCE `?code=`) → `/dashboard`; el layout del dashboard
+  rebota a `/onboarding` si el usuario nuevo aún no tiene org. Callback ampliado para errores del proveedor
+  (`?error=` → `/login?error=sso`).
+  - **Alcance elegido (checkpoint del fundador):** login **social** (Workspace/M365), NO SAML empresarial. SAML
+    exige Supabase Pro + config por cliente; se deja como futuro cuando un enterprise lo pida.
+  - **Degradación segura:** cada botón se enciende con `NEXT_PUBLIC_SSO_GOOGLE` / `NEXT_PUBLIC_SSO_MICROSOFT` en
+    Vercel (la app no puede saber si el proveedor está configurado en Supabase). Sin la variable, no aparece.
+  - **Pendiente del fundador (§1.6 PENDIENTES):** registrar las apps OAuth en Google Cloud / Azure, pegarlas en
+    Supabase → Providers, y poner las variables `NEXT_PUBLIC_SSO_*=1` en Vercel. Sin código.
+
 - **2026-07-20** · **Exportación de datos (portabilidad enterprise).** Botón "Descargar JSON" en *Plan y
   facturación* que baja **toda la evidencia declarada** de la organización activa en un JSON portable:
   meta, verificación de integridad de la cadena, sistemas (con historial de evaluaciones + auditoría de sesgo),
