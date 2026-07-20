@@ -157,6 +157,90 @@ function Pill({
   );
 }
 
+/**
+ * Briefing "aclaración de plazos" — diferenciador de Attesta: corrige el error
+ * extendido de que el 2-ago-2026 es el plazo de alto riesgo (el Digital Omnibus
+ * lo movió a dic-2027) y enfoca lo que el deployer sí debe tener listo pronto.
+ * Determinista, basado en los eventos curados del radar.
+ */
+function EuReadinessBriefing({
+  art50,
+  highRisk,
+  now,
+}: {
+  art50: RegulatoryEvent;
+  highRisk: RegulatoryEvent;
+  now: Date;
+}) {
+  const art50Days = daysUntil(art50.date, now);
+  const hrDays = daysUntil(highRisk.date, now);
+  return (
+    <section className="mb-8 rounded-2xl border border-brand/30 bg-brand-soft/40 p-6">
+      <div className="flex items-start gap-3">
+        <svg
+          viewBox="0 0 24 24"
+          className="mt-0.5 size-5 shrink-0 text-brand-strong"
+          fill="none"
+          aria-hidden
+        >
+          <path
+            d="M12 3a6 6 0 0 0-3.6 10.8c.5.4.9 1 1 1.6l.2 1.1h4.8l.2-1.1c.1-.6.5-1.2 1-1.6A6 6 0 0 0 12 3Z"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M9.5 20.5h5M10 18.4h4"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-strong">
+            Aclaración de plazos · EU AI Act
+          </p>
+          <h2 className="mt-1 font-display text-lg font-semibold text-ink">
+            El 2 de agosto de 2026 no es el plazo de los sistemas de alto riesgo
+          </h2>
+          <p className="mt-1.5 text-sm text-ink-soft">
+            Es un error extendido en el mercado. El{" "}
+            <span className="font-medium text-ink">Digital Omnibus</span> movió las
+            obligaciones de alto riesgo del Anexo III (empleo) al{" "}
+            <span className="font-medium text-ink">{formatDate(highRisk.date)}</span>
+            {hrDays > 0 && ` (${relativeLabel(hrDays)})`}. Lo que tu organización sí
+            debe tener listo pronto como{" "}
+            <span className="font-medium text-ink">deployer</span>:
+          </p>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            <li className="flex items-center justify-between gap-3 rounded-xl border border-line bg-paper-raised px-3.5 py-2.5">
+              <span className="text-sm text-ink">
+                Alfabetización en IA <span className="text-muted">· Art. 4</span>
+              </span>
+              <Pill tone="good">ya vigente</Pill>
+            </li>
+            <li className="flex items-center justify-between gap-3 rounded-xl border border-line bg-paper-raised px-3.5 py-2.5">
+              <span className="text-sm text-ink">
+                Transparencia <span className="text-muted">· Art. 50.3/50.4</span>
+              </span>
+              <Pill tone={countdownTone(art50Days)}>
+                {art50Days >= 0 ? relativeLabel(art50Days) : "en vigor"}
+              </Pill>
+            </li>
+          </ul>
+          <Link
+            href="/dashboard/packs"
+            className="mt-3 inline-flex text-xs font-medium text-brand hover:text-brand-strong"
+          >
+            Aplicar el pack de RRHH para dejar la evidencia lista →
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default async function VigilanciaPage({
   searchParams,
 }: {
@@ -228,6 +312,13 @@ export default async function VigilanciaPage({
   const heroAck = hero ? acks[hero.id] : undefined;
   const otherDeadlines = deadlines.slice(1);
 
+  // Briefing "aclaración de plazos" (diferenciador): se muestra con la UE en vista
+  // y mientras el alto riesgo del Anexo III siga por venir (mito aún vivo).
+  const art50Ev = shown.find((e) => e.id === "eu-transparency-art50");
+  const highRiskEv = events.find((e) => e.id === "eu-highrisk-annex-iii");
+  const showBriefing =
+    !!art50Ev && !!highRiskEv && daysUntil(highRiskEv.date, now) > 0;
+
   return (
     <>
       <PageHeader
@@ -286,6 +377,11 @@ export default async function VigilanciaPage({
             active={showAll || (!singleJ && nexus.length === 0)}
           />
         </div>
+      )}
+
+      {/* Briefing: aclaración del plazo del 2-ago-2026 (corrige el error de mercado) */}
+      {showBriefing && art50Ev && highRiskEv && (
+        <EuReadinessBriefing art50={art50Ev} highRisk={highRiskEv} now={now} />
       )}
 
       {/* Hero: próximo plazo */}

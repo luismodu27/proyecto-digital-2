@@ -123,6 +123,22 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-20** · **Foso ampliado: pack RRHH-EU completado (Art. 4 + Art. 50) + briefing "aclaración de plazos".**
+  Verificado con el `compliance-domain-expert` (fuentes). Hallazgo: el radar ya reflejaba bien el Digital Omnibus
+  (alto riesgo Anexo III → **2-dic-2027**, NO 2-ago-2026) y Colorado (SB 26-189 → 1-ene-2027, se queda en radar,
+  NO se promueve a pack). El hueco estaba en el **policy pack de RRHH**:
+  - **Nuevo control Art. 4 (alfabetización en IA)** — deber propio del deployer, vigente desde 2-feb-2025, evidencia
+    = registros de formación. Es el control más barato y universal; faltaba por completo.
+  - **Afinado el control Art. 50**: separa el deber PROPIO del deployer (50.3/50.4, aplicable 2-ago-2026) de lo que
+    se EXIGE al proveedor (50.1/50.2), y conserva la prohibición del Art. 5.1.f. Añadidos `conditional` con fechas y
+    un `note` de plazos al pack. (RRHH pasa de 14 a 15 controles.)
+  - **Briefing "Aclaración de plazos"** en el radar (`vigilancia/page.tsx`, determinista, force-dynamic): corrige el
+    error de mercado "2-ago-2026 = alto riesgo" contrastando con el aplazamiento a dic-2027 y enfocando lo vivo
+    (Art. 4 ya vigente + Art. 50 en N días). Solo se muestra con la UE en vista y mientras el alto riesgo siga por
+    venir. **Ese "reflejar bien lo que el mercado dice mal" ES el foso.**
+  - Copy sin términos prohibidos (verbos de la organización, "orientación no asesoría legal"). NO construido:
+    pack de Colorado, motor de bias-testing, ISO/NIST, shadow-AI (postura del experto mantenida).
+
 - **2026-07-20** · **Precio de Preparación: $350 → $120 USD/mes (early-access, más accesible).** Decisión del
   fundador para bajar la barrera de entrada y atraer más clientes al arrancar. Cambiado en el código: default
   `PLAN_PRICE_LABEL` (`stripe/config.ts`) y la tarjeta de la landing (`Pricing.tsx`). La UI de facturación y el

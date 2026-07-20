@@ -5,10 +5,12 @@
  * pensado para un DEPLOYER mid-market. Precarga las brechas de un gap assessment.
  *
  * ⚠️ Orientación de compliance, NO asesoría legal. Contenido revisado por el
- * subagente `compliance-domain-expert` (2026-07-17) contra el texto del EU AI Act
- * (Arts. 5, 10, 11, 14, 15, 26, 27, 50, 86) y el RGPD (Arts. 5, 13-14, 22, 35).
- * Los artículos de subapartados del Art. 26 y el alcance del Art. 27 (FRIA) se
- * verificaron contra artificialintelligenceact.eu.
+ * subagente `compliance-domain-expert` (2026-07-17; ampliado 2026-07-20) contra el
+ * texto del EU AI Act (Arts. 4, 5, 10, 11, 14, 15, 26, 27, 50, 86) y el RGPD
+ * (Arts. 5, 13-14, 22, 35). Los subapartados del Art. 26, el alcance del Art. 27
+ * (FRIA) y el reparto deployer/proveedor del Art. 50 se verificaron contra
+ * artificialintelligenceact.eu. Plazos del Digital Omnibus (alto riesgo → 2-dic-2027)
+ * verificados contra la nota del Consejo de la UE (29-jun-2026).
  */
 
 export type { PolicySeverity, PolicyControl, PolicyPack } from "./types";
@@ -20,7 +22,18 @@ export const RRHH_PACK: PolicyPack = {
   tag: "UE · Reclutamiento",
   summary:
     "Controles típicos para IA de selección de personal (alto riesgo, Anexo III). Aplícalo a un sistema para precargar sus brechas.",
+  note:
+    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 aplica el 2-ago-2026. Las obligaciones de alto riesgo del Anexo III (empleo, Arts. 14/26/27) se aplazaron al 2-dic-2027 con el Digital Omnibus — NO el 2-ago-2026, un error extendido en el mercado. Este pack te deja lista la evidencia con antelación.",
   controls: [
+    {
+      id: "alfabetizacion-ia",
+      title: "Alfabetización en IA del personal",
+      description:
+        "Adopta medidas para que las personas que operan o supervisan la herramienta de selección tengan un nivel suficiente de alfabetización en IA (sus capacidades, límites y riesgos), proporcionado a su rol y contexto. Es un deber PROPIO y directo del deployer, exigible desde el 2 de febrero de 2025. Evidencia = registro de la formación u onboarding impartido (fecha, asistentes y contenidos).",
+      article: "Art. 4",
+      severity: "media",
+      conditional: "Exigible desde el 2 de febrero de 2025 (ya vigente).",
+    },
     {
       id: "supervision-humana",
       title: "Supervisión humana efectiva en la decisión",
@@ -55,11 +68,13 @@ export const RRHH_PACK: PolicyPack = {
     },
     {
       id: "transparencia-chatbot-emociones",
-      title: "Chatbot / reconocimiento de emociones (si aplica)",
+      title: "Transparencia de IA en la interacción (Art. 50)",
       description:
-        "SI el proceso usa un chatbot conversacional, informa de que se interactúa con una IA (Art. 50). ATENCIÓN: inferir emociones de una persona en el ámbito laboral (p. ej. análisis de afecto o microexpresiones en vídeo-entrevistas) es una práctica PROHIBIDA salvo fines médicos o de seguridad (Art. 5.1.f); comprueba si tu herramienta lo hace antes de usarla.",
-      article: "Art. 50 (y prohibición Art. 5.1.f)",
+        "Deberes PROPIOS del deployer (aplicables desde el 2 de agosto de 2026): si expones a candidatos a un sistema de reconocimiento de emociones o categorización biométrica, debes informarles de ello (Art. 50.3); si difundes contenido generado o manipulado por IA (p. ej. imágenes o vídeos en materiales del proceso), debes etiquetarlo como tal (Art. 50.4). Lo que EXIGES al proveedor y conservas como evidencia: que un chatbot conversacional avise de que se habla con una IA (Art. 50.1) y que marque de forma legible por máquina el contenido que genere (Art. 50.2). ATENCIÓN: inferir emociones de una persona en el ámbito laboral (p. ej. análisis de afecto o microexpresiones en vídeo-entrevistas) es una práctica PROHIBIDA salvo fines médicos o de seguridad (Art. 5.1.f); comprueba si tu herramienta lo hace antes de usarla.",
+      article: "Art. 50.3/50.4 (deployer) · 50.1/50.2 (proveedor) · prohib. 5.1.f",
       severity: "alta",
+      conditional:
+        "Transparencia del deployer (Art. 50) aplicable desde el 2 de agosto de 2026; la prohibición del Art. 5.1.f ya está vigente.",
     },
     {
       id: "info-trabajadores",
