@@ -37,14 +37,11 @@ completo (degradación segura). Para encenderla:
    ```
 4. Cuando Stripe esté activo (§1.2), una suscripción activa sube la org a **preparación** sola.
 
-### 1.1-quater · Aplicar migración 0020 (audit-trail a prueba de manipulación) — RÁPIDO
-El registro de actividad ahora se **encadena con hashes SHA-256** (tamper-evident): cada evento incorpora el
-hash del anterior, así que borrar o alterar cualquiera —incluso con acceso directo a la base— rompe la cadena y
-queda demostrable. **Ya construido**; para encenderlo:
-1. Pega **`supabase/migrations/0020_audit_chain.sql`** en el SQL Editor de Supabase (solo ese archivo). Hace el
-   backfill de las filas históricas y crea la verificación.
-2. Entra a **Dashboard → Actividad**: verás la tarjeta "Integridad de la cadena verificada · N eventos encadenados".
-> Degradación segura: sin aplicar la migración, el visor sigue funcionando (no muestra la tarjeta de integridad).
+### 1.1-quater · Migración 0020 (audit-trail a prueba de manipulación) — ✅ APLICADA (2026-07-20)
+El registro de actividad se **encadena con hashes SHA-256** (tamper-evident): cada evento incorpora el hash del
+anterior, así que borrar o alterar cualquiera —incluso con acceso directo a la base— rompe la cadena y queda
+demostrable. **Aplicada y verificada por API** (columnas `prev_hash`/`row_hash` presentes y función
+`verify_audit_chain` activa). En **Dashboard → Actividad** se ve la tarjeta "Integridad de la cadena verificada".
 
 ### 1.1-ter · Migración 0019 (auditoría de sesgo NYC LL144) — ✅ APLICADA (2026-07-18)
 Aplicada y **verificada por API** (las 6 columnas existen en `ai_systems`). El registro de auditoría de sesgo
