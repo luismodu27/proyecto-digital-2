@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
-import { getAuditLog, isSupabaseConfigured } from "@/lib/data";
+import { getAuditLog, verifyAuditChain, isSupabaseConfigured } from "@/lib/data";
 import { ENTITY_META, ACTION_META } from "@/lib/audit";
-import type { AuditEntry } from "@/lib/mock-data";
+import type { AuditChainStatus, AuditEntry } from "@/lib/mock-data";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +55,7 @@ export default async function ActividadPage({
   searchParams: Promise<{ t?: string }>;
 }) {
   const { t } = await searchParams;
-  const all = await getAuditLog();
+  const [all, chain] = await Promise.all([getAuditLog(), verifyAuditChain()]);
   const filter = TYPES.some((x) => x.key === t) ? t : "";
   const entries = filter ? all.filter((e) => e.table === filter) : all;
   const now = new Date();
@@ -64,9 +64,15 @@ export default async function ActividadPage({
     <>
       <PageHeader
         title="Registro de actividad"
-        subtitle="Cada cambio queda registrado de forma inmutable: quién hizo qué y cuándo."
+        subtitle="Cada cambio queda registrado y encadenado con SHA-256: cualquier alteración posterior es detectable. Quién hizo qué y cuándo."
         action={
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] px-3 py-1 text-xs font-medium text-[var(--tone-good-fg)]">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${
+              chain && !chain.ok
+                ? "border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)]"
+                : "border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)]"
+            }`}
+          >
             <svg viewBox="0 0 20 20" className="size-3.5" fill="none" aria-hidden>
               <path
                 d="M6 9V7a4 4 0 118 0v2m-9 0h10a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6a1 1 0 011-1Z"
@@ -76,10 +82,12 @@ export default async function ActividadPage({
                 strokeLinejoin="round"
               />
             </svg>
-            Inmutable
+            {chain && !chain.ok ? "Integridad rota" : "Cadena íntegra"}
           </span>
         }
       />
+
+      {chain && <ChainStatusCard chain={chain} />}
 
       {!isSupabaseConfigured && (
         <div className="mb-6 rounded-2xl border border-[var(--tone-info-bd)] bg-[var(--tone-info-bg)] px-5 py-4 text-sm text-[var(--tone-info-fg)]">
@@ -121,6 +129,89 @@ export default async function ActividadPage({
         </ol>
       )}
     </>
+  );
+}
+
+/**
+ * Tarjeta de estado de la cadena de integridad (encadenado SHA-256). Es evidencia
+ * de integridad técnica del registro, no una afirmación de conformidad.
+ */
+function ChainStatusCard({ chain }: { chain: AuditChainStatus }) {
+  const ok = chain.ok;
+  return (
+    <div
+      role={ok ? undefined : "alert"}
+      className={`mb-6 flex items-start gap-3 rounded-2xl border px-5 py-4 ${
+        ok
+          ? "border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)]"
+          : "border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)]"
+      }`}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        className={`mt-0.5 size-5 shrink-0 ${
+          ok ? "text-[var(--tone-good-fg)]" : "text-[var(--tone-danger-fg)]"
+        }`}
+        fill="none"
+        aria-hidden
+      >
+        {ok ? (
+          <path
+            d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Zm-2.2 8.4 1.7 1.7 3.4-3.4"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        ) : (
+          <path
+            d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3ZM12 8v4m0 3h.01"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
+      </svg>
+      <div className="min-w-0 flex-1">
+        <p
+          className={`text-sm font-semibold ${
+            ok ? "text-[var(--tone-good-fg)]" : "text-[var(--tone-danger-fg)]"
+          }`}
+        >
+          {ok
+            ? "Integridad de la cadena verificada"
+            : "Se detectó una alteración en el registro"}
+        </p>
+        <p
+          className={`mt-1 text-sm ${
+            ok ? "text-[var(--tone-good-fg)]" : "text-[var(--tone-danger-fg)]"
+          }`}
+        >
+          {ok ? (
+            <>
+              Los <span className="font-medium">{chain.total}</span>{" "}
+              {chain.total === 1 ? "evento está encadenado" : "eventos están encadenados"} con
+              SHA-256: cada registro incorpora el hash del anterior, así que alterar
+              o borrar cualquiera —incluso con acceso directo a la base de datos—
+              rompería la cadena y quedaría en evidencia.
+            </>
+          ) : (
+            <>
+              La cadena se rompe en el evento{" "}
+              <span className="font-medium">#{chain.brokenId}</span>: un registro fue
+              modificado o eliminado fuera de la aplicación. Conserva esta evidencia
+              y revisa el acceso a la base de datos.
+            </>
+          )}
+        </p>
+        {ok && (
+          <p className="mt-1.5 text-xs text-[var(--tone-good-fg)] opacity-80">
+            Verificado en vivo · {formatExact(chain.checkedAt)}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
 

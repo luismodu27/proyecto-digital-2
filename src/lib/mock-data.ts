@@ -334,6 +334,18 @@ export type AuditEntry = {
   at: string; // ISO
 };
 
+/**
+ * Estado de la cadena de integridad del audit-trail (encadenado con SHA-256).
+ * `ok=false` indica que un evento fue alterado o borrado: `brokenId` es el
+ * primer eslabón donde la cadena deja de cuadrar.
+ */
+export type AuditChainStatus = {
+  total: number;
+  ok: boolean;
+  brokenId: number | null;
+  checkedAt: string; // ISO
+};
+
 /** Registro de actividad de ejemplo (modo demo). */
 export const SAMPLE_AUDIT: AuditEntry[] = [
   {

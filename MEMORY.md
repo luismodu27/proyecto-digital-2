@@ -123,6 +123,21 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-20** · **Audit-trail a prueba de manipulación (tamper-evident, hash-chain SHA-256).** El `audit_log`
+  ya era inmutable por triggers (`block_mutation`); ahora además es **verificable**: cada evento incorpora el hash
+  del anterior (cadena por organización). Alterar o borrar cualquier fila —incluso con acceso directo a la BD—
+  rompe la cadena y queda demostrable. Migración **0020** (columnas `prev_hash`/`row_hash`, función única
+  `private.audit_hash` compartida por trigger/backfill/verificación, `write_audit` encadenado con
+  `pg_advisory_xact_lock` por org para no bifurcar, backfill de filas históricas, RPC `public.verify_audit_chain`).
+  App: getter `verifyAuditChain` en la fachada (con degradación segura si la migración no está aplicada → devuelve
+  null) + tarjeta de verificación en vivo en `/dashboard/actividad`.
+  - **Copy revisado con el experto de compliance:** el reencuadre honesto y más fuerte es **detectable, no
+    inmutable** (*tamper-evident* ≠ *tamper-proof*): "inmutable"→"Cadena íntegra"; subtítulo → "…encadenado con
+    SHA-256: cualquier alteración posterior es detectable"; título de tarjeta → "Integridad de la cadena verificada".
+    Ningún término prohibido; el sujeto es **la cadena/el registro**, nunca la conformidad (no se afirma que la org
+    "cumple"). Es evidencia de integridad **técnica**, no un sello de conformidad.
+  - **Pendiente del fundador:** aplicar `supabase/migrations/0020_audit_chain.sql` en el SQL Editor (solo ese archivo).
+
 - **2026-07-18** · **Stripe FUNCIONANDO (modo Test) + bug multi-org del cobro corregido.** El fundador configuró
   Stripe (producto/precio $350, webhook, variables en Vercel) pero producción daba `503 "stripe no configurado"`.
   **Causa:** un **typo** en el nombre de la variable (`STRPE_PRICE_ID` en vez de `STRIPE_PRICE_ID`) → corregido +

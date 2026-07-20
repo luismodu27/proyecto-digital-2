@@ -5,6 +5,7 @@ import type {
   ActionTask,
   AiSystem,
   AssessmentRecord,
+  AuditChainStatus,
   AuditEntry,
   DossierData,
   EvidenceState,
@@ -609,6 +610,32 @@ export async function getAuditLog(): Promise<AuditEntry[]> {
   if (!org) return [];
   const { data } = await supabase.rpc("list_audit_log", { org, lim: 100 });
   return ((data ?? []) as RawAudit[]).map(toAuditEntry);
+}
+
+/**
+ * Verifica la cadena de integridad del audit-trail de la organización activa
+ * (encadenado con SHA-256). Devuelve null con degradación segura si la función
+ * aún no existe (migración 0020 sin aplicar) para no romper el visor.
+ */
+export async function verifyAuditChain(): Promise<AuditChainStatus | null> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return null;
+  const { data, error } = await supabase.rpc("verify_audit_chain", { org });
+  if (error) return null;
+  const row = ((data ?? []) as {
+    total: number;
+    ok: boolean;
+    broken_id: number | null;
+    checked_at: string;
+  }[])[0];
+  if (!row) return null;
+  return {
+    total: Number(row.total),
+    ok: row.ok === true,
+    brokenId: row.broken_id === null ? null : Number(row.broken_id),
+    checkedAt: String(row.checked_at),
+  };
 }
 
 /** Rol del usuario actual en la organización activa (o null). */

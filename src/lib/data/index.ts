@@ -25,6 +25,7 @@ export const getOrgMembers = () => repo.getOrgMembers();
 export const getPendingInvitations = () => repo.getPendingInvitations();
 export const getCurrentMemberRole = () => repo.getCurrentMemberRole();
 export const getAuditLog = () => repo.getAuditLog();
+export const verifyAuditChain = () => repo.verifyAuditChain();
 export const getRegulatoryAcks = () => repo.getRegulatoryAcks();
 export const getRegulatoryEvents = () => repo.getRegulatoryEvents();
 export const getRegCandidates = () => repo.getRegCandidates();
@@ -37,6 +38,7 @@ export { isSupabaseConfigured };
 export type {
   ActionTask,
   AiSystem,
+  AuditChainStatus,
   AuditEntry,
   DossierData,
   GapItem,

@@ -13,6 +13,7 @@ import {
   type ActionTask,
   type AiSystem,
   type AssessmentRecord,
+  type AuditChainStatus,
   type AuditEntry,
   type DossierData,
   type GapItem,
@@ -82,6 +83,16 @@ export async function getCurrentMemberRole(): Promise<MemberRole | null> {
 
 export async function getAuditLog(): Promise<AuditEntry[]> {
   return SAMPLE_AUDIT;
+}
+
+export async function verifyAuditChain(): Promise<AuditChainStatus | null> {
+  // En demo la cadena se muestra íntegra a modo ilustrativo (no hay backend).
+  return {
+    total: SAMPLE_AUDIT.length,
+    ok: true,
+    brokenId: null,
+    checkedAt: new Date().toISOString(),
+  };
 }
 
 export async function getRegulatoryAcks(): Promise<Record<string, RegAck>> {
