@@ -19,7 +19,7 @@ export function EventStatusControl({
         defaultValue={status ?? ""}
         aria-label="Estado interno"
         onChange={(e) => e.currentTarget.form?.requestSubmit()}
-        className="rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
+        className="rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
       >
         <option value="">Sin marcar</option>
         <option value="reviewed">Revisado</option>

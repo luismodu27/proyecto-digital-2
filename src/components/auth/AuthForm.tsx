@@ -177,7 +177,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
   }
 
   const inputBase =
-    "mt-1.5 w-full rounded-lg border bg-paper px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:ring-2 focus:ring-brand/30";
+    "mt-1.5 w-full rounded-lg border bg-paper px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:ring-2 focus:ring-brand";
   const okBorder = "border-line-strong focus:border-brand";
   const errBorder =
     "border-[var(--tone-danger-bd)] focus:border-[var(--tone-danger-fg)]";

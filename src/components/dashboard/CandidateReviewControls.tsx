@@ -10,7 +10,7 @@ const FRAMEWORKS = Object.entries(FRAMEWORK_META);
 const KINDS = Object.entries(REG_KIND_LABEL);
 
 const inputCls =
-  "w-full rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
+  "w-full rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand";
 const labelCls =
   "text-[11px] font-medium uppercase tracking-wide text-muted";
 

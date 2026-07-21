@@ -238,7 +238,7 @@ export function RiskWizard({
                     value={systemId}
                     onChange={(e) => setSystemId(e.target.value)}
                     disabled={!!presetSystemId}
-                    className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60"
+                    className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand disabled:opacity-60"
                   >
                     <option value="">Selecciona un sistema…</option>
                     {systems.map((s) => (
@@ -261,7 +261,7 @@ export function RiskWizard({
                       value={attestedBy}
                       onChange={(e) => setAttestedBy(e.target.value)}
                       placeholder="Nombre y cargo"
-                      className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
+                      className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
                     />
                   </div>
                   <div>
@@ -277,7 +277,7 @@ export function RiskWizard({
                       value={evidence}
                       onChange={(e) => setEvidence(e.target.value)}
                       placeholder="Enlace o descripción del documento"
-                      className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
+                      className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
                     />
                   </div>
                 </div>

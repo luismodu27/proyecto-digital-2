@@ -23,7 +23,7 @@ function formatDate(iso: string): string {
 }
 
 const field =
-  "mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
+  "mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand";
 
 export default async function EquipoPage() {
   const connected = isSupabaseConfigured;

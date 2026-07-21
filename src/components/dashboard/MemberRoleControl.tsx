@@ -21,7 +21,7 @@ export function MemberRoleControl({
         defaultValue={role}
         aria-label="Rol del miembro"
         onChange={(e) => e.currentTarget.form?.requestSubmit()}
-        className="rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
+        className="rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
       >
         <option value="member">Miembro</option>
         <option value="admin">Administrador</option>

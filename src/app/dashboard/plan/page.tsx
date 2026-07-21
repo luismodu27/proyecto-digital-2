@@ -169,7 +169,7 @@ export default async function PlanPage() {
               name="title"
               required
               placeholder="Qué hay que hacer"
-              className="mt-1 w-full rounded-lg border border-line-strong bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
+              className="mt-1 w-full rounded-lg border border-line-strong bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
             />
           </label>
           <label className="sm:col-span-2">
@@ -179,7 +179,7 @@ export default async function PlanPage() {
             <textarea
               name="detail"
               rows={2}
-              className="mt-1 w-full rounded-lg border border-line-strong bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
+              className="mt-1 w-full rounded-lg border border-line-strong bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
             />
           </label>
           <label>

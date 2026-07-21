@@ -22,7 +22,7 @@ import {
 export const dynamic = "force-dynamic";
 
 const field =
-  "mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
+  "mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand";
 
 export default async function EditarSistemaPage({
   params,
@@ -185,7 +185,7 @@ export default async function EditarSistemaPage({
                     type="checkbox"
                     name="is_aedt"
                     defaultChecked={bias.isAedt}
-                    className="mt-0.5 size-4 rounded border-line-strong text-brand focus:ring-brand/30"
+                    className="mt-0.5 size-4 rounded border-line-strong text-brand focus:ring-brand"
                   />
                   <span>
                     Es un <span className="font-medium">AEDT</span> (herramienta
@@ -262,7 +262,7 @@ export default async function EditarSistemaPage({
                     type="checkbox"
                     name="auditor_independence_confirmed"
                     defaultChecked={bias.auditorIndependenceConfirmed}
-                    className="mt-0.5 size-4 rounded border-line-strong text-brand focus:ring-brand/30"
+                    className="mt-0.5 size-4 rounded border-line-strong text-brand focus:ring-brand"
                   />
                   <span>
                     Confirmo que el auditor cumple los criterios de{" "}

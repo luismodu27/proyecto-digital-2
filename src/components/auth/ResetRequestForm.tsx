@@ -73,7 +73,7 @@ export function ResetRequestForm() {
   }
 
   const inputBase =
-    "mt-1.5 w-full rounded-lg border bg-paper px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:ring-2 focus:ring-brand/30 border-line-strong focus:border-brand";
+    "mt-1.5 w-full rounded-lg border bg-paper px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:ring-2 focus:ring-brand border-line-strong focus:border-brand";
 
   if (sent) {
     return (

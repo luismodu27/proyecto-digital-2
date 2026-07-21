@@ -38,7 +38,7 @@ export function JurisdictionSettings({ selected }: { selected: string[] }) {
                 name="jurisdiction"
                 value={j}
                 defaultChecked={selected.includes(j)}
-                className="size-4 rounded border-line-strong text-brand focus:ring-brand/30"
+                className="size-4 rounded border-line-strong text-brand focus:ring-brand"
               />
               {JURISDICTION_LABEL[j]}
             </label>

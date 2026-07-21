@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, type ReactNode } from "react";
+import { useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
 import { setUserFlag } from "@/lib/data/user-actions";
@@ -331,6 +331,47 @@ export function WelcomeGuide({
     setTimeout(() => setOpen(false), 220);
   }, [userId]);
 
+  // Gestión de foco del diálogo (a11y): foco inicial dentro del modal, trampa de
+  // Tab para no salir "por detrás", y cierre con Escape. Se monta al abrir.
+  const panelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const focusables = () =>
+      Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
+    focusables()[0]?.focus();
+
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        void dismiss();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const firstEl = items[0];
+      const lastEl = items[items.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey) {
+        if (active === firstEl || !panel!.contains(active)) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else if (active === lastEl || !panel!.contains(active)) {
+        e.preventDefault();
+        firstEl.focus();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, dismiss]);
+
   if (!open) return null;
 
   const step = STEPS[i];
@@ -353,10 +394,16 @@ export function WelcomeGuide({
       />
 
       <div
+        ref={panelRef}
+        tabIndex={-1}
         className={`relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-line bg-paper-raised shadow-2xl transition-all duration-300 ${
           entered ? "translate-y-0 scale-100 opacity-100" : "translate-y-4 scale-[0.98] opacity-0"
         }`}
       >
+        {/* Región viva: anuncia el cambio de paso a lectores de pantalla. */}
+        <p className="sr-only" aria-live="polite">
+          Paso {i + 1} de {STEPS.length}: {step.title}
+        </p>
         <div className="flex items-center justify-between border-b border-line px-6 py-4">
           <div className="flex items-center gap-2 text-brand">
             <SealMark size={22} />

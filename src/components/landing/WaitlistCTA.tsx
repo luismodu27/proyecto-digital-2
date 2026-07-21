@@ -102,7 +102,7 @@ export function WaitlistCTA() {
                 aria-invalid={!!error}
                 aria-describedby={error ? "waitlist-error" : undefined}
                 placeholder="tu@empresa.com"
-                className="w-full rounded-full border border-line-strong bg-paper px-5 py-3 text-sm text-ink outline-none placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/30"
+                className="w-full rounded-full border border-line-strong bg-paper px-5 py-3 text-sm text-ink outline-none placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand"
               />
               <Button type="submit" disabled={loading} className="px-6 py-3 shrink-0">
                 {loading ? "Enviando…" : "Solicitar acceso"}

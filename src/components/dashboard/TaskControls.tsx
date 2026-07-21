@@ -14,7 +14,7 @@ import {
 import { ConfirmSubmit } from "@/components/dashboard/ConfirmSubmit";
 
 const selectCls =
-  "rounded-lg border border-line-strong bg-paper px-2.5 py-1 text-xs text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
+  "rounded-lg border border-line-strong bg-paper px-2.5 py-1 text-xs text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand";
 
 /** Selector de estado de una tarea (autoenvía). */
 export function TaskStatusControl({

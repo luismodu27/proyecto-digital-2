@@ -17,7 +17,7 @@
   /* Tinta / texto */
   --color-ink: #0f1a14; /* verde-negro profundo */
   --color-ink-soft: #38443d;
-  --color-muted: #6b756e;
+  --color-muted: #5c665f;
 
   /* Líneas */
   --color-line: #e6e1d4;
@@ -277,7 +277,7 @@
     --color-paper-sunken: #f3f0e7;
     --color-ink: #0f1a14;
     --color-ink-soft: #38443d;
-    --color-muted: #6b756e;
+    --color-muted: #5c665f;
     --color-line: #e6e1d4;
     --color-line-strong: #d6d0bf;
     --color-brand: #0b6b4e;
