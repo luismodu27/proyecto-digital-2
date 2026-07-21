@@ -306,11 +306,12 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
                   clearErr("nombre");
                 }}
                 aria-invalid={!!fieldErrors.nombre}
+                aria-describedby={fieldErrors.nombre ? "err-nombre" : undefined}
                 className={`${inputBase} ${fieldErrors.nombre ? errBorder : okBorder}`}
                 placeholder="Tu nombre"
               />
               {fieldErrors.nombre && (
-                <p className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.nombre}</p>
+                <p id="err-nombre" role="alert" className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.nombre}</p>
               )}
             </div>
 
@@ -329,11 +330,12 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
                     clearErr("apellido1");
                   }}
                   aria-invalid={!!fieldErrors.apellido1}
+                  aria-describedby={fieldErrors.apellido1 ? "err-apellido1" : undefined}
                   className={`${inputBase} ${fieldErrors.apellido1 ? errBorder : okBorder}`}
                   placeholder="Apellido"
                 />
                 {fieldErrors.apellido1 && (
-                  <p className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.apellido1}</p>
+                  <p id="err-apellido1" role="alert" className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.apellido1}</p>
                 )}
               </div>
               <div>
@@ -369,11 +371,12 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
               clearErr("email");
             }}
             aria-invalid={!!fieldErrors.email}
+            aria-describedby={fieldErrors.email ? "err-email" : undefined}
             className={`${inputBase} ${fieldErrors.email ? errBorder : okBorder}`}
             placeholder="tu@empresa.com"
           />
           {fieldErrors.email && (
-            <p className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.email}</p>
+            <p id="err-email" role="alert" className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.email}</p>
           )}
         </div>
 
@@ -402,6 +405,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
                 clearErr("password");
               }}
               aria-invalid={!!fieldErrors.password}
+              aria-describedby={fieldErrors.password ? "err-password" : undefined}
               className={`${inputBase} pr-12 ${fieldErrors.password ? errBorder : okBorder}`}
               placeholder="••••••••"
             />
@@ -415,7 +419,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
             </button>
           </div>
           {fieldErrors.password && (
-            <p className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.password}</p>
+            <p id="err-password" role="alert" className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.password}</p>
           )}
           {mode === "signup" && !fieldErrors.password && (
             <p className="mt-1.5 text-xs text-muted">Mínimo 6 caracteres.</p>
@@ -437,11 +441,12 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
                 clearErr("confirm");
               }}
               aria-invalid={!!fieldErrors.confirm}
+              aria-describedby={fieldErrors.confirm ? "err-confirm" : undefined}
               className={`${inputBase} ${fieldErrors.confirm ? errBorder : okBorder}`}
               placeholder="••••••••"
             />
             {fieldErrors.confirm && (
-              <p className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.confirm}</p>
+              <p id="err-confirm" role="alert" className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.confirm}</p>
             )}
           </div>
         )}

@@ -120,6 +120,33 @@ export function WaitlistCTA() {
             </p>
           )}
 
+          {/* Marcadores de confianza — todos reales (nada de logos/testimonios inventados). */}
+          <ul className="mx-auto mt-8 flex max-w-lg flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            {[
+              "Región UE · datos en la Unión Europea",
+              "Contenido del EU AI Act revisado por experto",
+              "No certificamos: preparación honesta",
+            ].map((t) => (
+              <li key={t} className="flex items-center gap-1.5 text-xs text-ink-soft">
+                <svg
+                  viewBox="0 0 16 16"
+                  className="size-3.5 shrink-0 text-brand"
+                  fill="none"
+                  aria-hidden
+                >
+                  <path
+                    d="m3.5 8.5 3 3 6-7"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                {t}
+              </li>
+            ))}
+          </ul>
+
           <p className="mt-4 text-xs text-muted">
             Sin compromiso. Attesta ofrece orientación de compliance, no asesoría
             legal.
