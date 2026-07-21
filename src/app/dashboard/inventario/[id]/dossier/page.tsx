@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SealMark } from "@/components/ui/SealMark";
 import { PrintButton } from "@/components/dashboard/PrintButton";
 import { getSystemDossier, getOrganizationName } from "@/lib/data";
-import { LEGAL_PDF } from "@/components/ui/LegalNote";
+import { LEGAL_PDF, ScopeNote } from "@/components/ui/LegalNote";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { Paywall } from "@/components/dashboard/Paywall";
 import { getActiveOrg } from "@/lib/data/context";
@@ -157,13 +157,55 @@ export default async function DossierPage({
   const obligations = OBLIGATIONS_BY_LEVEL[level];
   const recs = recommendationsForLevel(level);
   const openGaps = gaps.filter((g) => g.status !== "done").length;
+  const criticalOpen = gaps.filter(
+    (g) => g.status !== "done" && g.severity === "alta",
+  ).length;
+  const isUnacceptable = level === "unacceptable";
 
-  const summary = [
-    { k: "Nivel de riesgo", v: RISK_LABEL[level], color: RISK_COLOR[level] },
-    { k: "Preparación", v: `${system.compliance}%` },
-    { k: "Brechas abiertas", v: String(openGaps) },
-    { k: "Respaldo", v: EVIDENCE_LABEL[evidenceState] },
-  ];
+  const org = orgName ?? "La organización";
+  const rol = ROLE_LABEL[system.actorRole] ?? system.actorRole;
+  const vendorPart = system.vendor ? `, proveedor: ${system.vendor}` : "";
+
+  // Resumen ejecutivo ensamblado de forma determinista (cero LLM) a partir de los
+  // datos ya declarados. Copy revisado por compliance. Para nivel "Inaceptable"
+  // (Art. 5) se enuncia la prohibición, no una "preparación": una práctica
+  // prohibida no se prepara para auditoría.
+  const s1 = `Este dossier documenta «${system.name}», un sistema de IA que ${org} utiliza en el dominio de ${system.domain}${vendorPart}. El rol que la organización declara frente a este sistema es «${rol}».`;
+  const s2s3 = isUnacceptable
+    ? "La autoevaluación orientativa de la organización sitúa este sistema entre las prácticas prohibidas del Art. 5 del EU AI Act. Las prácticas prohibidas no son una cuestión de «preparación para auditoría»: desde el 2 de febrero de 2025 no pueden ponerse en el mercado ni utilizarse en la UE, con independencia del nivel de evidencia o de preparación declarado. Por tanto, la prioridad no es cubrir controles, sino revisar de inmediato el uso del sistema y validar esta clasificación con asesoría jurídica cualificada antes de tomar cualquier decisión. Esta conclusión es orientativa y se basa únicamente en la información declarada por la organización."
+    : `Según la autoevaluación orientativa de la organización, este sistema se clasifica como ${RISK_LABEL[level]}, con una preparación declarada del ${system.compliance}% y un nivel de respaldo «${EVIDENCE_LABEL[evidenceState]}». ${
+        openGaps === 1
+          ? `Frente a los controles evaluados queda 1 brecha abierta (${criticalOpen} de severidad alta), detallada más abajo.`
+          : openGaps > 1
+            ? `Frente a los controles evaluados quedan ${openGaps} brechas abiertas (${criticalOpen} de severidad alta), detalladas más abajo.`
+            : "Frente a los controles evaluados no quedan brechas abiertas; el respaldo es autodeclarado, no verificado por Attesta ni por un tercero, y queda pendiente de verificación independiente. Esto no equivale a un juicio de cumplimiento ni descarta controles aún no evaluados."
+      }`;
+  const s4 = latest
+    ? latest.attestedByName
+      ? `La evaluación de riesgo vigente fue atestada por ${latest.attestedByName} el ${formatDateTime(latest.assessedAt)}.`
+      : "La evaluación de riesgo vigente no está atestada nominalmente."
+    : "El nivel de riesgo se asignó en la ficha del sistema, sin una evaluación guardada con el asistente de riesgo.";
+  const s5 =
+    biasAudit && biasAudit.isAedt
+      ? `En la medida en que la organización utiliza «${system.name}» para tomar decisiones de empleo sobre candidatos o personal en la ciudad de Nueva York, esta herramienta queda sujeta a la auditoría de sesgo anual por un auditor independiente que exige la Local Law 144; su estado, de forma orientativa, se detalla en el anexo correspondiente.`
+      : null;
+  const summaryParagraph = [s1, s2s3, s4, s5].filter(Boolean).join(" ");
+
+  // KPIs: para "Inaceptable" no se rotula "Preparación %/Brechas" como si algo
+  // prohibido pudiera prepararse; se muestra la prohibición y la acción debida.
+  const summary = isUnacceptable
+    ? [
+        { k: "Nivel de riesgo", v: RISK_LABEL[level], color: RISK_COLOR[level] },
+        { k: "Clasificación", v: "Práctica prohibida (Art. 5)", color: RISK_COLOR[level] },
+        { k: "Prioridad", v: "Revisión jurídica", color: RISK_COLOR[level] },
+        { k: "Respaldo", v: EVIDENCE_LABEL[evidenceState] },
+      ]
+    : [
+        { k: "Nivel de riesgo", v: RISK_LABEL[level], color: RISK_COLOR[level] },
+        { k: "Preparación", v: `${system.compliance}%` },
+        { k: "Brechas abiertas", v: String(openGaps) },
+        { k: "Respaldo", v: EVIDENCE_LABEL[evidenceState] },
+      ];
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -214,7 +256,18 @@ export default async function DossierPage({
           </p>
         </div>
 
-        {/* Resumen ejecutivo */}
+        {/* Resumen ejecutivo (narrativa determinista) */}
+        <section className="mt-6 break-inside-avoid">
+          <h2 className="font-display text-base font-semibold">Resumen ejecutivo</h2>
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+            {summaryParagraph}
+          </p>
+        </section>
+
+        {/* Alcance y método */}
+        <ScopeNote fecha={fecha} className="mt-5" />
+
+        {/* Indicadores */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {summary.map((c) => (
             <div

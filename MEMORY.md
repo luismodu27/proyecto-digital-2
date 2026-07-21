@@ -123,6 +123,19 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Dossier por sistema: resumen ejecutivo narrativo + nota de alcance.** Tercer y último
+  entregable con narrativa (build+lint+tsc + captura en impresión). El dossier ahora abre con un párrafo
+  **determinista** que sintetiza el sistema: identidad (qué usa la organización, dominio, proveedor, rol declarado),
+  clasificación orientativa + preparación + respaldo, brechas abiertas (o el matiz "pendiente de verificación
+  independiente" si no hay), atestación de la evaluación vigente, y —solo si es AEDT de empleo NY— la sujeción a la
+  auditoría de sesgo anual de la LL144. Debajo, la `ScopeNote` compartida.
+  - **Copy revisado por `compliance-domain-expert`** (3ª ronda). Salvedad crítica: para nivel **"Inaceptable"
+    (Art. 5)** el encuadre de "preparación/brechas" es engañoso (una práctica prohibida no se prepara para
+    auditoría). Variante dedicada que enuncia la prohibición (no comercializable ni usable en la UE desde 2-feb-2025)
+    y redirige a asesoría jurídica; además los KPIs de ese caso dejan de rotular "Preparación %/Brechas abiertas" y
+    muestran "Práctica prohibida (Art. 5)" + "Revisión jurídica". La frase LL144 se condiciona explícitamente a
+    jurisdicción/uso NY ("en la medida en que… decisiones de empleo… en Nueva York") con "auditor independiente".
+
 - **2026-07-21** · **Informe de gap: de tabla plana a documento de evidencia auditable.** Antes era un header + 4
   KPIs + una tabla plana de todas las brechas. Ahora (build+lint+tsc + captura en impresión):
   - **Resumen ejecutivo narrativo** (determinista) + **nota "Alcance y método"** (extraída a `ScopeNote` en
