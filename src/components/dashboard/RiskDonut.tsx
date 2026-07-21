@@ -1,13 +1,8 @@
-import { RISK_LABEL, type RiskLevel } from "@/lib/mock-data";
+import { RISK_LABEL, RISK_HEX, RISK_ORDER, type RiskLevel } from "@/lib/mock-data";
 
-const RISK_COLOR: Record<RiskLevel, string> = {
-  unacceptable: "#b4322a",
-  high: "#c9761f",
-  limited: "#b0824a",
-  minimal: "#0b6b4e",
-};
+const RISK_COLOR = RISK_HEX;
 
-const ORDER: RiskLevel[] = ["unacceptable", "high", "limited", "minimal"];
+const ORDER: RiskLevel[] = RISK_ORDER;
 
 /** Dona de distribución de riesgo (SVG, on-brand). */
 export function RiskDonut({

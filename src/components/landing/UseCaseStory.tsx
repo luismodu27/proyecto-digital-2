@@ -1,14 +1,11 @@
 import { CountUp } from "@/components/ui/CountUp";
 import { FillBar } from "@/components/ui/FillBar";
 import { Reveal } from "@/components/ui/Reveal";
+import { RISK_HEX } from "@/lib/mock-data";
 
-/* Paleta de riesgo (hex inline: colores dinámicos, no tokens tree-shakeados). */
-const C = {
-  high: "#c9761f",
-  limited: "#b0824a",
-  minimal: "#0b6b4e",
-  danger: "#a3271f",
-};
+/* Paleta de riesgo (hex inline: colores dinámicos, no tokens tree-shakeados).
+   Fuente única RISK_HEX + un rojo de acento propio de esta ilustración. */
+const C = { ...RISK_HEX, danger: "#a3271f" };
 
 /* Visual del paso 1 — inventario descubierto. */
 function InventoryVisual() {

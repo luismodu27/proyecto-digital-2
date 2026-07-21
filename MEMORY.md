@@ -123,6 +123,17 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Arreglos P3 (UX/a11y) y P4 (deuda).** **P3:** botón primario con hover por brillo (antes
+  `brand-strong`, menta claro en oscuro → texto blanco ilegible); **menú móvil** (hamburguesa) en la landing;
+  skip-link + landmark `<main>` en el dashboard; encuadre **deployer/proveedor** en `OBLIGATIONS_BY_LEVEL.high`
+  (deberes propios vs "exige y conserva evidencia del proveedor", revisado por el experto); semántica del asistente
+  de riesgo (`role="group"` + `aria-labelledby` + `aria-pressed` + aviso sr-only single/múltiple). **P4:** paleta de
+  riesgo unificada en `RISK_HEX` (mock-data) consumida por RiskDonut y UseCaseStory (antes duplicada); `RISK_ORDER`
+  reutilizado en RiskDonut. **P4 pendiente (mantenibilidad, sin impacto de usuario — checklist en PENDIENTES §Deuda):**
+  unificar los 3 formateadores de cuenta-atrás y los 7 de fecha, fusionar `daysUntil`/`daysUntilDate`, y feature-flag
+  explícito del módulo `analista/` (RAG a medio cablear). Los 2 ítems BAJA de seguridad (reminders GET/CSRF,
+  rate-limit del waitlist) también quedan documentados sin tocar (tocan cron/email aún no activo).
+
 - **2026-07-21** · **Arreglos P2 (correctness de datos).** (a) El widget "Próximo hito" del dashboard y el PDF
   ejecutivo usaban `upcomingDeadlines(now)` sobre el catálogo curado, ignorando los eventos publicados por el
   pipeline (que sí salen en el radar). Ahora ambos pasan `getRegulatoryEvents()` → fuente única con la vigilancia.

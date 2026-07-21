@@ -253,3 +253,25 @@ El **foso automatizado** (Vigía + Analista + Validador) está completo y verifi
 2. Pregunta al fundador en qué punto está de los pendientes 🔴 (sobre todo Stripe y dominio).
 3. Rama de trabajo: `claude/init-3bwfhm`; se pushea también a `main` (Vercel redespliega solo).
 4. Verificación: `npm run build` + `npm run lint` + `npx tsc --noEmit` (no hay tests); backend real por curl.
+
+---
+
+## Deuda técnica pendiente (P4 — auditoría 2026-07-21)
+
+Mantenibilidad, **sin impacto de usuario**; no urgente. Del escaneo completo:
+
+- [ ] Unificar los **3 formateadores de cuenta-atrás** en español (`task-reminders.ts:dueLabel`,
+  `BiasAuditBadge.tsx:countdownText`, `reminders/email.ts:countdown`) en un helper único en `lib/`.
+- [ ] Fusionar **`daysUntil`** (`regulatory-watch.ts`) y **`daysUntilDate`** (`bias-audit.ts`) en una sola
+  función que acepte `string | null`.
+- [ ] Centralizar los **~7 formateadores de fecha** `toLocaleDateString("es-ES", …)` repartidos por páginas
+  (facturación, informes, vigilancia, equipo, dossier) en 2-3 helpers nombrados (`fmtFechaLarga`/`fmtFechaCorta`).
+- [ ] Reutilizar **`RISK_ORDER`** en los sitios que aún re-declaran el orden de niveles
+  (`CandidateReviewControls.tsx`, `analista/llm.ts`, `reg-pipeline-actions.ts`).
+- [ ] Feature-flag explícito / nota del módulo **`analista/`** (RAG con Voyage+LLM, a medio cablear; `TODO(B.1)`
+  en `voyage.ts`) para que no quede como código semi-muerto.
+
+### Seguridad — ítems BAJA documentados (auditoría 2026-07-21)
+- [ ] `api/reminders/run`: exigir **POST** (o token CSRF) en el modo sesión (hoy acepta GET → CSRF de bajo
+  impacto). Tocar cuando se active el cron de correos.
+- [ ] `submitWaitlist`: **rate-limit / captcha** (hoy solo honeypot cliente) para evitar spam al fundador.

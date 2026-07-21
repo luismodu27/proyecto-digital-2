@@ -22,6 +22,19 @@ export const RISK_LABEL: Record<RiskLevel, string> = {
   minimal: "Riesgo mínimo",
 };
 
+/**
+ * Paleta de riesgo (hex saturado, igual en claro y oscuro) para SVG/gráficos
+ * donde el color inline no puede venir de una clase Tailwind. Fuente única:
+ * consúmela, no la re-declares por componente. Para texto/tono semántico usa
+ * los tokens `--tone-*` (que sí adaptan al tema).
+ */
+export const RISK_HEX: Record<RiskLevel, string> = {
+  unacceptable: "#b4322a",
+  high: "#c9761f",
+  limited: "#b0824a",
+  minimal: "#0b6b4e",
+};
+
 export type AiSystem = {
   id: string; // código visible (p. ej. SYS-001) o uuid si no hay código
   dbId?: string; // uuid real en BD (para editar/borrar; ausente en modo demo)
