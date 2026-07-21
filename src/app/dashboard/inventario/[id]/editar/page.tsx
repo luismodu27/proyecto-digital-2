@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
-import { Button, ButtonLink } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { DeleteSystemButton } from "@/components/dashboard/DeleteSystemButton";
 import { AssessmentHistory } from "@/components/dashboard/AssessmentHistory";
 import {
@@ -114,7 +115,7 @@ export default async function EditarSistemaPage({
               </div>
             </div>
             <div className="flex gap-3 pt-2">
-              <Button type="submit">Guardar cambios</Button>
+              <SubmitButton pendingText="Guardando…">Guardar cambios</SubmitButton>
               <Link
                 href="/dashboard/inventario"
                 className="inline-flex items-center justify-center rounded-full border border-line-strong px-5 py-2.5 text-sm font-medium text-ink hover:bg-paper-sunken"
@@ -269,7 +270,7 @@ export default async function EditarSistemaPage({
                   </p>
                 )}
 
-                <Button type="submit">Guardar auditoría de sesgo</Button>
+                <SubmitButton pendingText="Guardando…">Guardar auditoría de sesgo</SubmitButton>
               </form>
             </div>
           )}

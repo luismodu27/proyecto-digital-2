@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageHeader, Meter } from "@/components/dashboard/parts";
-import { Button, ButtonLink } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { EvidenceBadge } from "@/components/ui/EvidenceBadge";
 import { getAiSystems, isSupabaseConfigured } from "@/lib/data";
@@ -37,9 +38,9 @@ export default async function InventarioPage() {
             </ButtonLink>
             {isSupabaseConfigured && (
               <form action={seedSampleData}>
-                <Button type="submit" variant="outline">
+                <SubmitButton variant="outline" pendingText="Cargando ejemplo…">
                   Cargar datos de ejemplo
-                </Button>
+                </SubmitButton>
               </form>
             )}
           </div>

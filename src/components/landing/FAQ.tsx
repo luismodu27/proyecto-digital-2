@@ -5,7 +5,7 @@ const faqs = [
   },
   {
     q: "¿La IA que filtra o puntúa candidatos es de alto riesgo?",
-    a: "Sí. La IA usada para selección de personal (cribado de CVs, ranking, entrevistas por vídeo, tests) entra en el Anexo III (empleo) del EU AI Act como alto riesgo. Eso implica obligaciones de supervisión humana, control de sesgo y evidencia — justo lo que Attesta organiza por ti.",
+    a: "Por regla general, sí. La IA usada para selección de personal (cribado de CVs, ranking, entrevistas por vídeo, tests) entra en el Anexo III (empleo) del EU AI Act como alto riesgo. Existe una excepción acotada (Art. 6.3) para tareas muy limitadas, pero casi nunca aplica cuando el sistema perfila o puntúa a personas. Implica obligaciones de supervisión humana, control de sesgo y evidencia — justo lo que Attesta organiza por ti, y el asistente de riesgo evalúa esa excepción por ti.",
   },
   {
     q: "Usamos IA de terceros, no la desarrollamos. ¿Nos sirve?",

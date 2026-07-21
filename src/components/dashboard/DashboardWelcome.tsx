@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Button, ButtonLink } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { seedSampleData } from "@/lib/data/actions";
 
 /** Los tres movimientos del recorrido de gobernanza, en orden. */
@@ -102,9 +103,9 @@ export function DashboardWelcome({
             </ButtonLink>
             {canSeed && (
               <form action={seedSampleData}>
-                <Button type="submit" variant="outline">
+                <SubmitButton variant="outline" pendingText="Cargando ejemplo…">
                   Explorar con datos de ejemplo
-                </Button>
+                </SubmitButton>
               </form>
             )}
           </div>

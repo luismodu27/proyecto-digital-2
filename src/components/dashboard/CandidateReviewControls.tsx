@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { enrichCandidate, rejectCandidate } from "@/lib/data/reg-pipeline-actions";
 import { REG_KIND_LABEL, FRAMEWORK_META } from "@/lib/regulatory-watch";
 import { RISK_LABEL, type RegCandidate } from "@/lib/mock-data";
@@ -23,9 +23,25 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState(c.kind ?? "");
   const [date, setDate] = useState(c.date ?? "");
+  const [rejecting, setRejecting] = useState(false);
+  const [note, setNote] = useState("");
+  const rejectFormRef = useRef<HTMLFormElement>(null);
+  const noteRef = useRef<HTMLTextAreaElement>(null);
+  const rejectTitleId = useId();
 
   const publishable = Boolean(kind && date);
   const isSignal = !c.kind || !c.date;
+
+  // Modal de descarte accesible (sustituye a window.prompt): foco al abrir + Escape.
+  useEffect(() => {
+    if (!rejecting) return;
+    noteRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setRejecting(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [rejecting]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -38,33 +54,80 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
           {open ? "Cerrar editor" : isSignal ? "Completar y publicar" : "Editar y publicar"}
         </button>
 
-        <form
-          action={rejectCandidate}
-          onSubmit={(e) => {
-            const note = window.prompt(
-              `Motivo para descartar «${c.title}» (opcional):`,
-              "",
-            );
-            if (note === null) {
-              e.preventDefault();
-              return;
-            }
-            const hidden = e.currentTarget.elements.namedItem(
-              "note",
-            ) as HTMLInputElement | null;
-            if (hidden) hidden.value = note;
-          }}
-        >
+        <form action={rejectCandidate} ref={rejectFormRef}>
           <input type="hidden" name="id" value={c.id} />
-          <input type="hidden" name="note" value="" />
+          <input type="hidden" name="note" value={note} />
           <button
-            type="submit"
+            type="button"
+            onClick={() => setRejecting(true)}
             className="text-xs font-medium text-muted transition-colors hover:text-[var(--tone-danger-fg)]"
           >
             Descartar
           </button>
         </form>
       </div>
+
+      {rejecting && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={rejectTitleId}
+        >
+          <button
+            type="button"
+            aria-label="Cerrar"
+            onClick={() => setRejecting(false)}
+            className="absolute inset-0 cursor-default bg-ink/40 backdrop-blur-[2px]"
+          />
+          <div className="relative w-full max-w-sm rounded-2xl border border-line bg-paper-raised p-6 shadow-[0_24px_60px_-24px_rgba(15,26,20,0.55)]">
+            <h2
+              id={rejectTitleId}
+              className="font-display text-base font-semibold text-ink"
+            >
+              Descartar candidato
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+              Vas a descartar «{c.title}». Puedes anotar un motivo (opcional)
+              para el registro.
+            </p>
+            <label
+              htmlFor={`rej-${c.id}`}
+              className={`${labelCls} mt-4 block`}
+            >
+              Motivo (opcional)
+            </label>
+            <textarea
+              id={`rej-${c.id}`}
+              ref={noteRef}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={3}
+              placeholder="p. ej. duplicado, ruido, ya cubierto…"
+              className={`${inputCls} mt-1`}
+            />
+            <div className="mt-5 flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setRejecting(false)}
+                className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setRejecting(false);
+                  rejectFormRef.current?.requestSubmit();
+                }}
+                className="inline-flex items-center justify-center rounded-full border border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)] px-4 py-2 text-sm font-medium text-[var(--tone-danger-fg)] transition-colors hover:opacity-90"
+              >
+                Descartar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isSignal && !open && (
         <p className="max-w-xl text-xs text-muted">

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
-import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { getSystemsForSelect, isSupabaseConfigured } from "@/lib/data";
 import { createGapItem } from "@/lib/data/actions";
 
@@ -96,7 +96,7 @@ export default async function NuevaBrechaPage() {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button type="submit">Añadir brecha</Button>
+            <SubmitButton pendingText="Añadiendo…">Añadir brecha</SubmitButton>
             <Link
               href="/dashboard/gap"
               className="inline-flex items-center justify-center rounded-full border border-line-strong px-5 py-2.5 text-sm font-medium text-ink hover:bg-paper-sunken"

@@ -293,3 +293,14 @@ Mantenibilidad, **sin impacto de usuario**; no urgente. Del escaneo completo:
 - [x] ~~**`select("*")` → columnas explícitas**~~ — ✅ hecho (2026-07-21): `getAiSystems` y `getGapItems` enumeran
   columnas (sin las 6 de bias-audit 0019, que no usan). `getSystemDossier` se deja con `*` **a propósito**: sí usa las
   columnas de sesgo y necesita el fallback seguro si 0019 no está aplicada.
+
+### Follow-ups de la tanda P3 (2026-07-21) — lo que quedó abierto
+Hecho en P3: skip-link landing, matiz Art. 6(3) en FAQ, `SubmitButton` (estados "enviando"), modal accesible de
+descarte (fuera `window.prompt`), `engines`, `apiVersion` Stripe, React 19.2.7, README, borrado `patches/0005`.
+Queda (bajo, deferido con motivo):
+- [ ] **`tsconfig` `noUncheckedIndexedAccess`**: barrería muchos accesos indexados a datos del cliente (más seguridad
+  de tipos real), pero surface decenas de errores → merece su propia tanda dedicada, no un cambio suelto.
+- [ ] **Stats de `ProblemStats`** (78% / 83%) sin fuente citada: **decisión de contenido tuya** — o citamos la fuente
+  (nota al pie) o suavizamos a lenguaje de estimación. No lo toqué para no debilitar el gancho sin tu criterio.
+- [ ] `npm audit`: 2 moderate en `postcss` **vendorizado por Next** (build-time, no accionable sin update de Next). Aceptado.
+- [ ] Cosméticos: parpadeo de icono en `ThemeToggle` tras montaje; dots decorativos con hex fijo (semáforo macOS, intencional).

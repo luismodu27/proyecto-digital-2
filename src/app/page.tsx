@@ -17,8 +17,14 @@ import { Reveal } from "@/components/ui/Reveal";
 export default function Home() {
   return (
     <>
+      <a
+        href="#contenido"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
+      >
+        Saltar al contenido
+      </a>
       <SiteHeader />
-      <main>
+      <main id="contenido">
         <Hero />
         <Reveal>
           <TrustStrip />

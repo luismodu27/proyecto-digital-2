@@ -11,6 +11,9 @@ export function getStripe(): Stripe {
   }
   if (!cached) {
     cached = new Stripe(STRIPE_SECRET_KEY, {
+      // Fijada explícitamente para que una actualización del SDK no cambie en
+      // silencio la versión de la API de Stripe (coincide con la del SDK v22).
+      apiVersion: "2026-06-24.dahlia",
       appInfo: { name: "Attesta" },
     });
   }

@@ -140,6 +140,20 @@ diseño, nombre, features grandes); autónomo en lo demás.
   render en dashboard/plan/vigilancia); `getExportBundle` pasa de N+1 (2 consultas por sistema) a **2 consultas batch**
   (`.in(...)`) para toda la org. tsc + lint + build OK.
 
+- **2026-07-21** · **Diferido de P2 + tanda P3 (UX/a11y + infra).** **Diferido:** `getAiSystems`/`getGapItems` con
+  columnas explícitas (fuera las 6 de bias-audit 0019 que no usan); `getSystemDossier` se queda con `*` a propósito
+  (sí las usa + fallback seguro). **P3 UX/a11y:** (a) **skip-link** "Saltar al contenido" en la landing (ya lo tenía el
+  dashboard); (b) matiz **Art. 6(3)** en la FAQ ("por regla general, de alto riesgo… excepción acotada que casi nunca
+  aplica al perfilado"); (c) **`SubmitButton`** reutilizable (`useFormStatus`: disabled + aria-busy + texto "…")
+  aplicado a los formularios de creación/seed (inventario nuevo/editar, gap/nuevo, seed del welcome y del inventario);
+  (d) **modal accesible de descarte** en `CandidateReviewControls` (textarea etiquetado + Escape + foco) en vez de
+  `window.prompt`. **P3 infra:** `engines: node>=20`; `apiVersion` de Stripe pineada (`2026-06-24.dahlia`, evita
+  cambios silenciosos del SDK); React 19.2.4→**19.2.7** (patch); README actualizado (Attesta, estado real); borrado
+  `supabase/patches/0005` (redundante, ya plegado en 0003). **Deferido (documentado en PENDIENTES):** `tsconfig`
+  `noUncheckedIndexedAccess` (barrería muchos accesos indexados, requiere su propia tanda), stats de `ProblemStats` sin
+  fuente (decisión de contenido del fundador), npm audit moderate (postcss vendorizado por Next, no accionable), y los
+  ítems BAJA de seguridad (reminders GET, rate-limit waitlist, recompute de `saveRiskAssessment`). tsc + lint + build OK.
+
 - **2026-07-21** · **Tanda P2 (correctness + coherencia de compliance + dark mode + perf/bundle).**
   **Bugs de datos:** (a) `gap/page.tsx` mostraba el **UUID crudo** como "Sistema afectado" para sistemas sin `code`
   (creados por el usuario) → ahora resuelve el nombre con `getAiSystems()` (mismo patrón que el PDF) + singular/plural;

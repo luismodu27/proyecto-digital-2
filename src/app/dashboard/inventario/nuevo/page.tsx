@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
-import { Button } from "@/components/ui/Button";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { createAiSystem } from "@/lib/data/actions";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -68,7 +68,7 @@ export default function NuevoSistemaPage() {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button type="submit">Registrar sistema</Button>
+            <SubmitButton pendingText="Registrando…">Registrar sistema</SubmitButton>
             <Link
               href="/dashboard/inventario"
               className="inline-flex items-center justify-center rounded-full border border-line-strong px-5 py-2.5 text-sm font-medium text-ink hover:bg-paper-sunken"
