@@ -7,6 +7,7 @@ import {
   getGapItems,
   getOrganizationName,
   getOrgJurisdictions,
+  getRegulatoryEvents,
 } from "@/lib/data";
 import { getActiveOrg } from "@/lib/data/context";
 import { orgHasTier } from "@/lib/billing/plan";
@@ -54,11 +55,12 @@ export default async function InformeEjecutivoPage() {
     );
   }
 
-  const [systems, gaps, orgName, orgJur] = await Promise.all([
+  const [systems, gaps, orgName, orgJur, regEvents] = await Promise.all([
     getAiSystems(),
     getGapItems(),
     getOrganizationName(),
     getOrgJurisdictions(),
+    getRegulatoryEvents(),
   ]);
 
   const now = new Date();
@@ -88,7 +90,7 @@ export default async function InformeEjecutivoPage() {
     })
     .slice(0, 5);
 
-  const deadlines = upcomingDeadlines(now)
+  const deadlines = upcomingDeadlines(now, regEvents)
     .filter(
       (e) =>
         orgJur.length === 0 ||
@@ -114,6 +116,7 @@ export default async function InformeEjecutivoPage() {
 
   const org = orgName ?? "La organización";
   const nearest = deadlines[0];
+  const nearestDays = nearest ? daysUntil(nearest.date, now) : 0;
   // Ensamblado determinista (cero LLM) del resumen ejecutivo a partir de los
   // datos ya declarados por la organización. Copy revisado por compliance.
   const pl = (n: number, one: string, many: string) => (n === 1 ? one : many);
@@ -132,7 +135,7 @@ export default async function InformeEjecutivoPage() {
             ? `${belowReady} ${pl(belowReady, "sistema de alto riesgo está", "sistemas de alto riesgo están")} por debajo del umbral orientativo de preparación (${AUDIT_READY_THRESHOLD}% listo) y se ${pl(belowReady, "señala", "señalan")} para atención prioritaria.`
             : null,
           nearest
-            ? `El próximo hito regulatorio en el radar de la organización es «${nearest.title}», dentro de ${daysUntil(nearest.date, now)} días.`
+            ? `El próximo hito regulatorio en el radar de la organización es «${nearest.title}», dentro de ${nearestDays} ${pl(nearestDays, "día", "días")}.`
             : null,
         ]
           .filter(Boolean)
@@ -358,7 +361,7 @@ export default async function InformeEjecutivoPage() {
                       </span>
                     </span>
                     <span className="shrink-0 text-xs font-medium tabular-nums text-ink-soft">
-                      en {d} días
+                      en {d} {d === 1 ? "día" : "días"}
                     </span>
                   </li>
                 );

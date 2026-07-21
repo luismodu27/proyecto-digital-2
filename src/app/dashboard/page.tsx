@@ -13,6 +13,7 @@ import {
   getGapItems,
   getOrgMembers,
   getOrganizationName,
+  getRegulatoryEvents,
   isSupabaseConfigured,
 } from "@/lib/data";
 import { getCurrentUser } from "@/lib/data/context";
@@ -34,7 +35,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function DashboardOverview() {
-  const [systems, orgJur, tasks, gaps, members, user, orgName] =
+  const [systems, orgJur, tasks, gaps, members, user, orgName, regEvents] =
     await Promise.all([
       getAiSystems(),
       getOrgJurisdictions(),
@@ -43,6 +44,7 @@ export default async function DashboardOverview() {
       getOrgMembers(),
       getCurrentUser(),
       getOrganizationName(),
+      getRegulatoryEvents(),
     ]);
 
   // Nombre de pila para el saludo (solo si hay un nombre real en el perfil; no
@@ -98,7 +100,7 @@ export default async function DashboardOverview() {
   const inNexus = (e: RegulatoryEvent) =>
     orgJur.length === 0 ||
     orgJur.includes(FRAMEWORK_META[e.framework]?.jurisdiction ?? "");
-  const nextDeadline = upcomingDeadlines(now).filter(inNexus)[0];
+  const nextDeadline = upcomingDeadlines(now, regEvents).filter(inNexus)[0];
   const nextDays = nextDeadline ? daysUntil(nextDeadline.date, now) : 0;
   const nextAffected = nextDeadline
     ? affectedSystems(nextDeadline, systems).length

@@ -36,7 +36,8 @@ function formatAgo(iso: string, now: Date): string {
   if (d < 30) return `hace ${d} ${d === 1 ? "día" : "días"}`;
   const mo = Math.round(d / 30);
   if (mo < 12) return `hace ${mo} ${mo === 1 ? "mes" : "meses"}`;
-  return `hace ${Math.round(mo / 12)} años`;
+  const y = Math.round(mo / 12);
+  return `hace ${y} ${y === 1 ? "año" : "años"}`;
 }
 
 function formatExact(iso: string): string {

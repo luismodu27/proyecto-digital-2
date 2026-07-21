@@ -726,11 +726,14 @@ export async function getGapItems(): Promise<GapItem[]> {
 
   if (error || !data) return [];
 
+  const VALID_STATUS: GapItem["status"][] = ["missing", "partial", "done"];
   return data.map((row) => ({
     id: row.id,
     requirement: row.requirement,
     article: row.article ?? "",
-    status: row.status as GapItem["status"],
+    // Red segura simétrica a `severity`: un valor fuera del enum no rompe las
+    // pantallas que indexan STATUS_META[status] (dossier, gap).
+    status: VALID_STATUS.includes(row.status) ? row.status : "missing",
     severity: SEVERITY_ES[row.severity] ?? "media",
     system: row.ai_systems?.code ?? row.ai_system_id,
   }));

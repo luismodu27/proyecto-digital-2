@@ -123,6 +123,13 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Arreglos P2 (correctness de datos).** (a) El widget "Próximo hito" del dashboard y el PDF
+  ejecutivo usaban `upcomingDeadlines(now)` sobre el catálogo curado, ignorando los eventos publicados por el
+  pipeline (que sí salen en el radar). Ahora ambos pasan `getRegulatoryEvents()` → fuente única con la vigilancia.
+  (b) Pluralización en el PDF ejecutivo ("en 1 día", "dentro de N días") y en el "hace N años" de Actividad.
+  (c) `getGapItems` (supabase-repo) valida `status` contra el enum con fallback "missing" (red simétrica a la de
+  `severity`), para que STATUS_META[status] no rompa en dossier/gap ante un valor inesperado.
+
 - **2026-07-21** · **Escaneo completo del producto (5 auditorías en paralelo) + arreglos P0/P1.** Correctness,
   seguridad, UX/a11y, copy y deuda técnica. Sin bugs de crash ni fugas cross-tenant. **P0 (commit):** copy
   "cumplimiento"→"preparación" (`recommendations.ts`), landing "audit-trail inmutable"→"verificable" (coherente con
