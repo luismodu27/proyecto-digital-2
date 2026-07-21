@@ -45,6 +45,15 @@ const SEVERITY_ES: Record<string, GapItem["severity"]> = {
  * Repositorio real sobre Supabase. RLS garantiza el aislamiento por tenant;
  * además filtramos por la organización activa.
  */
+/**
+ * Columnas de `ai_systems` que consume la lista (NO incluye las de bias-audit de
+ * 0019, que solo usa el dossier). Todas son fundacionales (0001 + evidence_state
+ * de 0006), así que enumerarlas explícitamente no reintroduce riesgo de fallback
+ * y evita traer las ~6 columnas de sesgo en cada render del dashboard.
+ */
+const AI_SYSTEM_LIST_COLS =
+  "id, code, name, owner, domain, vendor, risk_level, compliance_pct, last_reviewed_at, evidence_state";
+
 export async function getAiSystems(): Promise<AiSystem[]> {
   const supabase = await createClient();
   const org = await getActiveOrg();
@@ -52,7 +61,7 @@ export async function getAiSystems(): Promise<AiSystem[]> {
 
   const { data, error } = await supabase
     .from("ai_systems")
-    .select("*")
+    .select(AI_SYSTEM_LIST_COLS)
     .eq("organization_id", org)
     .order("created_at", { ascending: true });
 
@@ -806,21 +815,28 @@ export async function getGapItems(): Promise<GapItem[]> {
 
   const { data, error } = await supabase
     .from("gap_items")
-    .select("*, ai_systems(code)")
+    .select("id, requirement, article, status, severity, ai_system_id, ai_systems(code)")
     .eq("organization_id", org)
     .order("created_at", { ascending: true });
 
   if (error || !data) return [];
 
   const VALID_STATUS: GapItem["status"][] = ["missing", "partial", "done"];
-  return data.map((row) => ({
-    id: row.id,
-    requirement: row.requirement,
-    article: row.article ?? "",
-    // Red segura simétrica a `severity`: un valor fuera del enum no rompe las
-    // pantallas que indexan STATUS_META[status] (dossier, gap).
-    status: VALID_STATUS.includes(row.status) ? row.status : "missing",
-    severity: SEVERITY_ES[row.severity] ?? "media",
-    system: row.ai_systems?.code ?? row.ai_system_id,
-  }));
+  return data.map((row) => {
+    // La relación embebida `ai_systems` es to-one (en runtime un objeto), pero
+    // los tipos generados la infieren como array: normalizamos ambos casos.
+    const sys = Array.isArray(row.ai_systems)
+      ? row.ai_systems[0]
+      : row.ai_systems;
+    return {
+      id: row.id,
+      requirement: row.requirement,
+      article: row.article ?? "",
+      // Red segura simétrica a `severity`: un valor fuera del enum no rompe las
+      // pantallas que indexan STATUS_META[status] (dossier, gap).
+      status: VALID_STATUS.includes(row.status) ? row.status : "missing",
+      severity: SEVERITY_ES[row.severity] ?? "media",
+      system: sys?.code ?? row.ai_system_id,
+    };
+  });
 }
