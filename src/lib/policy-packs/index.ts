@@ -7,12 +7,18 @@ export type { PolicySeverity, PolicyControl, PolicyPack } from "./types";
 
 import type { PolicyPack } from "./types";
 import { RRHH_PACK } from "./rrhh";
+import { GESTION_TRABAJADORES_PACK } from "./gestion-trabajadores";
 import { US_HIRING_PACK } from "./us-hiring";
 
 export { RRHH_PACK } from "./rrhh";
+export { GESTION_TRABAJADORES_PACK } from "./gestion-trabajadores";
 export { US_HIRING_PACK } from "./us-hiring";
 
-export const POLICY_PACKS: PolicyPack[] = [RRHH_PACK, US_HIRING_PACK];
+export const POLICY_PACKS: PolicyPack[] = [
+  RRHH_PACK,
+  GESTION_TRABAJADORES_PACK,
+  US_HIRING_PACK,
+];
 
 /** Devuelve un pack por su id (o null si no existe). */
 export function getPolicyPack(id: string): PolicyPack | null {

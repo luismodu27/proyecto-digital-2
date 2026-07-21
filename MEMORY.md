@@ -126,6 +126,31 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Foso — nuevo policy pack "Gestión y monitorización de trabajadores" (APROBADO por el fundador).**
+  Tras la 2ª verificación completa, el fundador eligió *ampliar el foso* con un 2º **caso de uso** (los dos packs previos
+  —`rrhh` y `us-hiring`— eran la misma vertical: contratación). Vertical elegida por recomendación: **gestión de
+  trabajadores** (people analytics), la *otra mitad* del **Anexo III.4**: el punto **4.(b)** (evaluación de desempeño,
+  asignación de tareas, promoción/terminación, monitorización) frente al 4.(a) de selección. Razón estratégica:
+  profundiza la cuña de RRHH, mismo comprador (People/RRHH), riesgo legal bajo (misma familia de artículos), venta
+  natural a quien ya tiene un sistema de selección inventariado.
+  - **Nuevo pack `policy-packs/gestion-trabajadores.ts`** (21 controles del **deployer**), verificado por el
+    `compliance-domain-expert` (2026-07-21) contra el texto literal del Anexo III.4.b, Arts. 4/5/14/15/26/27/50/86,
+    RGPD Arts. 5/13-14/22/35/**88** y TEDH (Bărbulescu 2017, López Ribalda GS 2019). Registrado en `index.ts`
+    (`POLICY_PACKS`, entre los dos packs UE); la UI de `/dashboard/packs` lo renderiza sola.
+  - **Añadidos vs RRHH:** `emociones-prohibicion` (Art. 5.1.f), `scoring-social-limite` (Art. 5.1.c),
+    `practicas-manipulativas` (Art. 5.1.a/b), `monitorizacion-proporcionada` (RGPD 5.1.c + TEDH),
+    `normativa-laboral-nacional` (Art. 88 RGPD — consulta a representantes, mosaico nacional), `explicacion` (Art. 86).
+    **Eliminado** lo específico de selección (datos = CVs, transparencia-candidato, chatbot). **Subido a `alta`**
+    `info-trabajadores` (aquí es central: relación laboral viva + representantes + consulta previa).
+  - **Trampa clave (verificada):** inferir emociones en el trabajo (Art. 5.1.f) es práctica **PROHIBIDA**, no de alto
+    riesgo → "se cesa, no se prepara". Igual que RRHH, se refleja por **copy** (control de **triaje**: cerrar la brecha =
+    "verifiqué que NO infiere emociones / cesé el uso", no "preparé una práctica prohibida"). Plazos confirmados: Art. 4 y
+    Art. 5 vigentes desde 2-feb-2025; Art. 50 el 2-ago-2026; alto riesgo Anexo III aplazado al **2-dic-2027** (Omnibus).
+  - **Follow-up estructural anotado en PENDIENTES** (deuda BAJA): el `applyPolicyPack` inserta todo control como
+    `gap_item` "missing" que computa en "% listo"; un tipo "prohibido" propio (fuera del cómputo, como el nivel
+    Inaceptable del dossier) sería más limpio que resolverlo por copy. No se implementó ahora (fuera de alcance del pack).
+  - Verificado: tsc + lint + build (exit 0).
+
 - **2026-07-21** · **Resuelto merge del PR #3 + análisis profundo (6 auditorías) + tanda P1.**
   **Merge:** la base del PR (`claude/startup-project-setup-612pzs`) traía un Vigía temprano paralelo; se resolvió a
   favor de esta rama (foso completo `reg-watch/` + `analista/`) y se descartaron los duplicados de la base

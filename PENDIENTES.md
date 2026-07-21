@@ -320,3 +320,10 @@ Queda (BAJO, deferido):
   (solo renderizan `ConfirmSubmit`/`<form action>`, que ya son client): saca unos bytes del bundle. Cleanup de altitud.
 - [ ] Modal de descarte: foco RESTAURADO al cerrar ✅, pero sin **focus-trap** completo (Tab puede salir al fondo). Menor.
 - [ ] Vercel: 2 crons semanales = límite del plan Hobby. Un 3er cron requeriría Pro. Informativo.
+- [ ] **Policy packs — tipo "prohibido" propio (a raíz del pack `gestion-trabajadores`, 2026-07-21).** El
+  `emociones-prohibicion` (Art. 5.1.f) es práctica PROHIBIDA, no una brecha ordinaria; hoy `applyPolicyPack` lo inserta
+  como `gap_item` "missing" que computa en "% listo" igual que los demás (se mitiga por copy: control de triaje). Más
+  limpio sería un flag/severidad "prohibido" en `PolicyControl` que quede **fuera del cómputo de preparación** y se
+  renderice como el nivel Inaceptable del dossier ("Práctica prohibida (Art. 5)" + "Revisión jurídica"). Requiere tocar
+  `types.ts` + `applyPolicyPack` + la UI de `packs`/`gap` → tanda propia, no cambio suelto. Aplica también al control
+  `transparencia-chatbot-emociones` del pack RRHH.
