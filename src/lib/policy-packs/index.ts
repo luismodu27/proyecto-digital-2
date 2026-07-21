@@ -9,17 +9,20 @@ import type { PolicyPack } from "./types";
 import { RRHH_PACK } from "./rrhh";
 import { GESTION_TRABAJADORES_PACK } from "./gestion-trabajadores";
 import { ATENCION_CLIENTE_GENAI_PACK } from "./atencion-cliente-genai";
+import { CREDITO_SEGUROS_PACK } from "./credito-seguros";
 import { US_HIRING_PACK } from "./us-hiring";
 
 export { RRHH_PACK } from "./rrhh";
 export { GESTION_TRABAJADORES_PACK } from "./gestion-trabajadores";
 export { ATENCION_CLIENTE_GENAI_PACK } from "./atencion-cliente-genai";
+export { CREDITO_SEGUROS_PACK } from "./credito-seguros";
 export { US_HIRING_PACK } from "./us-hiring";
 
 export const POLICY_PACKS: PolicyPack[] = [
   RRHH_PACK,
   GESTION_TRABAJADORES_PACK,
   ATENCION_CLIENTE_GENAI_PACK,
+  CREDITO_SEGUROS_PACK,
   US_HIRING_PACK,
 ];
 

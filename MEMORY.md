@@ -126,6 +126,30 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Foso — nuevo policy pack "Crédito y seguros" (APROBADO por el fundador).**
+  Quinto pack, cuarto CASO DE USO, el de mayor valor por ticket. **Alto riesgo del Anexo III.5.b** (scoring de solvencia
+  de personas físicas, con excepción de detección de fraude) y **5.c** (pricing de seguros de vida y salud). Comprador:
+  banco/fintech/aseguradora mid-market.
+  - **Nuevo pack `policy-packs/credito-seguros.ts`** (23 controles), verificado por el `compliance-domain-expert`
+    (2026-07-21) contra el texto literal del Anexo III.5.b/5.c, Art. 6(3), Arts. 4/26/27/86 + 10/11/15/25 (proveedor),
+    RGPD 5/9/13-14/22/35, jurisprudencia TJUE y normativa sectorial. Registrado en `index.ts` (tras
+    `atencion-cliente-genai`, antes del pack de EE. UU.).
+  - **LA gran diferencia con RRHH (verificada):** aquí la **FRIA (Art. 27) SÍ es OBLIGATORIA** aunque el deployer sea
+    entidad privada ordinaria — el Art. 27.1 la exige expresamente a los deployers del Anexo III **5.b y 5.c** (RRHH es
+    4.b, fuera de esa lista → no obligatoria). Control destacado, severidad alta, con los 6 apartados del 27.1 + la
+    notificación a la autoridad (27.3) + complemento con la DPIA (27.4).
+  - **Otros matices clave verificados:** (1) **SCHUFA** (TJUE C-634/21): generar el score YA es decisión automatizada del
+    Art. 22 si un tercero se apoya en él de forma determinante. (2) **Test-Achats** (C-236/09 + Dir. 2004/113/CE):
+    **tarifa unisex** obligatoria en seguros. (3) **Datos de salud** = categoría especial (RGPD Art. 9) en vida/salud.
+    (4) **Exención de detección de fraude** del 5.b (triaje: no "limpia" la función de scoring si conviven). (5) Solo
+    **personas físicas** (jurídicas fuera) y solo **vida/salud** (auto/hogar fuera). (6) **Art. 6(3)** NO permite escapar
+    del alto riesgo porque hay perfilado. (7) Normativa sectorial (CCD 2023/2225, MCD 2014/17, IDD, Solvencia II) en un
+    solo control "sigue aplicando en paralelo", sin sobre-desarrollar.
+  - **Plazo:** alto riesgo Anexo III → **2-dic-2027** (Omnibus). Tres controles de triaje (clasificación/exención/6.3) →
+    mismo follow-up de PENDIENTES (tipo fuera del cómputo de "% listo").
+  - Verificado: tsc + lint + build (exit 0). **Estado del foso: 5 packs / 4 casos de uso** (selección UE, selección
+    EE. UU., gestión de trabajadores, atención al cliente/generativa, crédito/seguros).
+
 - **2026-07-21** · **Foso — nuevo policy pack "Atención al cliente e IA generativa" (APROBADO por el fundador).**
   Cuarto pack, tercer CASO DE USO. El fundador lo eligió para *ensanchar el embudo*: casi toda empresa mid-market tiene
   chatbot de soporte o usa IA generativa para contenido. **Régimen distinto** a los packs de RRHH: NO es alto riesgo del
