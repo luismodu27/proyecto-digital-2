@@ -126,6 +126,30 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Foso — nuevo policy pack "Atención al cliente e IA generativa" (APROBADO por el fundador).**
+  Cuarto pack, tercer CASO DE USO. El fundador lo eligió para *ensanchar el embudo*: casi toda empresa mid-market tiene
+  chatbot de soporte o usa IA generativa para contenido. **Régimen distinto** a los packs de RRHH: NO es alto riesgo del
+  Anexo III por regla general, sino **transparencia (Art. 50) + GPAI (provider vs deployer) + RGPD** (riesgo limitado).
+  - **Nuevo pack `policy-packs/atencion-cliente-genai.ts`** (18 controles), verificado por el `compliance-domain-expert`
+    (2026-07-21) contra Arts. 4/5/6(2)+Anexo III/25/50.1-50.4/Cap. V, RGPD 5/6/9/13-14/22, las Guidelines de la Comisión
+    sobre Art. 50 (borrador 8-may-2026) y despachos (Gibson Dunn, Morrison Foerster, Greenberg Traurig, Covington).
+    Registrado en `index.ts` (tras `gestion-trabajadores`, antes del pack de EE. UU.); la UI de `/dashboard/packs` lo
+    renderiza sola.
+  - **Matices clave verificados (los que definen la honestidad del pack):** (1) **provider vs deployer** — 50.1 (aviso de
+    chatbot) y 50.2 (marcar contenido sintético) son del **PROVEEDOR**; el deployer *verifica/exige y conserva evidencia*.
+    50.3 (emociones/biométrica) y 50.4 (deepfakes + texto de interés público) son del **DEPLOYER**. (2) **Emociones de
+    CLIENTES ≠ prohibido** (el Art. 5.1.f es solo trabajo/educación), PERO **escala a alto riesgo** (Anexo III.1.c) + RGPD
+    Art. 9 → sale del régimen de este pack. (3) **Excepciones del 50.4**: obra artística/satírica (obligación *reducida*, no
+    exenta) y texto con **control editorial humano sustantivo** (un mero «check» no basta). (4) **GPAI**: quien solo usa un
+    modelo vía API/SaaS es deployer, NO proveedor (Cap. V recae en el proveedor del modelo); línea deployer→proveedor =
+    fine-tuning sustancial bajo marca propia. (5) **Alucinaciones**: NO son incumplimiento del AI Act (no es alto riesgo) →
+    encuadrado como **buena práctica** (protección al consumidor), sin inventar un artículo.
+  - **Plazo confirmado:** Art. 50 aplica el **2-ago-2026** y **NO fue aplazado** por el Digital Omnibus (que solo movió el
+    alto riesgo del Anexo III al 2-dic-2027). Tres controles de **triaje** (clasificación, prohibiciones, emociones) marcados
+    como tal; aplica el mismo follow-up de PENDIENTES (tipo "prohibido"/"reclasifica" fuera del cómputo de "% listo").
+  - Verificado: tsc + lint + build (exit 0). **Estado del foso: 4 packs / 3 casos de uso** (selección UE, selección EE. UU.,
+    gestión de trabajadores, atención al cliente/generativa).
+
 - **2026-07-21** · **Foso — nuevo policy pack "Gestión y monitorización de trabajadores" (APROBADO por el fundador).**
   Tras la 2ª verificación completa, el fundador eligió *ampliar el foso* con un 2º **caso de uso** (los dos packs previos
   —`rrhh` y `us-hiring`— eran la misma vertical: contratación). Vertical elegida por recomendación: **gestión de

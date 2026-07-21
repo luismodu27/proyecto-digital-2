@@ -8,15 +8,18 @@ export type { PolicySeverity, PolicyControl, PolicyPack } from "./types";
 import type { PolicyPack } from "./types";
 import { RRHH_PACK } from "./rrhh";
 import { GESTION_TRABAJADORES_PACK } from "./gestion-trabajadores";
+import { ATENCION_CLIENTE_GENAI_PACK } from "./atencion-cliente-genai";
 import { US_HIRING_PACK } from "./us-hiring";
 
 export { RRHH_PACK } from "./rrhh";
 export { GESTION_TRABAJADORES_PACK } from "./gestion-trabajadores";
+export { ATENCION_CLIENTE_GENAI_PACK } from "./atencion-cliente-genai";
 export { US_HIRING_PACK } from "./us-hiring";
 
 export const POLICY_PACKS: PolicyPack[] = [
   RRHH_PACK,
   GESTION_TRABAJADORES_PACK,
+  ATENCION_CLIENTE_GENAI_PACK,
   US_HIRING_PACK,
 ];
 
