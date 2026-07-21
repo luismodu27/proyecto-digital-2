@@ -5,12 +5,15 @@ import { RiskBadge } from "@/components/ui/RiskBadge";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
 import { DeadlineReminders } from "@/components/dashboard/DeadlineReminders";
 import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
+import { DashboardWelcome } from "@/components/dashboard/DashboardWelcome";
 import {
   getAiSystems,
   getOrgJurisdictions,
   getActionTasks,
   getGapItems,
   getOrgMembers,
+  getOrganizationName,
+  isSupabaseConfigured,
 } from "@/lib/data";
 import { getCurrentUser } from "@/lib/data/context";
 import {
@@ -31,14 +34,22 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function DashboardOverview() {
-  const [systems, orgJur, tasks, gaps, members, user] = await Promise.all([
-    getAiSystems(),
-    getOrgJurisdictions(),
-    getActionTasks(),
-    getGapItems(),
-    getOrgMembers(),
-    getCurrentUser(),
-  ]);
+  const [systems, orgJur, tasks, gaps, members, user, orgName] =
+    await Promise.all([
+      getAiSystems(),
+      getOrgJurisdictions(),
+      getActionTasks(),
+      getGapItems(),
+      getOrgMembers(),
+      getCurrentUser(),
+      getOrganizationName(),
+    ]);
+
+  // Nombre de pila para el saludo (solo si hay un nombre real en el perfil; no
+  // usamos el prefijo del email para no mostrar algo poco natural).
+  const meta = user?.user_metadata as { full_name?: string; name?: string } | undefined;
+  const firstName =
+    (meta?.full_name ?? meta?.name)?.trim().split(/\s+/)[0] ?? null;
 
   // Pasos de activación (primeros pasos). Se ocultan solos al completarse.
   const onboardingSteps = [
@@ -92,6 +103,28 @@ export default async function DashboardOverview() {
   const nextAffected = nextDeadline
     ? affectedSystems(nextDeadline, systems).length
     : 0;
+
+  // Cuenta sin sistemas todavía: en vez de widgets en cero (distribución vacía,
+  // "requieren atención"), damos una bienvenida cálida con la misión y los
+  // caminos para empezar.
+  if (systems.length === 0) {
+    return (
+      <>
+        <PageHeader
+          title="Resumen de gobernanza"
+          subtitle="Tu punto de partida para gobernar la IA con evidencia."
+        />
+        <DashboardWelcome
+          name={firstName}
+          orgName={orgName}
+          canSeed={isSupabaseConfigured}
+          deadline={
+            nextDeadline ? { title: nextDeadline.title, days: nextDays } : null
+          }
+        />
+      </>
+    );
+  }
 
   return (
     <>

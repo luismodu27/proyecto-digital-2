@@ -136,6 +136,12 @@ diseño, nombre, features grandes); autónomo en lo demás.
   - **`EvidenceBadge` honesto:** un sistema sin autoevaluación mostraba "Declarado" por defecto (simulaba
     respaldo). Ahora muestra "Sin clasificar" (borde punteado, muted) — coherente con el nuevo CTA. Solo afecta
     a sistemas sin `evidenceState`; los usos con estado concreto (historial) no cambian.
+  - **(07-21) Estado de bienvenida cálido** (`DashboardWelcome.tsx`): cuando la cuenta no tiene sistemas, el
+    resumen ya no muestra widgets en cero (donut vacío, "requieren atención"), sino un hero con saludo por
+    nombre (solo si hay nombre real en el perfil), la misión con el nombre de la org, el recorrido en 3 pasos
+    (Inventaría → Clasifica → Prepara evidencia), CTA primario "Registrar tu primer sistema" + "Explorar con
+    datos de ejemplo" (`seedSampleData`, solo conectado) y un enlace al próximo hito regulatorio. Verificado
+    por captura en claro y oscuro. El resto del resumen (stats, checklist, donut) reaparece al tener ≥1 sistema.
 
 - **2026-07-20** · **Foso ampliado: pack RRHH-EU completado (Art. 4 + Art. 50) + briefing "aclaración de plazos".**
   Verificado con el `compliance-domain-expert` (fuentes). Hallazgo: el radar ya reflejaba bien el Digital Omnibus
