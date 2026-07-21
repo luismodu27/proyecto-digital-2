@@ -42,8 +42,8 @@ Slides: `QUIEN-1` (marca) · `QUIEN-2` (qué hacemos) · `QUIEN-3` (para quién)
 ## 1 · El dato que duele  ·  🟢 claro  ·  `01-dato.png`
 
 ```
-El 78% de las organizaciones aún no ha dado pasos serios hacia el EU AI Act.
-El 83% ni siquiera tiene un inventario de sus sistemas de IA.
+El 77% admite que su adopción de IA va más rápido que su capacidad de gobernarla.
+Más del 50% no tiene un inventario formal de sus sistemas de IA.
 
 Si usas IA para contratar, evaluar o decidir sobre personas, la pregunta no es
 "si" te tocará prepararte, sino "cuándo".
@@ -52,7 +52,7 @@ Empieza por saber qué IA usas. 👇
 
 ℹ️ Contenido informativo, no asesoría legal.
 ```
-⚠️ **Antes de publicar:** añade la **fuente** exacta del 78% / 83% (encuesta) o suaviza — dato duro sin cita = riesgo de substanciación.
+ℹ️ **Fuentes:** 77% = IBM, estudio de gobernanza de IA (2026); inventario = Cloud Security Alliance (2026). Cifras alineadas con la web.
 #EUAIAct #AIGovernance #GobernanzaDeIA #IAResponsable #Compliance #RiesgoTecnológico #GRC #MidMarket #Attesta #AuditReady #ResponsibleAI
 
 ---
@@ -224,7 +224,7 @@ que lo respalda? Honestidad radical, registro inmutable. 🛡️
 ```
 Del riesgo a la tranquilidad, en un solo flujo. 🛡️
 
-El 78% aún no ha empezado y el 83% no sabe qué IA usa. Así se hace bien:
+El 77% va más rápido en IA que en gobernarla, y más de la mitad no tiene inventario. Así se hace bien:
 
 1 · Descubre tu IA y su riesgo (cribado de CVs, ranking… alto riesgo, Anexo III).
 2 · Cierra brechas sin pagar $500 la hora: un flujo continuo, no un informe viejo.
@@ -300,7 +300,7 @@ Alterna claro/oscuro para que el grid respire.
 - **#10:** la cita se marca como **ejemplo ilustrativo** (no es un cliente real).
 - **Disclaimer** "Contenido informativo, no asesoría legal" añadido a los captions con
   afirmaciones regulatorias (Quiénes somos, 1, 4, 7, 8, 9, narrativo).
-- **Pendiente tuyo antes de publicar #1:** citar la fuente del 78% / 83%.
+- **#1 stats:** actualizadas a **77% / >50%** con fuentes citables (IBM 2026 · Cloud Security Alliance 2026), acorde a la web.
 
 **Exactitud regulatoria verificada:** empleo/selección = alto riesgo (Anexo III pt. 4);
 2 dic 2027 (Digital Omnibus); multas hasta 35 M€/7% (tramo de prohibidas), alto riesgo 15 M€/3%.
