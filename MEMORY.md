@@ -123,6 +123,14 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Landing / conversión.** (a) `WhyNow`: timeline reordenado cronológicamente y liderando con lo
+  ya exigible (Art. 4, feb 2025) y el **plazo más cercano (Art. 50 · 2-ago-2026)**, que faltaba; el hito de 2027
+  reafirma el foso ("no es agosto de 2026, un error extendido en el mercado"). Fechas verificadas, copy a altitude
+  seguro sin misatribuir deployer/proveedor. (b) `WaitlistCTA`: **fila de confianza honesta** (Región UE · contenido
+  del EU AI Act revisado por experto · "no certificamos: preparación honesta") en el punto de conversión — sin
+  logos/testimonios inventados. (c) A11y: `WaitlistCTA` (aria-invalid/describedby, role=alert/status) y `AuthForm`
+  (errores por campo enlazados con aria-describedby + role=alert en los 5 campos).
+
 - **2026-07-21** · **Arreglos P3 (UX/a11y) y P4 (deuda).** **P3:** botón primario con hover por brillo (antes
   `brand-strong`, menta claro en oscuro → texto blanco ilegible); **menú móvil** (hamburguesa) en la landing;
   skip-link + landmark `<main>` en el dashboard; encuadre **deployer/proveedor** en `OBLIGATIONS_BY_LEVEL.high`
