@@ -22,11 +22,12 @@ seguros, salud, edtech) y que **no tienen un equipo GRC dedicado**.
 
 ## 2. El problema (el dolor)
 
-- **48,6%** de las empresas no se ha comprometido en serio con la preparación para el AI Act (Deloitte Legal,
-  encuesta EU AI Act 2024, 500 decisores en Alemania). ⚠️ **NO uses "78%"**: esa cifra venía de un press release de
-  proveedor (Vision Compliance, conflicto de interés) y se descartó el 2026-07-21 (ver §10).
+- **77%** de las empresas reconoce que su adopción de IA avanza más rápido que su capacidad de gobernarla
+  (**IBM**, estudio jun-2026, 2.000 CIO/CTO en 33 países). ⚠️ **NO uses "78%"** (a secas): esa cifra venía de un press
+  release de proveedor (Vision Compliance, conflicto de interés); el 77% de IBM es la fuente creíble y más nueva que la
+  sustituye (actualizado 2026-07-21, ver §10).
 - **Más de la mitad** no tiene un inventario formal de sus sistemas de IA (Cloud Security Alliance, nota 2026).
-  ⚠️ **NO uses "83%"** (misma razón que arriba).
+  ⚠️ **NO uses "83%"**: no tiene fuente independiente sólida.
 - Hoy se resuelve con **hojas de cálculo + consultores a ~$500/hora**.
 - Coste de compliance para grandes empresas estimado en **$8–15M**.
 - Multas de hasta **€35M o 7% de facturación** (Art. 99; más duras que el GDPR).
@@ -125,6 +126,15 @@ diseño, nombre, features grandes); autónomo en lo demás.
 ## 10. Bitácora de decisiones y correcciones
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
+
+- **2026-07-21** · **Stat de la landing actualizado a fuente 2026 (IBM), a petición del fundador.**
+  El fundador pidió reponer el 78%/83% por ser "más nuevo". Se buscó (WebSearch) y se confirmó que el **78% sigue
+  proviniendo del mismo press release de proveedor** (Vision Compliance/Secure Privacy, conflicto de interés) → no se
+  repone a secas. En su lugar se encontró y verificó en fuente primaria (**newsroom.ibm.com**, 8-jun-2026; 2.000 CIO/CTO,
+  33 países) una cifra casi idéntica y creíble: **77% reconoce que su adopción de IA supera su capacidad de gobernarla**.
+  Cambios: `ProblemStats` stat 1 (48,6% Deloitte 2024 → **77% IBM 2026** + pie de fuente); microcopy del `Hero`
+  ("casi la mitad…" → "más de 3 de cada 4…"); el stat de inventario (>50% CSA 2026) se mantiene (no era antiguo).
+  MEMORY §2 actualizado. Resultado: número potente que quería el fundador, pero de fuente independiente y más nueva.
 
 - **2026-07-21** · **Revisión crítica (panel de 3 críticos) + correcciones Tier 0/2/3-4/1.**
   Tras los 5 packs, el fundador pidió desplegar un "crítico" experto sobre producto + web (veredictos sí/no/mejorable +

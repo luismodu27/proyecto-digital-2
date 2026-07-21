@@ -3,11 +3,10 @@ import { Reveal } from "@/components/ui/Reveal";
 
 const stats = [
   {
-    value: 48.6,
-    decimals: 1,
+    value: 77,
     suffix: "%",
     label:
-      "de las empresas no se ha comprometido en serio con la preparación para el AI Act.",
+      "de las empresas reconoce que su adopción de IA avanza más rápido que su capacidad de gobernarla.",
   },
   {
     value: 50,
@@ -59,7 +58,6 @@ export function ProblemStats() {
                   value={s.value}
                   prefix={s.prefix}
                   suffix={s.suffix}
-                  decimals={s.decimals ?? 0}
                 />
               </dt>
               <dd className="mt-2 text-sm leading-relaxed text-ink-soft">
@@ -70,10 +68,10 @@ export function ProblemStats() {
         </dl>
 
         <p className="mt-4 max-w-3xl text-xs leading-relaxed text-ink-soft">
-          Fuentes: preparación — Deloitte Legal, encuesta EU AI Act 2024 (500
-          decisores de IA en Alemania); inventario de IA — Cloud Security
-          Alliance, nota de investigación 2026. El límite de 35 M€ / 7 % de la
-          facturación procede del propio EU AI Act (Art. 99).
+          Fuentes: gobierno de la IA — IBM, estudio de junio de 2026 (2.000 CIO y
+          CTO en 33 países); inventario de IA — Cloud Security Alliance, nota de
+          investigación de 2026. El límite de 35 M€ / 7 % de la facturación
+          procede del propio EU AI Act (Art. 99).
         </p>
       </div>
     </section>

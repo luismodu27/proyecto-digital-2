@@ -45,8 +45,8 @@ export function Hero() {
           </div>
 
           <p className="mt-4 text-xs text-muted">
-            Casi la mitad de las empresas aún no se ha comprometido en serio. Tú
-            puedes ir por delante.
+            Más de 3 de cada 4 empresas van más rápido en IA que en su gobierno.
+            Tú puedes ir por delante.
           </p>
         </div>
 
