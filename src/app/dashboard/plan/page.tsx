@@ -14,6 +14,7 @@ import {
   getGapItems,
   getActionTasks,
   getOrgMembers,
+  getSystemsForSelect,
 } from "@/lib/data";
 import {
   TASK_STATUS_LABEL,
@@ -68,11 +69,12 @@ function Pill({
 }
 
 export default async function PlanPage() {
-  const [systems, gaps, tasks, members] = await Promise.all([
+  const [systems, gaps, tasks, members, systemOpts] = await Promise.all([
     getAiSystems(),
     getGapItems(),
     getActionTasks(),
     getOrgMembers(),
+    getSystemsForSelect(),
   ]);
 
   const now = new Date();
@@ -227,7 +229,7 @@ export default async function PlanPage() {
               className="mt-1 w-full rounded-lg border border-line-strong bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-brand"
             >
               <option value="">—</option>
-              {systems.map((s) => (
+              {systemOpts.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
                 </option>

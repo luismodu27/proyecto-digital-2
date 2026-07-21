@@ -140,6 +140,24 @@ diseño, nombre, features grandes); autónomo en lo demás.
   render en dashboard/plan/vigilancia); `getExportBundle` pasa de N+1 (2 consultas por sistema) a **2 consultas batch**
   (`.in(...)`) para toda la org. tsc + lint + build OK.
 
+- **2026-07-21** · **Tanda P2 (correctness + coherencia de compliance + dark mode + perf/bundle).**
+  **Bugs de datos:** (a) `gap/page.tsx` mostraba el **UUID crudo** como "Sistema afectado" para sistemas sin `code`
+  (creados por el usuario) → ahora resuelve el nombre con `getAiSystems()` (mismo patrón que el PDF) + singular/plural;
+  (b) el **selector de sistema del Plan** usaba `s.id` (= code) y `cleanUuid` lo descartaba en silencio → ahora usa
+  `getSystemsForSelect()` (uuid real), como `gap/nuevo`. **Compliance (revisado por el experto):** (c) FAQ landing
+  "auditoría **inmutable**" → "**verificable** (SHA-256, alteración detectable)", coherente con el reencuadre honesto
+  ya adoptado; (d) `RiskWizard`: para nivel **Inaceptable** el bloque ya no dice "priorizar para cumplir" sino
+  "Acción inmediata: una práctica prohibida no se prepara, se cesa"; (e) **nuevas prohibiciones Art. 5 del Digital
+  Omnibus** (imágenes íntimas no consentidas / CSAM) añadidas al clasificador: nivel `unacceptable` **siempre**, pero
+  `rationale` **consciente de fecha** vía `OMNIBUS_ART5_EFFECTIVE` (2-dic-2026) — antes de esa fecha el texto dice
+  "aún no en vigor por el AI Act, pero ya ilícito penal (Directiva 2011/93/UE)"; hints con reencuadre deployer para no
+  autoclasificar por uso normal de RRHH; se de-ancló la fecha "2-feb-2025" hardcodeada del dossier Inaceptable (sería
+  falsa para esas 2 prácticas). **Dark mode:** 3 bordes `#bfdccf` → `var(--tone-good-bd)` y `text-[#a3271f]` →
+  `var(--tone-danger-fg)` (contraste AA). **Rendimiento/bundle:** `supabase-js` sale del bundle del dashboard — los
+  writes de flags de onboarding (`guide_seen`/`onboarding_dismissed`) pasan a una Server Action `setUserFlag`
+  (`data/user-actions.ts`). **Docs:** `.env.example` completado (11 vars: Stripe/correo/SSO/app URL). Diferido:
+  `select("*")`→columnas (P2, en PENDIENTES). tsc + lint + build OK.
+
 - **2026-07-21** · **Landing / conversión.** (a) `WhyNow`: timeline reordenado cronológicamente y liderando con lo
   ya exigible (Art. 4, feb 2025) y el **plazo más cercano (Art. 50 · 2-ago-2026)**, que faltaba; el hito de 2027
   reafirma el foso ("no es agosto de 2026, un error extendido en el mercado"). Fechas verificadas, copy a altitude

@@ -61,7 +61,7 @@ export function HeroPreview() {
                 <div key={c.k} className="rounded-lg border border-line bg-paper-raised p-2">
                   <p
                     className={`font-display text-lg font-semibold ${
-                      c.warn ? "text-[#a3271f]" : "text-ink"
+                      c.warn ? "text-[var(--tone-danger-fg)]" : "text-ink"
                     }`}
                   >
                     {c.v}
@@ -72,7 +72,7 @@ export function HeroPreview() {
             </div>
 
             {/* Próximo hito regulatorio (el foso, ya en el hero) */}
-            <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[#bfdccf] bg-brand-soft/50 px-3 py-2">
+            <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[var(--tone-good-bd)] bg-brand-soft/50 px-3 py-2">
               <div className="flex items-center gap-1.5">
                 <svg
                   viewBox="0 0 24 24"

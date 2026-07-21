@@ -3,7 +3,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
 import { GapStatusControl } from "@/components/dashboard/GapStatusControl";
 import { DeleteGapButton } from "@/components/dashboard/DeleteGapButton";
-import { getGapItems, isSupabaseConfigured } from "@/lib/data";
+import { getAiSystems, getGapItems, isSupabaseConfigured } from "@/lib/data";
 
 const statusMeta = {
   missing: {
@@ -27,14 +27,21 @@ const severityMeta = {
 } as const;
 
 export default async function GapPage() {
-  const gapItems = await getGapItems();
+  const [gapItems, systems] = await Promise.all([getGapItems(), getAiSystems()]);
   const open = gapItems.filter((g) => g.status !== "done").length;
+  // El nombre real del sistema (getGapItems deja el uuid si el sistema no tiene
+  // `code`, p. ej. los creados por el usuario). Misma resolución que el PDF.
+  const nameById = new Map(systems.map((s) => [s.id, s.name]));
 
   return (
     <>
       <PageHeader
         title="Gap assessment"
-        subtitle={`${open} brechas abiertas frente a los requisitos del EU AI Act.`}
+        subtitle={
+          open === 1
+            ? "1 brecha abierta frente a los requisitos del EU AI Act."
+            : `${open} brechas abiertas frente a los requisitos del EU AI Act.`
+        }
         action={
           <div className="flex flex-wrap gap-2">
             {isSupabaseConfigured && (
@@ -65,7 +72,9 @@ export default async function GapPage() {
                   </span>
                 </div>
                 <p className="mt-1 font-medium text-ink">{g.requirement}</p>
-                <p className="text-xs text-muted">Sistema afectado: {g.system}</p>
+                <p className="text-xs text-muted">
+                  Sistema afectado: {nameById.get(g.system) ?? g.system}
+                </p>
               </div>
               {isSupabaseConfigured ? (
                 <div className="flex shrink-0 items-center gap-1">

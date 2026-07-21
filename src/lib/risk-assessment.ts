@@ -89,6 +89,16 @@ export const RISK_QUESTIONS: Question[] = [
         value: "face_scraping",
         label: "Extracción masiva de imágenes faciales para bases de datos",
       },
+      {
+        value: "intimate_images",
+        label: "Generación de imágenes íntimas realistas no consentidas",
+        hint: "Sistemas cuyo propósito es crear o manipular imágenes o vídeo íntimos realistas de una persona identificable sin su consentimiento. NO marques esto por el uso normal de selección de personal (cribado de CVs, ranking, entrevistas): solo si el sistema produce ese material.",
+      },
+      {
+        value: "csam",
+        label: "Generación de material de abuso sexual infantil (CSAM)",
+        hint: "Sistemas que generan o manipulan CSAM (en el sentido de la Directiva 2011/93/UE). No aplica al uso de IA en RRHH; márcalo solo si el sistema produce este material.",
+      },
       { value: NONE, label: "Ninguna de las anteriores" },
     ],
   },
@@ -198,6 +208,14 @@ const REAL_EXCEPTIONS = new Set([
   "preparatory",
 ]);
 
+/**
+ * Las 2 prácticas del Art. 5 añadidas por el Digital Omnibus: aplicables desde el
+ * 2-dic-2026 (periodo transitorio). Antes de esa fecha aún NO están en vigor por el
+ * AI Act, aunque ya son ilícito penal (Directiva 2011/93/UE y normativa nacional).
+ */
+export const OMNIBUS_ART5_EFFECTIVE = new Date("2026-12-02T00:00:00Z");
+const OMNIBUS_ART5_PRACTICES = new Set(["intimate_images", "csam"]);
+
 export const OBLIGATIONS_BY_LEVEL: Record<RiskLevel, string[]> = {
   unacceptable: [
     "Prohibido: el sistema no puede comercializarse ni usarse en la UE.",
@@ -251,15 +269,43 @@ export function isHighCandidate(answers: Answers): boolean {
   return domain ? HIGH_DOMAINS.has(domain) : false;
 }
 
-export function classify(answers: Answers): ClassificationResult {
+export function classify(
+  answers: Answers,
+  now: Date = new Date(),
+): ClassificationResult {
   // 1) Prohibido (Art. 5) — cualquier práctica marcada, salvo "ninguna".
   const prohibited = (answers.prohibited ?? []).filter((v) => v !== NONE);
   if (prohibited.length > 0) {
+    // ¿Las marcadas son EXCLUSIVAMENTE las 2 añadidas por el Omnibus (aún no
+    // vigentes por el AI Act hasta 2-dic-2026, pero ya ilícito penal)?
+    const onlyOmnibus = prohibited.every((v) => OMNIBUS_ART5_PRACTICES.has(v));
+    const omnibusInForce = now >= OMNIBUS_ART5_EFFECTIVE;
+
+    let rationale: string;
+    if (!onlyOmnibus) {
+      // Hay al menos una prohibición "clásica" (ya vigente desde 2-feb-2025).
+      rationale =
+        "El sistema incurre en una o más prácticas prohibidas por el Art. 5. No puede usarse en la UE.";
+    } else if (omnibusInForce) {
+      rationale =
+        "El sistema incurre en una práctica prohibida por el Art. 5 —generación o manipulación de imágenes íntimas realistas no consentidas o de CSAM—, añadida por el Digital Omnibus y aplicable desde el 2 de diciembre de 2026. No puede ponerse en el mercado ni utilizarse en la UE. Con independencia del AI Act, generar o manipular este material ya constituye un ilícito penal (Directiva 2011/93/UE y normativa nacional).";
+    } else {
+      rationale =
+        "El Digital Omnibus añadió al Art. 5 esta práctica —generación o manipulación de imágenes íntimas realistas no consentidas o de CSAM—, que será una práctica prohibida del EU AI Act aplicable desde el 2 de diciembre de 2026 (aún no en vigor a la fecha de esta evaluación). No obstante, generar o manipular este material ya es ilícito por derecho penal con independencia del AI Act (Directiva 2011/93/UE y normativa nacional), por lo que se clasifica como inaceptable. Valida esta clasificación con asesoría jurídica cualificada.";
+    }
+
     return {
       level: "unacceptable",
-      rationale:
-        "El sistema incurre en una o más prácticas prohibidas por el Art. 5. No puede usarse en la UE.",
-      citations: CITATIONS.unacceptable,
+      rationale,
+      citations: onlyOmnibus
+        ? [
+            ...CITATIONS.unacceptable,
+            {
+              article: "Directiva 2011/93/UE",
+              text: "Ilícito penal con independencia del AI Act.",
+            },
+          ]
+        : CITATIONS.unacceptable,
       obligations: OBLIGATIONS_BY_LEVEL.unacceptable,
     };
   }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { setUserFlag } from "@/lib/data/user-actions";
 
 export type OnboardingStep = {
   key: string;
@@ -52,11 +52,7 @@ export function OnboardingChecklist({
     } catch {
       /* almacenamiento no disponible */
     }
-    try {
-      void createClient().auth.updateUser({ data: { onboarding_dismissed: true } });
-    } catch {
-      /* modo demo / sin sesión */
-    }
+    void setUserFlag("onboarding_dismissed");
     setDismissed(true);
   };
 

@@ -289,5 +289,8 @@ Mantenibilidad, **sin impacto de usuario**; no urgente. Del escaneo completo:
 ### Follow-ups de la tanda P1 (auditoría 2026-07-21)
 - [ ] **CSP estricta con nonce** en `next.config.ts` (ya están HSTS/X-Frame-Options/nosniff/Referrer/Permissions).
   Requiere prueba en navegador: no romper el script de tema inline (`layout.tsx`), Stripe.js ni Supabase.
-- [ ] **`.env.example` incompleto** (P2): faltan ~13 vars usadas en código (Stripe ×5, correo ×3, SSO ×2,
-  `NEXT_PUBLIC_APP_URL`). Documentarlas para que un deploy nuevo no apague features en silencio.
+- [x] ~~**`.env.example` incompleto**~~ — ✅ hecho (2026-07-21): añadidas Stripe ×5, correo ×3, SSO ×2, `NEXT_PUBLIC_APP_URL`.
+- [ ] **`select("*")` → columnas explícitas** (P2 rendimiento, diferido): `getAiSystems`, `getSystemDossier` y
+  `getGapItems` traen todas las columnas de `ai_systems` (incluidas las de bias-audit/plan que la mayoría de vistas
+  no usan). Enumerar columnas reduce payload por fila. Diferido por ser el cambio más amplio y de menor valor por
+  ítem; requiere cruzar cada `select` con lo que realmente se mapea.

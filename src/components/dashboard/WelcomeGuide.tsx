@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
-import { createClient } from "@/lib/supabase/client";
+import { setUserFlag } from "@/lib/data/user-actions";
 
 /**
  * Guía de uso que se muestra UNA sola vez, tras el primer inicio de sesión.
@@ -230,7 +230,7 @@ const STEPS: Step[] = [
     body: "Un radar que vigila las fuentes regulatorias oficiales y te avisa cuando algo cambia. Los cambios los valida un humano antes de publicarse: nunca texto inventado.",
     visual: (
       <Frame label="Radar regulatorio">
-        <div className="flex items-center justify-between gap-2 rounded-md border border-[#bfdccf] bg-brand-soft/50 px-2.5 py-1.5">
+        <div className="flex items-center justify-between gap-2 rounded-md border border-[var(--tone-good-bd)] bg-brand-soft/50 px-2.5 py-1.5">
           <span className="text-[10px] font-medium text-ink">
             Próximo hito · Transparencia (Art. 50)
           </span>
@@ -322,8 +322,7 @@ export function WelcomeGuide({
     }
     setSaving(true);
     try {
-      const supabase = createClient();
-      await supabase.auth.updateUser({ data: { guide_seen: true } });
+      await setUserFlag("guide_seen");
     } catch {
       // Si falla, la guardia local ya evita que reaparezca en este navegador.
     } finally {

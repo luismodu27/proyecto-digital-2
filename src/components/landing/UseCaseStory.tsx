@@ -148,7 +148,7 @@ function EvidenceVisual() {
           <p className="text-[11px] text-muted">Generado y listo para el auditor.</p>
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[#bfdccf] bg-brand-soft/50 px-3 py-2">
+      <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[var(--tone-good-bd)] bg-brand-soft/50 px-3 py-2">
         <span className="flex items-center gap-1.5 text-[11px] font-medium text-ink">
           <svg viewBox="0 0 24 24" className="size-3.5 text-brand-strong" fill="none" aria-hidden>
             <path

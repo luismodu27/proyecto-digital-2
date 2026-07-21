@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     q: "¿Cómo protegen nuestros datos?",
-    a: "Cada organización está aislada de las demás (multi-tenant con control de acceso a nivel de fila) y todos los cambios quedan en un registro de auditoría inmutable.",
+    a: "Cada organización está aislada de las demás (multi-tenant con control de acceso a nivel de fila) y todos los cambios quedan en un registro de auditoría verificable: encadenado con SHA-256, de forma que cualquier alteración posterior es detectable.",
   },
 ];
 

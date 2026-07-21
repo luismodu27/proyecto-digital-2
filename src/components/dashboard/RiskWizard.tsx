@@ -185,10 +185,14 @@ export function RiskWizard({
         {recs.length > 0 && (
           <div className="mt-8 border-t border-line pt-6">
             <h3 className="font-display text-sm font-semibold text-ink">
-              Puntos críticos y próximos pasos
+              {result.level === "unacceptable"
+                ? "Acción inmediata"
+                : "Puntos críticos y próximos pasos"}
             </h3>
             <p className="mt-1 text-xs text-muted">
-              Qué priorizar para cumplir, ordenado por urgencia.
+              {result.level === "unacceptable"
+                ? "Una práctica prohibida (Art. 5) no se prepara: se cesa. Valida con asesoría jurídica antes de continuar."
+                : "Qué priorizar para tu preparación, ordenado por urgencia."}
             </p>
             <div className="mt-4">
               <RecommendationList recs={recs} />
