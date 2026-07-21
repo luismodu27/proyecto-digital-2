@@ -8,13 +8,15 @@ que autoreproducen en mudo; "music-ready" para añadir pista después).
 
 ## Qué hay aquí
 
-Tres videos, cada uno en **3 formatos × 2 temas** = 6 archivos:
+Cinco videos, cada uno en **3 formatos × 2 temas** = 6 archivos:
 
 | Video | Superficie del producto | Tema base |
 |---|---|---|
 | **intro-web** — «Contrata con IA sin miedo a la auditoría» | Dashboard (tour con cursor) | claro |
 | **foso-web** — «Cero alucinaciones. Por diseño.» | Bandeja del validador + 3 pilares | oscuro |
 | **auditable-web** — «De 0 a auditable en una tarde» | Gap (medidor) + dossier | claro |
+| **reloj-web** — «El reloj del EU AI Act» | Timeline de plazos (Feb 2025 → Dic 2027) | oscuro |
+| **marcos-web** — «Un radar, todos tus marcos» | Radar multi-marco (EU + EE.UU.) | claro |
 
 Formatos: `story` (9:16, 1080×1920) · `square` (1:1, 1080×1080) · `wide` (16:9, 1920×1080).
 Temas: `light` · `dark`. Nombre: `{video}-{formato}-{tema}.mp4`.
@@ -41,7 +43,7 @@ Regenerar todo:
 ```bash
 cd generator && npm i puppeteer-core @ffmpeg-installer/ffmpeg    # deps (registry npm)
 # Chromium: usa el del sistema (ver CHROME en vrender.mjs/shot.mjs) o PLAYWRIGHT_BROWSERS_PATH
-node render-matrix.mjs intro-web,foso-web,auditable-web story,square,wide light,dark 3
+node render-matrix.mjs intro-web,foso-web,auditable-web,reloj-web,marcos-web story,square,wide light,dark 3
 ```
 Una sola variante: `node vrender.mjs "scenes/intro-web.html?fmt=story&theme=light" out.mp4 30 "" 1080 1920 1`
 

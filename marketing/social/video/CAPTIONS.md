@@ -75,6 +75,46 @@ sube 41%→78%) → dossier + radar. El cursor marca tareas y descarga el dossie
 
 ---
 
+## 🕐 VIDEO 4 — «El reloj del EU AI Act»
+Timeline animada de los plazos reales del AI Act, con el hito de alto riesgo (Dic 2027)
+resaltado y el flag «no es agosto de 2026» (corrige el error extendido en el mercado).
+
+**Caption:**
+> «El AI Act entra en agosto de 2026», te dijeron. No es exacto.
+>
+> Las obligaciones llegan por fases: **Feb 2025** — alfabetización en IA (Art. 4, ya exigible).
+> **2 ago 2026** — transparencia (Art. 50), el plazo más cercano para la IA que interactúa con
+> candidatos. **Dic 2027** — el Digital Omnibus movió aquí las obligaciones de **alto riesgo**
+> (Anexo III, empleo). Y a la vez crecen las **leyes estatales de EE. UU.** (NY, Illinois, Colorado).
+>
+> ¿La lectura? Es una obligación inevitable con una **ventana para adelantarse**. Prepararte con
+> calma sale más barato que a última hora.
+>
+> attesta-io.vercel.app
+>
+> #EUAIAct #GobernanzaDeIA #Compliance #IAResponsable #RRHH #RegTech #AIGovernance #DigitalOmnibus
+
+---
+
+## 🌎 VIDEO 5 — «Multi-marco: un radar, todos tus marcos»
+Recrea el radar de vigilancia con los marcos que aplican a la IA de empleo, por jurisdicción:
+EU AI Act + NYC LL144, Colorado AI Act, Illinois (AIVIA y HRA) y EEOC.
+
+**Caption:**
+> Si usas IA para contratar, no es solo el EU AI Act.
+>
+> En EE. UU. ya hay marcos propios para la IA de empleo: **NYC Local Law 144** (auditoría de sesgo),
+> **Colorado AI Act**, **Illinois** (AI Video Interview Act + Human Rights Act) y la orientación de la
+> **EEOC**. Attesta los **vigila por jurisdicción** y te avisa de lo que te aplica — cuando la ley
+> cambia, tú ya lo sabes.
+>
+> Un radar. Todos tus marcos.
+> attesta-io.vercel.app
+>
+> #EUAIAct #NYCLL144 #GobernanzaDeIA #Compliance #IAResponsable #RRHH #AIGovernance #RegTech
+
+---
+
 ## Notas de datos (verificado contra la web en vivo, jul-2026)
 - Stats del problema: **77%** ("adopción de IA más rápida que la capacidad de gobernarla", IBM 2026)
   y **>50%** ("sin inventario formal", Cloud Security Alliance). Antes eran 78%/83%.
