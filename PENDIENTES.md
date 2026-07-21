@@ -300,7 +300,12 @@ descarte (fuera `window.prompt`), `engines`, `apiVersion` Stripe, React 19.2.7, 
 Queda (bajo, deferido con motivo):
 - [ ] **`tsconfig` `noUncheckedIndexedAccess`**: barrería muchos accesos indexados a datos del cliente (más seguridad
   de tipos real), pero surface decenas de errores → merece su propia tanda dedicada, no un cambio suelto.
-- [~] **Stats de `ProblemStats`** (78% / 83%): suavizadas a estimación (~78 % / ~83 % + nota "estimaciones de mercado";
-  el 35 M€/7% se marca como dato del propio Art. 99). **Pendiente: buscar la fuente** para volver a cifra dura citada.
+- [x] ~~**Stats de `ProblemStats`**~~ — ✅ hecho (2026-07-21): las cifras 78 %/83 % venían de un press release de un
+  proveedor (Vision Compliance, conflicto de interés). Sustituidas por fuentes citables: preparación → **Deloitte Legal**,
+  encuesta EU AI Act 2024 (500 decisores en Alemania): **48,6 %** no se ha comprometido en serio
+  (https://www.deloittelegal.de/dl/en/services/legal/research/umfrage-eu-ai-act-2024.html); inventario → **Cloud Security
+  Alliance** 2026: **>50 %** sin inventario formal de IA
+  (https://labs.cloudsecurityalliance.org/research/csa-research-note-eu-ai-act-high-risk-compliance-deadline-20/).
+  El 35 M€/7 % se marca como dato del propio Art. 99. Nota al pie con fuentes y el caveat "Alemania".
 - [ ] `npm audit`: 2 moderate en `postcss` **vendorizado por Next** (build-time, no accionable sin update de Next). Aceptado.
 - [ ] Cosméticos: parpadeo de icono en `ThemeToggle` tras montaje; dots decorativos con hex fijo (semáforo macOS, intencional).

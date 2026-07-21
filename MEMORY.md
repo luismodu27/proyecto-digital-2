@@ -140,6 +140,14 @@ diseño, nombre, features grandes); autónomo en lo demás.
   render en dashboard/plan/vigilancia); `getExportBundle` pasa de N+1 (2 consultas por sistema) a **2 consultas batch**
   (`.in(...)`) para toda la org. tsc + lint + build OK.
 
+- **2026-07-21** · **Stats de la landing con fuente creíble.** Las cifras 78 %/83 % de `ProblemStats` (que primero
+  suavizamos a "~") venían en realidad de un **press release de un proveedor de compliance** (Vision Compliance) — mismo
+  conflicto de interés que si Attesta publicara su propio "todos sin preparar". Se investigó y sustituyó por fuentes
+  citables e independientes: **Deloitte Legal**, encuesta EU AI Act 2024 (500 decisores en Alemania) → **48,6 %** no se
+  ha comprometido en serio; **Cloud Security Alliance** 2026 → **>50 %** sin inventario formal de IA. Nota al pie con
+  ambas fuentes + caveat de que Deloitte es Alemania; el 35 M€/7 % se atribuye al propio Art. 99. `CountUp` ahora pasa
+  `decimals` (para "48,6 %"). Decisión del fundador: priorizar fuente sólida sobre número redondo. URLs en PENDIENTES.
+
 - **2026-07-21** · **Diferido de P2 + tanda P3 (UX/a11y + infra).** **Diferido:** `getAiSystems`/`getGapItems` con
   columnas explícitas (fuera las 6 de bias-audit 0019 que no usan); `getSystemDossier` se queda con `*` a propósito
   (sí las usa + fallback seguro). **P3 UX/a11y:** (a) **skip-link** "Saltar al contenido" en la landing (ya lo tenía el

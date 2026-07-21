@@ -3,15 +3,15 @@ import { Reveal } from "@/components/ui/Reveal";
 
 const stats = [
   {
-    value: 78,
-    prefix: "~",
+    value: 48.6,
+    decimals: 1,
     suffix: "%",
     label:
-      "de las organizaciones no ha dado pasos significativos hacia el cumplimiento del AI Act.",
+      "de las empresas no se ha comprometido en serio con la preparación para el AI Act.",
   },
   {
-    value: 83,
-    prefix: "~",
+    value: 50,
+    prefix: ">",
     suffix: "%",
     label: "no tiene un inventario formal de sus sistemas de IA.",
   },
@@ -55,7 +55,12 @@ export function ProblemStats() {
               className="group bg-paper-raised p-6 transition-colors duration-300 hover:bg-paper"
             >
               <dt className="font-display text-4xl font-semibold text-ink">
-                <CountUp value={s.value} prefix={s.prefix} suffix={s.suffix} />
+                <CountUp
+                  value={s.value}
+                  prefix={s.prefix}
+                  suffix={s.suffix}
+                  decimals={s.decimals ?? 0}
+                />
               </dt>
               <dd className="mt-2 text-sm leading-relaxed text-ink-soft">
                 {s.label}
@@ -64,10 +69,11 @@ export function ProblemStats() {
           ))}
         </dl>
 
-        <p className="mt-4 text-xs text-muted">
-          Las cifras de adopción y preparación (~78 %, ~83 %) son estimaciones de
-          mercado. El límite de 35 M€ / 7 % de la facturación procede del propio
-          EU AI Act (Art. 99).
+        <p className="mt-4 max-w-3xl text-xs leading-relaxed text-muted">
+          Fuentes: preparación — Deloitte Legal, encuesta EU AI Act 2024 (500
+          decisores de IA en Alemania); inventario de IA — Cloud Security
+          Alliance, nota de investigación 2026. El límite de 35 M€ / 7 % de la
+          facturación procede del propio EU AI Act (Art. 99).
         </p>
       </div>
     </section>
