@@ -320,6 +320,34 @@ Queda (BAJO, deferido):
   (solo renderizan `ConfirmSubmit`/`<form action>`, que ya son client): saca unos bytes del bundle. Cleanup de altitud.
 - [ ] Modal de descarte: foco RESTAURADO al cerrar ✅, pero sin **focus-trap** completo (Tab puede salir al fondo). Menor.
 - [ ] Vercel: 2 crons semanales = límite del plan Hobby. Un 3er cron requeriría Pro. Informativo.
+
+### Revisión crítica del panel (2026-07-21) — diferidos y lo que necesita INPUT del fundador
+Ejecutado: Tier 0 (bugs "% listo" y plan de acción), Tier 2 (a11y), Tier 3-4 + parte de Tier 1 (web). Queda:
+- [ ] **CREDIBILIDAD del footer (NECESITA TU INPUT).** Hoy el contacto es `attesta.io.mx@gmail.com`, `+52` e Instagram
+  `@attesta.io`. Para un comprador enterprise UE es la señal #1 de "proyecto, no proveedor". Necesito de ti: **email en
+  dominio propio** (p. ej. `hola@attesta.io`), y si quieres, **LinkedIn** en vez de/además de Instagram. No invento datos.
+- [ ] **Prueba social / nombrar al experto (NECESITA TU INPUT).** Decidiste "reformular sin nombre" (hecho). Cuando tengas
+  un nombre real + credencial, nombrarlo es la mayor palanca de credibilidad barata. También: contador honesto de waitlist.
+- [ ] **Framing de lanzamiento (DECISIÓN TUYA).** Coexisten "Entrar" (producto abierto) y "Solicitar acceso anticipado"
+  (waitlist). Apliqué tu mapa de CTAs por plan; si quieres, alineamos el Hero/waitlist a un único estado (abierto vs pre-).
+- [ ] **Stats 78%/83% (PENDIENTE de decisión + fuente).** El fundador quiere reponerlos por ser "más nuevos". OJO: en la
+  sesión previa se rastreó el 78% a una nota de prensa de un proveedor (Vision Compliance, conflicto de interés) y se
+  sustituyó por Deloitte Legal (48,6%) + CSA (>50%). Antes de reponer, CONFIRMAR la fuente nueva y citarla (regla de marca).
+- [ ] **`compliance_pct` → renombrar a `readinessPct`** (sugerencia del crítico): el campo nunca se renderiza pero el
+  término "compliance/cumplimiento" es prohibido en la marca; un `{s.compliance}` mal colocado lo filtraría. Cosmético/deuda.
+- [ ] **RiskWizard — gate de perfilado del Art. 6(3):** hoy "perfila personas" es una opción más del single-select de
+  excepciones; debería ser una pregunta binaria previa que fuerce alto riesgo. MEDIA (defendibilidad del clasificador).
+- [ ] **RiskWizard — cul-de-sac:** tras guardar solo ofrece "evaluar otro"/"volver"; añadir CTA "Detectar brechas con un
+  policy pack" → `/dashboard/packs?system=<id>` para coser el flujo sin depender del checklist efímero. MEDIA.
+- [ ] **Sign-off jurídico antes de GA:** el propio `LegalNote` admite "pendiente revisión por abogado UE". Revisar
+  disclaimers + reglas del clasificador + los 5 packs con un abogado de IA UE antes de producción. (Fundador.)
+- [ ] **Diseño (diferidos BAJA del crítico):** paleta de riesgo poco diferenciable en daltonismo (3 cálidos vecinos);
+  hex hardcodeado en `HeroPreview` (puntos del navegador falso) y avatares de `WelcomeGuide` → tokens de tono; targets
+  táctiles de la nav móvil ~32px (<44px reco); retorno de foco en `MobileNav`; posición del toast en móvil.
+- [ ] **Ideas de foso (estratégico):** benchmarking anónimo cross-tenant (network effect), integraciones HRIS/model
+  registry/ticketing (pegajosidad + activación), paquete de auditoría firmado (ZIP con manifiesto SHA-256 verificable).
+- [ ] **Narrativa (mejoras no ejecutadas):** subir `UseCaseStory` aún más arriba (tras RecruitmentFocus); tabla comparativa
+  "Attesta vs consultor vs Excel"; fuente para la cifra de mercado de `WhyNow` (o moverla a un deck de inversión).
 - [ ] **Policy packs — tipo "prohibido" propio (a raíz del pack `gestion-trabajadores`, 2026-07-21).** El
   `emociones-prohibicion` (Art. 5.1.f) es práctica PROHIBIDA, no una brecha ordinaria; hoy `applyPolicyPack` lo inserta
   como `gap_item` "missing" que computa en "% listo" igual que los demás (se mitiga por copy: control de triaje). Más

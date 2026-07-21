@@ -126,6 +126,32 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Revisión crítica (panel de 3 críticos) + correcciones Tier 0/2/3-4/1.**
+  Tras los 5 packs, el fundador pidió desplegar un "crítico" experto sobre producto + web (veredictos sí/no/mejorable +
+  ideas), entregar veredictos ANTES de tocar nada. Se desplegó un **panel de 3 críticos independientes** (conversión/
+  mensaje, diseño/UX/a11y, producto/estrategia/compliance) en solo-lectura. Veredicto: contenido de compliance
+  *superior*, diseño *por encima de la media*, pero **2 bugs que apagan el bucle de valor** + capa de credibilidad web
+  floja. El fundador eligió ejecutar los 4 lotes.
+  - **Tier 0 — bugs (commit 9d36523):** (1) `compliance_pct` ("% listo") solo lo fijaba `seedSampleData` → todo sistema
+    real quedaba a 0% permanente. Fix: `recomputeReadiness` (done/total de gap_items) invocado tras aplicar pack y tras
+    crear/editar/borrar brecha. (2) `buildActionPlan` hacía lookup exacto `REMEDIATION[article]` → descartaba casi todas
+    las brechas de un pack (formato rico "Art. 26.2 (y Art. 14)", "GDPR Art. 35", "Anexo III.5.b"…). Fix:
+    `remediationKeyFor` normaliza a la clave canónica solo para artículos-deployer con remediación validada (excluye
+    Art. 5 de prohibición y GDPR/Anexo/leyes estatales); el resto genera la recomendación desde el propio requisito del
+    control (texto validado del pack). Ninguna brecha se pierde y no se inventa texto legal.
+  - **Tier 2 — a11y (commit 49ed007):** focus-trap + Escape + foco inicial + aria-live "Paso X de Y" en `WelcomeGuide`;
+    `--color-muted` claro #6b756e→#5c665f (~5.5:1); ring de foco de inputs `ring-brand/30`→`ring-brand` (17 archivos,
+    unificado con botones, 3:1).
+  - **Tier 3-4 + Tier 1 (commit 46c69bd):** eliminado `HowItWorks` (duplicaba UseCaseStory), que hereda `#como-funciona`;
+    nueva sección **"Cero alucinaciones. Por diseño."** (`Honestidad.tsx`, eleva el diferenciador determinista + reformula
+    al experto SIN nombre, por decisión del fundador); **coherencia de CTA** (decisión del fundador): gratis→"Entrar",
+    de pago→"Suscribirse", Enterprise→"Solicitar acceso"; foso visible ("Policy packs (5 dominios)" + Modules enumera los
+    4 casos); FAQ +2 objeciones comerciales + matiz del plazo 2027 (Omnibus pendiente de DOUE); pulido dashboard
+    (glifo→SVG, KPI Alto riesgo danger→warn, footer legal). **Moneda:** el fundador decidió MANTENER USD (sin subrayarlo).
+  - **Pendiente de INPUT del fundador (no ejecutado, en PENDIENTES):** capa de credibilidad del footer (email de dominio
+    propio en vez de Gmail, +52, Instagram→LinkedIn) — no se inventan datos. Diferidos técnicos: ver PENDIENTES.
+  - Cada lote verificado con tsc + lint + build (exit 0) y en su propio commit.
+
 - **2026-07-21** · **Foso — nuevo policy pack "Crédito y seguros" (APROBADO por el fundador).**
   Quinto pack, cuarto CASO DE USO, el de mayor valor por ticket. **Alto riesgo del Anexo III.5.b** (scoring de solvencia
   de personas físicas, con excepción de detección de fraude) y **5.c** (pricing de seguros de vida y salud). Comprador:
