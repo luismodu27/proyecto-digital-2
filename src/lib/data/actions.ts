@@ -15,6 +15,32 @@ const SEVERITY_EN: Record<string, string> = {
   baja: "low",
 };
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const RISK_LEVELS = ["unacceptable", "high", "limited", "minimal"] as const;
+
+/**
+ * Verifica que un `ai_system` existe y pertenece a la organización activa.
+ * Defensa en profundidad: aunque la RLS ya aísla por tenant, comprobamos la
+ * pertenencia (y el formato UUID) antes de escribir filas que lo referencian,
+ * para no crear referencias colgantes a sistemas de otro tenant.
+ */
+async function systemBelongsToOrg(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  org: string,
+  systemId: string,
+): Promise<boolean> {
+  if (!UUID_RE.test(systemId)) return false;
+  const { data } = await supabase
+    .from("ai_systems")
+    .select("id")
+    .eq("organization_id", org)
+    .eq("id", systemId)
+    .maybeSingle();
+  return !!data;
+}
+
 /**
  * Aplica un policy pack a un sistema: precarga sus controles como brechas
  * (gap_items), sin duplicar los que ya existen. El pack se elige por `packId`
@@ -32,6 +58,11 @@ export async function applyPolicyPack(formData: FormData) {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
+
+  // El sistema debe pertenecer a la org activa (evita referencias cross-tenant).
+  if (!(await systemBelongsToOrg(supabase, org, systemId))) {
+    redirect("/dashboard/packs");
+  }
 
   const {
     data: { user },
@@ -238,6 +269,9 @@ export async function createGapItem(formData: FormData) {
   const aiSystemId = String(formData.get("systemId") ?? "");
   const requirement = String(formData.get("requirement") ?? "").trim();
   if (!aiSystemId || !requirement) redirect("/dashboard/gap/nuevo");
+  if (!(await systemBelongsToOrg(supabase, org, aiSystemId))) {
+    redirect("/dashboard/gap/nuevo?toast=gap-error");
+  }
 
   const status = String(formData.get("status") ?? "missing");
   const { error } = await supabase.from("gap_items").insert({
@@ -365,6 +399,16 @@ export async function saveRiskAssessment(
   const org = await getActiveOrg();
   if (!org) return { ok: false as const, error: "sin organización" };
 
+  // El nivel llega calculado en cliente: validarlo contra el enum antes de
+  // persistirlo (no confiar en la clasificación enviada sin comprobar).
+  if (!RISK_LEVELS.includes(result.level as (typeof RISK_LEVELS)[number])) {
+    return { ok: false as const, error: "nivel de riesgo no válido" };
+  }
+  // El sistema debe pertenecer a la org activa.
+  if (!(await systemBelongsToOrg(supabase, org, aiSystemId))) {
+    return { ok: false as const, error: "sistema no encontrado" };
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -403,6 +447,7 @@ export async function saveRiskAssessment(
       last_reviewed_at: new Date().toISOString(),
       evidence_state: evidenceState,
     })
+    .eq("organization_id", org)
     .eq("id", aiSystemId);
 
   revalidatePath("/dashboard/inventario");

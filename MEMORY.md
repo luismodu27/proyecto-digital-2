@@ -123,6 +123,20 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Escaneo completo del producto (5 auditorías en paralelo) + arreglos P0/P1.** Correctness,
+  seguridad, UX/a11y, copy y deuda técnica. Sin bugs de crash ni fugas cross-tenant. **P0 (commit):** copy
+  "cumplimiento"→"preparación" (`recommendations.ts`), landing "audit-trail inmutable"→"verificable" (coherente con
+  el reencuadre tamper-evident), hex hardcodeados→tokens `--tone-*` en KPIs/Meter/RiskWizard/inventario-nuevo (dark
+  mode roto en pantallas núcleo), y el error crudo de Supabase del onboarding traducido con `friendlyError`
+  (extraído a `lib/friendly-error.ts`, compartido con AuthForm) + `role="alert"`. **P1 seguridad (todo
+  intra-tenant, RLS ya impedía cruce):** (a) `actions.ts` — `saveRiskAssessment` valida `level` contra el enum,
+  verifica pertenencia del sistema y añade `.eq(organization_id)`; `createGapItem`/`applyPolicyPack` validan
+  UUID+pertenencia del `systemId` (helper `systemBelongsToOrg`). (b) **Migración 0021** (trigger
+  `enforce_membership_guards`, BEFORE UPDATE/DELETE): impone en la BD "solo owner otorga/retira owner" y "nunca sin
+  owner", que antes vivían solo en la app y un admin podía saltarse por PostgREST directo. Solo UPDATE/DELETE (los
+  INSERT de onboarding/invitaciones van por SD y no se tocan); contextos de confianza con `auth.uid()` nulo se
+  saltan las guardas para no romper mantenimiento/DBA. **Pendiente**: fundador aplica 0021 (PENDIENTES §1.1-quinquies).
+
 - **2026-07-21** · **Dossier por sistema: resumen ejecutivo narrativo + nota de alcance.** Tercer y último
   entregable con narrativa (build+lint+tsc + captura en impresión). El dossier ahora abre con un párrafo
   **determinista** que sintetiza el sistema: identidad (qué usa la organización, dominio, proveedor, rol declarado),
