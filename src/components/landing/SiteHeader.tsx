@@ -1,6 +1,7 @@
 import { Logo } from "@/components/ui/Logo";
 import { ButtonLink } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { MobileNav } from "@/components/landing/MobileNav";
 
 const nav = [
   { label: "Producto", href: "#producto" },
@@ -33,6 +34,7 @@ export function SiteHeader() {
           <ButtonLink href="#waitlist" variant="primary">
             Solicitar acceso
           </ButtonLink>
+          <MobileNav items={nav} />
         </div>
       </div>
     </header>
