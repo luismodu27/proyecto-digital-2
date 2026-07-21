@@ -42,6 +42,35 @@ async function systemBelongsToOrg(
 }
 
 /**
+ * Recalcula y persiste el "% listo" (`compliance_pct`) de un sistema a partir de
+ * la cobertura de sus brechas: proporción de controles en estado "done" sobre el
+ * total evaluado (misma fórmula que el informe de gap en vivo). Se invoca tras
+ * cualquier mutación de brechas o al aplicar un policy pack, para que la métrica
+ * insignia refleje el trabajo real y no quede clavada en 0 (antes solo la fijaba
+ * el seed de demo). Sin brechas evaluadas ⇒ 0% (nada declarado aún).
+ */
+async function recomputeReadiness(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  org: string,
+  aiSystemId: string,
+): Promise<void> {
+  const { data } = await supabase
+    .from("gap_items")
+    .select("status")
+    .eq("organization_id", org)
+    .eq("ai_system_id", aiSystemId);
+  const items = data ?? [];
+  const total = items.length;
+  const done = items.filter((r) => r.status === "done").length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  await supabase
+    .from("ai_systems")
+    .update({ compliance_pct: pct })
+    .eq("organization_id", org)
+    .eq("id", aiSystemId);
+}
+
+/**
  * Aplica un policy pack a un sistema: precarga sus controles como brechas
  * (gap_items), sin duplicar los que ya existen. El pack se elige por `packId`
  * (por defecto, el de RRHH, por compatibilidad).
@@ -92,7 +121,11 @@ export async function applyPolicyPack(formData: FormData) {
     if (error) redirect("/dashboard/packs?toast=pack-error");
   }
 
+  // El pack añadió controles como brechas ⇒ recalcula el "% listo" del sistema.
+  await recomputeReadiness(supabase, org, systemId);
+
   revalidatePath("/dashboard/gap");
+  revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard/plan");
   revalidatePath("/dashboard");
   redirect("/dashboard/gap?toast=pack-applied");
@@ -285,8 +318,11 @@ export async function createGapItem(formData: FormData) {
   });
   if (error) redirect("/dashboard/gap/nuevo?toast=gap-error");
 
+  await recomputeReadiness(supabase, org, aiSystemId);
+
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/plan");
+  revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
   redirect("/dashboard/gap?toast=gap-created");
 }
@@ -301,15 +337,22 @@ export async function deleteGapItem(formData: FormData) {
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
 
-  const { error } = await supabase
+  const { data: deleted, error } = await supabase
     .from("gap_items")
     .delete()
     .eq("organization_id", org)
-    .eq("id", id);
+    .eq("id", id)
+    .select("ai_system_id")
+    .maybeSingle();
   if (error) redirect("/dashboard/gap?toast=gap-error");
+
+  if (deleted?.ai_system_id) {
+    await recomputeReadiness(supabase, org, deleted.ai_system_id);
+  }
 
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/plan");
+  revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
   redirect("/dashboard/gap?toast=gap-deleted");
 }
@@ -327,15 +370,22 @@ export async function updateGapStatus(formData: FormData) {
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("gap_items")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("organization_id", org)
-    .eq("id", id);
+    .eq("id", id)
+    .select("ai_system_id")
+    .maybeSingle();
   if (error) redirect("/dashboard/gap?toast=gap-error");
+
+  if (updated?.ai_system_id) {
+    await recomputeReadiness(supabase, org, updated.ai_system_id);
+  }
 
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/plan");
+  revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
   redirect("/dashboard/gap?toast=gap-updated");
 }

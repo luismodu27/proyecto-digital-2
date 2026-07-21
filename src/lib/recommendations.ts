@@ -186,6 +186,25 @@ const GAP_SEVERITY_TO_PRIORITY: Record<GapItem["severity"], Priority> = {
 };
 
 /**
+ * Normaliza el `article` (a menudo rico: "Art. 26.2 (y Art. 14)",
+ * "GDPR Art. 35", "Anexo III.5.b"…) a la clave canónica del catálogo REMEDIATION
+ * cuando corresponde a un artículo del propio AI Act con remediación validada
+ * para el deployer. Devuelve null para referencias sin entrada fiable
+ * (GDPR/RGPD, directivas, Anexo, leyes estatales) o para el Art. 5 de prohibición
+ * —cuyo encuadre prohibido/alto-riesgo depende del subapartado y ya está
+ * redactado en el propio control—; esos casos usan el requisito del control como
+ * recomendación, de modo que ninguna brecha se descarta.
+ */
+function remediationKeyFor(article: string | null | undefined): string | null {
+  if (!article || !article.startsWith("Art. ")) return null;
+  const m = article.match(/^Art\.\s*(\d+)/);
+  if (!m) return null;
+  const key = `Art. ${m[1]}`;
+  if (key === "Art. 5") return null;
+  return REMEDIATION[key] ? key : null;
+}
+
+/**
  * Plan de acción de la organización: combina brechas abiertas y sistemas de
  * alto riesgo en una lista priorizada y deduplicada por artículo.
  */
@@ -196,12 +215,13 @@ export function buildActionPlan(
   const byArticle = new Map<string, Recommendation>();
   const nameById = new Map(systems.map((s) => [s.id, s.name]));
 
-  // 1) Brechas abiertas → recomendación por artículo (prioridad según severidad).
+  // 1) Brechas abiertas → recomendación (prioridad según severidad). El `article`
+  //    de un control puede venir en formato rico; se normaliza a la clave del
+  //    catálogo cuando hay remediación validada para ese artículo del AI Act, y
+  //    si no, se genera la recomendación a partir del propio control (su
+  //    requisito ya es texto validado del pack). Así ninguna brecha se pierde.
   for (const g of gaps) {
     if (g.status === "done") continue;
-    const article = g.article || "Art. 26";
-    const base = REMEDIATION[article];
-    if (!base) continue;
 
     const priority: Priority =
       g.status === "missing"
@@ -209,18 +229,33 @@ export function buildActionPlan(
         : downgrade(GAP_SEVERITY_TO_PRIORITY[g.severity]);
 
     const systemName = nameById.get(g.system) ?? g.system;
-    const existing = byArticle.get(article);
+    const key = remediationKeyFor(g.article);
+    const dedupeKey = key ?? `req:${g.article}|${g.requirement}`;
+
+    const existing = byArticle.get(dedupeKey);
     if (existing) {
       if (!existing.systems?.includes(systemName)) existing.systems?.push(systemName);
       if (PRIORITY_ORDER[priority] < PRIORITY_ORDER[existing.priority]) {
         existing.priority = priority;
       }
-    } else {
-      byArticle.set(article, {
-        ...toRec(article, { priority }),
-        systems: [systemName],
-      });
+      continue;
     }
+
+    byArticle.set(
+      dedupeKey,
+      key
+        ? { ...toRec(key, { priority }), systems: [systemName] }
+        : {
+            id: dedupeKey.replace(/\W+/g, "-").toLowerCase().slice(0, 64),
+            title: g.requirement,
+            action:
+              "Prepara y conserva la evidencia declarada de este control, según el policy pack aplicado; asigna un responsable y una fecha objetivo.",
+            article: g.article || "—",
+            priority,
+            effort: "medio",
+            systems: [systemName],
+          },
+    );
   }
 
   // 2) Sistemas de alto riesgo con baja preparación → punto crítico transversal.
