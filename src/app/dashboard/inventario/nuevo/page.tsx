@@ -24,7 +24,7 @@ export default function NuevoSistemaPage() {
       </div>
 
       {!isSupabaseConfigured ? (
-        <div className="max-w-xl rounded-2xl border border-[#e6cba3] bg-[#f7ead8] p-6 text-sm text-[#8a4f14]">
+        <div className="max-w-xl rounded-2xl border border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] p-6 text-sm text-[var(--tone-warn-fg)]">
           El alta de sistemas requiere conectar Supabase. En modo demo el
           inventario usa datos de ejemplo. Configura las credenciales para
           empezar a registrar sistemas reales.

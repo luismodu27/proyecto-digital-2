@@ -199,7 +199,7 @@ export function RiskWizard({
         {canSave && (
           <div className="mt-8 border-t border-line pt-6">
             {saveState === "saved" ? (
-              <div className="rounded-xl border border-[#bfdccf] bg-brand-soft px-4 py-3 text-sm text-brand-strong">
+              <div className="rounded-xl border border-[var(--tone-good-bd)] bg-brand-soft px-4 py-3 text-sm text-brand-strong">
                 <p>
                   ✓ Autoevaluación guardada como{" "}
                   <span className="font-medium">
@@ -292,7 +292,7 @@ export function RiskWizard({
               </div>
             )}
             {saveState === "error" && (
-              <p className="mt-2 text-sm text-[#8f271f]">
+              <p className="mt-2 text-sm text-[var(--tone-danger-fg)]" role="alert">
                 No se pudo guardar. Inténtalo de nuevo.
               </p>
             )}

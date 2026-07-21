@@ -223,7 +223,7 @@ export function buildActionPlan(
     }
   }
 
-  // 2) Sistemas de alto riesgo con bajo cumplimiento → punto crítico transversal.
+  // 2) Sistemas de alto riesgo con baja preparación → punto crítico transversal.
   const criticalSystems = systems.filter(
     (s) => (s.risk === "high" || s.risk === "unacceptable") && s.compliance < 50,
   );
@@ -231,9 +231,9 @@ export function buildActionPlan(
   if (criticalSystems.length > 0) {
     recs.unshift({
       id: "priorizar-alto-riesgo",
-      title: "Priorizar sistemas de alto riesgo con bajo cumplimiento",
+      title: "Priorizar sistemas de alto riesgo con baja preparación",
       action:
-        "Concentra los recursos de remediación en estos sistemas: su nivel de riesgo es alto y su cumplimiento está por debajo del 50%.",
+        "Concentra los recursos de remediación en estos sistemas: su nivel de riesgo es alto y su preparación (% listo) está por debajo del 50%.",
       article: "Art. 6",
       priority: "crítica",
       effort: "alto",

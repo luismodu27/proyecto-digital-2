@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyError } from "@/lib/friendly-error";
 
 function slugify(name: string) {
   const base = name
@@ -37,7 +38,7 @@ export function OnboardingForm() {
       router.push("/dashboard");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo crear la organización.");
+      setError(friendlyError(err instanceof Error ? err.message : ""));
     } finally {
       setLoading(false);
     }
@@ -69,7 +70,10 @@ export function OnboardingForm() {
         </div>
 
         {error && (
-          <p className="rounded-lg border border-[#e6b6b1] bg-[#f7e4e2] px-3 py-2 text-sm text-[#8f271f]">
+          <p
+            role="alert"
+            className="rounded-lg border border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)] px-3 py-2 text-sm text-[var(--tone-danger-fg)]"
+          >
             {error}
           </p>
         )}

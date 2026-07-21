@@ -39,8 +39,8 @@ export function StatCard({
   const accents = {
     ink: "text-ink",
     brand: "text-brand",
-    warn: "text-[#a4610f]",
-    danger: "text-[#a3271f]",
+    warn: "text-[var(--tone-warn-fg)]",
+    danger: "text-[var(--tone-danger-fg)]",
   };
   const inner = (
     <>
@@ -75,7 +75,11 @@ export function StatCard({
 
 export function Meter({ value, target }: { value: number; target?: number }) {
   const color =
-    value >= 75 ? "bg-brand" : value >= 50 ? "bg-[#c9761f]" : "bg-[#b4322a]";
+    value >= 75
+      ? "bg-brand"
+      : value >= 50
+        ? "bg-[var(--tone-warn-fg)]"
+        : "bg-[var(--tone-danger-fg)]";
   return (
     <div className="flex items-center gap-2">
       <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-paper-sunken">

@@ -8,34 +8,11 @@ import { SealMark } from "@/components/ui/SealMark";
 import { SsoButtons } from "@/components/auth/SsoButtons";
 import { createClient } from "@/lib/supabase/client";
 import { isAnySsoEnabled } from "@/lib/supabase/config";
+import { friendlyError } from "@/lib/friendly-error";
 
 type Mode = "login" | "signup";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/** Traduce errores de Supabase a mensajes claros en español. */
-function friendlyError(message: string): string {
-  const m = message.toLowerCase();
-  if (m.includes("invalid login credentials"))
-    return "Correo o contraseña incorrectos.";
-  if (m.includes("email not confirmed"))
-    return "Confirma tu correo antes de iniciar sesión.";
-  if (m.includes("already registered") || m.includes("already exists"))
-    return "Ya existe una cuenta con este correo. Inicia sesión.";
-  if (m.includes("password should be"))
-    return "La contraseña debe tener al menos 6 caracteres.";
-  if (m.includes("invalid format") || m.includes("unable to validate email"))
-    return "El correo no tiene un formato válido.";
-  if (m.includes("signups") && m.includes("disabled"))
-    return "El registro por correo está deshabilitado. Contacta al administrador.";
-  if (m.includes("for security purposes") || m.includes("rate limit"))
-    return "Demasiados intentos. Espera un momento e inténtalo de nuevo.";
-  if (m.includes("expired") || m.includes("invalid") || m.includes("token"))
-    return "El código es incorrecto o expiró. Revisa el correo o reenvíalo.";
-  if (m.includes("fetch") || m.includes("network"))
-    return "No pudimos conectar. Revisa tu conexión e inténtalo de nuevo.";
-  return "Algo salió mal. Inténtalo de nuevo.";
-}
 
 type FieldErrors = {
   nombre?: string;
