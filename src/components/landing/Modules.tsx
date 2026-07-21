@@ -2,7 +2,7 @@ const modules = [
   {
     step: "01",
     title: "Inventario de sistemas de IA",
-    body: "Un catálogo vivo de cada modelo y sistema en uso: quién lo opera, qué datos toca y para qué decisión se usa. El 83% no lo tiene; tú sí.",
+    body: "Un catálogo vivo de cada modelo y sistema en uso: quién lo opera, qué datos toca y para qué decisión se usa. Más de la mitad de las empresas no lo tiene; tú sí.",
     points: ["Descubrimiento guiado", "Propietario y proveedor", "Estado siempre al día"],
   },
   {

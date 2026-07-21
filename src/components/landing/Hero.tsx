@@ -45,7 +45,8 @@ export function Hero() {
           </div>
 
           <p className="mt-4 text-xs text-muted">
-            El 78% de las empresas aún no ha empezado. Tú puedes ir por delante.
+            Casi la mitad de las empresas aún no se ha comprometido en serio. Tú
+            puedes ir por delante.
           </p>
         </div>
 

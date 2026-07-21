@@ -69,7 +69,7 @@ export function ProblemStats() {
           ))}
         </dl>
 
-        <p className="mt-4 max-w-3xl text-xs leading-relaxed text-muted">
+        <p className="mt-4 max-w-3xl text-xs leading-relaxed text-ink-soft">
           Fuentes: preparación — Deloitte Legal, encuesta EU AI Act 2024 (500
           decisores de IA en Alemania); inventario de IA — Cloud Security
           Alliance, nota de investigación 2026. El límite de 35 M€ / 7 % de la

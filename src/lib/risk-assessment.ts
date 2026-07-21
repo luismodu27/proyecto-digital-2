@@ -288,10 +288,10 @@ export function classify(
         "El sistema incurre en una o más prácticas prohibidas por el Art. 5. No puede usarse en la UE.";
     } else if (omnibusInForce) {
       rationale =
-        "El sistema incurre en una práctica prohibida por el Art. 5 —generación o manipulación de imágenes íntimas realistas no consentidas o de CSAM—, añadida por el Digital Omnibus y aplicable desde el 2 de diciembre de 2026. No puede ponerse en el mercado ni utilizarse en la UE. Con independencia del AI Act, generar o manipular este material ya constituye un ilícito penal (Directiva 2011/93/UE y normativa nacional).";
+        "El sistema incurre en una práctica prohibida por el Art. 5 —generación o manipulación de imágenes íntimas realistas no consentidas o de CSAM—, añadida por el Digital Omnibus y aplicable desde el 2 de diciembre de 2026. No puede ponerse en el mercado ni utilizarse en la UE. Con independencia del AI Act, generar o manipular este material ya constituye un ilícito penal (la Directiva 2011/93/UE para el CSAM; la Directiva (UE) 2024/1385 y la normativa penal nacional para las imágenes íntimas no consentidas).";
     } else {
       rationale =
-        "El Digital Omnibus añadió al Art. 5 esta práctica —generación o manipulación de imágenes íntimas realistas no consentidas o de CSAM—, que será una práctica prohibida del EU AI Act aplicable desde el 2 de diciembre de 2026 (aún no en vigor a la fecha de esta evaluación). No obstante, generar o manipular este material ya es ilícito por derecho penal con independencia del AI Act (Directiva 2011/93/UE y normativa nacional), por lo que se clasifica como inaceptable. Valida esta clasificación con asesoría jurídica cualificada.";
+        "El Digital Omnibus añadió al Art. 5 esta práctica —generación o manipulación de imágenes íntimas realistas no consentidas o de CSAM—, que será una práctica prohibida del EU AI Act aplicable desde el 2 de diciembre de 2026 (aún no en vigor a la fecha de esta evaluación). No obstante, generar o manipular este material ya es ilícito por derecho penal con independencia del AI Act (la Directiva 2011/93/UE para el CSAM; la Directiva (UE) 2024/1385 y la normativa penal nacional para las imágenes íntimas no consentidas), por lo que se clasifica como inaceptable. Valida esta clasificación con asesoría jurídica cualificada.";
     }
 
     return {
@@ -302,7 +302,11 @@ export function classify(
             ...CITATIONS.unacceptable,
             {
               article: "Directiva 2011/93/UE",
-              text: "Ilícito penal con independencia del AI Act.",
+              text: "CSAM: ilícito penal con independencia del AI Act.",
+            },
+            {
+              article: "Directiva (UE) 2024/1385",
+              text: "Imágenes íntimas no consentidas: ilícito penal vía normativa nacional.",
             },
           ]
         : CITATIONS.unacceptable,

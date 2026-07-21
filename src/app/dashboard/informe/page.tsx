@@ -263,7 +263,8 @@ export default async function InformeEjecutivoPage() {
               Ningún sistema de alto riesgo está por debajo del umbral. 👍
             </p>
           ) : (
-            <table className="mt-3 w-full border-collapse text-left text-sm">
+            <div className="mt-3 overflow-x-auto print:overflow-visible">
+            <table className="w-full border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-line-strong text-xs uppercase tracking-wide text-muted">
                   <th className="py-2 pr-3 font-medium">Sistema</th>
@@ -290,6 +291,7 @@ export default async function InformeEjecutivoPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </section>
 

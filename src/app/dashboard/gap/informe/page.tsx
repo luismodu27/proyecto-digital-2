@@ -230,6 +230,7 @@ export default async function InformeGapPage() {
                     </span>
                   </div>
                 </div>
+                <div className="overflow-x-auto print:overflow-visible">
                 <table className="w-full border-collapse text-left text-sm">
                   <thead>
                     <tr className="text-xs uppercase tracking-wide text-muted">
@@ -263,6 +264,7 @@ export default async function InformeGapPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </section>
             ))}
           </div>

@@ -22,11 +22,14 @@ seguros, salud, edtech) y que **no tienen un equipo GRC dedicado**.
 
 ## 2. El problema (el dolor)
 
-- **78%** de las organizaciones no ha dado pasos significativos hacia el cumplimiento del EU AI Act.
-- **83%** no tiene un inventario formal de sus sistemas de IA.
+- **48,6%** de las empresas no se ha comprometido en serio con la preparación para el AI Act (Deloitte Legal,
+  encuesta EU AI Act 2024, 500 decisores en Alemania). ⚠️ **NO uses "78%"**: esa cifra venía de un press release de
+  proveedor (Vision Compliance, conflicto de interés) y se descartó el 2026-07-21 (ver §10).
+- **Más de la mitad** no tiene un inventario formal de sus sistemas de IA (Cloud Security Alliance, nota 2026).
+  ⚠️ **NO uses "83%"** (misma razón que arriba).
 - Hoy se resuelve con **hojas de cálculo + consultores a ~$500/hora**.
 - Coste de compliance para grandes empresas estimado en **$8–15M**.
-- Multas de hasta **€35M o 7% de facturación** (más duras que el GDPR).
+- Multas de hasta **€35M o 7% de facturación** (Art. 99; más duras que el GDPR).
 
 **Traducción:** dolor agudo, caro y con presupuesto asignado.
 
@@ -139,6 +142,19 @@ diseño, nombre, features grandes); autónomo en lo demás.
   (4) **Rendimiento**: `getIsPlatformAdmin` y un helper `listOrgMembersRaw` envueltos en `cache()` (dedup del RPC por
   render en dashboard/plan/vigilancia); `getExportBundle` pasa de N+1 (2 consultas por sistema) a **2 consultas batch**
   (`.in(...)`) para toda la org. tsc + lint + build OK.
+
+- **2026-07-21** · **2ª verificación completa (6 auditorías) + arreglos.** Se repitió el análisis profundo tras las
+  tandas P1→P3. Resultado: correctitud/seguridad/rendimiento/infra **sin regresiones** (CI verde en los 10 runs;
+  optimizaciones confirmadas funcionando; fachada 22/22/22). **Defectos cazados y corregidos:** (1) ALTO — la corrección
+  de las stats había quedado **incompleta**: el "78%" seguía vivo en `Hero.tsx` y el "83%" en `Modules.tsx` (contradecían
+  el 48,6%/>50% ya corregido en `ProblemStats`) → ambos reescritos con las cifras creíbles ("casi la mitad" / "más de la
+  mitad"). Actualizado también §2 de este MEMORY para que nadie reutilice las cifras viejas. (2) MEDIO — en
+  `risk-assessment.ts` la **Directiva 2011/93/UE estaba mal atribuida** (es solo CSAM/menores); para imágenes íntimas de
+  adultos es la **Directiva (UE) 2024/1385** → citas separadas en los 2 rationales y en el array. (3) MEDIO — waterfall en
+  `inventario/[id]/editar` (3 round-trips en cascada) → `Promise.all` (1). **BAJO arreglados:** contraste de la nota de
+  `ProblemStats` (text-muted→ink-soft), restauración de foco al cerrar el modal de descarte, 3 tablas de informes con
+  `overflow-x-auto print:overflow-visible`, `permissions: contents:read` en el CI. Fuente CSA (>50% sin inventario)
+  verificada (nota real del 13-mar-2026 "Enterprise Readiness Gap"). tsc + lint + build OK.
 
 - **2026-07-21** · **Stats de la landing con fuente creíble.** Las cifras 78 %/83 % de `ProblemStats` (que primero
   suavizamos a "~") venían en realidad de un **press release de un proveedor de compliance** (Vision Compliance) — mismo

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { enrichCandidate, rejectCandidate } from "@/lib/data/reg-pipeline-actions";
 import { REG_KIND_LABEL, FRAMEWORK_META } from "@/lib/regulatory-watch";
 import { RISK_LABEL, type RegCandidate } from "@/lib/mock-data";
@@ -27,21 +27,28 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
   const [note, setNote] = useState("");
   const rejectFormRef = useRef<HTMLFormElement>(null);
   const noteRef = useRef<HTMLTextAreaElement>(null);
+  const rejectTriggerRef = useRef<HTMLButtonElement>(null);
   const rejectTitleId = useId();
 
   const publishable = Boolean(kind && date);
   const isSignal = !c.kind || !c.date;
+
+  // Cierra el modal y devuelve el foco al botón que lo abrió (a11y de teclado).
+  const closeReject = useCallback(() => {
+    setRejecting(false);
+    rejectTriggerRef.current?.focus();
+  }, []);
 
   // Modal de descarte accesible (sustituye a window.prompt): foco al abrir + Escape.
   useEffect(() => {
     if (!rejecting) return;
     noteRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setRejecting(false);
+      if (e.key === "Escape") closeReject();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [rejecting]);
+  }, [rejecting, closeReject]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -58,6 +65,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
           <input type="hidden" name="id" value={c.id} />
           <input type="hidden" name="note" value={note} />
           <button
+            ref={rejectTriggerRef}
             type="button"
             onClick={() => setRejecting(true)}
             className="text-xs font-medium text-muted transition-colors hover:text-[var(--tone-danger-fg)]"
@@ -77,7 +85,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
           <button
             type="button"
             aria-label="Cerrar"
-            onClick={() => setRejecting(false)}
+            onClick={closeReject}
             className="absolute inset-0 cursor-default bg-ink/40 backdrop-blur-[2px]"
           />
           <div className="relative w-full max-w-sm rounded-2xl border border-line bg-paper-raised p-6 shadow-[0_24px_60px_-24px_rgba(15,26,20,0.55)]">
@@ -109,7 +117,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
             <div className="mt-5 flex justify-end gap-2.5">
               <button
                 type="button"
-                onClick={() => setRejecting(false)}
+                onClick={closeReject}
                 className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
               >
                 Cancelar

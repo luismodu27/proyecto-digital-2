@@ -30,9 +30,19 @@ export default async function EditarSistemaPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const system = isSupabaseConfigured ? await getSystemById(id) : null;
-  const assessments = system ? await getSystemAssessments(id) : [];
-  const bias = system ? await getSystemBiasAudit(id) : null;
+  // Los tres getters filtran por org y por id: con un id inexistente devuelven
+  // null/[]. Son independientes entre sí, así que van en paralelo (1 round-trip
+  // en vez de 3 en cascada).
+  let system: Awaited<ReturnType<typeof getSystemById>> = null;
+  let assessments: Awaited<ReturnType<typeof getSystemAssessments>> = [];
+  let bias: Awaited<ReturnType<typeof getSystemBiasAudit>> = null;
+  if (isSupabaseConfigured) {
+    [system, assessments, bias] = await Promise.all([
+      getSystemById(id),
+      getSystemAssessments(id),
+      getSystemBiasAudit(id),
+    ]);
+  }
   const now = new Date();
   const biasStatus = bias ? biasAuditStatus(bias, now) : null;
   const biasDue = bias ? nextBiasAuditDue(bias.lastAuditDate) : null;

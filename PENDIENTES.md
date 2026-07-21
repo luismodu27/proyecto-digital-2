@@ -309,3 +309,14 @@ Queda (bajo, deferido con motivo):
   El 35 M€/7 % se marca como dato del propio Art. 99. Nota al pie con fuentes y el caveat "Alemania".
 - [ ] `npm audit`: 2 moderate en `postcss` **vendorizado por Next** (build-time, no accionable sin update de Next). Aceptado.
 - [ ] Cosméticos: parpadeo de icono en `ThemeToggle` tras montaje; dots decorativos con hex fijo (semáforo macOS, intencional).
+
+### Follow-ups de la 2ª verificación (2026-07-21) — BAJO no bloqueantes
+Arreglados en el momento: 78% de `Hero`, 83% de `Modules`, cita Directiva 2024/1385 (adultos) en risk-assessment,
+waterfall de `editar` (→Promise.all), contraste de nota, foco del modal de descarte, tablas con overflow, CI permissions.
+Queda (BAJO, deferido):
+- [ ] `getExportBundle`: plegar `list_audit_log` (lim 500) dentro del primer `Promise.all` (no depende de `systems`) →
+  −1 round-trip en la exportación. Impacto bajo (acción administrativa fría).
+- [ ] Quitar `"use client"` innecesario de `DeleteGapButton`/`DeleteSystemButton`/`RevokeInviteButton`/`RemoveMemberButton`
+  (solo renderizan `ConfirmSubmit`/`<form action>`, que ya son client): saca unos bytes del bundle. Cleanup de altitud.
+- [ ] Modal de descarte: foco RESTAURADO al cerrar ✅, pero sin **focus-trap** completo (Tab puede salir al fondo). Menor.
+- [ ] Vercel: 2 crons semanales = límite del plan Hobby. Un 3er cron requeriría Pro. Informativo.

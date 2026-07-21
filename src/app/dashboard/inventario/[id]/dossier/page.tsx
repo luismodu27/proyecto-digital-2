@@ -406,6 +406,7 @@ export default async function DossierPage({
               pack de RRHH o añade brechas desde el gap assessment.
             </p>
           ) : (
+            <div className="overflow-x-auto print:overflow-visible">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-line-strong text-xs uppercase tracking-wide text-muted">
@@ -443,6 +444,7 @@ export default async function DossierPage({
                 })}
               </tbody>
             </table>
+            </div>
           )}
         </section>
 

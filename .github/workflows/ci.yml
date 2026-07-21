@@ -8,6 +8,10 @@ on:
   push:
     branches: [main]
 
+# El workflow solo lee el repo; limita el GITHUB_TOKEN al mínimo.
+permissions:
+  contents: read
+
 # Cancela ejecuciones antiguas de la misma rama/PR si llega un push nuevo.
 concurrency:
   group: ci-${{ github.ref }}
