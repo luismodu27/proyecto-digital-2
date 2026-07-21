@@ -37,13 +37,12 @@ completo (degradación segura). Para encenderla:
    ```
 4. Cuando Stripe esté activo (§1.2), una suscripción activa sube la org a **preparación** sola.
 
-### 1.1-quinquies · Migración 0021 (guardas de membresías) — ⚠️ PENDIENTE DE APLICAR — RÁPIDO
-Pega **solo** `supabase/migrations/0021_membership_guards.sql` en el SQL Editor de Supabase (ya está también al
-final de `setup.sql`). Añade un trigger que impone en la BD las reglas "solo un owner otorga/retira el rol owner"
-y "una organización nunca se queda sin owner". Antes esas reglas vivían solo en la app, así que un usuario con rol
-**admin** podía saltárselas escribiendo directamente por la API (auto-promoverse a owner o expulsar al owner).
-Es defensa en profundidad **intra-tenant** (RLS ya impide el cruce entre organizaciones); no cambia la UI. Sin
-aplicarla, la app funciona igual, pero la guarda dura no está activa.
+### 1.1-quinquies · Migración 0021 (guardas de membresías) — ✅ APLICADA (2026-07-21)
+Trigger `enforce_membership_guards` (BEFORE UPDATE/DELETE en `memberships`) que impone en la BD "solo un owner
+otorga/retira el rol owner" y "una organización nunca se queda sin owner". **Aplicada y verificada por SQL**
+(función `enforce_membership_guards` `prosecdef=true` + `search_path=` vacío; trigger habilitado, `tgenabled='O'`).
+Antes esas reglas vivían solo en la app y un **admin** podía saltárselas por API directa (auto-promoverse a owner
+o expulsar al owner); ahora es defensa en profundidad **intra-tenant** a nivel de BD.
 
 ### 1.1-quater · Migración 0020 (audit-trail a prueba de manipulación) — ✅ APLICADA (2026-07-20)
 El registro de actividad se **encadena con hashes SHA-256** (tamper-evident): cada evento incorpora el hash del
