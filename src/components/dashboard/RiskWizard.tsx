@@ -334,7 +334,7 @@ export function RiskWizard({
       </p>
 
       {/* Pregunta */}
-      <h2 className="mt-2 font-display text-xl font-semibold text-ink">
+      <h2 id="wizard-question" className="mt-2 font-display text-xl font-semibold text-ink">
         {question.title}
       </h2>
       {question.help && (
@@ -342,7 +342,17 @@ export function RiskWizard({
       )}
 
       {/* Opciones */}
-      <div className="mt-5 space-y-2.5">
+      <div
+        className="mt-5 space-y-2.5"
+        role="group"
+        aria-labelledby="wizard-question"
+        aria-describedby="wizard-select-mode"
+      >
+        <p id="wizard-select-mode" className="sr-only">
+          {question.type === "single"
+            ? "Selección única."
+            : "Selección múltiple: puedes marcar varias opciones."}
+        </p>
         {question.choices.map((c) => {
           const active = selected.includes(c.value);
           return (
@@ -350,6 +360,7 @@ export function RiskWizard({
               key={c.value}
               type="button"
               onClick={() => choose(c.value)}
+              aria-pressed={active}
               className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
                 active
                   ? "border-brand bg-brand-soft"

@@ -204,15 +204,12 @@ export const OBLIGATIONS_BY_LEVEL: Record<RiskLevel, string[]> = {
     "Cesar el uso y documentar la retirada.",
   ],
   high: [
-    "Sistema de gestión de riesgos (Art. 9)",
-    "Gobernanza y calidad de datos de entrenamiento (Art. 10)",
-    "Documentación técnica — Anexo IV (Art. 11)",
-    "Registro y trazabilidad de eventos / logging (Art. 12)",
-    "Transparencia e información al usuario profesional (Art. 13)",
-    "Supervisión humana efectiva (Art. 14)",
-    "Exactitud, robustez y ciberseguridad (Art. 15)",
-    "Obligaciones del responsable del despliegue / deployer (Art. 26)",
-    "Registro en la base de datos de la UE (Art. 49) y, si aplica, evaluación de impacto en derechos fundamentales (Art. 27)",
+    // Deberes PROPIOS del deployer (nuestro ICP).
+    "Deber propio: supervisión humana efectiva en la decisión (Art. 26.2, apoyada en el diseño del proveedor del Art. 14).",
+    "Deber propio: obligaciones del responsable del despliegue (Art. 26) — uso conforme a instrucciones, información a personas afectadas y a trabajadores, conservación de logs y monitoreo del funcionamiento.",
+    "Deber propio: transparencia frente a las personas afectadas (Art. 50) y, cuando aplique, registro en la base de datos de la UE (Art. 49) y evaluación de impacto en derechos fundamentales (Art. 27).",
+    // Obligaciones del PROVEEDOR: el deployer las exige y conserva como evidencia.
+    "Exige y conserva evidencia del proveedor: sistema de gestión de riesgos (Art. 9), gobernanza y calidad de datos (Art. 10), documentación técnica del Anexo IV (Art. 11), logging (Art. 12), instrucciones de uso (Art. 13), exactitud/robustez/ciberseguridad (Art. 15) y el marcado CE / Declaración UE de Conformidad.",
   ],
   limited: [
     "Informar a las personas de que interactúan con un sistema de IA (Art. 50).",
