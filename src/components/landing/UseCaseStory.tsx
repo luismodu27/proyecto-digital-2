@@ -198,7 +198,7 @@ const steps = [
 
 export function UseCaseStory() {
   return (
-    <section className="border-y border-line bg-paper-sunken/40">
+    <section id="como-funciona" className="border-y border-line bg-paper-sunken/40">
       <div className="container-page py-20 md:py-28">
         <div className="max-w-2xl">
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-brand">

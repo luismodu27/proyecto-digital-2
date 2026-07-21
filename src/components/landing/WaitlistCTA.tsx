@@ -62,7 +62,7 @@ export function WaitlistCTA() {
               role="status"
               className="mt-8 rounded-2xl border border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] px-6 py-5 text-[var(--tone-good-fg)]"
             >
-              <p className="font-display text-lg font-semibold">¡Gracias! 🎉</p>
+              <p className="font-display text-lg font-semibold">¡Gracias!</p>
               <p className="mt-1 text-sm">
                 Te avisaremos en <span className="font-medium">{email}</span>{" "}
                 cuando abramos tu acceso.
@@ -124,7 +124,7 @@ export function WaitlistCTA() {
           <ul className="mx-auto mt-8 flex max-w-lg flex-wrap items-center justify-center gap-x-6 gap-y-2">
             {[
               "Región UE · datos en la Unión Europea",
-              "Contenido del EU AI Act revisado por experto",
+              "Contenido del EU AI Act contrastado con criterio experto",
               "No certificamos: preparación honesta",
             ].map((t) => (
               <li key={t} className="flex items-center gap-1.5 text-xs text-ink-soft">

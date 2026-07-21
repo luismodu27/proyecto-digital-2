@@ -6,8 +6,8 @@ import { RecruitmentFocus } from "@/components/landing/RecruitmentFocus";
 import { Modules } from "@/components/landing/Modules";
 import { Platform } from "@/components/landing/Platform";
 import { WhyNow } from "@/components/landing/WhyNow";
-import { HowItWorks } from "@/components/landing/HowItWorks";
 import { UseCaseStory } from "@/components/landing/UseCaseStory";
+import { Honestidad } from "@/components/landing/Honestidad";
 import { Pricing } from "@/components/landing/Pricing";
 import { FAQ } from "@/components/landing/FAQ";
 import { WaitlistCTA } from "@/components/landing/WaitlistCTA";
@@ -44,10 +44,10 @@ export default function Home() {
         <Reveal>
           <WhyNow />
         </Reveal>
-        <Reveal>
-          <HowItWorks />
-        </Reveal>
         <UseCaseStory />
+        <Reveal>
+          <Honestidad />
+        </Reveal>
         <Reveal>
           <Pricing />
         </Reveal>

@@ -14,8 +14,8 @@ const modules = [
   {
     step: "03",
     title: "Gap assessment y plan",
-    body: "Qué te falta para cumplir, priorizado por severidad, con plan de acción por artículo. Aplica un policy pack de RRHH y precarga los controles típicos de un sistema de selección.",
-    points: ["Brechas priorizadas", "Policy pack de RRHH", "Plan de acción por artículo"],
+    body: "Qué te falta, priorizado por severidad, con plan de acción por artículo. Aplica un policy pack por dominio (RRHH, gestión de trabajadores, atención al cliente e IA generativa o crédito/seguros) y precarga los controles típicos del caso.",
+    points: ["Brechas priorizadas", "Policy packs por dominio", "Plan de acción por artículo"],
   },
 ];
 

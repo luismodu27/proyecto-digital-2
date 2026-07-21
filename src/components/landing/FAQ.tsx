@@ -13,7 +13,15 @@ const faqs = [
   },
   {
     q: "El deadline se aplazó a 2027, ¿para qué empezar ahora?",
-    a: "Justo por eso: tienes más ventana para prepararte bien, sin prisas ni consultores caros de última hora. La obligación sigue siendo inevitable; adelantarte es más barato y menos arriesgado.",
+    a: "Justo por eso: tienes más ventana para prepararte bien, sin prisas ni consultores caros de última hora. El aplazamiento del alto riesgo del Anexo III a diciembre de 2027 proviene del Digital Omnibus, acordado por el Parlamento y el Consejo en junio de 2026 y pendiente de publicación formal en el DOUE. La obligación sigue siendo inevitable; adelantarte es más barato y menos arriesgado. (Ojo: la alfabetización en IA y las prohibiciones del Art. 5 ya son exigibles desde febrero de 2025.)",
+  },
+  {
+    q: "¿En qué se diferencia de un consultor o de una hoja de cálculo?",
+    a: "Un consultor te entrega una foto fija —cara y desactualizada en cuanto la norma cambia—; un Excel no vigila nada ni deja rastro verificable. Attesta es un sistema de registro vivo: mantiene tu inventario y tu evidencia al día, vigila los cambios regulatorios y encadena cada registro con SHA-256 para que sea auditable. No sustituye el criterio jurídico cuando lo necesites, pero sí el trabajo repetitivo de organizarlo y mantenerlo.",
+  },
+  {
+    q: "¿Qué pasa con mi evidencia si me doy de baja?",
+    a: "Es tuya. Puedes exportar tu dossier y tu informe ejecutivo en PDF en cualquier momento, así que la evidencia que has preparado no queda atrapada en la herramienta.",
   },
   {
     q: "¿Necesito un equipo de compliance para usarlo?",

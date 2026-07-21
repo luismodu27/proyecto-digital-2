@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PageHeader, StatCard, Meter } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
+import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
 import { DeadlineReminders } from "@/components/dashboard/DeadlineReminders";
 import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
@@ -135,7 +136,16 @@ export default async function DashboardOverview() {
         subtitle="Estado de preparación de tus sistemas de IA en un vistazo."
         action={
           <ButtonLink href="/dashboard/informe" variant="outline">
-            ⬇ Informe ejecutivo
+            <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden>
+              <path
+                d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Informe ejecutivo
           </ButtonLink>
         }
       />
@@ -153,7 +163,7 @@ export default async function DashboardOverview() {
           label="Alto riesgo"
           value={highRisk}
           hint="requieren obligaciones estrictas"
-          accent="danger"
+          accent="warn"
         />
         <StatCard
           label="Preparación media"
@@ -285,6 +295,11 @@ export default async function DashboardOverview() {
           )}
         </div>
       </section>
+
+      <LegalNote
+        text={`El "% listo" refleja evidencia autodeclarada, no un juicio de cumplimiento. ${LEGAL_FOOTER}`}
+        className="mt-6"
+      />
     </>
   );
 }

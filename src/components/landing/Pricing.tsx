@@ -25,7 +25,7 @@ const tiers: Tier[] = [
       "1 usuario",
     ],
     limits: "Sin evidencia en PDF, sin vigilancia ni plan de acción.",
-    cta: "Empezar gratis",
+    cta: "Entrar",
     href: "/login",
     highlight: false,
   },
@@ -40,11 +40,11 @@ const tiers: Tier[] = [
       "Vigilancia regulatoria continua",
       "Dossier e informe ejecutivo (PDF)",
       "Evidencia y audit-trail verificable",
-      "Policy packs (RRHH)",
+      "Policy packs (5 dominios)",
       "Equipo y roles",
     ],
-    cta: "Solicitar acceso",
-    href: "#waitlist",
+    cta: "Suscribirse",
+    href: "/login",
     highlight: true,
   },
   {
@@ -57,7 +57,7 @@ const tiers: Tier[] = [
       "SSO y controles avanzados",
       "Soporte prioritario",
     ],
-    cta: "Hablar con nosotros",
+    cta: "Solicitar acceso",
     href: "#waitlist",
     highlight: false,
   },
@@ -73,7 +73,7 @@ const COMPARE: { label: string; cells: [Cell, Cell, Cell] }[] = [
   { label: "Vigilancia regulatoria continua", cells: [false, true, true] },
   { label: "Dossier e informe ejecutivo (PDF)", cells: [false, true, true] },
   { label: "Evidencia y audit-trail verificable", cells: [false, true, true] },
-  { label: "Policy packs (RRHH)", cells: [false, true, true] },
+  { label: "Policy packs (5 dominios)", cells: [false, true, true] },
   { label: "Multi-organización", cells: [false, false, true] },
   { label: "SSO y controles avanzados", cells: [false, false, true] },
   { label: "Soporte prioritario", cells: [false, false, true] },
@@ -111,7 +111,7 @@ export function Pricing() {
           Empieza gratis. Escala cuando lo necesites.
         </h2>
         <p className="mt-4 text-lg text-ink-soft">
-          Precios en dólares (USD), orientativos durante el acceso anticipado.
+          Precios orientativos (USD) durante el acceso anticipado.
         </p>
       </div>
 
