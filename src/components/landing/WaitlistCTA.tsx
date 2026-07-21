@@ -58,7 +58,10 @@ export function WaitlistCTA() {
           </p>
 
           {submitted ? (
-            <div className="mt-8 rounded-2xl border border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] px-6 py-5 text-[var(--tone-good-fg)]">
+            <div
+              role="status"
+              className="mt-8 rounded-2xl border border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] px-6 py-5 text-[var(--tone-good-fg)]"
+            >
               <p className="font-display text-lg font-semibold">¡Gracias! 🎉</p>
               <p className="mt-1 text-sm">
                 Te avisaremos en <span className="font-medium">{email}</span>{" "}
@@ -96,6 +99,8 @@ export function WaitlistCTA() {
                   setEmail(e.target.value);
                   if (error) setError(null);
                 }}
+                aria-invalid={!!error}
+                aria-describedby={error ? "waitlist-error" : undefined}
                 placeholder="tu@empresa.com"
                 className="w-full rounded-full border border-line-strong bg-paper px-5 py-3 text-sm text-ink outline-none placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/30"
               />
@@ -106,7 +111,13 @@ export function WaitlistCTA() {
           )}
 
           {error && (
-            <p className="mt-3 text-sm text-[var(--tone-danger-fg)]">{error}</p>
+            <p
+              id="waitlist-error"
+              role="alert"
+              className="mt-3 text-sm text-[var(--tone-danger-fg)]"
+            >
+              {error}
+            </p>
           )}
 
           <p className="mt-4 text-xs text-muted">

@@ -1,18 +1,23 @@
 const milestones = [
   {
-    date: "Adoptado 2026",
-    title: "El Omnibus amplía el plazo",
-    body: "El Digital Omnibus (adoptado en 2026) movió el deadline de alto riesgo. La obligación sigue: solo tienes más tiempo para prepararte bien.",
+    date: "Feb 2025 · en vigor",
+    title: "Alfabetización en IA (Art. 4)",
+    body: "Ya exigible: tu organización debe procurar que quien opera estas herramientas tenga formación suficiente en IA. Es un deber propio del deployer, no del proveedor.",
+  },
+  {
+    date: "2 ago 2026",
+    title: "Transparencia (Art. 50)",
+    body: "El plazo más cercano: empiezan a aplicarse los deberes de transparencia sobre la IA que interactúa con candidatos o genera contenido. Afecta directamente a un proceso de selección con IA.",
   },
   {
     date: "Dic 2027",
     title: "Obligaciones de alto riesgo",
-    body: "Entran en aplicación las obligaciones para sistemas de alto riesgo del EU AI Act (Anexo III).",
+    body: "El Digital Omnibus movió aquí las obligaciones del Anexo III (empleo). No es agosto de 2026 —un error extendido en el mercado—: tienes una ventana para prepararte bien, no para ignorarlo.",
   },
   {
     date: "2026 →",
     title: "Leyes estatales en EE.UU.",
-    body: "Se suman regulaciones de IA a nivel estatal. La superficie regulatoria crece.",
+    body: "Se suman regulaciones de IA a nivel estatal (p. ej. Nueva York, Illinois, Colorado). La superficie regulatoria crece.",
   },
 ];
 
