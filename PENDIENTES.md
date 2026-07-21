@@ -300,7 +300,7 @@ descarte (fuera `window.prompt`), `engines`, `apiVersion` Stripe, React 19.2.7, 
 Queda (bajo, deferido con motivo):
 - [ ] **`tsconfig` `noUncheckedIndexedAccess`**: barrería muchos accesos indexados a datos del cliente (más seguridad
   de tipos real), pero surface decenas de errores → merece su propia tanda dedicada, no un cambio suelto.
-- [ ] **Stats de `ProblemStats`** (78% / 83%) sin fuente citada: **decisión de contenido tuya** — o citamos la fuente
-  (nota al pie) o suavizamos a lenguaje de estimación. No lo toqué para no debilitar el gancho sin tu criterio.
+- [~] **Stats de `ProblemStats`** (78% / 83%): suavizadas a estimación (~78 % / ~83 % + nota "estimaciones de mercado";
+  el 35 M€/7% se marca como dato del propio Art. 99). **Pendiente: buscar la fuente** para volver a cifra dura citada.
 - [ ] `npm audit`: 2 moderate en `postcss` **vendorizado por Next** (build-time, no accionable sin update de Next). Aceptado.
 - [ ] Cosméticos: parpadeo de icono en `ThemeToggle` tras montaje; dots decorativos con hex fijo (semáforo macOS, intencional).

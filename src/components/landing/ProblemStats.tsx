@@ -4,12 +4,14 @@ import { Reveal } from "@/components/ui/Reveal";
 const stats = [
   {
     value: 78,
+    prefix: "~",
     suffix: "%",
     label:
       "de las organizaciones no ha dado pasos significativos hacia el cumplimiento del AI Act.",
   },
   {
     value: 83,
+    prefix: "~",
     suffix: "%",
     label: "no tiene un inventario formal de sus sistemas de IA.",
   },
@@ -61,6 +63,12 @@ export function ProblemStats() {
             </Reveal>
           ))}
         </dl>
+
+        <p className="mt-4 text-xs text-muted">
+          Las cifras de adopción y preparación (~78 %, ~83 %) son estimaciones de
+          mercado. El límite de 35 M€ / 7 % de la facturación procede del propio
+          EU AI Act (Art. 99).
+        </p>
       </div>
     </section>
   );
