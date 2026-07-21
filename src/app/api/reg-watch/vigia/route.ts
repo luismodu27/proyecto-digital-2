@@ -57,3 +57,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
+
+/**
+ * Entrada del cron de Vercel (GET). Los cron jobs de Vercel disparan una
+ * petición GET con la cabecera `Authorization: Bearer <CRON_SECRET>`. Este
+ * handler es EXCLUSIVO del cron: exige el secreto y NO acepta sesión, así que no
+ * tiene superficie CSRF. Corre el Vigía con service_role.
+ *
+ * El Vigía solo detecta cambios y encola candidatos; el Analista (enriquecido
+ * con LLM) y la publicación siguen siendo disparo manual del Validador humano.
+ */
+export async function GET(request: Request) {
+  const cronSecret = process.env.CRON_SECRET;
+  const auth = request.headers.get("authorization") ?? "";
+  if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "no autorizado" }, { status: 401 });
+  }
+
+  if (!isSupabaseConfigured) {
+    return NextResponse.json(
+      { error: "modo demo: el Vigía está inactivo" },
+      { status: 400 },
+    );
+  }
+
+  const svc = createServiceClient();
+  if (!svc) {
+    return NextResponse.json(
+      { error: "falta SUPABASE_SERVICE_ROLE_KEY para el modo cron" },
+      { status: 500 },
+    );
+  }
+
+  try {
+    const summary = await runVigia(svc);
+    return NextResponse.json(summary);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "error";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}

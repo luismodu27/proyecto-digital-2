@@ -183,6 +183,15 @@ Para **encenderlo** en Vercel → *Settings → Environment Variables* (Producti
 > Deliverabilidad: sin dominio propio verificado en Resend, los correos salen de `onboarding@resend.dev` y pueden
 > caer en spam. Verificar un dominio (§1.3) mejora esto y es lo mismo que hace falta para el código de correo.
 
+### 1.5-bis · Cron del Vigía (vigilancia regulatoria automática) — construido (2026-07-21)
+Hasta ahora el **Vigía solo corría si un admin lo disparaba a mano** — el "foso automatizado" no se ejecutaba solo.
+Ya está programado en `vercel.json`: cada **lunes 06:00 UTC** Vercel llama a `/api/reg-watch/vigia` (GET con
+`Authorization: Bearer <CRON_SECRET>`) y el Vigía revisa las fuentes y encola candidatos. **Requisitos** (los mismos
+del digest §1.5): `CRON_SECRET` + `SUPABASE_SERVICE_ROLE_KEY` en Vercel. Sin `CRON_SECRET` el cron responde 401 y no
+corre. **Decisión de diseño:** solo el **Vigía** (determinista, gratis) es automático; el **Analista** (enriquecido con
+LLM, con coste) sigue siendo disparo manual del Validador — coherente con "propone borradores que un humano valida".
+Si en el futuro quieres el pipeline entero automático, hay que encadenar `/api/reg-watch/analista` (avísame).
+
 ---
 
 ## 🟡 2. Pendiente MÍO (desarrollo, cuando desbloquees lo de arriba)
@@ -274,3 +283,11 @@ Mantenibilidad, **sin impacto de usuario**; no urgente. Del escaneo completo:
 - [ ] `api/reminders/run`: exigir **POST** (o token CSRF) en el modo sesión (hoy acepta GET → CSRF de bajo
   impacto). Tocar cuando se active el cron de correos.
 - [ ] `submitWaitlist`: **rate-limit / captcha** (hoy solo honeypot cliente) para evitar spam al fundador.
+- [ ] `saveRiskAssessment`: recomputar `rationale/citations/obligations` en servidor desde `answers` (hoy se guardan
+  tal cual llegan del cliente → integridad intra-tenant, sin XSS). Coherencia con "contenido legal determinista".
+
+### Follow-ups de la tanda P1 (auditoría 2026-07-21)
+- [ ] **CSP estricta con nonce** en `next.config.ts` (ya están HSTS/X-Frame-Options/nosniff/Referrer/Permissions).
+  Requiere prueba en navegador: no romper el script de tema inline (`layout.tsx`), Stripe.js ni Supabase.
+- [ ] **`.env.example` incompleto** (P2): faltan ~13 vars usadas en código (Stripe ×5, correo ×3, SSO ×2,
+  `NEXT_PUBLIC_APP_URL`). Documentarlas para que un deploy nuevo no apague features en silencio.

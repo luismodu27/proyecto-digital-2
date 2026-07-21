@@ -123,6 +123,23 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Resuelto merge del PR #3 + análisis profundo (6 auditorías) + tanda P1.**
+  **Merge:** la base del PR (`claude/startup-project-setup-612pzs`) traía un Vigía temprano paralelo; se resolvió a
+  favor de esta rama (foso completo `reg-watch/` + `analista/`) y se descartaron los duplicados de la base
+  (`lib/vigia/`, `lib/supabase/admin.ts`, `api/cron/vigia`, seed redundante, getters `getRegSources`/`RegSourceRow`
+  duplicados). **Auditoría** (correctitud, rendimiento, seguridad, compliance, frontend/a11y, infra/GitHub): 0 P0, sin
+  fugas cross-tenant, RLS/audit sólidos; ver el informe completo en la sesión. **Tanda P1 desplegada:**
+  (1) **Cabeceras de seguridad** en `next.config.ts` (HSTS, X-Frame-Options DENY, nosniff, Referrer/Permissions-Policy,
+  `poweredByHeader:false`); CSP estricta con nonce queda pendiente (necesita prueba en navegador: script de tema inline
+  + Stripe.js + Supabase). (2) **CI** en `.github/workflows/ci.yml` (lint + tsc + build en PRs y push a main; build en
+  modo demo, verificado exit 0). (3) **Cron del foso**: el Vigía no corría solo — se añadió handler **GET solo-cron**
+  (Bearer `CRON_SECRET`, sin sesión → sin CSRF) en `api/reg-watch/vigia` + cron semanal en `vercel.json`
+  (`0 6 * * 1`). Decisión: **solo el Vigía es automático** (determinista, gratis); el **Analista sigue manual**
+  (LLM con coste + filosofía humano-en-el-bucle). Requiere `CRON_SECRET` en Vercel (mismo secreto que reminders).
+  (4) **Rendimiento**: `getIsPlatformAdmin` y un helper `listOrgMembersRaw` envueltos en `cache()` (dedup del RPC por
+  render en dashboard/plan/vigilancia); `getExportBundle` pasa de N+1 (2 consultas por sistema) a **2 consultas batch**
+  (`.in(...)`) para toda la org. tsc + lint + build OK.
+
 - **2026-07-21** · **Landing / conversión.** (a) `WhyNow`: timeline reordenado cronológicamente y liderando con lo
   ya exigible (Art. 4, feb 2025) y el **plazo más cercano (Art. 50 · 2-ago-2026)**, que faltaba; el hito de 2027
   reafirma el foso ("no es agosto de 2026, un error extendido en el mercado"). Fechas verificadas, copy a altitude

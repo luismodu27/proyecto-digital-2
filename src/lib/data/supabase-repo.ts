@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrg } from "./context";
 import { toAuditEntry, type RawAudit } from "@/lib/audit";
@@ -76,21 +77,24 @@ export async function getAiSystems(): Promise<AiSystem[]> {
 }
 
 /** Historial de evaluaciones de un sistema (más recientes primero). */
-export async function getSystemAssessments(
-  systemId: string,
-): Promise<AssessmentRecord[]> {
-  const supabase = await createClient();
-  const org = await getActiveOrg();
-  if (!org) return [];
-  const { data } = await supabase
-    .from("risk_assessments")
-    .select(
-      "id, level, rationale, evidence_state, attested_by_name, evidence_note, evidence_url, assessed_at",
-    )
-    .eq("organization_id", org)
-    .eq("ai_system_id", systemId)
-    .order("assessed_at", { ascending: false });
-  return (data ?? []).map((r) => ({
+/** Columnas de `risk_assessments` que consumen el dossier y la exportación. */
+const ASSESSMENT_COLS =
+  "id, ai_system_id, level, rationale, evidence_state, attested_by_name, evidence_note, evidence_url, assessed_at";
+
+type AssessmentRow = {
+  id: string;
+  ai_system_id?: string;
+  level: string;
+  rationale: string;
+  evidence_state: string | null;
+  attested_by_name: string | null;
+  evidence_note: string | null;
+  evidence_url: string | null;
+  assessed_at: string;
+};
+
+function mapAssessmentRow(r: AssessmentRow): AssessmentRecord {
+  return {
     id: r.id,
     level: r.level as RiskLevel,
     rationale: r.rationale,
@@ -99,7 +103,22 @@ export async function getSystemAssessments(
     evidenceNote: r.evidence_note ?? null,
     evidenceUrl: r.evidence_url ?? null,
     assessedAt: String(r.assessed_at),
-  }));
+  };
+}
+
+export async function getSystemAssessments(
+  systemId: string,
+): Promise<AssessmentRecord[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data } = await supabase
+    .from("risk_assessments")
+    .select(ASSESSMENT_COLS)
+    .eq("organization_id", org)
+    .eq("ai_system_id", systemId)
+    .order("assessed_at", { ascending: false });
+  return ((data ?? []) as AssessmentRow[]).map(mapAssessmentRow);
 }
 
 export type EditableSystem = {
@@ -140,6 +159,35 @@ export async function getSystemById(
  * las columnas aún no existen (migración 0019 sin aplicar), devuelve null y la
  * sección simplemente no aparece — la app no se rompe.
  */
+/** Columnas de auditoría de sesgo (LL144) que viven en `ai_systems` (migración 0019). */
+const BIAS_COLS =
+  "id, is_aedt, last_bias_audit_date, independent_auditor_name, auditor_independence_confirmed, bias_audit_summary_url, summary_published_date";
+
+type BiasRow = {
+  id?: string;
+  is_aedt: boolean | null;
+  last_bias_audit_date: string | null;
+  independent_auditor_name: string | null;
+  auditor_independence_confirmed: boolean | null;
+  bias_audit_summary_url: string | null;
+  summary_published_date: string | null;
+};
+
+function mapBiasRow(r: BiasRow): BiasAudit {
+  return {
+    isAedt: !!r.is_aedt,
+    lastAuditDate: r.last_bias_audit_date
+      ? String(r.last_bias_audit_date).slice(0, 10)
+      : null,
+    auditorName: r.independent_auditor_name ?? null,
+    auditorIndependenceConfirmed: !!r.auditor_independence_confirmed,
+    summaryUrl: r.bias_audit_summary_url ?? null,
+    summaryPublishedDate: r.summary_published_date
+      ? String(r.summary_published_date).slice(0, 10)
+      : null,
+  };
+}
+
 export async function getSystemBiasAudit(
   id: string,
 ): Promise<BiasAudit | null> {
@@ -148,25 +196,12 @@ export async function getSystemBiasAudit(
   if (!org) return null;
   const { data, error } = await supabase
     .from("ai_systems")
-    .select(
-      "is_aedt, last_bias_audit_date, independent_auditor_name, auditor_independence_confirmed, bias_audit_summary_url, summary_published_date",
-    )
+    .select(BIAS_COLS)
     .eq("organization_id", org)
     .eq("id", id)
     .maybeSingle();
   if (error || !data) return null;
-  return {
-    isAedt: !!data.is_aedt,
-    lastAuditDate: data.last_bias_audit_date
-      ? String(data.last_bias_audit_date).slice(0, 10)
-      : null,
-    auditorName: data.independent_auditor_name ?? null,
-    auditorIndependenceConfirmed: !!data.auditor_independence_confirmed,
-    summaryUrl: data.bias_audit_summary_url ?? null,
-    summaryPublishedDate: data.summary_published_date
-      ? String(data.summary_published_date).slice(0, 10)
-      : null,
-  };
+  return mapBiasRow(data as BiasRow);
 }
 
 /**
@@ -305,25 +340,36 @@ export async function getSystemsForSelect(): Promise<
 /* Equipo / miembros                                                          */
 /* -------------------------------------------------------------------------- */
 
-/** Miembros de la organización activa (vía RPC security-definer con email). */
-export async function getOrgMembers(): Promise<OrgMember[]> {
+type OrgMemberRow = {
+  user_id: string;
+  email: string;
+  role: MemberRole;
+  joined_at: string;
+};
+
+/**
+ * Filas crudas de miembros de la org activa (RPC security-definer con email).
+ * Envuelto en `cache()` para deduplicar dentro del mismo render: el dashboard y
+ * el plan piden miembros dos veces (getOrgMembers + getActionTasks) y así solo se
+ * hace UN RPC (`list_org_members`, que hace join contra auth.users) por request.
+ */
+const listOrgMembersRaw = cache(async (): Promise<OrgMemberRow[]> => {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return [];
   const { data } = await supabase.rpc("list_org_members", { org });
-  return (data ?? []).map(
-    (r: {
-      user_id: string;
-      email: string;
-      role: MemberRole;
-      joined_at: string;
-    }) => ({
-      userId: r.user_id,
-      email: r.email,
-      role: r.role,
-      joinedAt: String(r.joined_at),
-    }),
-  );
+  return (data ?? []) as OrgMemberRow[];
+});
+
+/** Miembros de la organización activa (vía RPC security-definer con email). */
+export async function getOrgMembers(): Promise<OrgMember[]> {
+  const rows = await listOrgMembersRaw();
+  return rows.map((r) => ({
+    userId: r.user_id,
+    email: r.email,
+    role: r.role,
+    joinedAt: String(r.joined_at),
+  }));
 }
 
 /** Invitaciones pendientes de la org (solo visibles para owner/admin por RLS). */
@@ -547,7 +593,7 @@ export async function getActionTasks(): Promise<ActionTask[]> {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return [];
-  const [tasksRes, membersRes] = await Promise.all([
+  const [tasksRes, members] = await Promise.all([
     supabase
       .from("action_tasks")
       .select(
@@ -555,10 +601,10 @@ export async function getActionTasks(): Promise<ActionTask[]> {
       )
       .eq("organization_id", org)
       .order("created_at", { ascending: true }),
-    supabase.rpc("list_org_members", { org }),
+    listOrgMembersRaw(),
   ]);
   const emailById = new Map<string, string>();
-  for (const m of (membersRes.data ?? []) as { user_id: string; email: string }[]) {
+  for (const m of members) {
     emailById.set(m.user_id, m.email);
   }
   type Row = {
@@ -597,13 +643,19 @@ export async function getActionTasks(): Promise<ActionTask[]> {
   });
 }
 
-/** ¿El usuario actual es validador de plataforma (personal de Attesta)? */
-export async function getIsPlatformAdmin(): Promise<boolean> {
+/**
+ * ¿El usuario actual es validador de plataforma (personal de Attesta)?
+ *
+ * Cacheado por render: el layout (vía getOrgPlan) y las páginas de vigilancia lo
+ * consultan por separado; con `cache()` se hace un solo RPC `is_platform_admin`
+ * por request en vez de dos.
+ */
+export const getIsPlatformAdmin = cache(async (): Promise<boolean> => {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("is_platform_admin");
   if (error) return false;
   return data === true;
-}
+});
 
 /** Registro de actividad (audit-trail) de la organización activa. */
 export async function getAuditLog(): Promise<AuditEntry[]> {
@@ -667,16 +719,50 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
   const auditLog = ((rawLog ?? []) as RawAudit[]).map(toAuditEntry);
 
   // Evidencia por sistema (historial de evaluaciones + auditoría de sesgo).
-  const exportedSystems: ExportedSystem[] = await Promise.all(
-    systems.map(async (system): Promise<ExportedSystem> => {
-      if (!system.dbId) return { system, assessments: [], biasAudit: null };
-      const [assessments, biasAudit] = await Promise.all([
-        getSystemAssessments(system.dbId),
-        getSystemBiasAudit(system.dbId),
-      ]);
-      return { system, assessments, biasAudit };
-    }),
-  );
+  // Batch: 2 consultas para toda la org en vez de 2 por sistema (evita N+1 en la
+  // exportación de organizaciones con muchos sistemas).
+  const dbIds = systems
+    .map((s) => s.dbId)
+    .filter((x): x is string => Boolean(x));
+
+  const assessmentsBySystem = new Map<string, AssessmentRecord[]>();
+  const biasBySystem = new Map<string, BiasAudit>();
+  if (dbIds.length > 0) {
+    const [assessRes, biasRes] = await Promise.all([
+      supabase
+        .from("risk_assessments")
+        .select(ASSESSMENT_COLS)
+        .eq("organization_id", org)
+        .in("ai_system_id", dbIds)
+        .order("assessed_at", { ascending: false }),
+      supabase
+        .from("ai_systems")
+        .select(BIAS_COLS)
+        .eq("organization_id", org)
+        .in("id", dbIds),
+    ]);
+    for (const r of (assessRes.data ?? []) as AssessmentRow[]) {
+      if (!r.ai_system_id) continue;
+      const list = assessmentsBySystem.get(r.ai_system_id) ?? [];
+      list.push(mapAssessmentRow(r));
+      assessmentsBySystem.set(r.ai_system_id, list);
+    }
+    // Fallback seguro: si las columnas de sesgo (0019) no existen, biasRes.error
+    // está presente y simplemente no hay auditoría de sesgo en el export.
+    if (!biasRes.error) {
+      for (const r of (biasRes.data ?? []) as BiasRow[]) {
+        if (r.id) biasBySystem.set(r.id, mapBiasRow(r));
+      }
+    }
+  }
+
+  const exportedSystems: ExportedSystem[] = systems.map((system) => ({
+    system,
+    assessments: system.dbId
+      ? assessmentsBySystem.get(system.dbId) ?? []
+      : [],
+    biasAudit: system.dbId ? biasBySystem.get(system.dbId) ?? null : null,
+  }));
 
   return {
     meta: {
