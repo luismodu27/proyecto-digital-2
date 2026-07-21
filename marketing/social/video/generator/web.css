@@ -1,0 +1,61 @@
+/* web.css — identidad EXACTA de la web de Attesta (espejo de src/app/globals.css) para video.
+   Self-contained: incluye @font-face (NO cargar brand.css junto a esto → evita colisiones de clase). */
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-500.woff2") format("woff2");font-weight:500;font-style:normal;font-display:block}
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-600.woff2") format("woff2");font-weight:600;font-style:normal;font-display:block}
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-400-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:block}
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-600-italic.woff2") format("woff2");font-weight:600;font-style:italic;font-display:block}
+@font-face{font-family:"Geist";src:url("fonts/Geist.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:block}
+@font-face{font-family:"Geist Mono";src:url("fonts/GeistMono.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:block}
+:root, .light {
+  --paper:#faf8f2; --paper-raised:#ffffff; --paper-sunken:#f3f0e7;
+  --ink:#0f1a14; --ink-soft:#38443d; --muted:#6b756e;
+  --line:#e6e1d4; --line-strong:#d6d0bf;
+  --brand:#0b6b4e; --brand-strong:#084d38; --brand-bright:#11a071; --brand-soft:#e4efe9;
+  --seal:#b0824a; --seal-soft:#f0e7d7;
+  --risk-high:#c9761f; --risk-limited:#b0824a; --risk-minimal:#0b6b4e; --risk-unaccept:#b4322a;
+  --grid-line:rgba(15,26,20,0.04);
+  --sealimg:url("assets/sealmark.png");
+  --warn-bg:#f7ead8; --warn-fg:#8a4f14; --warn-bd:#e6cba3;
+  --good-bg:#e4efe9; --good-fg:#084d38; --good-bd:#bfdccf;
+  --gold-bg:#f2e9d9; --gold-fg:#7c5a2e; --gold-bd:#e0d0b3;
+  --neutral-bg:#f3f0e7; --neutral-fg:#38443d; --neutral-bd:#d6d0bf;
+  --danger-bg:#f7e4e2; --danger-fg:#8f271f; --danger-bd:#e6b6b1;
+  --shadow-card:0 18px 44px -26px rgba(15,26,20,0.4);
+  --shadow-float:0 40px 90px -40px rgba(15,26,20,0.45);
+}
+.dark {
+  --paper:#0e1512; --paper-raised:#151f19; --paper-sunken:#0a0f0c;
+  --ink:#eef2ee; --ink-soft:#aeb9b2; --muted:#79857e;
+  --line:#232e28; --line-strong:#33413a;
+  --brand:#12946a; --brand-strong:#7fd8b4; --brand-bright:#22b581; --brand-soft:#16271f;
+  --seal:#c79a5f; --seal-soft:#241d12;
+  --risk-high:#e0912f; --risk-limited:#c79a5f; --risk-minimal:#12946a; --risk-unaccept:#d9564c;
+  --grid-line:rgba(238,242,238,0.035);
+  --sealimg:url("assets/sealmark-dark.png");
+  --warn-bg:#2a2013; --warn-fg:#e6b877; --warn-bd:#4a3a1e;
+  --good-bg:#14261e; --good-fg:#7fd8b4; --good-bd:#24463a;
+  --gold-bg:#241f14; --gold-fg:#d8b781; --gold-bd:#40361f;
+  --neutral-bg:#1a231e; --neutral-fg:#b7c2bb; --neutral-bd:#33413a;
+  --danger-bg:#2a1614; --danger-fg:#f0a89f; --danger-bd:#4a221d;
+  --shadow-card:0 18px 50px -24px rgba(0,0,0,0.7);
+  --shadow-float:0 50px 110px -40px rgba(0,0,0,0.8);
+}
+/* background: paper + technical grid (grid-paper) */
+.gridbg{background-color:var(--paper);
+  background-image:linear-gradient(to right,var(--grid-line) 1px,transparent 1px),linear-gradient(to bottom,var(--grid-line) 1px,transparent 1px);
+  background-size:40px 40px}
+/* type roles (match globals: display=Fraunces, sans=Geist) */
+.eyebrow{font-family:"Geist Mono",monospace;text-transform:uppercase;letter-spacing:.24em;color:var(--brand);font-weight:500}
+.disp{font-family:"Fraunces",serif;font-weight:600;color:var(--ink);letter-spacing:-.018em;line-height:1.03}
+.disp .b{color:var(--brand)} .disp .em{font-style:italic;color:var(--brand)}
+.body{font-family:"Geist",sans-serif;color:var(--ink-soft)}
+/* card + badges (match landing/dashboard) */
+.card{background:var(--paper-raised);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-card)}
+.badge{font-family:"Geist Mono",monospace;text-transform:uppercase;letter-spacing:.08em;border-radius:999px;font-weight:500;border:1px solid}
+.badge.warn{background:var(--warn-bg);color:var(--warn-fg);border-color:var(--warn-bd)}
+.badge.good{background:var(--good-bg);color:var(--good-fg);border-color:var(--good-bd)}
+.badge.gold{background:var(--gold-bg);color:var(--gold-fg);border-color:var(--gold-bd)}
+.badge.neutral{background:var(--neutral-bg);color:var(--neutral-fg);border-color:var(--neutral-bd)}
+.seal{background:var(--sealimg) center/contain no-repeat}
