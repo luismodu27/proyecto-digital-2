@@ -123,6 +123,21 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Informe de gap: de tabla plana a documento de evidencia auditable.** Antes era un header + 4
+  KPIs + una tabla plana de todas las brechas. Ahora (build+lint+tsc + captura en impresión):
+  - **Resumen ejecutivo narrativo** (determinista) + **nota "Alcance y método"** (extraída a `ScopeNote` en
+    `LegalNote.tsx`, compartida con el informe ejecutivo para no divergir; el informe se refactorizó para usarla).
+  - **Agrupado por sistema** y ordenado por urgencia (más brechas abiertas de sev. alta primero); dentro de cada
+    sistema, abiertas antes que cubiertas, por severidad y artículo. Cada sistema muestra su cobertura (% cubierto)
+    y un chip si tiene sev. alta abierta. **Chips de tono** para severidad y estado (tokens `--tone-*`).
+  - **KPI de cobertura** (% cubierto) + barra global. KPIs renombrados a la terminología correcta.
+  - **Copy revisado por `compliance-domain-expert`** (2ª ronda): corrigió que **NO se llame "brecha" a un control
+    cubierto** — el universo son "controles evaluados", solo los abiertos son brechas (renombrado KPI "Brechas
+    totales"→"Controles evaluados"). Reforzado el encuadre de no-cumplimiento ("cubrir un control refleja evidencia
+    autodeclarada… no constituye un juicio de cumplimiento… pendiente de verificación independiente… no descarta
+    controles/sistemas aún no evaluados"). `{alta}` = solo abiertas de sev. alta. Pluralización determinista.
+  - `force-dynamic` añadido (el informe depende de la fecha de corte).
+
 - **2026-07-21** · **Reportes/evidencia: el informe ejecutivo lee como un brief de dirección, no un dashboard impreso.**
   Foco elegido por el fundador (el PDF es el entregable que justifica el precio). Cambios (build+lint+tsc en verde,
   verificado con captura en emulación de impresión):
