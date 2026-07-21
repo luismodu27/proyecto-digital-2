@@ -14,6 +14,7 @@ import { Paywall } from "@/components/dashboard/Paywall";
 import {
   RISK_LABEL,
   RISK_ORDER,
+  AUDIT_READY_THRESHOLD,
   avgCompliance,
   riskCounts,
   type RiskLevel,
@@ -101,6 +102,42 @@ export default async function InformeEjecutivoPage() {
     year: "numeric",
   });
 
+  // Sistemas de alto riesgo por debajo del umbral ORIENTATIVO de preparación
+  // (80%). Es un corte distinto —y más amplio— que `priority` (<60%, "los más
+  // urgentes"); la narrativa se apoya en este para que el % coincida con la
+  // marca del Meter y con el resto del producto (una sola fuente: la constante).
+  const belowReady = systems.filter(
+    (s) =>
+      (s.risk === "high" || s.risk === "unacceptable") &&
+      s.compliance < AUDIT_READY_THRESHOLD,
+  ).length;
+
+  const org = orgName ?? "La organización";
+  const nearest = deadlines[0];
+  // Ensamblado determinista (cero LLM) del resumen ejecutivo a partir de los
+  // datos ya declarados por la organización. Copy revisado por compliance.
+  const pl = (n: number, one: string, many: string) => (n === 1 ? one : many);
+  const summaryParagraph =
+    total === 0
+      ? `A fecha de ${fecha}, ${org} aún no ha inventariado sistemas de IA. El primer paso de la preparación es registrar los sistemas en uso y clasificar su riesgo.`
+      : [
+          `A fecha de ${fecha}, ${org} mantiene ${total} ${pl(total, "sistema de IA inventariado", "sistemas de IA inventariados")}, de ${pl(total, "el cual", "los cuales")} ${
+            highRisk === 0
+              ? "ninguno está clasificado"
+              : `${highRisk} ${pl(highRisk, "está clasificado", "están clasificados")}`
+          } como de alto riesgo según la autoevaluación orientativa de la organización.`,
+          `La preparación media declarada es del ${avg}%, y un ${backedPct}% de los sistemas cuenta con evidencia declarada de respaldo.`,
+          `Hay ${openGaps.length} ${pl(openGaps.length, "brecha abierta", "brechas abiertas")} (${criticalGaps.length} de severidad alta) ${pl(openGaps.length, "pendiente", "pendientes")} de resolución.`,
+          belowReady > 0
+            ? `${belowReady} ${pl(belowReady, "sistema de alto riesgo está", "sistemas de alto riesgo están")} por debajo del umbral orientativo de preparación (${AUDIT_READY_THRESHOLD}% listo) y se ${pl(belowReady, "señala", "señalan")} para atención prioritaria.`
+            : null,
+          nearest
+            ? `El próximo hito regulatorio en el radar de la organización es «${nearest.title}», dentro de ${daysUntil(nearest.date, now)} días.`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" ");
+
   const kpis = [
     { k: "Sistemas de IA", v: String(total) },
     { k: "Alto riesgo", v: String(highRisk), color: highRisk > 0 ? RISK_COLOR.high : undefined },
@@ -147,6 +184,32 @@ export default async function InformeEjecutivoPage() {
             autodeclarados
           </p>
         </div>
+
+        {/* Resumen ejecutivo (narrativa determinista) */}
+        <section className="mt-6 break-inside-avoid">
+          <h2 className="font-display text-base font-semibold">Resumen ejecutivo</h2>
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+            {summaryParagraph}
+          </p>
+        </section>
+
+        {/* Alcance y método */}
+        <section className="mt-5 break-inside-avoid rounded-lg border border-line bg-paper-sunken/40 px-4 py-3">
+          <p className="text-xs leading-relaxed text-muted">
+            <span className="font-medium text-ink-soft">Alcance y método</span> —
+            Este informe cubre exclusivamente los sistemas de IA que la organización
+            ha declarado en Attesta a fecha de {fecha}, y refleja su estado en ese
+            momento. La clasificación de riesgo es orientativa y se basa en el marco
+            del Reglamento Europeo de IA (EU AI Act) y, en su caso, en otros marcos
+            aplicables, a partir de la información introducida por los responsables de
+            la organización. El porcentaje de «preparación» indica el avance
+            autodeclarado hacia la evidencia requerida; no es un porcentaje de
+            cumplimiento ni un juicio de conformidad normativa. Los datos no han sido
+            verificados de forma independiente por Attesta. Este documento es
+            orientativo y no constituye asesoría jurídica; antes de tomar decisiones
+            regulatorias conviene validarlo con personal cualificado.
+          </p>
+        </section>
 
         {/* KPIs */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -204,7 +267,8 @@ export default async function InformeEjecutivoPage() {
             Sistemas que requieren atención
           </h2>
           <p className="mt-0.5 text-xs text-muted">
-            Alto riesgo con preparación por debajo del 60%.
+            Los más urgentes: alto riesgo con preparación por debajo del 60% (el
+            umbral orientativo de preparación es {AUDIT_READY_THRESHOLD}%).
           </p>
           {priority.length === 0 ? (
             <p className="mt-3 text-sm text-ink-soft">

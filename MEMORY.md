@@ -123,6 +123,22 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-21** · **Reportes/evidencia: el informe ejecutivo lee como un brief de dirección, no un dashboard impreso.**
+  Foco elegido por el fundador (el PDF es el entregable que justifica el precio). Cambios (build+lint+tsc en verde,
+  verificado con captura en emulación de impresión):
+  - **Resumen ejecutivo narrativo** (`informe/page.tsx`): párrafo **ensamblado de forma determinista** (cero LLM) a
+    partir de los datos ya declarados (total, alto riesgo, preparación media, % con respaldo, brechas, sistemas bajo
+    umbral, próximo hito). Pluralización y ramas condicionales; caso sin sistemas contemplado.
+  - **Nota "Alcance y método"**: qué cubre el informe (foto a fecha), en qué marco se basa (EU AI Act + otros en su
+    caso), que el % NO es cumplimiento y que no es asesoría jurídica. Va arriba, visible; `LEGAL_PDF` sigue de pie fino.
+  - **Copy revisado por `compliance-domain-expert`**: sin términos prohibidos, verbos de la organización, encuadre
+    deployer correcto. El experto detectó una **incoherencia de umbral**: el texto decía "80% listo" pero la variable
+    `priority` filtra <60%. Corregido con un contador propio `belowReady` que sale de `AUDIT_READY_THRESHOLD` (una sola
+    fuente), y el subtítulo de "Sistemas que requieren atención" ahora reconcilia los dos cortes (60% urgente / 80%
+    orientativo) para que un auditor no lo lea como error.
+  - **PDF más profesional** (`globals.css`): `@page` con márgenes 16/14mm; `@media print` evita títulos huérfanos
+    (`break-after:avoid`) y filas partidas (`break-inside:avoid`). Beneficia dossier, informe y evidencia de gap.
+
 - **2026-07-20** · **Activación / primer día: dashboard más honesto y con más caminos de salida.** Foco elegido
   por el fundador: convertir registros en usuarios activos. Cambios (todos verificados con build+lint+tsc):
   - **Bug de credibilidad corregido:** el stat "Brechas abiertas" del resumen estaba **hardcodeado a `4`** —
