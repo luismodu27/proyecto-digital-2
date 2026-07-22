@@ -929,5 +929,250 @@ export const es = {
         "La persona invitada ya no podrá unirse con este enlace. Puedes volver a invitarla más tarde.",
       revokeInviteLabel: "Revocar",
     },
+
+    inventory: {
+      title: "Inventario de sistemas de IA",
+      subtitle:
+        "Cada modelo y sistema en uso, con su propietario, proveedor y estado.",
+      addSystem: "+ Registrar sistema",
+      emptyTitle: "Tu inventario está vacío",
+      emptyBody:
+        "Registra tu primer sistema de IA, o carga un conjunto de datos de ejemplo para explorar Attesta con contenido.",
+      loadSample: "Cargar datos de ejemplo",
+      loadSamplePending: "Cargando ejemplo…",
+      col: {
+        system: "Sistema",
+        domain: "Dominio",
+        risk: "Riesgo",
+        evidence: "Respaldo",
+        readiness: "Preparación",
+        lastReview: "Última revisión",
+        actions: "Acciones",
+      },
+      classify: "Clasificar",
+      dossier: "Dossier",
+      backToInventory: "← Volver al inventario",
+      cancel: "Cancelar",
+      nameLabel: "Nombre del sistema *",
+      namePlaceholder: "Filtro de CVs — Talento",
+      ownerLabel: "Área responsable",
+      ownerPlaceholder: "RRHH",
+      domainLabel: "Dominio de uso",
+      domainPlaceholder: "Contratación",
+      vendorLabel: "Proveedor",
+      vendorPlaceholder: "Interno / HireFlow…",
+      roleLabel: "Vuestro rol",
+      roleDeployer: "Deployer (usamos el sistema)",
+      roleProvider: "Provider (lo desarrollamos)",
+      newTitle: "Registrar sistema de IA",
+      newSubtitle:
+        "Añade un sistema al inventario. Podrás clasificar su riesgo después.",
+      newDemoNotice:
+        "El alta de sistemas requiere conectar Supabase. En modo demo el inventario usa datos de ejemplo. Configura las credenciales para empezar a registrar sistemas reales.",
+      createCta: "Registrar sistema",
+      createPending: "Registrando…",
+      editTitle: "Editar sistema",
+      editSubtitle: "Actualiza los datos del sistema o elimínalo del inventario.",
+      generateDossier: "⬇ Generar dossier",
+      notFound:
+        "No se encontró el sistema, o la edición no está disponible en modo demo.",
+      saveCta: "Guardar cambios",
+      savePending: "Guardando…",
+      historyTitle: "Historial de evaluaciones",
+      evaluate: "+ Evaluar",
+      historyBody:
+        "Cada clasificación guardada queda registrada, con su nivel de respaldo y quién la atestó.",
+      dangerTitle: "Zona de peligro",
+      dangerBody: "Eliminar el sistema borra también sus evaluaciones y brechas.",
+    },
+
+    gap: {
+      title: "Gap assessment",
+      subtitleOne: "1 brecha abierta frente a los requisitos del EU AI Act.",
+      subtitleOtherAfter:
+        " brechas abiertas frente a los requisitos del EU AI Act.",
+      addGap: "+ Añadir brecha",
+      exportEvidence: "⬇ Exportar evidencia (PDF)",
+      severityPrefix: "· severidad ",
+      affectedSystemPrefix: "Sistema afectado: ",
+      status: { missing: "Falta", partial: "Parcial", done: "Cubierto" },
+      newTitle: "Añadir brecha",
+      newSubtitle: "Registra un control o requisito pendiente para un sistema.",
+      backToGap: "← Volver al gap assessment",
+      newDemoNotice:
+        "Añadir brechas requiere conectar Supabase. En modo demo el gap assessment usa datos de ejemplo.",
+      noSystems:
+        "Registra primero un sistema en el inventario para poder añadirle brechas.",
+      systemLabel: "Sistema *",
+      systemPlaceholder: "Selecciona un sistema…",
+      requirementLabel: "Requisito / control *",
+      requirementPlaceholder: "Supervisión humana efectiva en la decisión",
+      articleLabel: "Artículo",
+      articlePlaceholder: "Art. 26.2",
+      severityLabel: "Severidad",
+      severityAlta: "Alta",
+      severityMedia: "Media",
+      severityBaja: "Baja",
+      statusLabel: "Estado",
+      createCta: "Añadir brecha",
+      createPending: "Añadiendo…",
+      cancel: "Cancelar",
+    },
+
+    team: {
+      title: "Equipo",
+      subtitle: "Invita a tu equipo (RRHH, Legal, auditoría) y gestiona sus roles.",
+      demoBefore: "Estás en ",
+      demoMode: "modo demo",
+      demoAfter:
+        ": se muestra un equipo de ejemplo. Conecta tu organización para invitar personas y gestionar roles de verdad.",
+      inviteTitle: "Invitar a alguien",
+      inviteBody:
+        "Si ya tiene cuenta en Attesta se añade al instante. Si no, la invitación queda pendiente y se activa cuando se registre con ese correo.",
+      emailLabel: "Correo",
+      emailPlaceholder: "persona@empresa.com",
+      roleLabel: "Rol",
+      inviteCta: "Invitar",
+      membersTitle: "Miembros",
+      you: "(tú)",
+      joinedPrefix: "Se unió el ",
+      pendingTitle: "Invitaciones pendientes",
+      invitedAsPrefix: "Invitado como ",
+      pending: "Pendiente",
+      rolesLegendTitle: "Qué puede hacer cada rol",
+      roleLabels: {
+        owner: "Propietario",
+        admin: "Administrador",
+        member: "Miembro",
+      },
+      roleHints: {
+        owner:
+          "Control total: gestiona el equipo, la organización y puede borrar sistemas.",
+        admin:
+          "Gestiona sistemas, brechas y evaluaciones; puede invitar a miembros.",
+        member: "Acceso de lectura al panel de la organización.",
+      },
+    },
+
+    billing: {
+      title: "Plan y facturación",
+      subtitle: "Gestiona la suscripción de tu organización.",
+      okBanner:
+        "¡Pago recibido! Tu suscripción se activará en unos segundos. Si no ves el cambio, recarga la página.",
+      canceledBanner: "Checkout cancelado. No se realizó ningún cargo.",
+      planPrefix: "Plan ",
+      badgeEnterprise: "Enterprise",
+      badgeUnlocked: "Desbloqueado",
+      badgeFree: "Gratuito",
+      badgeActiveFallback: "Activa",
+      tier: {
+        free: "Diagnóstico",
+        preparacion: "Preparación",
+        enterprise: "Enterprise",
+      },
+      status: {
+        active: "Activa",
+        trialing: "En prueba",
+        past_due: "Pago pendiente",
+        canceled: "Cancelada",
+        unpaid: "Impaga",
+        incomplete: "Incompleta",
+        incomplete_expired: "Expirada",
+        paused: "En pausa",
+      },
+      willCancelBefore: "Se cancelará el ",
+      willCancelAfter: ". Hasta entonces conservas el acceso.",
+      renewsBefore: "Se renueva el ",
+      renewsAfter: ".",
+      manageSubscription: "Gestionar suscripción",
+      portalHint:
+        "Cambiar método de pago, ver facturas o cancelar — todo en el portal seguro de Stripe.",
+      enterpriseBody:
+        "Tu organización tiene el plan Enterprise: acceso completo, varias entidades, SSO y soporte prioritario.",
+      unlockedBody:
+        "Tu organización tiene desbloqueada la preparación completa para auditoría. ¡A por ello!",
+      freeBody:
+        "Tu organización usa el plan gratuito (inventario y clasificación de riesgo). Desbloquea la preparación completa para auditoría.",
+      perMonth: "/mes",
+      subscribeCta: "Suscribirse a Preparación",
+      checkoutInactive: "El cobro en línea aún no está activo. Vuelve pronto.",
+      includesTitle: "Qué incluye Preparación",
+      features: [
+        "Gap assessment + plan de acción",
+        "Vigilancia regulatoria continua",
+        "Dossier e informe ejecutivo (PDF)",
+        "Evidencia y audit-trail",
+        "Policy packs (RRHH)",
+        "Equipo y roles",
+      ],
+      enterpriseHint:
+        "¿Necesitas varias entidades, SSO o soporte prioritario? Escríbenos para el plan Enterprise.",
+      exportTitle: "Exportar datos",
+      exportBodyBefore:
+        "Descarga una copia completa de la evidencia declarada de tu organización en un archivo ",
+      exportBodyJson: "JSON",
+      exportBodyAfter:
+        " portable: inventario de sistemas, evaluaciones de riesgo, brechas, plan de acción, auditorías de sesgo, equipo, revisiones regulatorias y el registro de actividad con su verificación de integridad. Tus datos son tuyos: úsalo para respaldo o para llevártelos.",
+      downloadJson: "Descargar JSON",
+      exportNote:
+        "Es un volcado de tus datos, no un informe ni una certificación. Para el dossier o el informe ejecutivo en PDF, usa las secciones de Inventario e Informe.",
+    },
+
+    riskPage: {
+      title: "Clasificación de riesgo",
+      subtitle:
+        "Cada sistema mapeado a su nivel de riesgo del EU AI Act y sus obligaciones.",
+      evaluateCta: "+ Evaluar un sistema",
+    },
+
+    controls: {
+      gapStatus: { missing: "Falta", partial: "Parcial", done: "Cubierto" },
+      taskStatus: {
+        todo: "Por hacer",
+        in_progress: "En curso",
+        blocked: "Bloqueada",
+        done: "Hecha",
+      },
+      memberRole: {
+        member: "Miembro",
+        admin: "Administrador",
+        owner: "Propietario",
+      },
+      memberRoleAria: "Rol del miembro",
+      eventStatus: {
+        aria: "Estado interno",
+        unset: "Sin marcar",
+        reviewed: "Revisado",
+        planned: "Plan en marcha",
+        notApplicable: "No aplica",
+      },
+      jurisdiction: {
+        toggle: "Ajustar mis jurisdicciones",
+        hint: "Dónde contratas · afina el radar",
+        body: "Marca los territorios donde tu organización contrata o tiene empleados. El radar priorizará las normas de esas jurisdicciones.",
+        save: "Guardar",
+      },
+      task: {
+        statusAria: "Estado",
+        assigneeAria: "Responsable",
+        noAssignee: "Sin responsable",
+        dueDateAria: "Fecha límite",
+        deleteTitle: "Eliminar tarea",
+        deleteMessageBefore: "Se eliminará la tarea «",
+        deleteMessageAfter: "» del plan. Esta acción no se puede deshacer.",
+        deleteConfirm: "Eliminar",
+        deleteTrigger: "Eliminar",
+        deleteAria: "Eliminar tarea",
+      },
+      history: {
+        emptyBefore:
+          "Este sistema aún no tiene evaluaciones guardadas. Clasifícalo desde ",
+        emptyLink: "Riesgo → Evaluar un sistema",
+        emptyAfter: ".",
+        current: "Vigente",
+        attestedByPrefix: " · atestado por ",
+        viewEvidence: "Ver evidencia",
+      },
+    },
   },
 };

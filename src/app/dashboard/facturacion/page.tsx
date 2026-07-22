@@ -2,35 +2,18 @@ import { PageHeader } from "@/components/dashboard/parts";
 import { Button } from "@/components/ui/Button";
 import { getActiveOrg } from "@/lib/data/context";
 import { getOrgSubscription } from "@/lib/billing/subscription";
-import { getOrgPlan, TIER_LABEL } from "@/lib/billing/plan";
+import { getOrgPlan } from "@/lib/billing/plan";
 import { startCheckout, openBillingPortal } from "@/lib/billing/actions";
 import { PLAN_PRICE_LABEL, isStripeConfigured } from "@/lib/stripe/config";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
 
 export const dynamic = "force-dynamic";
 
-const PLAN_FEATURES = [
-  "Gap assessment + plan de acción",
-  "Vigilancia regulatoria continua",
-  "Dossier e informe ejecutivo (PDF)",
-  "Evidencia y audit-trail",
-  "Policy packs (RRHH)",
-  "Equipo y roles",
-];
-
-const STATUS_LABEL: Record<string, string> = {
-  active: "Activa",
-  trialing: "En prueba",
-  past_due: "Pago pendiente",
-  canceled: "Cancelada",
-  unpaid: "Impaga",
-  incomplete: "Incompleta",
-  incomplete_expired: "Expirada",
-  paused: "En pausa",
-};
-
-function fmtDate(iso: string | null): string {
+function fmtDate(iso: string | null, locale: Locale): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("es-ES", {
+  return new Date(iso).toLocaleDateString(locale === "en" ? "en-US" : "es-ES", {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -43,6 +26,8 @@ export default async function FacturacionPage({
   searchParams: Promise<{ estado?: string }>;
 }) {
   const { estado } = await searchParams;
+  const locale = await resolveLocale();
+  const t = getDictionary(locale).dashboard.billing;
   const orgId = await getActiveOrg();
   const [sub, plan] = await Promise.all([
     orgId ? getOrgSubscription(orgId) : Promise.resolve(null),
@@ -55,20 +40,16 @@ export default async function FacturacionPage({
 
   return (
     <>
-      <PageHeader
-        title="Plan y facturación"
-        subtitle="Gestiona la suscripción de tu organización."
-      />
+      <PageHeader title={t.title} subtitle={t.subtitle} />
 
       {estado === "ok" && (
         <div className="mb-6 rounded-xl border border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] px-4 py-3 text-sm text-[var(--tone-good-fg)]">
-          ¡Pago recibido! Tu suscripción se activará en unos segundos. Si no ves el
-          cambio, recarga la página.
+          {t.okBanner}
         </div>
       )}
       {estado === "cancelado" && (
         <div className="mb-6 rounded-xl border border-line bg-paper-sunken px-4 py-3 text-sm text-ink-soft">
-          Checkout cancelado. No se realizó ningún cargo.
+          {t.canceledBanner}
         </div>
       )}
 
@@ -77,7 +58,7 @@ export default async function FacturacionPage({
         <div className="rounded-2xl border border-line bg-paper-raised p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-semibold text-ink">
-              Plan {TIER_LABEL[plan]}
+              {t.planPrefix}{t.tier[plan]}
             </h2>
             <span
               className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${
@@ -87,12 +68,13 @@ export default async function FacturacionPage({
               }`}
             >
               {hasStripeSub
-                ? STATUS_LABEL[sub!.status] ?? "Activa"
+                ? t.status[sub!.status as keyof typeof t.status] ??
+                  t.badgeActiveFallback
                 : isEnterprise
-                  ? "Enterprise"
+                  ? t.badgeEnterprise
                   : unlocked
-                    ? "Desbloqueado"
-                    : "Gratuito"}
+                    ? t.badgeUnlocked
+                    : t.badgeFree}
             </span>
           </div>
 
@@ -102,48 +84,44 @@ export default async function FacturacionPage({
                 <>
                   <p className="mt-2 text-sm text-ink-soft">
                     {sub?.cancelAtPeriodEnd
-                      ? `Se cancelará el ${fmtDate(sub.currentPeriodEnd)}. Hasta entonces conservas el acceso.`
-                      : `Se renueva el ${fmtDate(sub?.currentPeriodEnd ?? null)}.`}
+                      ? `${t.willCancelBefore}${fmtDate(sub.currentPeriodEnd, locale)}${t.willCancelAfter}`
+                      : `${t.renewsBefore}${fmtDate(sub?.currentPeriodEnd ?? null, locale)}${t.renewsAfter}`}
                   </p>
                   <form action={openBillingPortal} className="mt-5">
                     <Button type="submit" variant="outline">
-                      Gestionar suscripción
+                      {t.manageSubscription}
                     </Button>
                   </form>
                   <p className="mt-3 text-xs text-muted">
-                    Cambiar método de pago, ver facturas o cancelar — todo en el
-                    portal seguro de Stripe.
+                    {t.portalHint}
                   </p>
                 </>
               ) : (
                 <p className="mt-2 text-sm text-ink-soft">
-                  {isEnterprise
-                    ? "Tu organización tiene el plan Enterprise: acceso completo, varias entidades, SSO y soporte prioritario."
-                    : "Tu organización tiene desbloqueada la preparación completa para auditoría. ¡A por ello!"}
+                  {isEnterprise ? t.enterpriseBody : t.unlockedBody}
                 </p>
               )}
             </>
           ) : (
             <>
               <p className="mt-2 text-sm text-ink-soft">
-                Tu organización usa el plan gratuito (inventario y clasificación de
-                riesgo). Desbloquea la preparación completa para auditoría.
+                {t.freeBody}
               </p>
               <div className="mt-5 flex items-baseline gap-1">
                 <span className="font-display text-3xl font-semibold text-ink">
                   {PLAN_PRICE_LABEL}
                 </span>
-                <span className="text-sm text-muted">/mes</span>
+                <span className="text-sm text-muted">{t.perMonth}</span>
               </div>
               {isStripeConfigured ? (
                 <form action={startCheckout} className="mt-5">
                   <Button type="submit" className="w-full sm:w-auto">
-                    Suscribirse a Preparación
+                    {t.subscribeCta}
                   </Button>
                 </form>
               ) : (
                 <p className="mt-5 rounded-lg border border-line bg-paper-sunken px-4 py-3 text-sm text-muted">
-                  El cobro en línea aún no está activo. Vuelve pronto.
+                  {t.checkoutInactive}
                 </p>
               )}
             </>
@@ -153,10 +131,10 @@ export default async function FacturacionPage({
         {/* Qué incluye */}
         <div className="rounded-2xl border border-line bg-paper-raised p-6">
           <h2 className="font-display text-lg font-semibold text-ink">
-            Qué incluye Preparación
+            {t.includesTitle}
           </h2>
           <ul className="mt-4 space-y-2.5">
-            {PLAN_FEATURES.map((f) => (
+            {t.features.map((f) => (
               <li key={f} className="flex items-start gap-2 text-sm text-ink">
                 <svg viewBox="0 0 16 16" className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden>
                   <path
@@ -173,8 +151,7 @@ export default async function FacturacionPage({
             ))}
           </ul>
           <p className="mt-5 text-xs text-muted">
-            ¿Necesitas varias entidades, SSO o soporte prioritario? Escríbenos para el
-            plan Enterprise.
+            {t.enterpriseHint}
           </p>
         </div>
       </div>
@@ -184,15 +161,12 @@ export default async function FacturacionPage({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <h2 className="font-display text-lg font-semibold text-ink">
-              Exportar datos
+              {t.exportTitle}
             </h2>
             <p className="mt-2 max-w-2xl text-sm text-ink-soft">
-              Descarga una copia completa de la evidencia declarada de tu
-              organización en un archivo <span className="font-medium">JSON</span>{" "}
-              portable: inventario de sistemas, evaluaciones de riesgo, brechas,
-              plan de acción, auditorías de sesgo, equipo, revisiones regulatorias
-              y el registro de actividad con su verificación de integridad. Tus
-              datos son tuyos: úsalo para respaldo o para llevártelos.
+              {t.exportBodyBefore}
+              <span className="font-medium">{t.exportBodyJson}</span>
+              {t.exportBodyAfter}
             </p>
           </div>
           <a
@@ -209,13 +183,11 @@ export default async function FacturacionPage({
                 strokeLinejoin="round"
               />
             </svg>
-            Descargar JSON
+            {t.downloadJson}
           </a>
         </div>
         <p className="mt-4 text-xs text-muted">
-          Es un volcado de tus datos, no un informe ni una certificación. Para el
-          dossier o el informe ejecutivo en PDF, usa las secciones de Inventario e
-          Informe.
+          {t.exportNote}
         </p>
       </div>
     </>

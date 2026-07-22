@@ -3,7 +3,10 @@ import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { getAiSystems } from "@/lib/data";
 import { RISK_LABEL, RISK_ORDER, type RiskLevel } from "@/lib/mock-data";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
+// Textos de obligaciones por nivel de riesgo (contenido regulatorio determinista) → ES.
 const guidance: Record<RiskLevel, string> = {
   unacceptable: "Prohibido bajo el EU AI Act. Debe retirarse de uso.",
   high: "Obligaciones estrictas: documentación técnica, supervisión humana, logging, gestión de datos.",
@@ -13,6 +16,8 @@ const guidance: Record<RiskLevel, string> = {
 
 export default async function RiesgoPage() {
   const allSystems = await getAiSystems();
+  const d = getDictionary(await resolveLocale()).dashboard;
+  const t = d.riskPage;
   const grouped = RISK_ORDER.map((level) => ({
     level,
     systems: allSystems.filter((s) => s.risk === level),
@@ -21,11 +26,11 @@ export default async function RiesgoPage() {
   return (
     <>
       <PageHeader
-        title="Clasificación de riesgo"
-        subtitle="Cada sistema mapeado a su nivel de riesgo del EU AI Act y sus obligaciones."
+        title={t.title}
+        subtitle={t.subtitle}
         action={
           <ButtonLink href="/dashboard/riesgo/evaluar" variant="primary">
-            + Evaluar un sistema
+            {t.evaluateCta}
           </ButtonLink>
         }
       />
@@ -40,7 +45,8 @@ export default async function RiesgoPage() {
               <div className="flex items-center gap-3">
                 <RiskBadge level={level} />
                 <span className="text-sm text-muted">
-                  {systems.length} sistema{systems.length === 1 ? "" : "s"}
+                  {systems.length}{" "}
+                  {systems.length === 1 ? d.units.systemOne : d.units.systemOther}
                 </span>
               </div>
               <span className="font-display text-sm font-medium text-ink">

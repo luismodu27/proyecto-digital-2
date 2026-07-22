@@ -7,18 +7,21 @@ import { EvidenceBadge } from "@/components/ui/EvidenceBadge";
 import { getAiSystems, isSupabaseConfigured } from "@/lib/data";
 import { AUDIT_READY_THRESHOLD } from "@/lib/mock-data";
 import { seedSampleData } from "@/lib/data/actions";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function InventarioPage() {
   const systems = await getAiSystems();
+  const t = getDictionary(await resolveLocale()).dashboard.inventory;
 
   return (
     <>
       <PageHeader
-        title="Inventario de sistemas de IA"
-        subtitle="Cada modelo y sistema en uso, con su propietario, proveedor y estado."
+        title={t.title}
+        subtitle={t.subtitle}
         action={
           <ButtonLink href="/dashboard/inventario/nuevo" variant="primary">
-            + Registrar sistema
+            {t.addSystem}
           </ButtonLink>
         }
       />
@@ -26,20 +29,19 @@ export default async function InventarioPage() {
       {systems.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-line-strong bg-paper-raised px-6 py-16 text-center">
           <p className="font-display text-lg font-semibold text-ink">
-            Tu inventario está vacío
+            {t.emptyTitle}
           </p>
           <p className="mx-auto mt-2 max-w-md text-sm text-ink-soft">
-            Registra tu primer sistema de IA, o carga un conjunto de datos de
-            ejemplo para explorar Attesta con contenido.
+            {t.emptyBody}
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <ButtonLink href="/dashboard/inventario/nuevo" variant="primary">
-              + Registrar sistema
+              {t.addSystem}
             </ButtonLink>
             {isSupabaseConfigured && (
               <form action={seedSampleData}>
-                <SubmitButton variant="outline" pendingText="Cargando ejemplo…">
-                  Cargar datos de ejemplo
+                <SubmitButton variant="outline" pendingText={t.loadSamplePending}>
+                  {t.loadSample}
                 </SubmitButton>
               </form>
             )}
@@ -51,14 +53,14 @@ export default async function InventarioPage() {
             <table className="w-full min-w-[820px] text-left text-sm">
               <thead>
                 <tr className="border-b border-line text-xs uppercase tracking-wide text-muted">
-                  <th className="px-5 py-3 font-medium">Sistema</th>
-                  <th className="px-5 py-3 font-medium">Dominio</th>
-                  <th className="px-5 py-3 font-medium">Riesgo</th>
-                  <th className="px-5 py-3 font-medium">Respaldo</th>
-                  <th className="px-5 py-3 font-medium">Preparación</th>
-                  <th className="px-5 py-3 font-medium">Última revisión</th>
+                  <th className="px-5 py-3 font-medium">{t.col.system}</th>
+                  <th className="px-5 py-3 font-medium">{t.col.domain}</th>
+                  <th className="px-5 py-3 font-medium">{t.col.risk}</th>
+                  <th className="px-5 py-3 font-medium">{t.col.evidence}</th>
+                  <th className="px-5 py-3 font-medium">{t.col.readiness}</th>
+                  <th className="px-5 py-3 font-medium">{t.col.lastReview}</th>
                   <th className="px-5 py-3 font-medium">
-                    <span className="sr-only">Acciones</span>
+                    <span className="sr-only">{t.col.actions}</span>
                   </th>
                 </tr>
               </thead>
@@ -117,7 +119,7 @@ export default async function InventarioPage() {
                                 strokeLinejoin="round"
                               />
                             </svg>
-                            Clasificar
+                            {t.classify}
                           </Link>
                         )}
                         <Link
@@ -138,7 +140,7 @@ export default async function InventarioPage() {
                               strokeLinejoin="round"
                             />
                           </svg>
-                          Dossier
+                          {t.dossier}
                         </Link>
                       </div>
                     </td>

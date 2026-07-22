@@ -18,6 +18,8 @@ import {
   daysUntilDate,
   publicationComplete,
 } from "@/lib/bias-audit";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -47,19 +49,20 @@ export default async function EditarSistemaPage({
   const biasStatus = bias ? biasAuditStatus(bias, now) : null;
   const biasDue = bias ? nextBiasAuditDue(bias.lastAuditDate) : null;
   const biasDays = daysUntilDate(biasDue, now);
+  const t = getDictionary(await resolveLocale()).dashboard.inventory;
 
   return (
     <>
       <PageHeader
-        title="Editar sistema"
-        subtitle="Actualiza los datos del sistema o elimínalo del inventario."
+        title={t.editTitle}
+        subtitle={t.editSubtitle}
         action={
           system ? (
             <ButtonLink
               href={`/dashboard/inventario/${system.id}/dossier`}
               variant="outline"
             >
-              ⬇ Generar dossier
+              {t.generateDossier}
             </ButtonLink>
           ) : undefined
         }
@@ -69,13 +72,13 @@ export default async function EditarSistemaPage({
           href="/dashboard/inventario"
           className="text-sm font-medium text-brand hover:text-brand-strong"
         >
-          ← Volver al inventario
+          {t.backToInventory}
         </Link>
       </div>
 
       {!system ? (
         <div className="max-w-xl rounded-2xl border border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] p-6 text-sm text-[var(--tone-warn-fg)]">
-          No se encontró el sistema, o la edición no está disponible en modo demo.
+          {t.notFound}
         </div>
       ) : (
         <>
@@ -86,32 +89,32 @@ export default async function EditarSistemaPage({
             <input type="hidden" name="id" value={system.id} />
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-ink">
-                Nombre del sistema *
+                {t.nameLabel}
               </label>
               <input id="name" name="name" required defaultValue={system.name} className={field} />
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <label htmlFor="owner" className="block text-sm font-medium text-ink">
-                  Área responsable
+                  {t.ownerLabel}
                 </label>
                 <input id="owner" name="owner" defaultValue={system.owner} className={field} />
               </div>
               <div>
                 <label htmlFor="domain" className="block text-sm font-medium text-ink">
-                  Dominio de uso
+                  {t.domainLabel}
                 </label>
                 <input id="domain" name="domain" defaultValue={system.domain} className={field} />
               </div>
               <div>
                 <label htmlFor="vendor" className="block text-sm font-medium text-ink">
-                  Proveedor
+                  {t.vendorLabel}
                 </label>
                 <input id="vendor" name="vendor" defaultValue={system.vendor} className={field} />
               </div>
               <div>
                 <label htmlFor="actor_role" className="block text-sm font-medium text-ink">
-                  Vuestro rol
+                  {t.roleLabel}
                 </label>
                 <select
                   id="actor_role"
@@ -119,18 +122,18 @@ export default async function EditarSistemaPage({
                   className={field}
                   defaultValue={system.actorRole}
                 >
-                  <option value="deployer">Deployer (usamos el sistema)</option>
-                  <option value="provider">Provider (lo desarrollamos)</option>
+                  <option value="deployer">{t.roleDeployer}</option>
+                  <option value="provider">{t.roleProvider}</option>
                 </select>
               </div>
             </div>
             <div className="flex gap-3 pt-2">
-              <SubmitButton pendingText="Guardando…">Guardar cambios</SubmitButton>
+              <SubmitButton pendingText={t.savePending}>{t.saveCta}</SubmitButton>
               <Link
                 href="/dashboard/inventario"
                 className="inline-flex items-center justify-center rounded-full border border-line-strong px-5 py-2.5 text-sm font-medium text-ink hover:bg-paper-sunken"
               >
-                Cancelar
+                {t.cancel}
               </Link>
             </div>
           </form>
@@ -138,19 +141,18 @@ export default async function EditarSistemaPage({
           <div className="mt-6 max-w-xl rounded-2xl border border-line bg-paper-raised p-6">
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-display text-base font-semibold text-ink">
-                Historial de evaluaciones
+                {t.historyTitle}
               </h2>
               <ButtonLink
                 href={`/dashboard/riesgo/evaluar?system=${system.id}`}
                 variant="outline"
                 className="px-4 py-2 text-xs"
               >
-                + Evaluar
+                {t.evaluate}
               </ButtonLink>
             </div>
             <p className="mb-5 mt-1 text-sm text-ink-soft">
-              Cada clasificación guardada queda registrada, con su nivel de respaldo
-              y quién la atestó.
+              {t.historyBody}
             </p>
             <AssessmentHistory assessments={assessments} />
           </div>
@@ -286,9 +288,9 @@ export default async function EditarSistemaPage({
           )}
 
           <div className="mt-6 max-w-xl rounded-2xl border border-line bg-paper-raised p-6">
-            <h2 className="font-display text-sm font-semibold text-ink">Zona de peligro</h2>
+            <h2 className="font-display text-sm font-semibold text-ink">{t.dangerTitle}</h2>
             <p className="mt-1 text-sm text-ink-soft">
-              Eliminar el sistema borra también sus evaluaciones y brechas.
+              {t.dangerBody}
             </p>
             <div className="mt-4">
               <DeleteSystemButton id={system.id} name={system.name} />

@@ -5,6 +5,7 @@ import {
   JURISDICTION_ORDER,
   JURISDICTION_LABEL,
 } from "@/lib/regulatory-watch";
+import { useT } from "@/lib/i18n/provider";
 
 /**
  * Configurador del nexo de jurisdicción (owner/admin): marca dónde contrata la
@@ -12,35 +13,35 @@ import {
  * robar protagonismo al radar.
  */
 export function JurisdictionSettings({ selected }: { selected: string[] }) {
+  const j = useT().dashboard.controls.jurisdiction;
   return (
     <details className="mb-6 rounded-2xl border border-line bg-paper-raised">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-3 [&::-webkit-details-marker]:hidden">
         <span className="text-sm font-medium text-ink">
-          Ajustar mis jurisdicciones
+          {j.toggle}
         </span>
         <span className="text-xs text-muted">
-          Dónde contratas · afina el radar
+          {j.hint}
         </span>
       </summary>
       <form action={setOrgJurisdictions} className="border-t border-line px-5 py-4">
         <p className="mb-3 text-xs text-muted">
-          Marca los territorios donde tu organización contrata o tiene
-          empleados. El radar priorizará las normas de esas jurisdicciones.
+          {j.body}
         </p>
         <div className="flex flex-wrap gap-x-6 gap-y-2">
-          {JURISDICTION_ORDER.map((j) => (
+          {JURISDICTION_ORDER.map((jur) => (
             <label
-              key={j}
+              key={jur}
               className="flex cursor-pointer items-center gap-2 text-sm text-ink-soft"
             >
               <input
                 type="checkbox"
                 name="jurisdiction"
-                value={j}
-                defaultChecked={selected.includes(j)}
+                value={jur}
+                defaultChecked={selected.includes(jur)}
                 className="size-4 rounded border-line-strong text-brand focus:ring-brand"
               />
-              {JURISDICTION_LABEL[j]}
+              {JURISDICTION_LABEL[jur]}
             </label>
           ))}
         </div>
@@ -48,7 +49,7 @@ export function JurisdictionSettings({ selected }: { selected: string[] }) {
           type="submit"
           className="mt-4 inline-flex items-center justify-center rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
         >
-          Guardar
+          {j.save}
         </button>
       </form>
     </details>

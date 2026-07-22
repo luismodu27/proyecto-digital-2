@@ -4,21 +4,8 @@ import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
 import { GapStatusControl } from "@/components/dashboard/GapStatusControl";
 import { DeleteGapButton } from "@/components/dashboard/DeleteGapButton";
 import { getAiSystems, getGapItems, isSupabaseConfigured } from "@/lib/data";
-
-const statusMeta = {
-  missing: {
-    label: "Falta",
-    cls: "bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)] border-[var(--tone-danger-bd)]",
-  },
-  partial: {
-    label: "Parcial",
-    cls: "bg-[var(--tone-warn-bg)] text-[var(--tone-warn-fg)] border-[var(--tone-warn-bd)]",
-  },
-  done: {
-    label: "Cubierto",
-    cls: "bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)] border-[var(--tone-good-bd)]",
-  },
-} as const;
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 const severityMeta = {
   alta: "text-[var(--tone-danger-fg)]",
@@ -26,8 +13,17 @@ const severityMeta = {
   baja: "text-muted",
 } as const;
 
+const statusCls = {
+  missing:
+    "bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)] border-[var(--tone-danger-bd)]",
+  partial:
+    "bg-[var(--tone-warn-bg)] text-[var(--tone-warn-fg)] border-[var(--tone-warn-bd)]",
+  done: "bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)] border-[var(--tone-good-bd)]",
+} as const;
+
 export default async function GapPage() {
   const [gapItems, systems] = await Promise.all([getGapItems(), getAiSystems()]);
+  const t = getDictionary(await resolveLocale()).dashboard.gap;
   const open = gapItems.filter((g) => g.status !== "done").length;
   // El nombre real del sistema (getGapItems deja el uuid si el sistema no tiene
   // `code`, p. ej. los creados por el usuario). Misma resolución que el PDF.
@@ -36,21 +32,17 @@ export default async function GapPage() {
   return (
     <>
       <PageHeader
-        title="Gap assessment"
-        subtitle={
-          open === 1
-            ? "1 brecha abierta frente a los requisitos del EU AI Act."
-            : `${open} brechas abiertas frente a los requisitos del EU AI Act.`
-        }
+        title={t.title}
+        subtitle={open === 1 ? t.subtitleOne : `${open}${t.subtitleOtherAfter}`}
         action={
           <div className="flex flex-wrap gap-2">
             {isSupabaseConfigured && (
               <ButtonLink href="/dashboard/gap/nuevo" variant="primary">
-                + Añadir brecha
+                {t.addGap}
               </ButtonLink>
             )}
             <ButtonLink href="/dashboard/gap/informe" variant="outline">
-              ⬇ Exportar evidencia (PDF)
+              {t.exportEvidence}
             </ButtonLink>
           </div>
         }
@@ -58,7 +50,6 @@ export default async function GapPage() {
 
       <div className="space-y-3">
         {gapItems.map((g) => {
-          const st = statusMeta[g.status];
           return (
             <article
               key={g.id}
@@ -68,12 +59,12 @@ export default async function GapPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-xs text-muted">{g.article}</span>
                   <span className={`text-xs font-medium uppercase ${severityMeta[g.severity]}`}>
-                    · severidad {g.severity}
+                    {t.severityPrefix}{g.severity}
                   </span>
                 </div>
                 <p className="mt-1 font-medium text-ink">{g.requirement}</p>
                 <p className="text-xs text-muted">
-                  Sistema afectado: {nameById.get(g.system) ?? g.system}
+                  {t.affectedSystemPrefix}{nameById.get(g.system) ?? g.system}
                 </p>
               </div>
               {isSupabaseConfigured ? (
@@ -83,9 +74,9 @@ export default async function GapPage() {
                 </div>
               ) : (
                 <span
-                  className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium ${st.cls}`}
+                  className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium ${statusCls[g.status]}`}
                 >
-                  {st.label}
+                  {t.status[g.status]}
                 </span>
               )}
             </article>
