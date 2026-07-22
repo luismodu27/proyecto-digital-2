@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SealMark } from "@/components/ui/SealMark";
 import { PrintButton } from "@/components/dashboard/PrintButton";
-import { LEGAL_PDF, ScopeNote } from "@/components/ui/LegalNote";
+import { LEGAL_PDF_BY_LOCALE, ScopeNote } from "@/components/ui/LegalNote";
 import {
   getAiSystems,
   getGapItems,
@@ -27,7 +27,7 @@ import {
   affectedSystems,
   daysUntil,
   FRAMEWORK_META,
-  type RegulatoryEvent,
+  frameworkMeta,
 } from "@/lib/regulatory-watch";
 
 export const dynamic = "force-dynamic";
@@ -47,7 +47,8 @@ const SEVERITY_COLOR = {
 } as const;
 
 export default async function InformeEjecutivoPage() {
-  const dict = getDictionary(await resolveLocale()).dashboard;
+  const locale = await resolveLocale();
+  const dict = getDictionary(locale).dashboard;
   const tp = dict.pages;
   const gateOrg = await getActiveOrg();
   if (gateOrg && !(await orgHasTier(gateOrg, "preparacion"))) {
@@ -202,7 +203,7 @@ export default async function InformeEjecutivoPage() {
         </section>
 
         {/* Alcance y método */}
-        <ScopeNote fecha={fecha} className="mt-5" />
+        <ScopeNote fecha={fecha} locale={locale} className="mt-5" />
 
         {/* KPIs */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -361,9 +362,8 @@ export default async function InformeEjecutivoPage() {
                       {e.title}
                       <span className="ml-1 text-xs text-muted">
                         ·{" "}
-                        {FRAMEWORK_META[
-                          e.framework as RegulatoryEvent["framework"]
-                        ]?.short ?? e.framework}{" "}
+                        {frameworkMeta(e.framework, locale)?.short ??
+                          e.framework}{" "}
                         · afecta a {n} {n === 1 ? "sistema" : "sistemas"}
                       </span>
                     </span>
@@ -382,7 +382,7 @@ export default async function InformeEjecutivoPage() {
             Generado por <span className="font-medium text-ink">Attesta</span> el{" "}
             {fecha}. Resumen de dirección para preparación de auditoría.
           </p>
-          <p className="mt-1">{LEGAL_PDF}</p>
+          <p className="mt-1">{LEGAL_PDF_BY_LOCALE[locale]}</p>
         </footer>
       </article>
     </div>

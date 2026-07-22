@@ -17,7 +17,7 @@ import { saveRiskAssessment } from "@/lib/data/actions";
 import { recommendationsForLevel } from "@/lib/recommendations";
 import { RecommendationList } from "@/components/dashboard/Recommendations";
 import { LegalNote, LEGAL_RESULT } from "@/components/ui/LegalNote";
-import { useT } from "@/lib/i18n/provider";
+import { useT, useLocale } from "@/lib/i18n/provider";
 
 type SystemOption = { id: string; name: string };
 
@@ -46,6 +46,7 @@ export function RiskWizard({
 }) {
   const router = useRouter();
   const tw = useT().dashboard.pages.wizard;
+  const locale = useLocale();
   const [answers, setAnswers] = useState<Answers>({});
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
@@ -56,7 +57,10 @@ export function RiskWizard({
     "idle",
   );
 
-  const questions = useMemo(() => visibleQuestions(answers), [answers]);
+  const questions = useMemo(
+    () => visibleQuestions(answers, locale),
+    [answers, locale],
+  );
   const clampedIndex = Math.min(index, questions.length - 1);
   const question = questions[clampedIndex];
   const selected = answers[question.id] ?? [];
@@ -90,7 +94,7 @@ export function RiskWizard({
   }
 
   if (done) {
-    const result = classify(answers);
+    const result = classify(answers, undefined, locale);
     // Un sistema de alto riesgo que además dispara transparencia debe cumplir
     // AMBOS: las obligaciones del Art. 50 se suman a las de alto riesgo.
     const alsoTransparency =
@@ -118,7 +122,7 @@ export function RiskWizard({
     }
 
     const canSave = connected && systems.length > 0;
-    const recs = recommendationsForLevel(result.level);
+    const recs = recommendationsForLevel(result.level, locale);
     return (
       <div className="rounded-2xl border border-line bg-paper-raised p-7">
         <div className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-center sm:justify-between">

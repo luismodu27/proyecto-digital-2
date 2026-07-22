@@ -89,7 +89,7 @@ export default async function PlanPage() {
   const taskedKeys = new Set(
     tasks.map((t) => t.sourceKey).filter((k): k is string => Boolean(k)),
   );
-  const suggestions = buildActionPlan(systems, gaps).filter(
+  const suggestions = buildActionPlan(systems, gaps, locale).filter(
     (r) => !taskedKeys.has(r.id),
   );
 

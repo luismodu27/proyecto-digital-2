@@ -3,14 +3,17 @@ import Link from "next/link";
 import { SealMark } from "@/components/ui/SealMark";
 import { PrintButton } from "@/components/dashboard/PrintButton";
 import { getSystemDossier, getOrganizationName } from "@/lib/data";
-import { LEGAL_PDF, ScopeNote } from "@/components/ui/LegalNote";
+import { LEGAL_PDF_BY_LOCALE, ScopeNote } from "@/components/ui/LegalNote";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { Paywall } from "@/components/dashboard/Paywall";
 import { getActiveOrg } from "@/lib/data/context";
 import { orgHasTier } from "@/lib/billing/plan";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
-import { OBLIGATIONS_BY_LEVEL } from "@/lib/risk-assessment";
+import {
+  OBLIGATIONS_BY_LEVEL,
+  OBLIGATIONS_BY_LEVEL_EN,
+} from "@/lib/risk-assessment";
 import { recommendationsForLevel } from "@/lib/recommendations";
 import { BiasAuditBadge } from "@/components/dashboard/BiasAuditBadge";
 import {
@@ -106,7 +109,8 @@ export default async function DossierPage({
 }) {
   const { id } = await params;
 
-  const dict = getDictionary(await resolveLocale()).dashboard;
+  const locale = await resolveLocale();
+  const dict = getDictionary(locale).dashboard;
   const tp = dict.pages;
   const gateOrg = await getActiveOrg();
   if (gateOrg && !(await orgHasTier(gateOrg, "preparacion"))) {
@@ -158,8 +162,10 @@ export default async function DossierPage({
   const latest = assessments[0];
   const rationale = latest?.rationale ?? RATIONALE_FALLBACK[level];
   const evidenceState: EvidenceState = system.evidenceState ?? "declared";
-  const obligations = OBLIGATIONS_BY_LEVEL[level];
-  const recs = recommendationsForLevel(level);
+  const obligations = (
+    locale === "en" ? OBLIGATIONS_BY_LEVEL_EN : OBLIGATIONS_BY_LEVEL
+  )[level];
+  const recs = recommendationsForLevel(level, locale);
   const openGaps = gaps.filter((g) => g.status !== "done").length;
   const criticalOpen = gaps.filter(
     (g) => g.status !== "done" && g.severity === "alta",
@@ -269,7 +275,7 @@ export default async function DossierPage({
         </section>
 
         {/* Alcance y método */}
-        <ScopeNote fecha={fecha} className="mt-5" />
+        <ScopeNote fecha={fecha} locale={locale} className="mt-5" />
 
         {/* Indicadores */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -577,7 +583,7 @@ export default async function DossierPage({
             Generado por <span className="font-medium text-ink">Attesta</span> el{" "}
             {fecha}. Documento de trabajo para preparación de auditoría.
           </p>
-          <p className="mt-1">{LEGAL_PDF}</p>
+          <p className="mt-1">{LEGAL_PDF_BY_LOCALE[locale]}</p>
         </footer>
       </article>
     </div>

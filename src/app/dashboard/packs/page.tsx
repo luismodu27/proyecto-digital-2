@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/Button";
 import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
 import { getSystemsForSelect, isSupabaseConfigured } from "@/lib/data";
 import { applyPolicyPack } from "@/lib/data/actions";
-import { POLICY_PACKS, type PolicySeverity } from "@/lib/policy-packs";
+import { policyPacks, type PolicySeverity } from "@/lib/policy-packs";
+import { resolveLocale } from "@/lib/i18n/resolve";
 
 const severityCls: Record<PolicySeverity, string> = {
   alta: "bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)] border-[var(--tone-danger-bd)]",
@@ -13,6 +14,8 @@ const severityCls: Record<PolicySeverity, string> = {
 
 export default async function PolicyPacksPage() {
   const systems = isSupabaseConfigured ? await getSystemsForSelect() : [];
+  // La fachada de packs sirve el contenido validado en el idioma de la UI.
+  const packs = policyPacks(await resolveLocale());
 
   return (
     <>
@@ -22,7 +25,7 @@ export default async function PolicyPacksPage() {
       />
 
       <div className="space-y-6">
-        {POLICY_PACKS.map((pack) => (
+        {packs.map((pack) => (
           <article
             key={pack.id}
             className="rounded-2xl border border-line bg-paper-raised p-6"

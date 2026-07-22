@@ -30,6 +30,7 @@ import {
   daysUntil,
   affectedSystems,
   FRAMEWORK_META,
+  frameworkMeta,
   type RegulatoryEvent,
 } from "@/lib/regulatory-watch";
 import { resolveLocale } from "@/lib/i18n/resolve";
@@ -216,9 +217,8 @@ export default async function DashboardOverview() {
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-muted">
                 Próximo hito regulatorio ·{" "}
-                {FRAMEWORK_META[
-                  nextDeadline.framework as RegulatoryEvent["framework"]
-                ]?.short ?? nextDeadline.framework}
+                {frameworkMeta(nextDeadline.framework, locale)?.short ??
+                  nextDeadline.framework}
               </p>
               <p className="truncate text-sm font-medium text-ink">
                 {nextDeadline.title}

@@ -7,7 +7,8 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
 import type { Answers, ClassificationResult } from "@/lib/risk-assessment";
 import { AI_SYSTEMS, GAP_ITEMS } from "@/lib/mock-data";
-import { getPolicyPack } from "@/lib/policy-packs";
+import { policyPackById } from "@/lib/policy-packs";
+import { resolveLocale } from "@/lib/i18n/resolve";
 
 const SEVERITY_EN: Record<string, string> = {
   alta: "high",
@@ -81,7 +82,10 @@ export async function applyPolicyPack(formData: FormData) {
   const systemId = String(formData.get("systemId") ?? "");
   if (!systemId) redirect("/dashboard/packs");
 
-  const pack = getPolicyPack(String(formData.get("packId") ?? "rrhh"));
+  // Resolvemos el locale para insertar los controles en el idioma de la UI: en
+  // EN se guardan los textos EN validados como gap_items (datos persistidos).
+  const locale = await resolveLocale();
+  const pack = policyPackById(String(formData.get("packId") ?? "rrhh"), locale);
   if (!pack) redirect("/dashboard/packs");
 
   const supabase = await createClient();

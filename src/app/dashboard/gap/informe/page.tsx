@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SealMark } from "@/components/ui/SealMark";
 import { PrintButton } from "@/components/dashboard/PrintButton";
 import { getAiSystems, getGapItems, getOrganizationName } from "@/lib/data";
-import { LEGAL_PDF, ScopeNote } from "@/components/ui/LegalNote";
+import { LEGAL_PDF_BY_LOCALE, ScopeNote } from "@/components/ui/LegalNote";
 import type { GapItem } from "@/lib/mock-data";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
@@ -56,7 +56,8 @@ export default async function InformeGapPage() {
     getAiSystems(),
     getOrganizationName(),
   ]);
-  const tp = getDictionary(await resolveLocale()).dashboard.pages;
+  const locale = await resolveLocale();
+  const tp = getDictionary(locale).dashboard.pages;
 
   const nameById = new Map(systems.map((s) => [s.id, s.name]));
   const total = gapItems.length;
@@ -175,7 +176,7 @@ export default async function InformeGapPage() {
         </section>
 
         {/* Alcance y método */}
-        <ScopeNote fecha={fecha} className="mt-5" />
+        <ScopeNote fecha={fecha} locale={locale} className="mt-5" />
 
         {/* KPIs */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -278,7 +279,7 @@ export default async function InformeGapPage() {
             Generado por <span className="font-medium text-ink">Attesta</span> el {fecha}.
             Documento de trabajo para preparación de auditoría.
           </p>
-          <p className="mt-1">{LEGAL_PDF}</p>
+          <p className="mt-1">{LEGAL_PDF_BY_LOCALE[locale]}</p>
         </footer>
       </article>
     </div>

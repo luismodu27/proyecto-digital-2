@@ -27,6 +27,7 @@ import {
   type RegSource,
 } from "@/lib/mock-data";
 import { mergeCatalog, type RegulatoryEvent } from "@/lib/regulatory-watch";
+import { resolveLocale } from "@/lib/i18n/resolve";
 
 /** Repositorio de datos de ejemplo (modo demo). */
 export async function getAiSystems(): Promise<AiSystem[]> {
@@ -130,8 +131,10 @@ export async function getRegulatoryAcks(): Promise<Record<string, RegAck>> {
 }
 
 export async function getRegulatoryEvents(): Promise<RegulatoryEvent[]> {
-  // En demo el catálogo es solo la base curada (sin eventos de pipeline).
-  return mergeCatalog([]);
+  // En demo el catálogo es solo la base curada (sin eventos de pipeline). La
+  // fachada resuelve el locale: en EN sirve la base curada en inglés.
+  const locale = await resolveLocale();
+  return mergeCatalog([], undefined, locale);
 }
 
 export async function getRegCandidates(): Promise<RegCandidate[]> {

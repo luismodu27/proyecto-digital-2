@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
 import { getAuditLog, verifyAuditChain, isSupabaseConfigured } from "@/lib/data";
-import { ENTITY_META, ACTION_META } from "@/lib/audit";
+import { ENTITY_META_BY_LOCALE, ACTION_META_BY_LOCALE } from "@/lib/audit";
 import type { AuditChainStatus, AuditEntry } from "@/lib/mock-data";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +63,8 @@ export default async function ActividadPage({
   const filter = TYPES.some((x) => x.key === t) ? t : "";
   const entries = filter ? all.filter((e) => e.table === filter) : all;
   const now = new Date();
-  const tr = getDictionary(await resolveLocale()).dashboard.pages.activity;
+  const locale = await resolveLocale();
+  const tr = getDictionary(locale).dashboard.pages.activity;
   const filterLabels: Record<string, string> = {
     "": tr.filterAll,
     ai_systems: tr.filterSystems,
@@ -135,7 +137,7 @@ export default async function ActividadPage({
       ) : (
         <ol className="space-y-2">
           {entries.map((e) => (
-            <ActivityRow key={e.id} entry={e} now={now} />
+            <ActivityRow key={e.id} entry={e} now={now} locale={locale} />
           ))}
         </ol>
       )}
@@ -226,13 +228,21 @@ function ChainStatusCard({ chain }: { chain: AuditChainStatus }) {
   );
 }
 
-function ActivityRow({ entry, now }: { entry: AuditEntry; now: Date }) {
-  const entity = ENTITY_META[entry.table] ?? {
+function ActivityRow({
+  entry,
+  now,
+  locale,
+}: {
+  entry: AuditEntry;
+  now: Date;
+  locale: Locale;
+}) {
+  const entity = ENTITY_META_BY_LOCALE[locale][entry.table] ?? {
     label: entry.table,
-    article: "el",
+    article: locale === "en" ? "the" : "el",
     tone: "neutral",
   };
-  const act = ACTION_META[entry.action];
+  const act = ACTION_META_BY_LOCALE[locale][entry.action];
   const actor = entry.actorEmail ?? "El sistema";
   const initial = (entry.actorEmail ?? "·").slice(0, 1).toUpperCase();
 

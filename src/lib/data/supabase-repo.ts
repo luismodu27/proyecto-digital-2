@@ -33,6 +33,7 @@ import {
   type RegKind,
 } from "@/lib/regulatory-watch";
 import type { BiasAudit } from "@/lib/bias-audit";
+import { resolveLocale } from "@/lib/i18n/resolve";
 
 /** Mapea la severidad de BD (en) a la del modelo de UI (es). */
 const SEVERITY_ES: Record<string, GapItem["severity"]> = {
@@ -464,14 +465,22 @@ function rowToRegEvent(r: RegEventRow): RegulatoryEvent {
  * pipeline. Si la tabla no existe o hay error, cae a la base curada.
  */
 export async function getRegulatoryEvents(): Promise<RegulatoryEvent[]> {
+  // La fachada resuelve el locale: la base curada sale en EN cuando la UI está
+  // en inglés; los eventos publicados por el pipeline se sirven tal como se
+  // almacenaron (idioma de guardado).
+  const locale = await resolveLocale();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("reg_events")
     .select(
       "id, event_date, kind, framework, title, summary, impact, action, articles, source, scope",
     );
-  if (error || !data) return mergeCatalog([]);
-  return mergeCatalog((data as RegEventRow[]).map(rowToRegEvent));
+  if (error || !data) return mergeCatalog([], undefined, locale);
+  return mergeCatalog(
+    (data as RegEventRow[]).map(rowToRegEvent),
+    undefined,
+    locale,
+  );
 }
 
 type RegCandidateRow = {
@@ -671,8 +680,9 @@ export async function getAuditLog(): Promise<AuditEntry[]> {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return [];
+  const locale = await resolveLocale();
   const { data } = await supabase.rpc("list_audit_log", { org, lim: 100 });
-  return ((data ?? []) as RawAudit[]).map((r) => toAuditEntry(r));
+  return ((data ?? []) as RawAudit[]).map((r) => toAuditEntry(r, locale));
 }
 
 /**
