@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
 import { LandingPage } from "@/components/landing/LandingPage";
+import { buildLandingMetadata } from "@/lib/i18n/metadata";
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "/en",
-    languages: { es: "/", en: "/en" },
-  },
-  openGraph: { locale: "en_US" },
-};
+export const metadata: Metadata = buildLandingMetadata("en");
 
 export default function HomeEn() {
   return <LandingPage locale="en" />;

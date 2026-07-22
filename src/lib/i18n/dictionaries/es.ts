@@ -37,6 +37,13 @@ export const es = {
     closeMenu: "Cerrar menú",
   },
 
+  meta: {
+    title: "Attesta — Gobernanza continua de IA para el mid-market",
+    description:
+      "Inventaría tus sistemas de IA, clasifica su riesgo (EU AI Act + EE. UU.) y genera evidencia lista para auditoría. Compliance de IA sin equipo GRC.",
+    ogTitle: "Attesta — Gobernanza continua de IA",
+  },
+
   landing: {
     hero: {
       badge: "Gobernanza de IA para Recursos Humanos · EU AI Act",

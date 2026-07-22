@@ -37,6 +37,13 @@ export const en: Dictionary = {
     closeMenu: "Close menu",
   },
 
+  meta: {
+    title: "Attesta — Continuous AI governance for the mid-market",
+    description:
+      "Inventory your AI systems, classify their risk (EU AI Act + U.S.) and generate audit-ready evidence. AI governance and compliance readiness, without a GRC team.",
+    ogTitle: "Attesta — Continuous AI governance",
+  },
+
   landing: {
     hero: {
       badge: "AI governance for Human Resources · EU AI Act",
