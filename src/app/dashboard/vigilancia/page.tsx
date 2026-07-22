@@ -179,6 +179,32 @@ function Pill({
   );
 }
 
+/** Celda de la banda de orientación (valor grande + etiqueta). */
+function SummaryStat({
+  value,
+  label,
+  accent = false,
+}: {
+  value: string;
+  label: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="bg-paper-raised px-5 py-4">
+      <p
+        className={`font-display text-2xl font-semibold tabular-nums ${
+          accent ? "text-brand-strong" : "text-ink"
+        }`}
+      >
+        {value}
+      </p>
+      <p className="mt-0.5 text-[11px] uppercase tracking-wide text-muted">
+        {label}
+      </p>
+    </div>
+  );
+}
+
 /**
  * Briefing "aclaración de plazos" — diferenciador de Attesta: corrige el error
  * extendido de que el 2-ago-2026 es el plazo de alto riesgo (el Digital Omnibus
@@ -370,7 +396,6 @@ export default async function VigilanciaPage({
     .filter((x) => x.days >= 0)
     .sort((a, b) => a.days - b.days);
   const past = withDays.filter((x) => x.days < 0).sort((a, b) => b.days - a.days);
-  const feed = [...upcoming, ...past];
 
   const deadlines = upcomingDeadlines(now, shown);
   const hero = deadlines[0];
@@ -378,6 +403,15 @@ export default async function VigilanciaPage({
   const heroDays = hero ? daysUntil(hero.date, now) : 0;
   const heroAck = hero ? acks[hero.id] : undefined;
   const otherDeadlines = deadlines.slice(1);
+
+  // Etiqueta larga del marco en el hero: solo si aporta algo sobre el pill corto
+  // (evita el "EU AI Act · EU AI Act" cuando short y label coinciden).
+  const heroFull = hero ? frameworkLabel(hero.framework, locale) : "";
+  const heroShort = hero ? frameworkMeta(hero.framework, locale)?.short : undefined;
+
+  // Cifras de orientación para la banda de resumen (deterministas, del feed ya calculado).
+  const frameworkCount = new Set(shown.map((e) => e.framework)).size;
+  const nearestDays = upcoming[0]?.days;
 
   // Briefing "aclaración de plazos" (diferenciador): se muestra con la UE en vista
   // y mientras el alto riesgo del Anexo III siga por venir (mito aún vivo).
@@ -449,6 +483,20 @@ export default async function VigilanciaPage({
         </div>
       )}
 
+      {/* Banda de orientación: lectura de un vistazo del estado del radar */}
+      {shown.length > 0 && (
+        <section className="mb-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4">
+          <SummaryStat value={String(upcoming.length)} label={tm.summaryUpcoming} />
+          <SummaryStat
+            value={nearestDays != null ? relativeLabel(nearestDays, tm) : tm.summaryNone}
+            label={tm.summaryNearest}
+            accent
+          />
+          <SummaryStat value={String(past.length)} label={tm.summaryInForce} />
+          <SummaryStat value={String(frameworkCount)} label={tm.summaryFrameworks} />
+        </section>
+      )}
+
       {/* Briefing: aclaración del plazo del 2-ago-2026 (corrige el error de mercado) */}
       {showBriefing && art50Ev && highRiskEv && (
         <EuReadinessBriefing
@@ -468,9 +516,9 @@ export default async function VigilanciaPage({
               <div className="flex flex-wrap items-center gap-2">
                 <Pill tone={countdownTone(heroDays)}>{tm.nextDeadline}</Pill>
                 <FrameworkPill framework={hero.framework} locale={locale} />
-                <span className="text-xs text-muted">
-                  {frameworkLabel(hero.framework, locale)}
-                </span>
+                {heroFull && heroFull !== heroShort && (
+                  <span className="text-xs text-muted">{heroFull}</span>
+                )}
                 {heroAck && <AckPill status={heroAck.status} locale={locale} />}
               </div>
               <h2 className="mt-2 font-display text-xl font-semibold text-ink">
@@ -560,7 +608,29 @@ export default async function VigilanciaPage({
               : ""}
         </h3>
         <div className="space-y-3">
-          {feed.map(({ ev, days, affected }) => (
+          {upcoming.map(({ ev, days, affected }) => (
+            <EventRow
+              key={ev.id}
+              ev={ev}
+              days={days}
+              affectedCount={affected.length}
+              affected={affected}
+              ack={acks[ev.id]}
+              canManage={canManage}
+              locale={locale}
+              t={tm}
+              u={u}
+            />
+          ))}
+          {upcoming.length > 0 && past.length > 0 && (
+            <div className="flex items-center gap-3 pt-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                {tm.timelineInForceDivider}
+              </span>
+              <span className="h-px flex-1 bg-line" />
+            </div>
+          )}
+          {past.map(({ ev, days, affected }) => (
             <EventRow
               key={ev.id}
               ev={ev}
