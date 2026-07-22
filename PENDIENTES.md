@@ -17,10 +17,15 @@ En una sesión anterior se pegó una **clave secreta LIVE de Stripe (`sk_live_�
 tratarla como comprometida. **Rótala**: Stripe → *Developers → API keys* → en la Secret key →
 **Roll key**. La nueva NUNCA se pega en el chat; va solo a variables de entorno de Vercel.
 
-### 1.1-bis · Aplicar migración 0018 (diferenciación de planes) — RÁPIDO
+### 1.1-bis · Aplicar migración 0018 (diferenciación de planes) — RÁPIDO ⚠️ BLOQUEA EL GATING ENTERPRISE
 La diferenciación de planes (free / preparación / enterprise) **ya está construida**, pero el
 bloqueo por plan **solo se activa al aplicar la migración**. Sin aplicarla, la app sigue con acceso
-completo (degradación segura). Para encenderla:
+completo (degradación segura). **Esto incluye las nuevas funciones Enterprise** (Multi-organización
+`/dashboard/organizaciones` y SSO/controles avanzados `/dashboard/seguridad`, desplegadas 2026-07-22):
+mientras 0018 no esté aplicada, `getOrgPlan` devuelve `enterprise` por defecto y **nadie queda
+bloqueado**. Para que el gating por-organización que pidió el fundador surta efecto real:
+aplicar 0018 **y** poner `organizations.plan = 'enterprise'` en las orgs que sí pagan Enterprise.
+Para encenderla:
 1. Pega **`supabase/migrations/0018_org_plan.sql`** en el SQL Editor de Supabase (solo ese archivo).
 2. A partir de ahí, las cuentas nuevas entran como **gratis** (solo Inventario + Riesgo). Tu cuenta,
    al ser `platform_admin`, **conserva acceso completo** automáticamente.
@@ -290,6 +295,14 @@ móvil + tema claro/oscuro) · planes diferenciados **$350 USD/mes** + tabla com
 SHA-256, migración 0020) · **exportación de datos** (JSON portable en *Plan y facturación*, sin migración,
 disponible en todos los planes a propósito) · **SSO social** (Google + Microsoft; código listo, se enciende
 con config del fundador → §1.6). Futuro opcional: SAML empresarial (requiere Supabase Pro).
+
+**Enterprise por-organización (2026-07-22, desplegado a `main`)**: Multi-organización
+(`/dashboard/organizaciones` — portfolio de entidades + crear entidad) y SSO/controles avanzados
+(`/dashboard/seguridad` — placeholder honesto) como funciones **exclusivas de Enterprise**, gateadas
+`requires="enterprise"`. El plan se resuelve por org activa → se aplica a todos los miembros y solo en
+esa org; al cambiar a otra org sin Enterprise se bloquean. ⚠️ **Solo bloquea de verdad con la migración
+0018 aplicada** (ver §1.1-bis). La página de Seguridad es un placeholder; el SSO corporativo real (SAML/
+OIDC) aún no está cableado — el SSO **social** (Google/Microsoft) es cosa aparte (§1.6).
 
 **Construido pero inactivo hasta configurar**: cobro por suscripción Stripe (migración 0017 + webhook +
 paywall) y verificación de correo por código OTP.
