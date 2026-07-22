@@ -65,6 +65,7 @@ export const es = {
       urlBar: "app.attesta.io/dashboard",
       navItems: ["Resumen", "Inventario", "Riesgo", "Vigilancia", "Equipo"],
       overviewTitle: "Resumen de gobernanza",
+      liveLabel: "En vivo",
       stats: [
         { k: "Sistemas", v: "6" },
         { k: "Alto riesgo", v: "4" },

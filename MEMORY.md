@@ -127,6 +127,12 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **P2 item 7: hero elevado.** Visual del hero mejorado (sin copy regulatorio): (1) el mock del
+  producto flota ahora sobre un **suelo atmosférico** de gradiente (técnica Linear) con tokens `--color-brand-soft`/
+  `--color-seal-soft` (theme-aware, nada de hex sueltos); (2) indicador **"En vivo"** con punto de pulso (`motion-safe:
+  animate-ping`) junto al título del dashboard → sensación de "producto trabajando" (estilo Vanta). Verificado en tema
+  claro y oscuro. Queda de P2: item 10 (sistema tipográfico).
+
 - **2026-07-22** · **P2 (1er PR): sección de evidencia "Proof" + eyebrow de categoría + corrección de mono.**
   Continuación del estudio del landing. (1) Nueva sección **`Evidence`** tras "Cómo funciona": showcase de evidencia
   declarada (dossier PDF mock, entrada de audit-log inmutable con visual de cadena/sello, anillo SVG "% listo" al 78%),

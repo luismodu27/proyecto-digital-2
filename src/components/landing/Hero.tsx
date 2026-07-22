@@ -58,8 +58,12 @@ export function Hero({
           <p className="mt-4 text-xs text-muted">{t.footnote}</p>
         </div>
 
-        {/* Mockup */}
-        <div className="reveal is-visible [transition-delay:120ms]">
+        {/* Mockup, flotando sobre un suelo atmosférico */}
+        <div className="reveal is-visible relative isolate [transition-delay:120ms]">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-x-6 -bottom-8 top-6 -z-10 rounded-[2.5rem] bg-gradient-to-b from-brand-soft/70 via-seal-soft/25 to-transparent blur-2xl"
+          />
           <HeroPreview t={preview} />
         </div>
       </div>

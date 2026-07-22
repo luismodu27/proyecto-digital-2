@@ -65,6 +65,7 @@ export const en: Dictionary = {
       urlBar: "app.attesta.io/dashboard",
       navItems: ["Overview", "Inventory", "Risk", "Monitoring", "Team"],
       overviewTitle: "Governance overview",
+      liveLabel: "Live",
       stats: [
         { k: "Systems", v: "6" },
         { k: "High risk", v: "4" },
