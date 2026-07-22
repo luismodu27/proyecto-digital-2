@@ -127,6 +127,22 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **"INGLÉS TOTAL": la versión EN no deja NADA en español (contenido regulatorio incluido).**
+  El fundador pidió que la versión inglesa funcione igual que la española sin nada en español. Se reconcilió con la
+  regla dura de "contenido legal validado por experto" traduciendo TODO el contenido regulatorio pero con el
+  **`compliance-domain-expert` validando cada texto legal EN** (no traducción mecánica). Se añadió `_EN` validado a
+  policy-packs (5), risk-assessment, recommendations, regulatory-watch, audit y las muestras demo de `mock-data`;
+  cada módulo expone selector locale (`*_BY_LOCALE`/`fn(x,locale)`, default ES) y la **fachada de datos resuelve el
+  locale por cookie internamente** (getRegulatoryEvents/getAuditLog/applyPolicyPack + mock-repo). Narrativas
+  hand-written (dossier s1–s5, RATIONALE_FALLBACK, summaryParagraph de informes, briefing de vigilancia) con EN
+  validado por locale. Bloque de resultado del RiskWizard traducido (verificado con Playwright). Limpieza:
+  `Anexo→Annex`, `Directiva…UE→Directive…EU`, `«»→""`, ortografía americana, solo en `_EN`. **Verificado por escaneo
+  integral** (build modo demo + cookie `NEXT_LOCALE=en`, 23 rutas, filtrando payload RSC) → cero texto español;
+  tsc+lint+build exit 0. Sigue en la rama (no desplegado a `main`). **Límite conocido:** datos que el usuario ya
+  guardó en modo conectado (gap_items, rationale histórico, eventos publicados) se muestran en su idioma de guardado
+  (no retraducibles); en demo todo sale EN. Recordatorio: validación por abogado UE del EN sigue pendiente antes de GA
+  (igual que el ES) — es orientación de producto, no asesoría legal.
+
 - **2026-07-22** · **i18n ES/EN COMPLETA (web pública + auth + dashboard) — Inc 0–5, en la rama.** Cierre de la
   internacionalización que pidió el fundador (alcance web + dashboard, URLs `/en`). Estado: **todo en la rama
   `claude/init-3bwfhm`, NO desplegado a `main`** por decisión del fundador (se publica cuando él dé el visto bueno).

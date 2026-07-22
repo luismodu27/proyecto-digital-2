@@ -217,26 +217,29 @@ Queda pendiente:
 - **Estados vacíos menores**: `riesgo/page.tsx` muestra las 4 secciones con "0 sistemas" en cuenta nueva.
 - **TODOs de andamiaje**: `context.ts:21` (selector de org activa), `analista/voyage.ts` (placeholder de embeddings).
 
-### 2.4 · i18n "INGLÉS TOTAL" — traducir TAMBIÉN el contenido regulatorio (en curso, 2026-07-22)
-El fundador pidió que la versión inglesa NO deje NADA en español y funcione igual que la española.
-Reconciliación con la regla dura: el contenido legal SÍ se traduce, pero **cada texto legal lo valida el
-`compliance-domain-expert`** (no traducción mecánica). Patrón: cada módulo mantiene el ES canónico + añade
-`_EN` validado + selector locale (`*_BY_LOCALE`/`fn(x,locale)`, default ES); la fachada de datos resuelve el
-locale por cookie internamente.
-- ✅ **Contenido `_EN` validado por experto:** policy-packs (5), risk-assessment, recommendations,
-  regulatory-watch, audit. (commits `add6c02`, `d5ee3b9`).
-- ✅ **Wiring Fase 1** (API locale en los 5 módulos) `e99e83a`; **Fase 2A** (fachada locale-aware +
-  reportes/plan/packs/riesgo/actividad) `10c4347`.
-- 🔄 **En curso:** chrome interno de páginas regulatorias (packs page, dossier/informe secciones+KPIs,
-  actividad ChainStatusCard/formatAgo) usando selectores locale; y `mock-data` demo + ruta `/demo`.
-- ⏳ **Pendiente — NARRATIVAS legales hand-written → experto + wiring:** resumen ejecutivo del dossier (s1–s5),
-  `RATIONALE_FALLBACK`, `summaryParagraph` del informe, hero/briefing "Aclaración de plazos" de vigilancia,
-  LegalNotes sin `_BY_LOCALE`, y el contenido regulatorio de las muestras de `mock-data` (SAMPLE gaps/assessments).
-- ⏳ **Limpieza final:** `Anexo`→`Annex` y `Directiva…UE/CE`→`Directive…EU/EC` dentro de las estructuras `_EN`;
-  **escaneo integral** de la versión EN hasta cero español; normalizar ortografía a americana.
-- **Datos persistidos** (gap_items ya guardados, rationale de evaluaciones históricas, eventos publicados) se
-  quedan en el idioma de guardado — no son retraducibles; es correcto (solo el contenido curado/computado en
-  display sale por locale).
+### 2.4 · i18n "INGLÉS TOTAL" — ✅ COMPLETADO (en la rama, 2026-07-22)
+El fundador pidió que la versión inglesa NO deje NADA en español y funcione igual que la española. **Hecho y
+verificado.** Reconciliación con la regla dura: el contenido legal se tradujo, pero **cada texto legal lo validó el
+`compliance-domain-expert`** (no traducción mecánica). Patrón: cada módulo mantiene el ES canónico + `_EN` validado +
+selector locale (`*_BY_LOCALE`/`fn(x,locale)`, default ES); la fachada de datos resuelve el locale por cookie.
+- ✅ Contenido `_EN` validado por experto: **5 policy-packs, risk-assessment, recommendations, regulatory-watch,
+  audit, y las muestras demo de `mock-data`** (GAP_ITEMS, SAMPLE_ASSESSMENTS/ACTION_TASKS/AUDIT/REG_*/BIAS).
+- ✅ Wiring: API locale en los 5 módulos (Fase 1); fachada locale-aware (getRegulatoryEvents/getAuditLog/
+  applyPolicyPack + mock-repo getters); todos los consumidores (reportes, plan, packs, riesgo, RiskWizard incl. su
+  bloque de resultado, vigilancia, actividad, informes, /demo, overview).
+- ✅ Narrativas legales EN validadas (dossier s1–s5 + RATIONALE_FALLBACK, informe/gap-informe summaryParagraph,
+  briefing de vigilancia, LegalNotes por locale). ✅ Limpieza: `Anexo`→`Annex`, `Directiva…UE`→`Directive…EU`,
+  `«»`→`""`, ortografía americana — solo en las estructuras `_EN`.
+- ✅ **Verificación:** escaneo integral en modo demo (build sin `.env.local`, cookie `NEXT_LOCALE=en`) de 23 rutas
+  filtrando el payload RSC → **cero texto español** en la versión inglesa; el bloque de resultado del RiskWizard
+  verificado con Playwright en 4 clasificaciones. tsc+lint+build exit 0. `/` sigue siendo la landing ES (por diseño;
+  el inglés vive en `/en`).
+- **Nota — datos persistidos:** en modo CONECTADO, los datos ya guardados por el usuario (gap_items, rationale de
+  evaluaciones históricas, eventos publicados) se muestran en el idioma en que se guardaron — no son retraducibles.
+  Solo el contenido curado/computado en display sale por locale. En modo demo (mock) todo sale EN.
+- **Pendiente menor / diferido:** el enum `Effort` (bajo/medio/alto) en `RecommendationCard` — componente NO
+  importado en la app (código muerto), no renderiza; traducir si algún día se usa. Sigue pendiente de validación del
+  experto (si se quisiera) los enums de estado sueltos de `regulatory-watch` ya cubiertos por selector.
 
 ### 2.3 · Internacionalización ES/EN — Inc 0–5 HECHOS (en la rama, 2026-07-22)
 Toda la UI (web pública + auth + dashboard) es bilingüe ES/EN. **En la rama `claude/init-3bwfhm`, NO desplegado a `main`**
