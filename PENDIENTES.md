@@ -217,9 +217,9 @@ Queda pendiente:
 - **Estados vacíos menores**: `riesgo/page.tsx` muestra las 4 secciones con "0 sistemas" en cuenta nueva.
 - **TODOs de andamiaje**: `context.ts:21` (selector de org activa), `analista/voyage.ts` (placeholder de embeddings).
 
-### 2.4 · i18n "INGLÉS TOTAL" — ✅ COMPLETADO (en la rama, 2026-07-22)
-El fundador pidió que la versión inglesa NO deje NADA en español y funcione igual que la española. **Hecho y
-verificado.** Reconciliación con la regla dura: el contenido legal se tradujo, pero **cada texto legal lo validó el
+### 2.4 · i18n "INGLÉS TOTAL" — ✅ COMPLETADO y ✅ DESPLEGADO A PRODUCCIÓN (`main`, 2026-07-22)
+El fundador pidió que la versión inglesa NO deje NADA en español y funcione igual que la española. **Hecho,
+verificado y publicado a `main` (commit `c96aadb`)** a petición del fundador. Reconciliación con la regla dura: el contenido legal se tradujo, pero **cada texto legal lo validó el
 `compliance-domain-expert`** (no traducción mecánica). Patrón: cada módulo mantiene el ES canónico + `_EN` validado +
 selector locale (`*_BY_LOCALE`/`fn(x,locale)`, default ES); la fachada de datos resuelve el locale por cookie.
 - ✅ Contenido `_EN` validado por experto: **5 policy-packs, risk-assessment, recommendations, regulatory-watch,
