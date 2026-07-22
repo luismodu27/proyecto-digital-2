@@ -28,6 +28,12 @@ export function Modules({ t }: { t: Dictionary["landing"]["modules"] }) {
             <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-soft">
               {m.body}
             </p>
+            <div className="mt-5 flex items-baseline gap-2.5 border-t border-line pt-5">
+              <span className="font-display text-2xl font-semibold leading-none text-brand-strong">
+                {m.stat.v}
+              </span>
+              <span className="text-xs leading-tight text-muted">{m.stat.k}</span>
+            </div>
             <ul className="mt-5 space-y-2 border-t border-line pt-5">
               {m.points.map((p) => (
                 <li key={p} className="flex items-center gap-2 text-sm text-ink">

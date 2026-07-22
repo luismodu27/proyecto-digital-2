@@ -174,6 +174,16 @@ export function UseCaseStory({ t }: { t: L }) {
           <h2 className="mt-3 font-display text-3xl font-semibold text-ink sm:text-4xl">
             {t.title}
           </h2>
+          <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            {t.verbs.map((v, i) => (
+              <span key={v} className="flex items-center gap-3">
+                {i > 0 && <span className="text-line-strong" aria-hidden>·</span>}
+                <span className="font-display text-lg font-semibold text-brand-strong">
+                  {v}
+                </span>
+              </span>
+            ))}
+          </div>
           <p className="mt-4 text-lg text-ink-soft">{t.intro}</p>
         </div>
 

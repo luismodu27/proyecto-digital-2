@@ -55,7 +55,8 @@ export const es = {
       bodyAfter:
         " bajo el EU AI Act. Attesta la inventaría, clasifica su riesgo, genera tu evidencia y vigila los cambios normativos. Sin necesitar un equipo GRC.",
       ctaPrimary: "Solicitar acceso anticipado",
-      ctaSecondary: "Explorar la demo",
+      ctaSecondary: "Explora la demo en vivo",
+      ctaNote: "Sin llamada de ventas · sin registro",
       footnote:
         "Más de 3 de cada 4 empresas van más rápido en IA que en su gobierno. Tú puedes ir por delante.",
     },
@@ -76,15 +77,24 @@ export const es = {
     },
 
     trustStrip: {
-      eyebrow:
-        "Para responsables de RRHH, Talent Acquisition y People Ops que usan IA para contratar",
-      sectors: [
-        "Cribado de CVs",
-        "Entrevistas por vídeo",
-        "Scoring de candidatos",
-        "ATS con IA",
-        "Tests automatizados",
-        "Chatbots de selección",
+      eyebrow: "Construido para resistir una auditoría",
+      signals: [
+        {
+          title: "Cero alucinaciones",
+          body: "Texto regulatorio 100% determinista, sin LLM.",
+        },
+        {
+          title: "Datos alojados en la UE",
+          body: "Alojamiento dentro de la Unión Europea.",
+        },
+        {
+          title: "Registro inmutable",
+          body: "Cada cambio queda en un audit-trail inalterable.",
+        },
+        {
+          title: "Revisado por experto",
+          body: "Contenido regulatorio revisado por un experto en compliance.",
+        },
       ],
     },
 
@@ -149,6 +159,7 @@ export const es = {
         {
           title: "Inventario de sistemas de IA",
           body: "Un catálogo vivo de cada modelo y sistema en uso: quién lo opera, qué datos toca y para qué decisión se usa. Más de la mitad de las empresas no lo tiene; tú sí.",
+          stat: { v: "1", k: "fuente de verdad, no hojas sueltas" },
           points: [
             "Descubrimiento guiado",
             "Propietario y proveedor",
@@ -158,6 +169,7 @@ export const es = {
         {
           title: "Clasificación de riesgo",
           body: "Un asistente guiado clasifica cada sistema según el EU AI Act —inaceptable, alto, limitado o mínimo— y te dice exactamente qué obligaciones aplican, distinguiendo lo tuyo (deployer) de lo del proveedor.",
+          stat: { v: "5", k: "obligaciones del deployer · Arts. 14·26·27·50·86" },
           points: [
             "Mapeo a artículos del AI Act",
             "Captura de evidencia y atestación",
@@ -167,6 +179,7 @@ export const es = {
         {
           title: "Gap assessment y plan",
           body: "Qué te falta, priorizado por severidad, con plan de acción por artículo. Aplica un policy pack por dominio (RRHH, gestión de trabajadores, atención al cliente e IA generativa o crédito/seguros) y precarga los controles típicos del caso.",
+          stat: { v: "Minutos", k: "para tu dossier, no semanas" },
           points: [
             "Brechas priorizadas",
             "Policy packs por dominio",
@@ -199,6 +212,43 @@ export const es = {
           body: "RRHH, Legal y auditoría trabajando en el mismo sitio, con permisos por rol y aislamiento por organización. Invita a quien necesites en segundos.",
         },
       ],
+    },
+
+    coverage: {
+      eyebrow: "Cobertura de marcos",
+      title: "Prepara la evidencia de los marcos que te aplican",
+      intro:
+        "Un mismo sistema de registro para autoevaluar tu IA y reunir evidencia lista para auditoría frente a los marcos que te aplican.",
+      frameworks: [
+        {
+          name: "EU AI Act",
+          body: "Organiza la supervisión humana, la transparencia y la evidencia que exige tu despliegue.",
+          tag: "Arts. 14·26·27·50·86",
+        },
+        {
+          name: "ISO/IEC 42001",
+          body: "Estructura tu sistema de gestión de IA y reúne su evidencia declarada.",
+          tag: "Cláusulas 4–10 · Anexo A",
+        },
+        {
+          name: "NIST AI RMF",
+          body: "Ordena tus prácticas de gobernanza de IA según sus cuatro funciones.",
+          tag: "Govern · Map · Measure · Manage",
+        },
+        {
+          name: "NYC Local Law 144",
+          body: "Conserva la auditoría de sesgo independiente y los avisos a candidatos.",
+          tag: "Auditoría de sesgo · AEDT",
+        },
+        {
+          name: "Illinois (IA en empleo)",
+          body: "Documenta el aviso de uso de IA y las salvaguardas en selección.",
+          tag: "AI Video Interview Act · HB 3773",
+        },
+      ],
+      radarLabel: "En el radar de vigilancia",
+      radar: ["Colorado AI Act (SB 205)", "Texas TRAIGA"],
+      note: "Preparación para auditoría y clasificación orientativa — no es certificación ni asesoría legal.",
     },
 
     whyNow: {
@@ -237,6 +287,7 @@ export const es = {
     useCaseStory: {
       eyebrow: "En acción",
       title: "De la duda a la evidencia, en una tarde.",
+      verbs: ["Inventaría tu IA", "Clasifica el riesgo", "Prueba que estás listo"],
       intro:
         "Así es como una empresa mid-market pasa de «creo que usamos IA en contratación» a tener todo clasificado, con brechas cerradas y evidencia lista para el auditor.",
       inventory: {

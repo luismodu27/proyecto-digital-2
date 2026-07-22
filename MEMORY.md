@@ -127,6 +127,22 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Estudio comparativo del landing + mejoras P1 (contra Vanta/Drata/Secureframe y Linear/Stripe/Vercel).**
+  A petición del fundador se hizo una crítica del landing comparándolo con las mejores páginas del sector y de diseño (dos
+  agentes de investigación) + radiografía de nuestro landing. Veredicto: ya está en el tramo alto; faltan movimientos
+  quirúrgicos. Documento visual publicado (artifact `https://claude.ai/code/artifact/b94a68fc-1bf7-4392-ab73-b733f83cf0b2`).
+  **Implementado P1 (rama `claude/init-3bwfhm` → PR hacia main):** (1) nueva sección **Coverage** = rejilla de cobertura de
+  marcos anclada al deployer (EU AI Act 14·26·27·50·86, ISO 42001, NIST AI RMF, NYC LL144, Illinois AIVIA/HB 3773) + banda
+  "en el radar" (Colorado SB 205, Texas TRAIGA) + disclaimer; (2) **TrustStrip** rehecho: de "sectores" a 4 señales reales
+  (cero LLM/determinista, datos UE, registro inmutable, revisado por experto); (3) micro-stats en tarjetas de Módulos
+  (readiness/tiempo, copy seguro); (4) 3 verbos en "cómo funciona" ("Inventaría tu IA · Clasifica el riesgo · Prueba que
+  estás listo"); (5) CTA "Explora la demo en vivo · sin llamada de ventas · sin registro". Copy regulatorio **validado por
+  compliance-domain-expert** (Colorado/Texas → radar por aplazamiento/alcance; Illinois anclado en AIVIA+HB 3773).
+  **Descartado por el fundador:** mono para etiquetas técnicas (Art. 26/IDs). **Follow-ups:** candidata card de California
+  (packs FEHA/ADS + CCPA/CPPA ADMT ya existen); verificar que `regulatory-watch.ts` trate Colorado como radar (fecha
+  1-ene-2027); P2 pendiente (elevar visual del hero, sección de evidencia "Proof", decisión de titular categoría, sistema
+  tipográfico). Sign-off de abogado UE/EE.UU. sobre etiquetas de artículos sigue pendiente pre-GA.
+
 - **2026-07-22** · **Documento maestro regenerado y actualizado + versión en inglés (artifacts).** A petición del
   fundador se actualizó la guía maestra (recorrido por cada pantalla con capturas reales anotadas) al estado actual del
   producto y se creó una versión paralela en inglés. Como las fuentes del artifact original eran efímeras (scratchpad),
