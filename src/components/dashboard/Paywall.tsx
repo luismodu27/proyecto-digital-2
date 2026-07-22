@@ -1,23 +1,29 @@
 import { ButtonLink } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
 import { PLAN_PRICE_LABEL } from "@/lib/stripe/config";
-import { TIER_LABEL, type PlanTier } from "@/lib/billing/plan";
+import { type PlanTier } from "@/lib/billing/plan";
+import type { Dictionary } from "@/lib/i18n";
 
 /**
  * Pantalla de bloqueo para una función que requiere un plan superior. Se muestra
  * en lugar del contenido de la sección cuando la organización no alcanza el nivel.
+ *
+ * Recibe el slice `t` ya resuelto por su renderizador (`PaidGate`), que conoce el
+ * locale. `feature`/`description` los pasa la página que envuelve la sección.
  */
 export function Paywall({
   feature,
   description,
   tier = "preparacion",
+  t,
 }: {
   feature: string;
   description?: string;
   tier?: PlanTier;
+  t: Dictionary["dashboard"]["paywall"];
 }) {
   const isEnterprise = tier === "enterprise";
-  const tierName = TIER_LABEL[tier];
+  const tierName = isEnterprise ? t.tierName.enterprise : t.tierName.preparacion;
 
   return (
     <div className="mx-auto max-w-xl py-10 text-center">
@@ -34,30 +40,28 @@ export function Paywall({
           </svg>
         </span>
         <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted">
-          Función del plan {tierName}
+          {t.featureBefore}
+          {tierName}
+          {t.featureAfter}
         </p>
         <h1 className="mt-2 font-display text-2xl font-semibold text-ink">
           {feature}
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-          {description ??
-            (isEnterprise
-              ? "Esta función forma parte del plan Enterprise (varias entidades, SSO y soporte prioritario)."
-              : "Desbloquea esta sección con el plan Preparación: la preparación completa para auditoría de tu organización.")}
+          {description ?? (isEnterprise ? t.descEnterprise : t.descDefault)}
         </p>
         <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <ButtonLink href="/dashboard/facturacion">
             {isEnterprise
-              ? "Ver planes y contacto"
-              : `Ver planes · ${PLAN_PRICE_LABEL}/mes`}
+              ? t.ctaEnterprise
+              : `${t.ctaPlansBefore}${PLAN_PRICE_LABEL}${t.perMonth}`}
           </ButtonLink>
           <ButtonLink href="/dashboard" variant="ghost">
-            Volver al resumen
+            {t.back}
           </ButtonLink>
         </div>
         <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-muted">
-          <SealMark size={14} /> Inventario y clasificación de riesgo siguen
-          disponibles en el plan gratuito.
+          <SealMark size={14} /> {t.footer}
         </p>
       </div>
     </div>

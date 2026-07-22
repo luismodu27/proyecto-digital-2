@@ -1,8 +1,9 @@
 import {
-  BIAS_STATUS_LABEL,
   BIAS_STATUS_TONE,
   type BiasAuditStatus,
 } from "@/lib/bias-audit";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 const TONE_CLS: Record<string, string> = {
   danger:
@@ -13,36 +14,46 @@ const TONE_CLS: Record<string, string> = {
     "bg-[var(--tone-neutral-bg)] text-[var(--tone-neutral-fg)] border-[var(--tone-neutral-bd)]",
 };
 
-/** Texto de cuenta atrás a partir de los días que faltan. */
-function countdownText(days: number | null): string | null {
+type BiasDict = ReturnType<typeof getDictionary>["dashboard"]["bias"];
+
+/** Texto de cuenta atrás a partir de los días que faltan (chrome de UI). */
+function countdownText(days: number | null, t: BiasDict): string | null {
   if (days === null) return null;
-  if (days < 0) return `venció hace ${Math.abs(days)} día${Math.abs(days) === 1 ? "" : "s"}`;
-  if (days === 0) return "vence hoy";
-  return `vence en ${days} día${days === 1 ? "" : "s"}`;
+  if (days < 0) {
+    const n = Math.abs(days);
+    return `${t.overduePrefix}${n} ${n === 1 ? t.dayOne : t.dayOther}${t.overdueSuffix}`;
+  }
+  if (days === 0) return t.today;
+  return `${t.upcomingPrefix}${days} ${days === 1 ? t.dayOne : t.dayOther}`;
 }
 
 /**
  * Pill de estado de la auditoría de sesgo (NYC LL144), con cuenta atrás opcional.
  * Orientativo — no es un juicio de cumplimiento.
+ *
+ * Es un Server Component compartido por varias páginas (dossier, editar), así que
+ * resuelve el locale por su cuenta (cookie) y no exige que cada página se lo pase.
+ * Solo se traduce el chrome del badge; el tono/severidad viene de `bias-audit`.
  */
-export function BiasAuditBadge({
+export async function BiasAuditBadge({
   status,
   days,
 }: {
   status: BiasAuditStatus;
   days?: number | null;
 }) {
+  const t = getDictionary(await resolveLocale()).dashboard.bias;
   const tone = BIAS_STATUS_TONE[status];
   const countdown =
     status === "vigente" || status === "por_vencer" || status === "vencida"
-      ? countdownText(days ?? null)
+      ? countdownText(days ?? null, t)
       : null;
 
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${TONE_CLS[tone]}`}
     >
-      {BIAS_STATUS_LABEL[status]}
+      {t.labels[status]}
       {countdown && <span className="font-normal opacity-80">· {countdown}</span>}
     </span>
   );

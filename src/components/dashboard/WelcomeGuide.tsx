@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
 import { setUserFlag } from "@/lib/data/user-actions";
+import { useT } from "@/lib/i18n/provider";
+import type { Dictionary } from "@/lib/i18n";
+
+type GuideDict = Dictionary["dashboard"]["guide"];
 
 /**
  * Guía de uso que se muestra UNA sola vez, tras el primer inicio de sesión.
@@ -118,162 +122,171 @@ type Step = {
   visual: ReactNode;
 };
 
-const STEPS: Step[] = [
-  {
-    icon: "M3 12h7V3H3v9Zm0 9h7v-7H3v7Zm11 0h7V12h-7v9Zm0-18v7h7V3h-7Z",
-    title: "Bienvenido a Attesta",
-    body: "Tu sistema de registro para gobernar la IA con evidencia. Te mostramos en 30 segundos para qué sirve cada apartado —con un vistazo a cada pantalla.",
-    visual: (
-      <Frame label="Resumen de gobernanza">
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { k: "Sistemas", v: "6" },
-            { k: "Alto riesgo", v: "4", tone: C.danger },
-            { k: "% listo", v: "59%" },
-          ].map((c, idx) => (
-            <div
-              key={c.k}
-              className="animate-guide-row rounded-lg border border-line bg-paper-raised p-2"
-              style={{ animationDelay: `${60 + idx * 110}ms` }}
-            >
-              <p
-                className="font-display text-base font-semibold"
-                style={c.tone ? { color: c.tone } : undefined}
+/**
+ * Construye los pasos de la guía a partir del diccionario (chrome de UI). Los
+ * iconos, tonos y animaciones son estructura; el texto sale de `g`. Las mini-UI
+ * son ejemplos ilustrativos (datos ficticios), no contenido regulatorio real:
+ * los números de artículo se mantienen idénticos entre idiomas.
+ */
+function makeSteps(g: GuideDict): Step[] {
+  const v = g.viz;
+  return [
+    {
+      icon: "M3 12h7V3H3v9Zm0 9h7v-7H3v7Zm11 0h7V12h-7v9Zm0-18v7h7V3h-7Z",
+      title: g.steps[0].title,
+      body: g.steps[0].body,
+      visual: (
+        <Frame label={g.frames.overview}>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { k: v.statSystems, val: "6" },
+              { k: v.statHighRisk, val: "4", tone: C.danger },
+              { k: v.statReady, val: "59%" },
+            ].map((c, idx) => (
+              <div
+                key={c.k}
+                className="animate-guide-row rounded-lg border border-line bg-paper-raised p-2"
+                style={{ animationDelay: `${60 + idx * 110}ms` }}
               >
-                {c.v}
-              </p>
-              <p className="text-[9px] text-muted">{c.k}</p>
-            </div>
-          ))}
-        </div>
-      </Frame>
-    ),
-  },
-  {
-    icon: "M4 7h16M4 12h16M4 17h16",
-    title: "Inventario",
-    body: "Registra cada sistema de IA que tu organización usa. Es el punto de partida: todo lo demás se calcula a partir de lo que declaras aquí.",
-    visual: (
-      <Frame label="Inventario · 3 sistemas">
-        <div className="space-y-1.5">
-          <SysRow name="Cribado de CVs" tag="Alto riesgo" tone={C.danger} delay={60} />
-          <SysRow name="Scoring de candidatos" tag="Alto riesgo" tone={C.danger} delay={170} />
-          <SysRow name="Chatbot de entrevistas" tag="Riesgo limitado" tone={C.gold} delay={280} />
-        </div>
-      </Frame>
-    ),
-  },
-  {
-    icon: "M12 3 2 20h20L12 3Zm0 6v5m0 3h.01",
-    title: "Riesgo",
-    body: "Clasifica cada sistema según el EU AI Act y marcos de EE. UU. Attesta te orienta sobre su nivel de riesgo y qué obligaciones aplican a tu rol de deployer.",
-    visual: (
-      <Frame label="Distribución de riesgo">
-        <div className="space-y-2">
-          <Bar label="Alto" pct={67} tone={C.danger} delay={80} />
-          <Bar label="Limitado" pct={17} tone={C.gold} delay={220} />
-          <Bar label="Mínimo" pct={16} tone={C.good} delay={360} />
-        </div>
-      </Frame>
-    ),
-  },
-  {
-    icon: "M9 11l3 3 8-8M4 12a8 8 0 108-8",
-    title: "Gap assessment",
-    body: "Mide qué tan preparado estás frente a cada obligación y obtén tu «% listo». Las brechas identificadas se convierten en tareas concretas para cerrar.",
-    visual: (
-      <Frame label="Preparación para auditoría">
-        <div className="flex items-baseline justify-between">
-          <span className="text-[10px] text-muted">% listo</span>
-          <span className="font-display text-lg font-semibold text-ink">78%</span>
-        </div>
-        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-paper-sunken">
-          <div
-            className="animate-guide-bar h-full rounded-full"
-            style={{ width: "78%", backgroundColor: C.good, animationDelay: "80ms" }}
-          />
-        </div>
-        <div className="mt-2 space-y-1">
-          <Check delay={220}>Supervisión humana (Art. 14)</Check>
-          <Check delay={340}>Transparencia a candidatos (Art. 50)</Check>
-        </div>
-      </Frame>
-    ),
-  },
-  {
-    icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9 2 2 4-4",
-    title: "Plan de acción y Policy packs",
-    body: "El plan reúne las tareas para cerrar brechas con responsables y fechas. Los policy packs te dan plantillas listas (empezando por RRHH).",
-    visual: (
-      <Frame label="Plan de acción">
-        <div className="space-y-1.5">
-          {[
-            { t: "Documentar supervisión humana", who: "Ana · 12 jul", tone: C.danger },
-            { t: "Publicar aviso de transparencia", who: "Luis · 20 jul", tone: C.gold },
-          ].map((task, idx) => (
+                <p
+                  className="font-display text-base font-semibold"
+                  style={c.tone ? { color: c.tone } : undefined}
+                >
+                  {c.val}
+                </p>
+                <p className="text-[9px] text-muted">{c.k}</p>
+              </div>
+            ))}
+          </div>
+        </Frame>
+      ),
+    },
+    {
+      icon: "M4 7h16M4 12h16M4 17h16",
+      title: g.steps[1].title,
+      body: g.steps[1].body,
+      visual: (
+        <Frame label={g.frames.inventory}>
+          <div className="space-y-1.5">
+            <SysRow name={v.inventoryRows[0].name} tag={v.inventoryRows[0].tag} tone={C.danger} delay={60} />
+            <SysRow name={v.inventoryRows[1].name} tag={v.inventoryRows[1].tag} tone={C.danger} delay={170} />
+            <SysRow name={v.inventoryRows[2].name} tag={v.inventoryRows[2].tag} tone={C.gold} delay={280} />
+          </div>
+        </Frame>
+      ),
+    },
+    {
+      icon: "M12 3 2 20h20L12 3Zm0 6v5m0 3h.01",
+      title: g.steps[2].title,
+      body: g.steps[2].body,
+      visual: (
+        <Frame label={g.frames.risk}>
+          <div className="space-y-2">
+            <Bar label={v.riskBars[0]} pct={67} tone={C.danger} delay={80} />
+            <Bar label={v.riskBars[1]} pct={17} tone={C.gold} delay={220} />
+            <Bar label={v.riskBars[2]} pct={16} tone={C.good} delay={360} />
+          </div>
+        </Frame>
+      ),
+    },
+    {
+      icon: "M9 11l3 3 8-8M4 12a8 8 0 108-8",
+      title: g.steps[3].title,
+      body: g.steps[3].body,
+      visual: (
+        <Frame label={g.frames.gap}>
+          <div className="flex items-baseline justify-between">
+            <span className="text-[10px] text-muted">{v.readyLabel}</span>
+            <span className="font-display text-lg font-semibold text-ink">78%</span>
+          </div>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-paper-sunken">
             <div
-              key={task.t}
-              className="animate-guide-row flex items-center justify-between gap-2 rounded-md border border-line bg-paper-raised px-2.5 py-1.5"
-              style={{ borderLeftColor: task.tone, borderLeftWidth: 3, animationDelay: `${80 + idx * 130}ms` }}
-            >
-              <span className="text-[11px] text-ink">{task.t}</span>
-              <span className="shrink-0 text-[9px] text-muted">{task.who}</span>
-            </div>
-          ))}
-        </div>
-      </Frame>
-    ),
-  },
-  {
-    icon: "M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
-    title: "Vigilancia",
-    body: "Un radar que vigila las fuentes regulatorias oficiales y te avisa cuando algo cambia. Los cambios los valida un humano antes de publicarse: nunca texto inventado.",
-    visual: (
-      <Frame label="Radar regulatorio">
-        <div className="flex items-center justify-between gap-2 rounded-md border border-[var(--tone-good-bd)] bg-brand-soft/50 px-2.5 py-1.5">
-          <span className="text-[10px] font-medium text-ink">
-            Próximo hito · Transparencia (Art. 50)
-          </span>
-          <span className="shrink-0 text-[10px] font-semibold tabular-nums text-brand-strong">
-            en 16 días
-          </span>
-        </div>
-        <div className="mt-1.5 flex items-center gap-1.5 px-1 text-[10px] text-muted">
-          <span className="size-1.5 rounded-full" style={{ backgroundColor: C.good }} />
-          8 fuentes oficiales vigiladas · sin cambios
-        </div>
-      </Frame>
-    ),
-  },
-  {
-    icon: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
-    title: "Equipo y Actividad",
-    body: "Invita a tu equipo con roles y consulta el registro de actividad: un audit-trail inmutable de todo lo que ocurre. Listo, ya puedes empezar.",
-    visual: (
-      <Frame label="Equipo">
-        <div className="flex items-center gap-1.5">
-          {[
-            { i: "AN", tone: "#0b6b4e" },
-            { i: "LU", tone: "#b0824a" },
-            { i: "MG", tone: "#33507e" },
-          ].map((a) => (
-            <span
-              key={a.i}
-              className="flex size-6 items-center justify-center rounded-full text-[9px] font-semibold text-white"
-              style={{ backgroundColor: a.tone }}
-            >
-              {a.i}
+              className="animate-guide-bar h-full rounded-full"
+              style={{ width: "78%", backgroundColor: C.good, animationDelay: "80ms" }}
+            />
+          </div>
+          <div className="mt-2 space-y-1">
+            <Check delay={220}>{v.checks[0]}</Check>
+            <Check delay={340}>{v.checks[1]}</Check>
+          </div>
+        </Frame>
+      ),
+    },
+    {
+      icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9 2 2 4-4",
+      title: g.steps[4].title,
+      body: g.steps[4].body,
+      visual: (
+        <Frame label={g.frames.plan}>
+          <div className="space-y-1.5">
+            {[
+              { t: v.tasks[0].t, who: v.tasks[0].who, tone: C.danger },
+              { t: v.tasks[1].t, who: v.tasks[1].who, tone: C.gold },
+            ].map((task, idx) => (
+              <div
+                key={task.t}
+                className="animate-guide-row flex items-center justify-between gap-2 rounded-md border border-line bg-paper-raised px-2.5 py-1.5"
+                style={{ borderLeftColor: task.tone, borderLeftWidth: 3, animationDelay: `${80 + idx * 130}ms` }}
+              >
+                <span className="text-[11px] text-ink">{task.t}</span>
+                <span className="shrink-0 text-[9px] text-muted">{task.who}</span>
+              </div>
+            ))}
+          </div>
+        </Frame>
+      ),
+    },
+    {
+      icon: "M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
+      title: g.steps[5].title,
+      body: g.steps[5].body,
+      visual: (
+        <Frame label={g.frames.radar}>
+          <div className="flex items-center justify-between gap-2 rounded-md border border-[var(--tone-good-bd)] bg-brand-soft/50 px-2.5 py-1.5">
+            <span className="text-[10px] font-medium text-ink">
+              {v.radarMilestone}
             </span>
-          ))}
-          <span className="ml-1 text-[10px] text-muted">3 miembros · roles por correo</span>
-        </div>
-        <div className="mt-2 rounded-md border border-line bg-paper-raised px-2.5 py-1.5 text-[10px] text-ink-soft">
-          <span className="text-muted">Actividad ·</span> Ana clasificó «Cribado de CVs» como alto riesgo
-        </div>
-      </Frame>
-    ),
-  },
-];
+            <span className="shrink-0 text-[10px] font-semibold tabular-nums text-brand-strong">
+              {v.radarCountdown}
+            </span>
+          </div>
+          <div className="mt-1.5 flex items-center gap-1.5 px-1 text-[10px] text-muted">
+            <span className="size-1.5 rounded-full" style={{ backgroundColor: C.good }} />
+            {v.radarSources}
+          </div>
+        </Frame>
+      ),
+    },
+    {
+      icon: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+      title: g.steps[6].title,
+      body: g.steps[6].body,
+      visual: (
+        <Frame label={g.frames.team}>
+          <div className="flex items-center gap-1.5">
+            {[
+              { i: "AN", tone: "#0b6b4e" },
+              { i: "LU", tone: "#b0824a" },
+              { i: "MG", tone: "#33507e" },
+            ].map((a) => (
+              <span
+                key={a.i}
+                className="flex size-6 items-center justify-center rounded-full text-[9px] font-semibold text-white"
+                style={{ backgroundColor: a.tone }}
+              >
+                {a.i}
+              </span>
+            ))}
+            <span className="ml-1 text-[10px] text-muted">{v.teamMembers}</span>
+          </div>
+          <div className="mt-2 rounded-md border border-line bg-paper-raised px-2.5 py-1.5 text-[10px] text-ink-soft">
+            <span className="text-muted">{v.activityLabel}</span> {v.activityText}
+          </div>
+        </Frame>
+      ),
+    },
+  ];
+}
 
 const LS_PREFIX = "attesta:guide:v1:";
 
@@ -284,6 +297,8 @@ export function WelcomeGuide({
   show: boolean;
   userId?: string;
 }) {
+  const g = useT().dashboard.guide;
+  const STEPS = useMemo(() => makeSteps(g), [g]);
   const [open, setOpen] = useState(false);
   const [i, setI] = useState(0);
   const [entered, setEntered] = useState(false);
@@ -402,19 +417,19 @@ export function WelcomeGuide({
       >
         {/* Región viva: anuncia el cambio de paso a lectores de pantalla. */}
         <p className="sr-only" aria-live="polite">
-          Paso {i + 1} de {STEPS.length}: {step.title}
+          {g.step} {i + 1} {g.of} {STEPS.length}: {step.title}
         </p>
         <div className="flex items-center justify-between border-b border-line px-6 py-4">
           <div className="flex items-center gap-2 text-brand">
             <SealMark size={22} />
-            <span className="text-sm font-semibold text-ink">Guía rápida</span>
+            <span className="text-sm font-semibold text-ink">{g.brand}</span>
           </div>
           <button
             type="button"
             onClick={dismiss}
             className="text-xs font-medium text-muted transition-colors hover:text-ink"
           >
-            Omitir
+            {g.skip}
           </button>
         </div>
 
@@ -469,7 +484,7 @@ export function WelcomeGuide({
                 className="px-4 py-2"
                 onClick={() => setI((n) => Math.max(0, n - 1))}
               >
-                Atrás
+                {g.back}
               </Button>
             )}
             {isLast ? (
@@ -479,7 +494,7 @@ export function WelcomeGuide({
                 disabled={saving}
                 onClick={dismiss}
               >
-                Empezar
+                {g.start}
               </Button>
             ) : (
               <Button
@@ -487,7 +502,7 @@ export function WelcomeGuide({
                 className="px-5 py-2"
                 onClick={() => setI((n) => Math.min(STEPS.length - 1, n + 1))}
               >
-                Siguiente
+                {g.next}
               </Button>
             )}
           </div>

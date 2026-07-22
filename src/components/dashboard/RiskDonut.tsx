@@ -4,11 +4,21 @@ const RISK_COLOR = RISK_HEX;
 
 const ORDER: RiskLevel[] = RISK_ORDER;
 
-/** Dona de distribución de riesgo (SVG, on-brand). */
+/**
+ * Dona de distribución de riesgo (SVG, on-brand).
+ *
+ * `labels`/`systemsLabel` son chrome de UI: si no se pasan, cae al español
+ * (`RISK_LABEL`). Las páginas i18n pasan el slice traducido; `RISK_LABEL` de
+ * mock-data no se toca (contenido determinista).
+ */
 export function RiskDonut({
   counts,
+  labels = RISK_LABEL,
+  systemsLabel = "sistemas",
 }: {
   counts: Record<RiskLevel, number>;
+  labels?: Record<RiskLevel, string>;
+  systemsLabel?: string;
 }) {
   const total = ORDER.reduce((s, l) => s + counts[l], 0);
   const r = 52;
@@ -60,7 +70,7 @@ export function RiskDonut({
           <span className="font-display text-3xl font-semibold text-ink">
             {total}
           </span>
-          <span className="text-[11px] text-muted">sistemas</span>
+          <span className="text-[11px] text-muted">{systemsLabel}</span>
         </div>
       </div>
 
@@ -71,7 +81,7 @@ export function RiskDonut({
               className="size-2.5 rounded-sm"
               style={{ backgroundColor: RISK_COLOR[l] }}
             />
-            <span className="text-ink-soft">{RISK_LABEL[l]}</span>
+            <span className="text-ink-soft">{labels[l]}</span>
             <span className="ml-auto font-medium tabular-nums text-ink">
               {counts[l]}
             </span>

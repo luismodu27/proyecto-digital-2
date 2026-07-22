@@ -8,6 +8,8 @@ import { RiskBadge } from "@/components/ui/RiskBadge";
 import { Paywall } from "@/components/dashboard/Paywall";
 import { getActiveOrg } from "@/lib/data/context";
 import { orgHasTier } from "@/lib/billing/plan";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 import { OBLIGATIONS_BY_LEVEL } from "@/lib/risk-assessment";
 import { recommendationsForLevel } from "@/lib/recommendations";
 import { BiasAuditBadge } from "@/components/dashboard/BiasAuditBadge";
@@ -110,6 +112,7 @@ export default async function DossierPage({
       <Paywall
         feature="Dossier de evidencia"
         description="Genera el dossier de evidencia por sistema en PDF, listo para presentar al auditor."
+        t={getDictionary(await resolveLocale()).dashboard.paywall}
       />
     );
   }

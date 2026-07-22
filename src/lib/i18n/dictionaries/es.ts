@@ -703,5 +703,231 @@ export const es = {
       "vigia-denied": "Solo el equipo de validación de Attesta puede ejecutar el Vigía.",
       "vigia-error": "El Vigía no pudo completar la revisión. Inténtalo de nuevo.",
     },
+
+    units: {
+      dayOne: "día",
+      dayOther: "días",
+      systemOne: "sistema",
+      systemOther: "sistemas",
+    },
+
+    welcome: {
+      badge: "Empecemos",
+      greetingNamedPrefix: "Te damos la bienvenida, ",
+      greetingDefault: "Te damos la bienvenida a Attesta",
+      missionWithOrgBefore:
+        "Aquí construyes el sistema de registro de la gobernanza de IA de ",
+      missionWithOrgAfter:
+        ": inventario, clasificación de riesgo y evidencia lista para auditoría.",
+      missionDefault:
+        "Aquí construyes el sistema de registro de tu gobernanza de IA: inventario, clasificación de riesgo y evidencia lista para auditoría.",
+      ctaPrimary: "+ Registrar tu primer sistema",
+      ctaSeed: "Explorar con datos de ejemplo",
+      seedPending: "Cargando ejemplo…",
+      seedHint:
+        "Los datos de ejemplo cargan un inventario realista para que veas el dossier, las brechas y la vigilancia antes de introducir los tuyos.",
+      step: "Paso",
+      journey: [
+        {
+          title: "Inventaría",
+          body: "Registra cada sistema de IA en uso: quién lo opera, qué proveedor y para qué.",
+        },
+        {
+          title: "Clasifica el riesgo",
+          body: "El asistente del EU AI Act y marcos de EE. UU. sitúan cada sistema en su nivel.",
+        },
+        {
+          title: "Prepara la evidencia",
+          body: "Detecta brechas, sigue un plan y genera dossier e informe listos para auditoría.",
+        },
+      ],
+      nextMilestone: "Próximo hito regulatorio:",
+      milestoneDaysPrefix: "· en ",
+    },
+
+    onboarding: {
+      title: "Primeros pasos en Attesta",
+      subtitle: "Completa estos pasos para poner en marcha tu gobernanza de IA.",
+      dismiss: "Ocultar",
+      paidBadge: "Preparación",
+      steps: {
+        system: {
+          label: "Registra tu primer sistema de IA",
+          hint: "Empieza tu inventario de IA",
+        },
+        risk: {
+          label: "Clasifica el riesgo de un sistema",
+          hint: "Con el asistente del EU AI Act",
+        },
+        gap: {
+          label: "Detecta tus brechas",
+          hint: "Aplica un policy pack a un sistema",
+        },
+        team: {
+          label: "Invita a tu equipo",
+          hint: "Gobernar es cosa de varios",
+        },
+      },
+    },
+
+    guide: {
+      brand: "Guía rápida",
+      skip: "Omitir",
+      back: "Atrás",
+      next: "Siguiente",
+      start: "Empezar",
+      step: "Paso",
+      of: "de",
+      frames: {
+        overview: "Resumen de gobernanza",
+        inventory: "Inventario · 3 sistemas",
+        risk: "Distribución de riesgo",
+        gap: "Preparación para auditoría",
+        plan: "Plan de acción",
+        radar: "Radar regulatorio",
+        team: "Equipo",
+      },
+      steps: [
+        {
+          title: "Bienvenido a Attesta",
+          body: "Tu sistema de registro para gobernar la IA con evidencia. Te mostramos en 30 segundos para qué sirve cada apartado —con un vistazo a cada pantalla.",
+        },
+        {
+          title: "Inventario",
+          body: "Registra cada sistema de IA que tu organización usa. Es el punto de partida: todo lo demás se calcula a partir de lo que declaras aquí.",
+        },
+        {
+          title: "Riesgo",
+          body: "Clasifica cada sistema según el EU AI Act y marcos de EE. UU. Attesta te orienta sobre su nivel de riesgo y qué obligaciones aplican a tu rol de deployer.",
+        },
+        {
+          title: "Gap assessment",
+          body: "Mide qué tan preparado estás frente a cada obligación y obtén tu «% listo». Las brechas identificadas se convierten en tareas concretas para cerrar.",
+        },
+        {
+          title: "Plan de acción y Policy packs",
+          body: "El plan reúne las tareas para cerrar brechas con responsables y fechas. Los policy packs te dan plantillas listas (empezando por RRHH).",
+        },
+        {
+          title: "Vigilancia",
+          body: "Un radar que vigila las fuentes regulatorias oficiales y te avisa cuando algo cambia. Los cambios los valida un humano antes de publicarse: nunca texto inventado.",
+        },
+        {
+          title: "Equipo y Actividad",
+          body: "Invita a tu equipo con roles y consulta el registro de actividad: un audit-trail inmutable de todo lo que ocurre. Listo, ya puedes empezar.",
+        },
+      ],
+      viz: {
+        statSystems: "Sistemas",
+        statHighRisk: "Alto riesgo",
+        statReady: "% listo",
+        inventoryRows: [
+          { name: "Cribado de CVs", tag: "Alto riesgo" },
+          { name: "Scoring de candidatos", tag: "Alto riesgo" },
+          { name: "Chatbot de entrevistas", tag: "Riesgo limitado" },
+        ],
+        riskBars: ["Alto", "Limitado", "Mínimo"],
+        readyLabel: "% listo",
+        checks: [
+          "Supervisión humana (Art. 14)",
+          "Transparencia a candidatos (Art. 50)",
+        ],
+        tasks: [
+          { t: "Documentar supervisión humana", who: "Ana · 12 jul" },
+          { t: "Publicar aviso de transparencia", who: "Luis · 20 jul" },
+        ],
+        radarMilestone: "Próximo hito · Transparencia (Art. 50)",
+        radarCountdown: "en 16 días",
+        radarSources: "8 fuentes oficiales vigiladas · sin cambios",
+        teamMembers: "3 miembros · roles por correo",
+        activityLabel: "Actividad ·",
+        activityText: "Ana clasificó «Cribado de CVs» como alto riesgo",
+      },
+    },
+
+    paywall: {
+      featureBefore: "Función del plan ",
+      featureAfter: "",
+      tierName: {
+        preparacion: "Preparación",
+        enterprise: "Enterprise",
+      },
+      descDefault:
+        "Desbloquea esta sección con el plan Preparación: la preparación completa para auditoría de tu organización.",
+      descEnterprise:
+        "Esta función forma parte del plan Enterprise (varias entidades, SSO y soporte prioritario).",
+      ctaEnterprise: "Ver planes y contacto",
+      ctaPlansBefore: "Ver planes · ",
+      perMonth: "/mes",
+      back: "Volver al resumen",
+      footer:
+        "Inventario y clasificación de riesgo siguen disponibles en el plan gratuito.",
+    },
+
+    deadlines: {
+      title: "Vencimientos del plan",
+      overdueOne: "vencida",
+      overdueOther: "vencidas",
+      viewPlan: "Ver el plan →",
+      morePrefix: "y ",
+      moreTaskOne: "tarea más",
+      moreTaskOther: "tareas más",
+      moreSuffix: " con fecha próxima.",
+    },
+
+    risk: {
+      systems: "sistemas",
+      labels: {
+        unacceptable: "Inaceptable",
+        high: "Alto riesgo",
+        limited: "Riesgo limitado",
+        minimal: "Riesgo mínimo",
+      },
+    },
+
+    bias: {
+      labels: {
+        no_aplica: "No es AEDT",
+        sin_auditoria: "Sin auditoría",
+        vencida: "Auditoría vencida",
+        por_vencer: "Próxima a vencer",
+        vigente: "Auditoría vigente",
+      },
+      overduePrefix: "venció hace ",
+      overdueSuffix: "",
+      today: "vence hoy",
+      upcomingPrefix: "vence en ",
+      dayOne: "día",
+      dayOther: "días",
+    },
+
+    confirm: {
+      confirmDefault: "Eliminar",
+      cancel: "Cancelar",
+      close: "Cerrar",
+    },
+
+    buttons: {
+      downloadPdf: "Descargar / Imprimir PDF",
+      vigiaRun: "Ejecutar Vigía ahora",
+      vigiaRunning: "Revisando fuentes…",
+      deleteSystemTitleBefore: 'Eliminar "',
+      deleteSystemTitleAfter: '"',
+      deleteSystemMessage:
+        "Se borrarán también sus evaluaciones y brechas. Esta acción no se puede deshacer.",
+      deleteSystemLabel: "Eliminar sistema",
+      deleteGapTitle: "Eliminar brecha",
+      deleteGapMessage:
+        "Se quitará este control del gap assessment. Esta acción no se puede deshacer.",
+      deleteGapLabel: "Eliminar",
+      removeMemberTitle: "Quitar del equipo",
+      removeMemberMessageSuffix:
+        " dejará de tener acceso a esta organización. Podrás volver a invitarle más tarde.",
+      removeMemberLabel: "Quitar",
+      revokeInviteTitle: "Revocar invitación",
+      revokeInviteMessage:
+        "La persona invitada ya no podrá unirse con este enlace. Puedes volver a invitarla más tarde.",
+      revokeInviteLabel: "Revocar",
+    },
   },
 };

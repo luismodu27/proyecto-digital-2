@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { getActiveOrg } from "@/lib/data/context";
 import { orgHasTier, type PlanTier } from "@/lib/billing/plan";
 import { Paywall } from "@/components/dashboard/Paywall";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 /**
  * Envuelve el contenido de una sección con requisito de plan. Si la organización
@@ -24,7 +26,15 @@ export async function PaidGate({
 }) {
   const orgId = await getActiveOrg();
   if (orgId && !(await orgHasTier(orgId, requires))) {
-    return <Paywall feature={feature} description={description} tier={requires} />;
+    const dict = getDictionary(await resolveLocale());
+    return (
+      <Paywall
+        feature={feature}
+        description={description}
+        tier={requires}
+        t={dict.dashboard.paywall}
+      />
+    );
   }
   return <>{children}</>;
 }

@@ -127,6 +127,28 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **i18n dashboard — sub-incremento 5b (genéricos, estados vacíos, onboarding, botones).**
+  Ampliado el namespace `dashboard` de los diccionarios con sub-namespaces nuevos: `units`, `welcome`, `onboarding`,
+  `guide`, `paywall`, `deadlines`, `risk`, `bias`, `confirm`, `buttons`. Traducidos SOLO como chrome: `WelcomeGuide`
+  (tour completo, incl. las mini-UI ilustrativas —datos ficticios— siguiendo el precedente de la landing;
+  números de artículo idénticos entre idiomas), `OnboardingChecklist`, `ConfirmSubmit`, `Paywall`, los 6 botones
+  (Delete/Remove/Revoke/Print/Vigía) y `BiasAuditBadge`; y los server components `DashboardWelcome`,
+  `DeadlineReminders`, `RiskDonut`.
+  - **Client components** usan `useT()` (dentro del `<I18nProvider>` del layout, 5a). **Server components** reciben el
+    slice por props desde su renderizador: `dashboard/page.tsx` resuelve `resolveLocale()` y pasa slices a
+    DashboardWelcome/DeadlineReminders/RiskDonut + traduce el array `onboardingSteps`; `PaidGate` (gate.tsx) resuelve y
+    pasa el slice a `Paywall`, y las 2 páginas que renderizan `Paywall` directo (informe, dossier) lo pasan también.
+  - **Excepción deliberada:** `BiasAuditBadge` es un Server Component compartido por 2 páginas fuera de alcance
+    (dossier, editar); se hizo **async y auto-resuelve el locale** (cookie) para no tocar esas páginas.
+  - **Frontera legal (rule A):** `RISK_LABEL`/`TASK_PRIORITY_LABEL`/`BIAS_STATUS_LABEL` de `mock-data`/`bias-audit` NO
+    se editan; las etiquetas de riesgo/estado se traducen por **slice de diccionario** pasado a la UI (mismo patrón que
+    `RiskBadge` en la landing). `RiskDonut` cae al español (`RISK_LABEL`) si no se le pasa `labels` → `/demo` intacto.
+    `dueLabel` (task-reminders) y `TASK_PRIORITY_LABEL` quedan en español (fuera de alcance). Deadline titles de
+    `regulatory-watch` NO se traducen. **Sin funciones en los diccionarios** (cruzan la frontera RSC vía provider →
+    interpolación por piezas prefijo/sufijo + plurales).
+  - Verificado: tsc + eslint + build (exit 0). Pendiente 5c/5d: `feature`/`description` de los paywalls y el resto de
+    las páginas siguen en español a propósito.
+
 - **2026-07-22** · **Internacionalización ES/EN — web pública completa (Inc 0–3).** El fundador pidió que la
   página web también esté en inglés; eligió **alcance web + dashboard** y **URLs `/en`** (no solo toggle). Se
   consultó al `product-architect`: arquitectura **híbrida** — URL real `/en` solo para la web pública (SEO/hreflang);

@@ -12,6 +12,8 @@ import {
 import { getActiveOrg } from "@/lib/data/context";
 import { orgHasTier } from "@/lib/billing/plan";
 import { Paywall } from "@/components/dashboard/Paywall";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 import {
   RISK_LABEL,
   RISK_ORDER,
@@ -51,6 +53,7 @@ export default async function InformeEjecutivoPage() {
       <Paywall
         feature="Informe ejecutivo"
         description="Genera el informe ejecutivo de gobernanza en PDF, listo para dirección y auditoría."
+        t={getDictionary(await resolveLocale()).dashboard.paywall}
       />
     );
   }

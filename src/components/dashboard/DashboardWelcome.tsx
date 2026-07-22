@@ -2,47 +2,39 @@ import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { seedSampleData } from "@/lib/data/actions";
+import type { Dictionary } from "@/lib/i18n";
 
-/** Los tres movimientos del recorrido de gobernanza, en orden. */
-const JOURNEY = [
-  {
-    title: "Inventaría",
-    body: "Registra cada sistema de IA en uso: quién lo opera, qué proveedor y para qué.",
-    icon: (
-      <path
-        d="M4 7h16M4 12h16M4 17h10"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-      />
-    ),
-  },
-  {
-    title: "Clasifica el riesgo",
-    body: "El asistente del EU AI Act y marcos de EE. UU. sitúan cada sistema en su nivel.",
-    icon: (
-      <path
-        d="M12 3 3 7v5c0 4.5 3.6 8 9 9 5.4-1 9-4.5 9-9V7l-9-4Zm-3 9 2.4 2.5L16 8"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    ),
-  },
-  {
-    title: "Prepara la evidencia",
-    body: "Detecta brechas, sigue un plan y genera dossier e informe listos para auditoría.",
-    icon: (
-      <path
-        d="M7 3.5h6L17.5 8v11a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Zm6 0V8h4.5M8.5 12h6M8.5 15.5h4.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    ),
-  },
+/** Iconos del recorrido de gobernanza, en orden (estructura; el texto llega por props). */
+const JOURNEY_ICONS = [
+  (
+    <path
+      key="i0"
+      d="M4 7h16M4 12h16M4 17h10"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+    />
+  ),
+  (
+    <path
+      key="i1"
+      d="M12 3 3 7v5c0 4.5 3.6 8 9 9 5.4-1 9-4.5 9-9V7l-9-4Zm-3 9 2.4 2.5L16 8"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  (
+    <path
+      key="i2"
+      d="M7 3.5h6L17.5 8v11a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Zm6 0V8h4.5M8.5 12h6M8.5 15.5h4.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
 ];
 
 /**
@@ -56,13 +48,17 @@ export function DashboardWelcome({
   orgName,
   canSeed,
   deadline,
+  t,
+  units,
 }: {
   name?: string | null;
   orgName?: string | null;
   canSeed: boolean;
   deadline?: { title: string; days: number } | null;
+  t: Dictionary["dashboard"]["welcome"];
+  units: Dictionary["dashboard"]["units"];
 }) {
-  const greeting = name ? `Te damos la bienvenida, ${name}` : "Te damos la bienvenida a Attesta";
+  const greeting = name ? `${t.greetingNamedPrefix}${name}` : t.greetingDefault;
 
   return (
     <section className="overflow-hidden rounded-2xl border border-brand/30 bg-brand-soft/40">
@@ -76,7 +72,7 @@ export function DashboardWelcome({
         <div className="relative max-w-2xl">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-paper-raised px-3 py-0.5 text-xs font-medium text-brand-strong">
             <span className="size-1.5 rounded-full bg-brand" />
-            Empecemos
+            {t.badge}
           </span>
 
           <h2 className="mt-4 font-display text-2xl font-semibold text-ink sm:text-3xl">
@@ -85,41 +81,37 @@ export function DashboardWelcome({
           <p className="mt-2 text-sm text-ink-soft sm:text-base">
             {orgName ? (
               <>
-                Aquí construyes el sistema de registro de la gobernanza de IA de{" "}
-                <span className="font-medium text-ink">{orgName}</span>: inventario,
-                clasificación de riesgo y evidencia lista para auditoría.
+                {t.missionWithOrgBefore}
+                <span className="font-medium text-ink">{orgName}</span>
+                {t.missionWithOrgAfter}
               </>
             ) : (
-              <>
-                Aquí construyes el sistema de registro de tu gobernanza de IA:
-                inventario, clasificación de riesgo y evidencia lista para auditoría.
-              </>
+              <>{t.missionDefault}</>
             )}
           </p>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <ButtonLink href="/dashboard/inventario/nuevo" variant="primary">
-              + Registrar tu primer sistema
+              {t.ctaPrimary}
             </ButtonLink>
             {canSeed && (
               <form action={seedSampleData}>
-                <SubmitButton variant="outline" pendingText="Cargando ejemplo…">
-                  Explorar con datos de ejemplo
+                <SubmitButton variant="outline" pendingText={t.seedPending}>
+                  {t.ctaSeed}
                 </SubmitButton>
               </form>
             )}
           </div>
           {canSeed && (
             <p className="mt-2 text-xs text-muted">
-              Los datos de ejemplo cargan un inventario realista para que veas el
-              dossier, las brechas y la vigilancia antes de introducir los tuyos.
+              {t.seedHint}
             </p>
           )}
         </div>
 
         {/* Recorrido en tres pasos */}
         <ol className="relative mt-8 grid gap-4 sm:grid-cols-3">
-          {JOURNEY.map((step, i) => (
+          {t.journey.map((step, i) => (
             <li
               key={step.title}
               className="rounded-xl border border-line bg-paper-raised p-5"
@@ -127,11 +119,11 @@ export function DashboardWelcome({
               <div className="flex items-center gap-3">
                 <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-strong">
                   <svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden>
-                    {step.icon}
+                    {JOURNEY_ICONS[i]}
                   </svg>
                 </span>
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-                  Paso {i + 1}
+                  {t.step} {i + 1}
                 </span>
               </div>
               <h3 className="mt-3 font-display text-base font-semibold text-ink">
@@ -156,9 +148,13 @@ export function DashboardWelcome({
                 strokeLinejoin="round"
               />
             </svg>
-            Próximo hito regulatorio:{" "}
+            {t.nextMilestone}{" "}
             <span className="font-medium text-ink">{deadline.title}</span>
-            <span className="text-muted">· en {deadline.days} días</span>
+            <span className="text-muted">
+              {t.milestoneDaysPrefix}
+              {deadline.days}{" "}
+              {deadline.days === 1 ? units.dayOne : units.dayOther}
+            </span>
             <span className="text-brand transition-transform group-hover:translate-x-0.5">
               →
             </span>

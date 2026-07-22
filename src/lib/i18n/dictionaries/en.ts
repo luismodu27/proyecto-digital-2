@@ -703,5 +703,231 @@ export const en: Dictionary = {
       "vigia-denied": "Only Attesta's review team can run the Watcher.",
       "vigia-error": "The Watcher couldn't complete the review. Please try again.",
     },
+
+    units: {
+      dayOne: "day",
+      dayOther: "days",
+      systemOne: "system",
+      systemOther: "systems",
+    },
+
+    welcome: {
+      badge: "Let's start",
+      greetingNamedPrefix: "Welcome, ",
+      greetingDefault: "Welcome to Attesta",
+      missionWithOrgBefore:
+        "Here you build the AI governance system of record for ",
+      missionWithOrgAfter:
+        ": inventory, risk classification and audit-ready evidence.",
+      missionDefault:
+        "Here you build the system of record for your AI governance: inventory, risk classification and audit-ready evidence.",
+      ctaPrimary: "+ Register your first system",
+      ctaSeed: "Explore with sample data",
+      seedPending: "Loading sample…",
+      seedHint:
+        "Sample data loads a realistic inventory so you can see the dossier, the gaps and the watch before entering your own.",
+      step: "Step",
+      journey: [
+        {
+          title: "Inventory",
+          body: "Register every AI system in use: who operates it, which vendor and what for.",
+        },
+        {
+          title: "Classify the risk",
+          body: "The EU AI Act and U.S. frameworks wizard places each system at its level.",
+        },
+        {
+          title: "Prepare the evidence",
+          body: "Spot gaps, follow a plan and generate an audit-ready dossier and report.",
+        },
+      ],
+      nextMilestone: "Next regulatory milestone:",
+      milestoneDaysPrefix: "· in ",
+    },
+
+    onboarding: {
+      title: "First steps in Attesta",
+      subtitle: "Complete these steps to get your AI governance up and running.",
+      dismiss: "Hide",
+      paidBadge: "Readiness",
+      steps: {
+        system: {
+          label: "Register your first AI system",
+          hint: "Start your AI inventory",
+        },
+        risk: {
+          label: "Classify a system's risk",
+          hint: "With the EU AI Act wizard",
+        },
+        gap: {
+          label: "Find your gaps",
+          hint: "Apply a policy pack to a system",
+        },
+        team: {
+          label: "Invite your team",
+          hint: "Governance is a team effort",
+        },
+      },
+    },
+
+    guide: {
+      brand: "Quick guide",
+      skip: "Skip",
+      back: "Back",
+      next: "Next",
+      start: "Start",
+      step: "Step",
+      of: "of",
+      frames: {
+        overview: "Governance overview",
+        inventory: "Inventory · 3 systems",
+        risk: "Risk distribution",
+        gap: "Audit readiness",
+        plan: "Action plan",
+        radar: "Regulatory radar",
+        team: "Team",
+      },
+      steps: [
+        {
+          title: "Welcome to Attesta",
+          body: "Your system of record to govern AI with evidence. In 30 seconds we show you what each section is for —with a glimpse of each screen.",
+        },
+        {
+          title: "Inventory",
+          body: "Register every AI system your organization uses. It's the starting point: everything else is computed from what you declare here.",
+        },
+        {
+          title: "Risk",
+          body: "Classify each system under the EU AI Act and U.S. frameworks. Attesta guides you on its risk level and which obligations apply to your deployer role.",
+        },
+        {
+          title: "Gap assessment",
+          body: "Measure how ready you are against each obligation and get your “% ready”. The gaps identified turn into concrete tasks to close.",
+        },
+        {
+          title: "Action plan and Policy packs",
+          body: "The plan gathers the tasks to close gaps with owners and dates. Policy packs give you ready-made templates (starting with HR).",
+        },
+        {
+          title: "Watch",
+          body: "A radar that watches the official regulatory sources and alerts you when something changes. A human validates changes before they're published: never invented text.",
+        },
+        {
+          title: "Team and Activity",
+          body: "Invite your team with roles and check the activity log: an immutable audit trail of everything that happens. That's it, you're ready to begin.",
+        },
+      ],
+      viz: {
+        statSystems: "Systems",
+        statHighRisk: "High risk",
+        statReady: "% ready",
+        inventoryRows: [
+          { name: "CV screening", tag: "High risk" },
+          { name: "Candidate scoring", tag: "High risk" },
+          { name: "Interview chatbot", tag: "Limited risk" },
+        ],
+        riskBars: ["High", "Limited", "Minimal"],
+        readyLabel: "% ready",
+        checks: [
+          "Human oversight (Art. 14)",
+          "Transparency to candidates (Art. 50)",
+        ],
+        tasks: [
+          { t: "Document human oversight", who: "Ana · Jul 12" },
+          { t: "Publish transparency notice", who: "Luis · Jul 20" },
+        ],
+        radarMilestone: "Next milestone · Transparency (Art. 50)",
+        radarCountdown: "in 16 days",
+        radarSources: "8 official sources watched · no changes",
+        teamMembers: "3 members · roles by email",
+        activityLabel: "Activity ·",
+        activityText: "Ana classified “CV screening” as high risk",
+      },
+    },
+
+    paywall: {
+      featureBefore: "",
+      featureAfter: " plan feature",
+      tierName: {
+        preparacion: "Readiness",
+        enterprise: "Enterprise",
+      },
+      descDefault:
+        "Unlock this section with the Readiness plan: your organization's full audit readiness.",
+      descEnterprise:
+        "This feature is part of the Enterprise plan (multiple entities, SSO and priority support).",
+      ctaEnterprise: "See plans and contact",
+      ctaPlansBefore: "See plans · ",
+      perMonth: "/mo",
+      back: "Back to overview",
+      footer:
+        "Inventory and risk classification remain available on the free plan.",
+    },
+
+    deadlines: {
+      title: "Plan deadlines",
+      overdueOne: "overdue",
+      overdueOther: "overdue",
+      viewPlan: "View the plan →",
+      morePrefix: "and ",
+      moreTaskOne: "more task",
+      moreTaskOther: "more tasks",
+      moreSuffix: " coming due soon.",
+    },
+
+    risk: {
+      systems: "systems",
+      labels: {
+        unacceptable: "Unacceptable",
+        high: "High risk",
+        limited: "Limited risk",
+        minimal: "Minimal risk",
+      },
+    },
+
+    bias: {
+      labels: {
+        no_aplica: "Not an AEDT",
+        sin_auditoria: "No audit",
+        vencida: "Audit expired",
+        por_vencer: "Expiring soon",
+        vigente: "Audit valid",
+      },
+      overduePrefix: "expired ",
+      overdueSuffix: " ago",
+      today: "due today",
+      upcomingPrefix: "due in ",
+      dayOne: "day",
+      dayOther: "days",
+    },
+
+    confirm: {
+      confirmDefault: "Delete",
+      cancel: "Cancel",
+      close: "Close",
+    },
+
+    buttons: {
+      downloadPdf: "Download / Print PDF",
+      vigiaRun: "Run the Watcher now",
+      vigiaRunning: "Checking sources…",
+      deleteSystemTitleBefore: 'Delete "',
+      deleteSystemTitleAfter: '"',
+      deleteSystemMessage:
+        "Its assessments and gaps will also be deleted. This action can't be undone.",
+      deleteSystemLabel: "Delete system",
+      deleteGapTitle: "Delete gap",
+      deleteGapMessage:
+        "This control will be removed from the gap assessment. This action can't be undone.",
+      deleteGapLabel: "Delete",
+      removeMemberTitle: "Remove from team",
+      removeMemberMessageSuffix:
+        " will lose access to this organization. You can invite them again later.",
+      removeMemberLabel: "Remove",
+      revokeInviteTitle: "Revoke invitation",
+      revokeInviteMessage:
+        "The invited person will no longer be able to join with this link. You can invite them again later.",
+      revokeInviteLabel: "Revoke",
+    },
   },
 };

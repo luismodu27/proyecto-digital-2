@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ActionTask } from "@/lib/data";
 import { TASK_PRIORITY_LABEL, type TaskPriority } from "@/lib/mock-data";
 import { bucketTaskDeadlines, dueLabel } from "@/lib/task-reminders";
+import type { Dictionary } from "@/lib/i18n";
 
 const PRIORITY_TONE: Record<TaskPriority, string> = {
   critica:
@@ -63,10 +64,12 @@ export function DeadlineReminders({
   tasks,
   now,
   limit = 5,
+  t,
 }: {
   tasks: ActionTask[];
   now: Date;
   limit?: number;
+  t: Dictionary["dashboard"]["deadlines"];
 }) {
   const { overdue, dueSoon } = bucketTaskDeadlines(tasks, now);
   const total = overdue.length + dueSoon.length;
@@ -82,11 +85,11 @@ export function DeadlineReminders({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <h2 className="font-display text-lg font-semibold text-ink">
-            Vencimientos del plan
+            {t.title}
           </h2>
           {overdue.length > 0 && (
             <span className="inline-flex items-center rounded-full border border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)] px-2 py-0.5 text-xs font-medium text-[var(--tone-danger-fg)]">
-              {overdue.length} {overdue.length === 1 ? "vencida" : "vencidas"}
+              {overdue.length} {overdue.length === 1 ? t.overdueOne : t.overdueOther}
             </span>
           )}
         </div>
@@ -94,7 +97,7 @@ export function DeadlineReminders({
           href="/dashboard/plan"
           className="shrink-0 text-sm font-medium text-brand hover:text-brand-strong"
         >
-          Ver el plan →
+          {t.viewPlan}
         </Link>
       </div>
 
@@ -109,8 +112,9 @@ export function DeadlineReminders({
 
       {hidden > 0 && (
         <p className="mt-3 text-xs text-muted">
-          y {hidden} {hidden === 1 ? "tarea más" : "tareas más"} con fecha
-          próxima.
+          {t.morePrefix}
+          {hidden} {hidden === 1 ? t.moreTaskOne : t.moreTaskOther}
+          {t.moreSuffix}
         </p>
       )}
     </section>

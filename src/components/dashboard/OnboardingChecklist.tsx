@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { setUserFlag } from "@/lib/data/user-actions";
+import { useT } from "@/lib/i18n/provider";
 
 export type OnboardingStep = {
   key: string;
@@ -25,6 +26,7 @@ export function OnboardingChecklist({
   steps: OnboardingStep[];
   userId?: string;
 }) {
+  const t = useT().dashboard.onboarding;
   const [ready, setReady] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
@@ -63,10 +65,10 @@ export function OnboardingChecklist({
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="font-display text-lg font-semibold text-ink">
-            Primeros pasos en Attesta
+            {t.title}
           </h2>
           <p className="mt-0.5 text-sm text-ink-soft">
-            Completa estos pasos para poner en marcha tu gobernanza de IA.
+            {t.subtitle}
           </p>
         </div>
         <button
@@ -74,7 +76,7 @@ export function OnboardingChecklist({
           onClick={dismiss}
           className="shrink-0 text-xs font-medium text-muted transition-colors hover:text-ink"
         >
-          Ocultar
+          {t.dismiss}
         </button>
       </div>
 
@@ -135,7 +137,7 @@ export function OnboardingChecklist({
               </span>
               {s.paid && !s.done && (
                 <span className="shrink-0 rounded-full border border-[var(--tone-gold-bd)] bg-[var(--tone-gold-bg)] px-2 py-0.5 text-[11px] font-medium text-[var(--tone-gold-fg)]">
-                  Preparación
+                  {t.paidBadge}
                 </span>
               )}
               {!s.done && (

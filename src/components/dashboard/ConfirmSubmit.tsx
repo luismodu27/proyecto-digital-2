@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useT } from "@/lib/i18n/provider";
 
 /**
  * Botón que, antes de enviar un Server Action, pide confirmación en un modal con
@@ -12,7 +13,7 @@ export function ConfirmSubmit({
   fields,
   title,
   message,
-  confirmLabel = "Eliminar",
+  confirmLabel,
   triggerLabel,
   triggerClassName,
   triggerAriaLabel,
@@ -30,6 +31,7 @@ export function ConfirmSubmit({
   triggerAriaLabel?: string;
   children?: ReactNode;
 }) {
+  const t = useT().dashboard.confirm;
   const [open, setOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
@@ -69,7 +71,7 @@ export function ConfirmSubmit({
         >
           <button
             type="button"
-            aria-label="Cerrar"
+            aria-label={t.close}
             onClick={() => setOpen(false)}
             className="absolute inset-0 cursor-default bg-ink/40 backdrop-blur-[2px]"
           />
@@ -100,7 +102,7 @@ export function ConfirmSubmit({
                 onClick={() => setOpen(false)}
                 className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
               >
-                Cancelar
+                {t.cancel}
               </button>
               <button
                 ref={confirmRef}
@@ -111,7 +113,7 @@ export function ConfirmSubmit({
                 }}
                 className="inline-flex items-center justify-center rounded-full border border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)] px-4 py-2 text-sm font-medium text-[var(--tone-danger-fg)] transition-colors hover:opacity-90"
               >
-                {confirmLabel}
+                {confirmLabel ?? t.confirmDefault}
               </button>
             </div>
           </div>

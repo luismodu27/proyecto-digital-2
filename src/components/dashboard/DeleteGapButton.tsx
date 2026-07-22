@@ -2,16 +2,18 @@
 
 import { deleteGapItem } from "@/lib/data/actions";
 import { ConfirmSubmit } from "@/components/dashboard/ConfirmSubmit";
+import { useT } from "@/lib/i18n/provider";
 
 export function DeleteGapButton({ id }: { id: string }) {
+  const t = useT().dashboard.buttons;
   return (
     <ConfirmSubmit
       action={deleteGapItem}
       fields={{ id }}
-      title="Eliminar brecha"
-      message="Se quitará este control del gap assessment. Esta acción no se puede deshacer."
-      confirmLabel="Eliminar"
-      triggerAriaLabel="Eliminar brecha"
+      title={t.deleteGapTitle}
+      message={t.deleteGapMessage}
+      confirmLabel={t.deleteGapLabel}
+      triggerAriaLabel={t.deleteGapTitle}
       triggerClassName="flex size-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-paper-sunken hover:text-[var(--tone-danger-fg)]"
     >
       <svg viewBox="0 0 20 20" className="size-4" fill="none" aria-hidden>

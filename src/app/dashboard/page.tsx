@@ -31,6 +31,8 @@ import {
   FRAMEWORK_META,
   type RegulatoryEvent,
 } from "@/lib/regulatory-watch";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 // El widget de "próximo hito" depende de la fecha actual.
 export const dynamic = "force-dynamic";
@@ -48,6 +50,8 @@ export default async function DashboardOverview() {
       getRegulatoryEvents(),
     ]);
 
+  const d = getDictionary(await resolveLocale()).dashboard;
+
   // Nombre de pila para el saludo (solo si hay un nombre real en el perfil; no
   // usamos el prefijo del email para no mostrar algo poco natural).
   const meta = user?.user_metadata as { full_name?: string; name?: string } | undefined;
@@ -58,30 +62,30 @@ export default async function DashboardOverview() {
   const onboardingSteps = [
     {
       key: "system",
-      label: "Registra tu primer sistema de IA",
-      hint: "Empieza tu inventario de IA",
+      label: d.onboarding.steps.system.label,
+      hint: d.onboarding.steps.system.hint,
       href: "/dashboard/inventario/nuevo",
       done: systems.length > 0,
     },
     {
       key: "risk",
-      label: "Clasifica el riesgo de un sistema",
-      hint: "Con el asistente del EU AI Act",
+      label: d.onboarding.steps.risk.label,
+      hint: d.onboarding.steps.risk.hint,
       href: "/dashboard/riesgo/evaluar",
       done: systems.some((s) => !!s.evidenceState),
     },
     {
       key: "gap",
-      label: "Detecta tus brechas",
-      hint: "Aplica un policy pack a un sistema",
+      label: d.onboarding.steps.gap.label,
+      hint: d.onboarding.steps.gap.hint,
       href: "/dashboard/packs",
       done: gaps.length > 0,
       paid: true,
     },
     {
       key: "team",
-      label: "Invita a tu equipo",
-      hint: "Gobernar es cosa de varios",
+      label: d.onboarding.steps.team.label,
+      hint: d.onboarding.steps.team.hint,
       href: "/dashboard/equipo",
       done: members.length > 1,
       paid: true,
@@ -124,6 +128,8 @@ export default async function DashboardOverview() {
           deadline={
             nextDeadline ? { title: nextDeadline.title, days: nextDays } : null
           }
+          t={d.welcome}
+          units={d.units}
         />
       </>
     );
@@ -235,7 +241,7 @@ export default async function DashboardOverview() {
         </Link>
       )}
 
-      <DeadlineReminders tasks={tasks} now={now} />
+      <DeadlineReminders tasks={tasks} now={now} t={d.deadlines} />
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">
@@ -243,7 +249,11 @@ export default async function DashboardOverview() {
             Distribución de riesgo
           </h2>
           <div className="mt-6">
-            <RiskDonut counts={counts} />
+            <RiskDonut
+              counts={counts}
+              labels={d.risk.labels}
+              systemsLabel={d.risk.systems}
+            />
           </div>
         </div>
 
