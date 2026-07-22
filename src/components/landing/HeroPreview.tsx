@@ -47,9 +47,18 @@ export function HeroPreview({ t }: { t: Dictionary["landing"]["heroPreview"] }) 
 
           {/* Contenido */}
           <div className="flex-1 p-4">
-            <p className="font-display text-sm font-semibold text-ink">
-              {t.overviewTitle}
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="font-display text-sm font-semibold text-ink">
+                {t.overviewTitle}
+              </p>
+              <span className="flex items-center gap-1.5 text-[10px] font-medium text-brand-strong">
+                <span className="relative flex size-1.5">
+                  <span className="absolute inline-flex size-full rounded-full bg-brand/60 motion-safe:animate-ping" />
+                  <span className="relative inline-flex size-1.5 rounded-full bg-brand" />
+                </span>
+                {t.liveLabel}
+              </span>
+            </div>
             <div className="mt-3 grid grid-cols-3 gap-2">
               {t.stats.map((c, i) => (
                 <div key={c.k} className="rounded-lg border border-line bg-paper-raised p-2">
