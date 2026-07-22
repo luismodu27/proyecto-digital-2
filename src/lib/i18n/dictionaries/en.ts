@@ -1171,5 +1171,159 @@ export const en: Dictionary = {
         viewEvidence: "View evidence",
       },
     },
+
+    pages: {
+      back: "← Back",
+      backToOverview: "← Back to overview",
+      backToInventory: "← Back to inventory",
+      backToRiskClass: "← Back to risk classification",
+      backToGap: "← Back to gap assessment",
+      backToMonitoring: "← Back to Monitoring",
+      radarBack: "← Radar",
+
+      evaluate: {
+        title: "Assess a system's risk",
+        subtitle:
+          "Answer the guided questionnaire and get the classification under the EU AI Act.",
+      },
+
+      wizard: {
+        stepPrefix: "Step ",
+        stepOf: " of ",
+        back: "← Back",
+        next: "Next",
+        seeResult: "See result",
+        selectSingle: "Single choice.",
+        selectMultiple: "Multiple choice: you can select several options.",
+        evaluateAnother: "Assess another system",
+        backToRisk: "Back to risk",
+      },
+
+      plan: {
+        title: "Action plan",
+        subtitle:
+          "Prioritized tasks to close your gaps: assign an owner, date and status.",
+        exportEvidence: "⬇ Export evidence",
+        statOpen: "open",
+        statInProgress: "in progress",
+        statOverdue: "overdue",
+        statDone: "done",
+        addTask: "+ Add task",
+        addTaskHint: "Create a manual task",
+        fieldTitle: "Title",
+        fieldTitlePlaceholder: "What needs to be done",
+        fieldDetail: "Detail (optional)",
+        fieldPriority: "Priority",
+        fieldAssignee: "Owner",
+        noAssignee: "Unassigned",
+        fieldDueDate: "Due date",
+        fieldSystem: "System (optional)",
+        addToPlan: "Add to plan",
+        emptyTitle: "Your plan is empty",
+        emptyBody:
+          "Add a task or bring in the suggestions below, generated from your gaps and risk levels.",
+        overdue: "overdue",
+        suggested: "· suggested",
+        suggestionsTitle: "Suggestions",
+        suggestionsBody:
+          "Generated from your open gaps and risk levels. Add them to the plan to assign an owner and date.",
+        addSuggestionToPlan: "+ Add to plan",
+      },
+
+      activity: {
+        title: "Activity log",
+        subtitle:
+          "Every change is recorded and chained with SHA-256: any later alteration is detectable. Who did what and when.",
+        chainOk: "Chain intact",
+        chainBroken: "Integrity broken",
+        filterAll: "All",
+        filterSystems: "Systems",
+        filterAssessments: "Assessments",
+        filterGaps: "Gaps",
+        filterTeam: "Team",
+        empty: "No activity recorded yet.",
+        demoBefore: "You're in ",
+        demoMode: "demo mode",
+        demoAfter:
+          ": sample activity. In connected mode every real change is recorded by database triggers, with no way to edit or delete it.",
+      },
+
+      monitoring: {
+        title: "Regulatory monitoring",
+        subtitle:
+          "A radar of deadlines and regulatory changes affecting your AI systems.",
+        watchedSources: "Watched sources →",
+        validationInbox: "Validation inbox →",
+      },
+
+      candidates: {
+        title: "Validation inbox",
+        subtitleNonAdmin:
+          "Queue of regulatory candidates proposed by the pipeline.",
+        subtitle:
+          "Drafts proposed by the pipeline. Nothing reaches customers' radar without your validation.",
+        nonAdminNotice:
+          "This area is for Attesta's compliance team, which validates regulatory changes before publishing them on the radar.",
+        pendingOne: "candidate pending",
+        pendingOther: "candidates pending",
+        pendingSuffix: " review",
+        empty:
+          "No pending candidates. The pipeline will leave each detected regulatory change here for your review.",
+        reviewed: "Already reviewed",
+      },
+
+      candidateControls: {
+        closeEditor: "Close editor",
+        completeAndPublish: "Complete and publish",
+        editAndPublish: "Edit and publish",
+        discard: "Discard",
+        discardTitle: "Discard candidate",
+        discardBodyBefore: "You're about to discard “",
+        discardBodyAfter: "”. You can note a reason (optional) for the record.",
+        reasonLabel: "Reason (optional)",
+        cancel: "Cancel",
+        close: "Close",
+        publishToRadar: "Publish to the radar",
+        saveDraft: "Save draft",
+      },
+
+      sources: {
+        title: "Watched sources",
+        subtitleNonAdmin:
+          "The Watcher's watchlist: the regulatory sources we monitor.",
+        subtitle:
+          "The Watcher checks these official sources by content fingerprint (fetch + hash). When one changes, it queues a signal in the validation inbox. Zero LLM: it only detects that something changed.",
+        nonAdminNotice:
+          "This area is for Attesta's compliance team, which watches regulatory changes before publishing them on the radar.",
+        sourcesUnit: "sources",
+        changedUnrevised: "with unreviewed changes",
+        downloadErrors: "with a download error",
+        demoNotice:
+          "Demo mode: sample watchlist, read-only. With the organization connected, the Watcher checks the sources on a schedule and leaves signals in the Validator's inbox.",
+        colSource: "Source",
+        colLastStatus: "Last status",
+        colChecked: "Checked",
+        colLastChange: "Last change",
+        unreviewed: "Unreviewed",
+      },
+
+      reportExec: {
+        downloadPdf: "Download report (PDF)",
+        paywallFeature: "Executive report",
+        paywallDesc:
+          "Generate the executive AI governance report in PDF, ready for leadership and audit.",
+      },
+      dossier: {
+        downloadPdf: "Download dossier (PDF)",
+        paywallFeature: "Evidence dossier",
+        paywallDesc:
+          "Generate the per-system evidence dossier in PDF, ready to present to the auditor.",
+        notFound:
+          "System not found. It may have been deleted or may not belong to your organization.",
+      },
+      gapReport: {
+        downloadPdf: "Download evidence (PDF)",
+      },
+    },
   },
 };

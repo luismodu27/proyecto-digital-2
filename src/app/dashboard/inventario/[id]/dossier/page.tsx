@@ -106,13 +106,15 @@ export default async function DossierPage({
 }) {
   const { id } = await params;
 
+  const dict = getDictionary(await resolveLocale()).dashboard;
+  const tp = dict.pages;
   const gateOrg = await getActiveOrg();
   if (gateOrg && !(await orgHasTier(gateOrg, "preparacion"))) {
     return (
       <Paywall
-        feature="Dossier de evidencia"
-        description="Genera el dossier de evidencia por sistema en PDF, listo para presentar al auditor."
-        t={getDictionary(await resolveLocale()).dashboard.paywall}
+        feature={tp.dossier.paywallFeature}
+        description={tp.dossier.paywallDesc}
+        t={dict.paywall}
       />
     );
   }
@@ -136,12 +138,11 @@ export default async function DossierPage({
             href="/dashboard/inventario"
             className="text-sm font-medium text-brand hover:text-brand-strong"
           >
-            ← Volver al inventario
+            {tp.backToInventory}
           </Link>
         </div>
         <div className="rounded-2xl border border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] p-6 text-sm text-[var(--tone-warn-fg)]">
-          No se encontró el sistema. Puede que se haya eliminado o que no
-          pertenezca a tu organización.
+          {tp.dossier.notFound}
         </div>
       </div>
     );
@@ -222,9 +223,9 @@ export default async function DossierPage({
           }
           className="text-sm font-medium text-brand hover:text-brand-strong"
         >
-          ← Volver
+          {tp.back}
         </Link>
-        <PrintButton label="Descargar dossier (PDF)" />
+        <PrintButton label={tp.dossier.downloadPdf} />
       </div>
 
       {/* Documento */}

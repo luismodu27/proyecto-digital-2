@@ -3,6 +3,8 @@ import { PageHeader } from "@/components/dashboard/parts";
 import { getAuditLog, verifyAuditChain, isSupabaseConfigured } from "@/lib/data";
 import { ENTITY_META, ACTION_META } from "@/lib/audit";
 import type { AuditChainStatus, AuditEntry } from "@/lib/mock-data";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -60,12 +62,20 @@ export default async function ActividadPage({
   const filter = TYPES.some((x) => x.key === t) ? t : "";
   const entries = filter ? all.filter((e) => e.table === filter) : all;
   const now = new Date();
+  const tr = getDictionary(await resolveLocale()).dashboard.pages.activity;
+  const filterLabels: Record<string, string> = {
+    "": tr.filterAll,
+    ai_systems: tr.filterSystems,
+    risk_assessments: tr.filterAssessments,
+    gap_items: tr.filterGaps,
+    memberships: tr.filterTeam,
+  };
 
   return (
     <>
       <PageHeader
-        title="Registro de actividad"
-        subtitle="Cada cambio queda registrado y encadenado con SHA-256: cualquier alteración posterior es detectable. Quién hizo qué y cuándo."
+        title={tr.title}
+        subtitle={tr.subtitle}
         action={
           <span
             className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${
@@ -83,7 +93,7 @@ export default async function ActividadPage({
                 strokeLinejoin="round"
               />
             </svg>
-            {chain && !chain.ok ? "Integridad rota" : "Cadena íntegra"}
+            {chain && !chain.ok ? tr.chainBroken : tr.chainOk}
           </span>
         }
       />
@@ -92,9 +102,9 @@ export default async function ActividadPage({
 
       {!isSupabaseConfigured && (
         <div className="mb-6 rounded-2xl border border-[var(--tone-info-bd)] bg-[var(--tone-info-bg)] px-5 py-4 text-sm text-[var(--tone-info-fg)]">
-          Estás en <span className="font-medium">modo demo</span>: actividad de
-          ejemplo. En modo conectado se registra cada cambio real por triggers de
-          base de datos, sin poder editarlo ni borrarlo.
+          {tr.demoBefore}
+          <span className="font-medium">{tr.demoMode}</span>
+          {tr.demoAfter}
         </div>
       )}
 
@@ -112,7 +122,7 @@ export default async function ActividadPage({
                   : "border-line bg-paper-raised text-ink-soft hover:bg-paper-sunken"
               }`}
             >
-              {x.label}
+              {filterLabels[x.key] ?? x.label}
             </Link>
           );
         })}
@@ -120,7 +130,7 @@ export default async function ActividadPage({
 
       {entries.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-line-strong bg-paper-raised px-6 py-16 text-center text-sm text-muted">
-          No hay actividad registrada todavía.
+          {tr.empty}
         </div>
       ) : (
         <ol className="space-y-2">

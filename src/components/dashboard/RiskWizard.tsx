@@ -17,6 +17,7 @@ import { saveRiskAssessment } from "@/lib/data/actions";
 import { recommendationsForLevel } from "@/lib/recommendations";
 import { RecommendationList } from "@/components/dashboard/Recommendations";
 import { LegalNote, LEGAL_RESULT } from "@/components/ui/LegalNote";
+import { useT } from "@/lib/i18n/provider";
 
 type SystemOption = { id: string; name: string };
 
@@ -44,6 +45,7 @@ export function RiskWizard({
   presetSystemId?: string;
 }) {
   const router = useRouter();
+  const tw = useT().dashboard.pages.wizard;
   const [answers, setAnswers] = useState<Answers>({});
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
@@ -305,13 +307,13 @@ export function RiskWizard({
 
         <div className="mt-8 flex flex-col gap-3 border-t border-line pt-6 sm:flex-row">
           <Button onClick={reset} variant="primary">
-            Evaluar otro sistema
+            {tw.evaluateAnother}
           </Button>
           <Link
             href="/dashboard/riesgo"
             className="inline-flex items-center justify-center rounded-full border border-line-strong px-5 py-2.5 text-sm font-medium text-ink hover:bg-paper-sunken"
           >
-            Volver a riesgo
+            {tw.backToRisk}
           </Link>
         </div>
 
@@ -334,7 +336,10 @@ export function RiskWizard({
         ))}
       </div>
       <p className="mt-3 text-xs font-medium uppercase tracking-wide text-muted">
-        Paso {clampedIndex + 1} de {questions.length}
+        {tw.stepPrefix}
+        {clampedIndex + 1}
+        {tw.stepOf}
+        {questions.length}
       </p>
 
       {/* Pregunta */}
@@ -353,9 +358,7 @@ export function RiskWizard({
         aria-describedby="wizard-select-mode"
       >
         <p id="wizard-select-mode" className="sr-only">
-          {question.type === "single"
-            ? "Selección única."
-            : "Selección múltiple: puedes marcar varias opciones."}
+          {question.type === "single" ? tw.selectSingle : tw.selectMultiple}
         </p>
         {question.choices.map((c) => {
           const active = selected.includes(c.value);
@@ -412,10 +415,10 @@ export function RiskWizard({
           disabled={clampedIndex === 0}
           className="text-sm font-medium text-ink-soft hover:text-ink disabled:opacity-40"
         >
-          ← Atrás
+          {tw.back}
         </button>
         <Button onClick={next} disabled={!canAdvance} variant="primary">
-          {isLast ? "Ver resultado" : "Siguiente"}
+          {isLast ? tw.seeResult : tw.next}
         </Button>
       </div>
     </div>

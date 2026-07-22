@@ -10,6 +10,8 @@ import {
   type RegSourceStatus,
 } from "@/lib/mock-data";
 import { FRAMEWORK_LABEL, type RegFramework } from "@/lib/regulatory-watch";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +51,13 @@ function relTime(iso: string | null): string {
   });
 }
 
-function SourceRow({ s }: { s: RegSource }) {
+function SourceRow({
+  s,
+  unreviewedLabel,
+}: {
+  s: RegSource;
+  unreviewedLabel: string;
+}) {
   const status = s.lastStatus;
   return (
     <tr className="border-t border-line align-top">
@@ -78,7 +86,7 @@ function SourceRow({ s }: { s: RegSource }) {
             {REG_SOURCE_STATUS_LABEL[status]}
           </Pill>
         ) : (
-          <Pill>Sin revisar</Pill>
+          <Pill>{unreviewedLabel}</Pill>
         )}
       </td>
       <td className="py-3 pr-4 whitespace-nowrap text-xs text-muted">
@@ -96,25 +104,21 @@ export default async function FuentesPage() {
     getIsPlatformAdmin(),
     getRegSources(),
   ]);
+  const d = getDictionary(await resolveLocale()).dashboard.pages;
+  const tf = d.sources;
 
   // En modo conectado, el panel del Vigía es solo para el equipo de Attesta.
   if (isSupabaseConfigured && !isAdmin) {
     return (
       <>
-        <PageHeader
-          title="Fuentes vigiladas"
-          subtitle="Watchlist del Vigía: las fuentes regulatorias que monitorizamos."
-        />
+        <PageHeader title={tf.title} subtitle={tf.subtitleNonAdmin} />
         <div className="rounded-2xl border border-line bg-paper-raised p-8 text-center">
-          <p className="text-sm text-ink-soft">
-            Esta área es para el equipo de compliance de Attesta, que vigila los
-            cambios normativos antes de publicarlos en el radar.
-          </p>
+          <p className="text-sm text-ink-soft">{tf.nonAdminNotice}</p>
           <Link
             href="/dashboard/vigilancia"
             className="mt-4 inline-block text-sm font-medium text-brand hover:text-brand-strong"
           >
-            ← Volver a Vigilancia
+            {d.backToMonitoring}
           </Link>
         </div>
       </>
@@ -127,14 +131,14 @@ export default async function FuentesPage() {
   return (
     <>
       <PageHeader
-        title="Fuentes vigiladas"
-        subtitle="El Vigía revisa estas fuentes oficiales por huella de contenido (fetch + hash). Cuando una cambia, encola una señal en la bandeja de validación. Cero LLM: solo detecta que algo cambió."
+        title={tf.title}
+        subtitle={tf.subtitle}
         action={
           <Link
             href="/dashboard/vigilancia/candidatos"
             className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
           >
-            Bandeja de validación →
+            {d.monitoring.validationInbox}
           </Link>
         }
       />
@@ -144,16 +148,16 @@ export default async function FuentesPage() {
           <span className="font-display text-2xl font-semibold tabular-nums text-ink">
             {sources.length}
           </span>
-          <span className="text-sm text-muted">fuentes</span>
+          <span className="text-sm text-muted">{tf.sourcesUnit}</span>
         </div>
         {changed > 0 && (
           <span className="text-sm text-[var(--tone-gold-fg)]">
-            {changed} con cambios sin revisar
+            {changed} {tf.changedUnrevised}
           </span>
         )}
         {errors > 0 && (
           <span className="text-sm text-[var(--tone-danger-fg)]">
-            {errors} con error de descarga
+            {errors} {tf.downloadErrors}
           </span>
         )}
         {isSupabaseConfigured && isAdmin && (
@@ -165,9 +169,7 @@ export default async function FuentesPage() {
 
       {!isSupabaseConfigured && (
         <div className="mb-6 rounded-xl border border-dashed border-line-strong bg-paper-raised p-4 text-sm text-ink-soft">
-          Modo demo: watchlist de ejemplo, de solo lectura. Con la organización
-          conectada, el Vigía revisa las fuentes en un horario y deja las señales
-          en la bandeja del Validador.
+          {tf.demoNotice}
         </div>
       )}
 
@@ -175,15 +177,15 @@ export default async function FuentesPage() {
         <table className="w-full min-w-[640px] text-left">
           <thead>
             <tr className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-              <th className="px-5 py-3">Fuente</th>
-              <th className="px-5 py-3">Último estado</th>
-              <th className="px-5 py-3">Revisada</th>
-              <th className="px-5 py-3">Último cambio</th>
+              <th className="px-5 py-3">{tf.colSource}</th>
+              <th className="px-5 py-3">{tf.colLastStatus}</th>
+              <th className="px-5 py-3">{tf.colChecked}</th>
+              <th className="px-5 py-3">{tf.colLastChange}</th>
             </tr>
           </thead>
           <tbody className="[&_td:first-child]:pl-5 [&_td:last-child]:pr-5">
             {sources.map((s) => (
-              <SourceRow key={s.id} s={s} />
+              <SourceRow key={s.id} s={s} unreviewedLabel={tf.unreviewed} />
             ))}
           </tbody>
         </table>

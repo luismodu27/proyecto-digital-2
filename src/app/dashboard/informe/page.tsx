@@ -47,13 +47,15 @@ const SEVERITY_COLOR = {
 } as const;
 
 export default async function InformeEjecutivoPage() {
+  const dict = getDictionary(await resolveLocale()).dashboard;
+  const tp = dict.pages;
   const gateOrg = await getActiveOrg();
   if (gateOrg && !(await orgHasTier(gateOrg, "preparacion"))) {
     return (
       <Paywall
-        feature="Informe ejecutivo"
-        description="Genera el informe ejecutivo de gobernanza en PDF, listo para dirección y auditoría."
-        t={getDictionary(await resolveLocale()).dashboard.paywall}
+        feature={tp.reportExec.paywallFeature}
+        description={tp.reportExec.paywallDesc}
+        t={dict.paywall}
       />
     );
   }
@@ -159,9 +161,9 @@ export default async function InformeEjecutivoPage() {
           href="/dashboard"
           className="text-sm font-medium text-brand hover:text-brand-strong"
         >
-          ← Volver al resumen
+          {tp.backToOverview}
         </Link>
-        <PrintButton label="Descargar informe (PDF)" />
+        <PrintButton label={tp.reportExec.downloadPdf} />
       </div>
 
       <article className="rounded-2xl border border-line bg-paper-raised p-8 text-ink print:rounded-none print:border-0 print:p-0">

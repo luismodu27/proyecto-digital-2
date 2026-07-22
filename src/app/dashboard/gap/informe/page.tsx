@@ -4,6 +4,8 @@ import { PrintButton } from "@/components/dashboard/PrintButton";
 import { getAiSystems, getGapItems, getOrganizationName } from "@/lib/data";
 import { LEGAL_PDF, ScopeNote } from "@/components/ui/LegalNote";
 import type { GapItem } from "@/lib/mock-data";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +56,7 @@ export default async function InformeGapPage() {
     getAiSystems(),
     getOrganizationName(),
   ]);
+  const tp = getDictionary(await resolveLocale()).dashboard.pages;
 
   const nameById = new Map(systems.map((s) => [s.id, s.name]));
   const total = gapItems.length;
@@ -132,9 +135,9 @@ export default async function InformeGapPage() {
           href="/dashboard/gap"
           className="text-sm font-medium text-brand hover:text-brand-strong"
         >
-          ← Volver al gap assessment
+          {tp.backToGap}
         </Link>
-        <PrintButton label="Descargar evidencia (PDF)" />
+        <PrintButton label={tp.gapReport.downloadPdf} />
       </div>
 
       {/* Documento */}

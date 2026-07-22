@@ -1174,5 +1174,166 @@ export const es = {
         viewEvidence: "Ver evidencia",
       },
     },
+
+    // Chrome de navegación de las páginas regulatorias (5d). SOLO títulos de
+    // PageHeader genéricos, botones de acción/navegación, estados vacíos y
+    // micro-etiquetas de UI. El contenido regulatorio determinista queda en ES.
+    pages: {
+      // Enlaces de vuelta genéricos
+      back: "← Volver",
+      backToOverview: "← Volver al resumen",
+      backToInventory: "← Volver al inventario",
+      backToRiskClass: "← Volver a clasificación de riesgo",
+      backToGap: "← Volver al gap assessment",
+      backToMonitoring: "← Volver a Vigilancia",
+      radarBack: "← Radar",
+
+      evaluate: {
+        title: "Evaluar riesgo de un sistema",
+        subtitle:
+          "Responde el cuestionario guiado y obtén la clasificación según el EU AI Act.",
+      },
+
+      wizard: {
+        stepPrefix: "Paso ",
+        stepOf: " de ",
+        back: "← Atrás",
+        next: "Siguiente",
+        seeResult: "Ver resultado",
+        selectSingle: "Selección única.",
+        selectMultiple: "Selección múltiple: puedes marcar varias opciones.",
+        evaluateAnother: "Evaluar otro sistema",
+        backToRisk: "Volver a riesgo",
+      },
+
+      plan: {
+        title: "Plan de acción",
+        subtitle:
+          "Tareas priorizadas para cerrar tus brechas: asigna responsable, fecha y estado.",
+        exportEvidence: "⬇ Exportar evidencia",
+        statOpen: "abiertas",
+        statInProgress: "en curso",
+        statOverdue: "vencidas",
+        statDone: "hechas",
+        addTask: "+ Añadir tarea",
+        addTaskHint: "Crea una tarea manual",
+        fieldTitle: "Título",
+        fieldTitlePlaceholder: "Qué hay que hacer",
+        fieldDetail: "Detalle (opcional)",
+        fieldPriority: "Prioridad",
+        fieldAssignee: "Responsable",
+        noAssignee: "Sin responsable",
+        fieldDueDate: "Fecha límite",
+        fieldSystem: "Sistema (opcional)",
+        addToPlan: "Añadir al plan",
+        emptyTitle: "Tu plan está vacío",
+        emptyBody:
+          "Añade una tarea o incorpora las sugerencias de abajo, generadas a partir de tus brechas y niveles de riesgo.",
+        overdue: "vencida",
+        suggested: "· sugerida",
+        suggestionsTitle: "Sugerencias",
+        suggestionsBody:
+          "Generadas a partir de tus brechas abiertas y niveles de riesgo. Añádelas al plan para asignarles responsable y fecha.",
+        addSuggestionToPlan: "+ Añadir al plan",
+      },
+
+      activity: {
+        title: "Registro de actividad",
+        subtitle:
+          "Cada cambio queda registrado y encadenado con SHA-256: cualquier alteración posterior es detectable. Quién hizo qué y cuándo.",
+        chainOk: "Cadena íntegra",
+        chainBroken: "Integridad rota",
+        filterAll: "Todo",
+        filterSystems: "Sistemas",
+        filterAssessments: "Evaluaciones",
+        filterGaps: "Brechas",
+        filterTeam: "Equipo",
+        empty: "No hay actividad registrada todavía.",
+        demoBefore: "Estás en ",
+        demoMode: "modo demo",
+        demoAfter:
+          ": actividad de ejemplo. En modo conectado se registra cada cambio real por triggers de base de datos, sin poder editarlo ni borrarlo.",
+      },
+
+      monitoring: {
+        title: "Vigilancia regulatoria",
+        subtitle:
+          "Radar de plazos y cambios normativos que afectan a tus sistemas de IA.",
+        watchedSources: "Fuentes vigiladas →",
+        validationInbox: "Bandeja de validación →",
+      },
+
+      candidates: {
+        title: "Bandeja de validación",
+        subtitleNonAdmin:
+          "Cola de candidatos regulatorios propuestos por el pipeline.",
+        subtitle:
+          "Borradores propuestos por el pipeline. Nada llega al radar de los clientes sin tu validación.",
+        nonAdminNotice:
+          "Esta área es para el equipo de compliance de Attesta, que valida los cambios normativos antes de publicarlos en el radar.",
+        pendingOne: "candidato pendiente",
+        pendingOther: "candidatos pendientes",
+        pendingSuffix: " de revisión",
+        empty:
+          "No hay candidatos pendientes. El pipeline dejará aquí cada cambio normativo detectado para tu revisión.",
+        reviewed: "Ya revisados",
+      },
+
+      candidateControls: {
+        closeEditor: "Cerrar editor",
+        completeAndPublish: "Completar y publicar",
+        editAndPublish: "Editar y publicar",
+        discard: "Descartar",
+        discardTitle: "Descartar candidato",
+        discardBodyBefore: "Vas a descartar «",
+        discardBodyAfter:
+          "». Puedes anotar un motivo (opcional) para el registro.",
+        reasonLabel: "Motivo (opcional)",
+        cancel: "Cancelar",
+        close: "Cerrar",
+        publishToRadar: "Publicar en el radar",
+        saveDraft: "Guardar borrador",
+      },
+
+      sources: {
+        title: "Fuentes vigiladas",
+        subtitleNonAdmin:
+          "Watchlist del Vigía: las fuentes regulatorias que monitorizamos.",
+        subtitle:
+          "El Vigía revisa estas fuentes oficiales por huella de contenido (fetch + hash). Cuando una cambia, encola una señal en la bandeja de validación. Cero LLM: solo detecta que algo cambió.",
+        nonAdminNotice:
+          "Esta área es para el equipo de compliance de Attesta, que vigila los cambios normativos antes de publicarlos en el radar.",
+        sourcesUnit: "fuentes",
+        changedUnrevised: "con cambios sin revisar",
+        downloadErrors: "con error de descarga",
+        demoNotice:
+          "Modo demo: watchlist de ejemplo, de solo lectura. Con la organización conectada, el Vigía revisa las fuentes en un horario y deja las señales en la bandeja del Validador.",
+        colSource: "Fuente",
+        colLastStatus: "Último estado",
+        colChecked: "Revisada",
+        colLastChange: "Último cambio",
+        unreviewed: "Sin revisar",
+      },
+
+      // Chrome de los documentos PDF: SOLO botón de descarga + paywall. El cuerpo
+      // legal (dossier/informe/gap) permanece íntegro en español (contenido validado).
+      reportExec: {
+        downloadPdf: "Descargar informe (PDF)",
+        paywallFeature: "Informe ejecutivo",
+        paywallDesc:
+          "Genera el informe ejecutivo de gobernanza en PDF, listo para dirección y auditoría.",
+      },
+      dossier: {
+        downloadPdf: "Descargar dossier (PDF)",
+        paywallFeature: "Dossier de evidencia",
+        paywallDesc:
+          "Genera el dossier de evidencia por sistema en PDF, listo para presentar al auditor.",
+        notFound:
+          "No se encontró el sistema. Puede que se haya eliminado o que no pertenezca a tu organización.",
+      },
+      gapReport: {
+        downloadPdf: "Descargar evidencia (PDF)",
+      },
+    },
   },
 };

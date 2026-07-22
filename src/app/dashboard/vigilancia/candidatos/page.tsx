@@ -19,6 +19,8 @@ import {
   type RegKind,
   type RegFramework,
 } from "@/lib/regulatory-watch";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -192,25 +194,21 @@ export default async function CandidatosPage() {
     getIsPlatformAdmin(),
     getRegCandidates(),
   ]);
+  const d = getDictionary(await resolveLocale()).dashboard.pages;
+  const tc = d.candidates;
 
   // En modo conectado, la bandeja es solo para el equipo de Attesta.
   if (isSupabaseConfigured && !isAdmin) {
     return (
       <>
-        <PageHeader
-          title="Bandeja de validación"
-          subtitle="Cola de candidatos regulatorios propuestos por el pipeline."
-        />
+        <PageHeader title={tc.title} subtitle={tc.subtitleNonAdmin} />
         <div className="rounded-2xl border border-line bg-paper-raised p-8 text-center">
-          <p className="text-sm text-ink-soft">
-            Esta área es para el equipo de compliance de Attesta, que valida los
-            cambios normativos antes de publicarlos en el radar.
-          </p>
+          <p className="text-sm text-ink-soft">{tc.nonAdminNotice}</p>
           <Link
             href="/dashboard/vigilancia"
             className="mt-4 inline-block text-sm font-medium text-brand hover:text-brand-strong"
           >
-            ← Volver a Vigilancia
+            {d.backToMonitoring}
           </Link>
         </div>
       </>
@@ -223,14 +221,14 @@ export default async function CandidatosPage() {
   return (
     <>
       <PageHeader
-        title="Bandeja de validación"
-        subtitle="Borradores propuestos por el pipeline. Nada llega al radar de los clientes sin tu validación."
+        title={tc.title}
+        subtitle={tc.subtitle}
         action={
           <Link
             href="/dashboard/vigilancia"
             className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
           >
-            ← Radar
+            {d.radarBack}
           </Link>
         }
       />
@@ -240,16 +238,14 @@ export default async function CandidatosPage() {
           {drafts.length}
         </span>
         <span className="text-sm text-muted">
-          {drafts.length === 1 ? "candidato pendiente" : "candidatos pendientes"} de revisión
+          {drafts.length === 1 ? tc.pendingOne : tc.pendingOther}
+          {tc.pendingSuffix}
         </span>
       </div>
 
       {drafts.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-line-strong bg-paper-raised p-8 text-center">
-          <p className="text-sm text-ink-soft">
-            No hay candidatos pendientes. El pipeline dejará aquí cada cambio
-            normativo detectado para tu revisión.
-          </p>
+          <p className="text-sm text-ink-soft">{tc.empty}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-5">
@@ -262,7 +258,7 @@ export default async function CandidatosPage() {
       {reviewed.length > 0 && (
         <section className="mt-10">
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
-            Ya revisados
+            {tc.reviewed}
           </h3>
           <div className="flex flex-col gap-5">
             {reviewed.map((c) => (

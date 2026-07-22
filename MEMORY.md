@@ -127,6 +127,24 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **i18n dashboard — sub-incremento 5d (chrome de páginas/componentes regulatorios).**
+  Nuevo sub-namespace `dashboard.pages` (es/en) SOLO con chrome de navegación: títulos/subtítulos genéricos de
+  `PageHeader`, botones de acción/navegación (descargar/imprimir/exportar/volver), estados vacíos de producto,
+  encabezados de columna de tablas y micro-etiquetas. Traducido en: `riesgo/evaluar`, `plan`, `actividad` (solo el
+  shell: header, filtros, badge de cadena, demo-notice, empty; el feed de auditoría y `ChainStatusCard`/`formatAgo`
+  quedan en ES por venir de `audit.ts`), `vigilancia` (solo header + 2 botones de nav; radar/briefing/timeline en ES),
+  `vigilancia/candidatos` y `vigilancia/fuentes` (header, nav, avisos de producto, empty, columnas, unidad), y los 3
+  documentos PDF `informe`/`dossier`/`gap/informe` (SOLO back-link + botón de descarga + `feature`/`description` del
+  Paywall en informe/dossier; **el cuerpo legal permanece íntegro en ES**). Componentes cliente: `RiskWizard` (solo
+  navegación del asistente: "Paso X de Y", Atrás/Siguiente/Ver resultado, sr-only single/múltiple, botones de resultado;
+  el bloque "Guardar autoevaluación" y todo el resultado regulatorio quedan en ES) y `CandidateReviewControls` (solo
+  botones genéricos + modal de descarte; las etiquetas de campos del editor de eventos quedan en ES).
+  - **Frontera legal respetada:** NO se tocó `risk-assessment`/`recommendations`/`regulatory-watch`/`policy-packs`/
+    `mock-data` (RISK_LABEL, *_LABEL)/`audit.ts`/`bias-audit`/`LegalNote`. `Recommendations.tsx` se dejó intacto (su único
+    wrapper "Esfuerzo:" está acoplado al valor `rec.effort` de `recommendations.ts`). `ScopeNote`/`LEGAL_*` de los PDF
+    en ES (documento coherente en ES). Copy seguro también en EN (readiness, sin certified/compliant/guarantees; deployer).
+  - Verificado: tsc + eslint + build (exit 0). Sin commit.
+
 - **2026-07-22** · **i18n dashboard — sub-incremento 5b (genéricos, estados vacíos, onboarding, botones).**
   Ampliado el namespace `dashboard` de los diccionarios con sub-namespaces nuevos: `units`, `welcome`, `onboarding`,
   `guide`, `paywall`, `deadlines`, `risk`, `bias`, `confirm`, `buttons`. Traducidos SOLO como chrome: `WelcomeGuide`

@@ -31,6 +31,8 @@ import {
   type RegJurisdiction,
   type RegulatoryEvent,
 } from "@/lib/regulatory-watch";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 // El radar depende de la fecha actual: nunca prerenderizar el countdown.
 export const dynamic = "force-dynamic";
@@ -256,6 +258,7 @@ export default async function VigilanciaPage({
     getOrgJurisdictions(),
   ]);
   const now = new Date();
+  const tm = getDictionary(await resolveLocale()).dashboard.pages.monitoring;
   const canManage =
     isSupabaseConfigured && (role === "owner" || role === "admin");
 
@@ -322,8 +325,8 @@ export default async function VigilanciaPage({
   return (
     <>
       <PageHeader
-        title="Vigilancia regulatoria"
-        subtitle="Radar de plazos y cambios normativos que afectan a tus sistemas de IA."
+        title={tm.title}
+        subtitle={tm.subtitle}
         action={
           isAdmin ? (
             <div className="flex flex-wrap gap-2">
@@ -331,13 +334,13 @@ export default async function VigilanciaPage({
                 href="/dashboard/vigilancia/fuentes"
                 className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
               >
-                Fuentes vigiladas →
+                {tm.watchedSources}
               </Link>
               <Link
                 href="/dashboard/vigilancia/candidatos"
                 className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
               >
-                Bandeja de validación →
+                {tm.validationInbox}
               </Link>
             </div>
           ) : undefined

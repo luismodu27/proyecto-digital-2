@@ -25,6 +25,8 @@ import {
 } from "@/lib/mock-data";
 import { buildActionPlan, type Priority } from "@/lib/recommendations";
 import { isTaskOverdue } from "@/lib/task-reminders";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +78,7 @@ export default async function PlanPage() {
     getOrgMembers(),
     getSystemsForSelect(),
   ]);
+  const tp = getDictionary(await resolveLocale()).dashboard.pages.plan;
 
   const now = new Date();
   const todayIso = now.toISOString().slice(0, 10);
@@ -113,11 +116,11 @@ export default async function PlanPage() {
   return (
     <>
       <PageHeader
-        title="Plan de acción"
-        subtitle="Tareas priorizadas para cerrar tus brechas: asigna responsable, fecha y estado."
+        title={tp.title}
+        subtitle={tp.subtitle}
         action={
           <ButtonLink href="/dashboard/gap/informe" variant="outline">
-            ⬇ Exportar evidencia
+            {tp.exportEvidence}
           </ButtonLink>
         }
       />
@@ -128,13 +131,13 @@ export default async function PlanPage() {
           <p className="font-display text-2xl font-semibold text-ink">
             {openCount}
           </p>
-          <p className="mt-0.5 text-xs text-muted">abiertas</p>
+          <p className="mt-0.5 text-xs text-muted">{tp.statOpen}</p>
         </div>
         <div className="rounded-2xl border border-line bg-paper-raised p-4">
           <p className="font-display text-2xl font-semibold text-ink">
             {counts.in_progress}
           </p>
-          <p className="mt-0.5 text-xs text-muted">en curso</p>
+          <p className="mt-0.5 text-xs text-muted">{tp.statInProgress}</p>
         </div>
         <div className="rounded-2xl border border-line bg-paper-raised p-4">
           <p
@@ -142,21 +145,21 @@ export default async function PlanPage() {
           >
             {overdueCount}
           </p>
-          <p className="mt-0.5 text-xs text-muted">vencidas</p>
+          <p className="mt-0.5 text-xs text-muted">{tp.statOverdue}</p>
         </div>
         <div className="rounded-2xl border border-line bg-paper-raised p-4">
           <p className="font-display text-2xl font-semibold text-ink">
             {counts.done}
           </p>
-          <p className="mt-0.5 text-xs text-muted">hechas</p>
+          <p className="mt-0.5 text-xs text-muted">{tp.statDone}</p>
         </div>
       </div>
 
       {/* Alta manual de tarea */}
       <details className="mt-6 rounded-2xl border border-line bg-paper-raised">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-3 [&::-webkit-details-marker]:hidden">
-          <span className="text-sm font-medium text-ink">+ Añadir tarea</span>
-          <span className="text-xs text-muted">Crea una tarea manual</span>
+          <span className="text-sm font-medium text-ink">{tp.addTask}</span>
+          <span className="text-xs text-muted">{tp.addTaskHint}</span>
         </summary>
         <form
           action={createActionTask}
@@ -164,17 +167,17 @@ export default async function PlanPage() {
         >
           <input type="hidden" name="source" value="manual" />
           <label className="sm:col-span-2">
-            <span className="text-xs font-medium text-muted">Título</span>
+            <span className="text-xs font-medium text-muted">{tp.fieldTitle}</span>
             <input
               name="title"
               required
-              placeholder="Qué hay que hacer"
+              placeholder={tp.fieldTitlePlaceholder}
               className="mt-1 w-full rounded-lg border border-line-strong bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
             />
           </label>
           <label className="sm:col-span-2">
             <span className="text-xs font-medium text-muted">
-              Detalle (opcional)
+              {tp.fieldDetail}
             </span>
             <textarea
               name="detail"
@@ -183,7 +186,7 @@ export default async function PlanPage() {
             />
           </label>
           <label>
-            <span className="text-xs font-medium text-muted">Prioridad</span>
+            <span className="text-xs font-medium text-muted">{tp.fieldPriority}</span>
             <select
               name="priority"
               defaultValue="media"
@@ -197,13 +200,13 @@ export default async function PlanPage() {
             </select>
           </label>
           <label>
-            <span className="text-xs font-medium text-muted">Responsable</span>
+            <span className="text-xs font-medium text-muted">{tp.fieldAssignee}</span>
             <select
               name="assigneeId"
               defaultValue=""
               className="mt-1 w-full rounded-lg border border-line-strong bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-brand"
             >
-              <option value="">Sin responsable</option>
+              <option value="">{tp.noAssignee}</option>
               {memberOpts.map((m) => (
                 <option key={m.userId} value={m.userId}>
                   {m.email}
@@ -212,7 +215,7 @@ export default async function PlanPage() {
             </select>
           </label>
           <label>
-            <span className="text-xs font-medium text-muted">Fecha límite</span>
+            <span className="text-xs font-medium text-muted">{tp.fieldDueDate}</span>
             <input
               type="date"
               name="dueDate"
@@ -221,7 +224,7 @@ export default async function PlanPage() {
           </label>
           <label>
             <span className="text-xs font-medium text-muted">
-              Sistema (opcional)
+              {tp.fieldSystem}
             </span>
             <select
               name="systemId"
@@ -241,7 +244,7 @@ export default async function PlanPage() {
               type="submit"
               className="inline-flex items-center justify-center rounded-full bg-brand px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
             >
-              Añadir al plan
+              {tp.addToPlan}
             </button>
           </div>
         </form>
@@ -251,11 +254,10 @@ export default async function PlanPage() {
       {tasks.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-dashed border-line-strong bg-paper-raised px-6 py-12 text-center">
           <p className="font-display text-lg font-semibold text-ink">
-            Tu plan está vacío
+            {tp.emptyTitle}
           </p>
           <p className="mx-auto mt-2 max-w-md text-sm text-ink-soft">
-            Añade una tarea o incorpora las sugerencias de abajo, generadas a
-            partir de tus brechas y niveles de riesgo.
+            {tp.emptyBody}
           </p>
         </div>
       ) : (
@@ -287,7 +289,7 @@ export default async function PlanPage() {
                     <span className="text-xs text-muted">· {t.systemName}</span>
                   )}
                   {t.source === "recommendation" && (
-                    <span className="text-[11px] text-muted">· sugerida</span>
+                    <span className="text-[11px] text-muted">{tp.suggested}</span>
                   )}
                 </div>
 
@@ -311,7 +313,7 @@ export default async function PlanPage() {
                     <TaskDueDateControl id={t.id} dueDate={t.dueDate} />
                     {overdue && (
                       <span className="text-[11px] font-medium text-[var(--tone-danger-fg)]">
-                        vencida
+                        {tp.overdue}
                       </span>
                     )}
                   </div>
@@ -329,12 +331,9 @@ export default async function PlanPage() {
       {suggestions.length > 0 && (
         <section className="mt-10">
           <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">
-            Sugerencias
+            {tp.suggestionsTitle}
           </h3>
-          <p className="mb-3 text-sm text-muted">
-            Generadas a partir de tus brechas abiertas y niveles de riesgo.
-            Añádelas al plan para asignarles responsable y fecha.
-          </p>
+          <p className="mb-3 text-sm text-muted">{tp.suggestionsBody}</p>
           <div className="space-y-3">
             {suggestions.map((r) => (
               <div
@@ -374,7 +373,7 @@ export default async function PlanPage() {
                     type="submit"
                     className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
                   >
-                    + Añadir al plan
+                    {tp.addSuggestionToPlan}
                   </button>
                 </form>
               </div>
