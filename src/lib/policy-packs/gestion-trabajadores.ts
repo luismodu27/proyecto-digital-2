@@ -237,7 +237,7 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
   summary:
     "Controls for AI that manages, evaluates and monitors workers (high-risk, Annex III.4.b). Apply it to a system to preload its gaps.",
   note:
-    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions —including emotion recognition in the workplace (Art. 5.1.f)— are already enforceable (since 2 Feb 2025); Art. 50 transparency applies on 2 Aug 2026. The Annex III.4.b high-risk obligations (Arts. 14/26/27) were postponed to 2 Dec 2027 by the Digital Omnibus, NOT 2 Aug 2026 (a widespread misconception in the market). Beyond the AI Act, the GDPR and national labour law/collective agreements also apply (Art. 88 GDPR), which may require prior consultation of representatives. This pack gets your evidence ready ahead of time.",
+    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions —including emotion recognition in the workplace (Art. 5.1.f)— are already enforceable (since 2 Feb 2025); Art. 50 transparency applies on 2 Aug 2026. The Annex III.4.b high-risk obligations (Arts. 14/26/27) were postponed to 2 Dec 2027 by the Digital Omnibus, NOT 2 Aug 2026 (a widespread misconception in the market). Beyond the AI Act, the GDPR and national labor law/collective agreements also apply (Art. 88 GDPR), which may require prior consultation of representatives. This pack gets your evidence ready ahead of time.",
   controls: [
     {
       id: "emociones-prohibicion",
@@ -255,7 +255,7 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       title:
         "Scoring employees within limits (avoiding prohibited social scoring)",
       description:
-        "If the system scores or classifies workers over time, keep the score tied to relevant work-related data and within its own context (productivity, quality, targets). It approaches the prohibition on «social scoring» when it incorporates data unrelated to the work context (private life, social media, general social behaviour) or produces disproportionate detrimental treatment or treatment in areas unrelated to the conduct being evaluated. Evidence = description of the score's variables and their origin, and confirmation that it does not cross-reference out-of-context data with unfavourable effects.",
+        "If the system scores or classifies workers over time, keep the score tied to relevant work-related data and within its own context (productivity, quality, targets). It approaches the prohibition on «social scoring» when it incorporates data unrelated to the work context (private life, social media, general social behavior) or produces disproportionate detrimental treatment or treatment in areas unrelated to the conduct being evaluated. Evidence = description of the score's variables and their origin, and confirmation that it does not cross-reference out-of-context data with unfavorable effects.",
       article: "Art. 5.1.c",
       severity: "media",
       conditional:
@@ -265,7 +265,7 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       id: "practicas-manipulativas",
       title: "No manipulative techniques or exploitation of vulnerabilities",
       description:
-        "Verify that the system (e.g. gamified task/shift allocation, productivity nudging) does not employ subliminal, deceptive or manipulative techniques that materially distort the worker's behaviour, nor exploit vulnerabilities due to age, disability or socio-economic situation. Both are prohibited practices. Evidence = description of the system's incentive/gamification mechanisms and confirmation that these techniques are absent.",
+        "Verify that the system (e.g. gamified task/shift allocation, productivity nudging) does not employ subliminal, deceptive or manipulative techniques that materially distort the worker's behavior, nor exploit vulnerabilities due to age, disability or socio-economic situation. Both are prohibited practices. Evidence = description of the system's incentive/gamification mechanisms and confirmation that these techniques are absent.",
       article: "Art. 5.1.a / 5.1.b",
       severity: "media",
       conditional: "Prohibitions already in force (since 2 Feb 2025).",
@@ -283,16 +283,16 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       id: "info-trabajadores",
       title: "Information to workers and their representatives",
       description:
-        "As an employer, before putting the high-risk AI into service or using it in the workplace, inform the affected workers and their representatives that they will be subject to it. In this context of an ongoing employment relationship, prior consultation of the works council/representatives under national labour law and collective agreements is also usually required. Evidence = communication to the workforce and representatives (date and content) and, where appropriate, minutes of the consultation.",
+        "As an employer, before putting the high-risk AI into service or using it in the workplace, inform the affected workers and their representatives that they will be subject to it. In this context of an ongoing employment relationship, prior consultation of the works council/representatives under national labor law and collective agreements is also usually required. Evidence = communication to the workforce and representatives (date and content) and, where appropriate, minutes of the consultation.",
       article: "Art. 26.7",
       severity: "alta",
     },
     {
       id: "monitorizacion-proporcionada",
-      title: "Proportionate monitoring and data minimisation",
+      title: "Proportionate monitoring and data minimization",
       description:
-        "Limit monitoring to what is strictly necessary for the stated purpose: avoid continuous or omnipresent surveillance, minimise the data collected and prefer the least intrusive option (minimisation, GDPR Art. 5.1.c). The proportionality of workplace surveillance is also required by ECtHR case law (prior information, limited scope, balancing of interests). Evidence = documented proportionality analysis (purpose, data collected, less intrusive alternatives discarded) and a communicated monitoring policy.",
-      article: "GDPR Art. 5.1.c (proporcionalidad)",
+        "Limit monitoring to what is strictly necessary for the stated purpose: avoid continuous or omnipresent surveillance, minimize the data collected and prefer the least intrusive option (minimization, GDPR Art. 5.1.c). The proportionality of workplace surveillance is also required by ECtHR case law (prior information, limited scope, balancing of interests). Evidence = documented proportionality analysis (purpose, data collected, less intrusive alternatives discarded) and a communicated monitoring policy.",
+      article: "GDPR Art. 5.1.c (proportionality)",
       severity: "alta",
     },
     {
@@ -305,9 +305,9 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
     },
     {
       id: "normativa-laboral-nacional",
-      title: "National labour law and collective agreements (Art. 88 GDPR)",
+      title: "National labor law and collective agreements (Art. 88 GDPR)",
       description:
-        "Check the country-specific rules on processing workers' data: the GDPR (Art. 88) empowers Member States and collective agreements to impose additional requirements (consultation of representatives, limits on video surveillance/geolocation/monitoring of communications, dignity safeguards). These rules vary by country and may condition or prohibit specific uses. Evidence = identification of the applicable labour law/collective agreement and confirmation of compliance (or a supporting legal opinion).",
+        "Check the country-specific rules on processing workers' data: the GDPR (Art. 88) empowers Member States and collective agreements to impose additional requirements (consultation of representatives, limits on video surveillance/geolocation/monitoring of communications, dignity safeguards). These rules vary by country and may condition or prohibit specific uses. Evidence = identification of the applicable labor law/collective agreement and confirmation of compliance (or a supporting legal opinion).",
       article: "GDPR Art. 88",
       severity: "media",
       conditional:
@@ -318,15 +318,15 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       title: "Effective human oversight in the decision",
       description:
         "Assign oversight to a competent person, trained and with authority to review, not follow or override the AI's recommendation before a performance, allocation, promotion or termination decision. As a deployer, DESIGNATING that person is your obligation (Art. 26.2); that the system enables oversight is the provider's design (Art. 14). Evidence = designated person/role, their training and the review/override procedure.",
-      article: "Art. 26.2 (y Art. 14)",
+      article: "Art. 26.2 (and Art. 14)",
       severity: "alta",
     },
     {
       id: "decision-automatizada",
       title: "Decision not solely automated (GDPR)",
       description:
-        "If there are decisions with a significant effect on the worker (e.g. automatic dismissal, sanction, denial of promotion or unfavourable assignment), ensure genuine human intervention and the affected person's right to express their point of view, obtain an explanation and contest it (GDPR Art. 22). The AI Act reinforces this with the right to a clear explanation of the system's role in high-risk decisions (Art. 86). Evidence = flow design that guarantees human intervention and a channel to contest.",
-      article: "GDPR Art. 22 (y Art. 86)",
+        "If there are decisions with a significant effect on the worker (e.g. automatic dismissal, sanction, denial of promotion or unfavorable assignment), ensure genuine human intervention and the affected person's right to express their point of view, obtain an explanation and contest it (GDPR Art. 22). The AI Act reinforces this with the right to a clear explanation of the system's role in high-risk decisions (Art. 86). Evidence = flow design that guarantees human intervention and a channel to contest.",
+      article: "GDPR Art. 22 (and Art. 86)",
       severity: "alta",
     },
     {
@@ -334,7 +334,7 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       title: "Non-discrimination and bias control",
       description:
         "The employer's direct duty arises from anti-discrimination law (e.g. EU Directives 2000/78/EC, 2006/54/EC, 2000/43/EC and national law): monitor that performance evaluation, task allocation or promotion/termination decisions do not produce disparate impact on protected characteristics (sex, age, origin, disability) and document it. Also require from the provider evidence of its bias testing on the training data (a provider obligation, Art. 10, not yours as deployer). Evidence = your own disparate-impact analysis + bias documentation required from the provider.",
-      article: "Normativa antidiscriminación (Art. 10 = proveedor)",
+      article: "Anti-discrimination law (Art. 10 = provider)",
       severity: "alta",
     },
     {
@@ -342,7 +342,7 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       title: "Information to the person affected by the decision",
       description:
         "Inform the worker that they are subject to a high-risk AI system (a deployer obligation, Art. 26.11) and provide the GDPR data-protection information: purpose, legal basis, logic involved and data processed (Arts. 13-14). Evidence = notice given to the worker and a data-protection information template.",
-      article: "Art. 26.11 (y GDPR Arts. 13-14)",
+      article: "Art. 26.11 (and GDPR Arts. 13-14)",
       severity: "media",
     },
     {
@@ -359,26 +359,26 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       id: "datos-entrada",
       title: "Relevant and representative input data",
       description:
-        "To the extent that you control the input data (performance metrics, activity/behaviour logs, targets, weightings), ensure that they are relevant, accurate and sufficiently representative for the intended purpose, and do not introduce spurious signals (e.g. proxies for protected characteristics). Evidence = description of the input data sources and their validation.",
+        "To the extent that you control the input data (performance metrics, activity/behavior logs, targets, weightings), ensure that they are relevant, accurate and sufficiently representative for the intended purpose, and do not introduce spurious signals (e.g. proxies for protected characteristics). Evidence = description of the input data sources and their validation.",
       article: "Art. 26.4",
       severity: "media",
     },
     {
       id: "transparencia-art50",
-      title: "Transparency of biometric categorisation (Art. 50)",
+      title: "Transparency of biometric categorization (Art. 50)",
       description:
-        "The deployer's OWN duty (applicable from 2 August 2026): if you expose workers to a biometric-categorisation system (permitted only in narrowly defined cases and for a safety purpose), you must inform them of its operation (Art. 50.3); if you disseminate AI-generated or manipulated content, label it (Art. 50.4). WARNING: the most common use in this area —inferring emotions— is NOT resolved by transparency: it is prohibited (see the emotions control). Evidence = biometric-categorisation notice given and a record of content labelling.",
+        "The deployer's OWN duty (applicable from 2 August 2026): if you expose workers to a biometric-categorization system (permitted only in narrowly defined cases and for a safety purpose), you must inform them of its operation (Art. 50.3); if you disseminate AI-generated or manipulated content, label it (Art. 50.4). WARNING: the most common use in this area —inferring emotions— is NOT resolved by transparency: it is prohibited (see the emotions control). Evidence = biometric-categorization notice given and a record of content labeling.",
       article: "Art. 50.3/50.4 (deployer)",
       severity: "media",
       conditional:
-        "Art. 50 transparency applicable from 2 August 2026. Applies only if there is biometric categorisation or disseminated synthetic content.",
+        "Art. 50 transparency applicable from 2 August 2026. Applies only if there is biometric categorization or disseminated synthetic content.",
     },
     {
       id: "documentacion",
       title: "Use in line with the provider's instructions and documentation",
       description:
         "Use the system in accordance with the provider's instructions for use (Art. 26.1). Require and keep as evidence the information the provider must supply to you (instructions for use and the Annex IV / Art. 11 information, a provider obligation). Evidence = archived instructions for use and confirmation that real use conforms to the intended purpose.",
-      article: "Art. 26.1 (Annex IV/Art. 11 = proveedor)",
+      article: "Art. 26.1 (Annex IV/Art. 11 = provider)",
       severity: "media",
     },
     {
@@ -393,8 +393,8 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       id: "exactitud-robustez",
       title: "Accuracy, robustness and cybersecurity (require evidence)",
       description:
-        "An appropriate level of accuracy, robustness and cybersecurity is the provider's design obligation (Art. 15): require from it the declared metrics and their limits —especially the reliability of inferences about performance/behaviour— and monitor in real use that performance is maintained (Art. 26.5). Evidence = metrics and limits declared by the provider + a record of your verification in use.",
-      article: "Art. 15 (proveedor) + Art. 26.5",
+        "An appropriate level of accuracy, robustness and cybersecurity is the provider's design obligation (Art. 15): require from it the declared metrics and their limits —especially the reliability of inferences about performance/behavior— and monitor in real use that performance is maintained (Art. 26.5). Evidence = metrics and limits declared by the provider + a record of your verification in use.",
+      article: "Art. 15 (provider) + Art. 26.5",
       severity: "media",
     },
     {
@@ -409,8 +409,8 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       id: "conservacion-evidencia",
       title: "Retention of evidence of your own decisions",
       description:
-        "Keep a record of the decisions and human reviews (reason for an AI-assisted evaluation, promotion, sanction or termination, who reviewed and when) to demonstrate accountability (GDPR Art. 5.2), respond to explanation requests (Art. 86) and defend yourself against labour or discrimination claims. Evidence = decision file with the human intervention recorded.",
-      article: "GDPR Art. 5.2 (y Art. 86)",
+        "Keep a record of the decisions and human reviews (reason for an AI-assisted evaluation, promotion, sanction or termination, who reviewed and when) to demonstrate accountability (GDPR Art. 5.2), respond to explanation requests (Art. 86) and defend yourself against labor or discrimination claims. Evidence = decision file with the human intervention recorded.",
+      article: "GDPR Art. 5.2 (and Art. 86)",
       severity: "media",
     },
     {

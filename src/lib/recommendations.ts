@@ -10,6 +10,7 @@
  */
 
 import type { AiSystem, GapItem, RiskLevel } from "./mock-data";
+import type { Locale } from "./i18n/config";
 
 export type Priority = "crítica" | "alta" | "media";
 export type Effort = "bajo" | "medio" | "alto";
@@ -252,12 +253,31 @@ export const REMEDIATION_EN: Record<string, CatalogEntry> = {
 };
 
 /**
+ * Acción genérica de respaldo (ES) para una brecha sin remediación validada por
+ * artículo. Paralelo a `GENERIC_REMEDIATION_ACTION_EN`; texto idéntico al que
+ * antes vivía inline en `buildActionPlan`.
+ */
+export const GENERIC_REMEDIATION_ACTION =
+  "Prepara y conserva la evidencia declarada de este control, según el policy pack aplicado; asigna un responsable y una fecha objetivo.";
+
+/**
  * Acción genérica de respaldo (EN) para una brecha sin remediación validada por
  * artículo: en `buildActionPlan` el título es el propio `requirement` del control
  * (dato del cliente/pack, no se traduce aquí) y la acción es este texto fijo.
  */
 export const GENERIC_REMEDIATION_ACTION_EN =
   "Prepare and retain the declared evidence for this control, in line with the applied policy pack; assign an owner and a target date.";
+
+/**
+ * Punto crítico transversal (ES) que `buildActionPlan` antepone cuando hay
+ * sistemas de alto riesgo con baja preparación. Paralelo a
+ * `PRIORITIZE_HIGH_RISK_EN`; texto idéntico al que antes vivía inline.
+ */
+export const PRIORITIZE_HIGH_RISK = {
+  title: "Priorizar sistemas de alto riesgo con baja preparación",
+  action:
+    "Concentra los recursos de remediación en estos sistemas: su nivel de riesgo es alto y su preparación (% listo) está por debajo del 50%.",
+} as const;
 
 /**
  * Punto crítico transversal (EN) que `buildActionPlan` antepone cuando hay
@@ -291,8 +311,13 @@ const ARTICLES_BY_LEVEL: Record<RiskLevel, string[]> = {
   minimal: [],
 };
 
-function toRec(article: string, over?: Partial<CatalogEntry>): Recommendation {
-  const base = REMEDIATION[article];
+function toRec(
+  article: string,
+  locale: Locale = "es",
+  over?: Partial<CatalogEntry>,
+): Recommendation {
+  const catalog = locale === "en" ? REMEDIATION_EN : REMEDIATION;
+  const base = catalog[article];
   return {
     id: article.replace(/\W+/g, "-").toLowerCase(),
     ...base,
@@ -301,9 +326,12 @@ function toRec(article: string, over?: Partial<CatalogEntry>): Recommendation {
 }
 
 /** Recomendaciones para un nivel de riesgo (usado tras clasificar un sistema). */
-export function recommendationsForLevel(level: RiskLevel): Recommendation[] {
+export function recommendationsForLevel(
+  level: RiskLevel,
+  locale: Locale = "es",
+): Recommendation[] {
   return ARTICLES_BY_LEVEL[level]
-    .map((a) => toRec(a))
+    .map((a) => toRec(a, locale))
     .sort((x, y) => PRIORITY_ORDER[x.priority] - PRIORITY_ORDER[y.priority]);
 }
 
@@ -344,9 +372,14 @@ function remediationKeyFor(article: string | null | undefined): string | null {
 export function buildActionPlan(
   systems: AiSystem[],
   gaps: GapItem[],
+  locale: Locale = "es",
 ): Recommendation[] {
   const byArticle = new Map<string, Recommendation>();
   const nameById = new Map(systems.map((s) => [s.id, s.name]));
+  const genericAction =
+    locale === "en" ? GENERIC_REMEDIATION_ACTION_EN : GENERIC_REMEDIATION_ACTION;
+  const prioritizeHighRisk =
+    locale === "en" ? PRIORITIZE_HIGH_RISK_EN : PRIORITIZE_HIGH_RISK;
 
   // 1) Brechas abiertas → recomendación (prioridad según severidad). El `article`
   //    de un control puede venir en formato rico; se normaliza a la clave del
@@ -377,12 +410,11 @@ export function buildActionPlan(
     byArticle.set(
       dedupeKey,
       key
-        ? { ...toRec(key, { priority }), systems: [systemName] }
+        ? { ...toRec(key, locale, { priority }), systems: [systemName] }
         : {
             id: dedupeKey.replace(/\W+/g, "-").toLowerCase().slice(0, 64),
             title: g.requirement,
-            action:
-              "Prepara y conserva la evidencia declarada de este control, según el policy pack aplicado; asigna un responsable y una fecha objetivo.",
+            action: genericAction,
             article: g.article || "—",
             priority,
             effort: "medio",
@@ -399,9 +431,8 @@ export function buildActionPlan(
   if (criticalSystems.length > 0) {
     recs.unshift({
       id: "priorizar-alto-riesgo",
-      title: "Priorizar sistemas de alto riesgo con baja preparación",
-      action:
-        "Concentra los recursos de remediación en estos sistemas: su nivel de riesgo es alto y su preparación (% listo) está por debajo del 50%.",
+      title: prioritizeHighRisk.title,
+      action: prioritizeHighRisk.action,
       article: "Art. 6",
       priority: "crítica",
       effort: "alto",

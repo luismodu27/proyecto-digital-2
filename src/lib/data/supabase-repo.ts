@@ -672,7 +672,7 @@ export async function getAuditLog(): Promise<AuditEntry[]> {
   const org = await getActiveOrg();
   if (!org) return [];
   const { data } = await supabase.rpc("list_audit_log", { org, lim: 100 });
-  return ((data ?? []) as RawAudit[]).map(toAuditEntry);
+  return ((data ?? []) as RawAudit[]).map((r) => toAuditEntry(r));
 }
 
 /**
@@ -725,7 +725,7 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
 
   // Registro completo (hasta el tope de la función, 500) para la exportación.
   const { data: rawLog } = await supabase.rpc("list_audit_log", { org, lim: 500 });
-  const auditLog = ((rawLog ?? []) as RawAudit[]).map(toAuditEntry);
+  const auditLog = ((rawLog ?? []) as RawAudit[]).map((r) => toAuditEntry(r));
 
   // Evidencia por sistema (historial de evaluaciones + auditoría de sesgo).
   // Batch: 2 consultas para toda la org en vez de 2 por sistema (evita N+1 en la

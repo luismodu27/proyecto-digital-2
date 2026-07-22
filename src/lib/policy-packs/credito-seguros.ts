@@ -263,17 +263,17 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
       title: "Financial-fraud detection exception (triage)",
       description:
         "Annex III.5.b expressly excludes systems used to detect financial fraud: an engine whose actual purpose is to detect fraud (transactional, money-laundering, impersonation) is NOT high-risk on this ground. Check the purpose honestly: if the same system also scores creditworthiness, the exception covers ONLY the fraud function, not the scoring function, which remains high-risk. Evidence = description of the system's purpose and documented confirmation of whether it operates as fraud detection, as creditworthiness scoring, or both (delimiting each function).",
-      article: "Anexo III.5.b (excepción de fraude)",
+      article: "Anexo III.5.b (fraud exception)",
       severity: "media",
       conditional:
-        "Triage. Applies only if the provider/your organisation invoke the fraud-detection exception to avoid classifying the system as high-risk.",
+        "Triage. Applies only if the provider/your organization invoke the fraud-detection exception to avoid classifying the system as high-risk.",
     },
     {
       id: "no-alto-riesgo-6-3",
       title: "The «not high-risk» filter (Art. 6.3) does not apply to profiling",
       description:
         "Do not assume that scoring or pricing escapes high-risk via Art. 6(3) (limited procedural task, improving a prior human activity, etc.). Art. 6(3) itself closes with an absolute exception: an Annex III system is ALWAYS considered high-risk when it performs profiling of natural persons —and assessing creditworthiness or setting premiums by individual risk is profiling. Evidence = note confirming that the system profiles natural persons and, therefore, that it cannot rely on the Art. 6(3) exception.",
-      article: "Art. 6.3 (excepción de perfilado)",
+      article: "Art. 6.3 (profiling exception)",
       severity: "media",
       conditional:
         "Triage. Document this conclusion if anyone proposes treating the system as «not high-risk».",
@@ -292,8 +292,8 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
       title:
         "Effective human oversight in the decision (critical in denials)",
       description:
-        "Designate a competent person, trained and with authority to review, not follow or override the AI's recommendation before a decision with impact —denial or increased cost of a loan, rejection or surcharge in an insurance policy. As a deployer, DESIGNATING that person is your obligation (Art. 26.2); that the system enables oversight is the provider's design (Art. 14). The oversight must be genuine, not an automatic rubber stamp. Evidence = designated person/role, their training and the review/override procedure, especially in unfavourable decisions.",
-      article: "Art. 26.2 (y Art. 14)",
+        "Designate a competent person, trained and with authority to review, not follow or override the AI's recommendation before a decision with impact —denial or increased cost of a loan, rejection or surcharge in an insurance policy. As a deployer, DESIGNATING that person is your obligation (Art. 26.2); that the system enables oversight is the provider's design (Art. 14). The oversight must be genuine, not an automatic rubber stamp. Evidence = designated person/role, their training and the review/override procedure, especially in unfavorable decisions.",
+      article: "Art. 26.2 (and Art. 14)",
       severity: "alta",
     },
     {
@@ -310,7 +310,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
       title: "Non-discrimination and proxy bias in credit",
       description:
         "The direct duty arises from anti-discrimination law (EU Directives 2000/43/EC on racial equality, 2004/113/EC on gender in goods and services, and national law): monitor that the scoring does not produce disparate impact on protected characteristics or through PROXIES (postcode as a proxy for origin or «redlining», name, device type, etc.). Also require from the provider evidence of its bias testing (a provider obligation, Art. 10, not yours as deployer). Evidence = your own disparate-impact analysis of the decisions + identification of possible proxies + bias documentation required from the provider.",
-      article: "Normativa antidiscriminación (Art. 10 = proveedor)",
+      article: "Anti-discrimination law (Art. 10 = provider)",
       severity: "alta",
       conditional: "Applies as a priority to credit scoring.",
     },
@@ -348,7 +348,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
       title: "Information to the person affected by the decision",
       description:
         "Inform the person that they are subject to a high-risk AI system (a deployer obligation, Art. 26.11) and provide the GDPR data-protection information: purpose, legal basis, logic involved and data processed (Arts. 13-14). Evidence = notice given to the applicant/insured and a data-protection information template.",
-      article: "Art. 26.11 (y GDPR Arts. 13-14)",
+      article: "Art. 26.11 (and GDPR Arts. 13-14)",
       severity: "media",
     },
     {
@@ -406,7 +406,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
         "Data governance and bias testing (require evidence from the provider)",
       description:
         "The governance of the training data and the bias testing on that data are the PROVIDER's design obligation (Art. 10): require from it documentation of the representativeness of the data, of the examination of possible biases and of the mitigation measures —critical in scoring/pricing, where a bias in the data carries over into decisions about people. Evidence = data governance and bias-testing documentation obtained from the provider and archived.",
-      article: "Art. 10 (proveedor)",
+      article: "Art. 10 (provider)",
       severity: "media",
     },
     {
@@ -415,7 +415,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
         "Accuracy, robustness and cybersecurity (require evidence from the provider)",
       description:
         "An appropriate level of accuracy, robustness and cybersecurity is the provider's design obligation (Art. 15): require from it the declared metrics and their limits —especially the reliability of the score/risk prediction— and monitor in real use that performance is maintained (Art. 26.5). Evidence = metrics and limits declared by the provider + a record of your verification in use.",
-      article: "Art. 15 (proveedor) + Art. 26.5",
+      article: "Art. 15 (provider) + Art. 26.5",
       severity: "media",
     },
     {
@@ -423,7 +423,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
       title: "Provider's technical documentation",
       description:
         "Require and keep as evidence the information the provider must supply to you: instructions for use and information derived from the technical documentation (Art. 11 / Annex IV), a provider obligation. It serves your FRIA, your human oversight and your accountability. Evidence = provider documentation and instructions archived.",
-      article: "Art. 11 / Annex IV (proveedor)",
+      article: "Art. 11 / Annex IV (provider)",
       severity: "media",
     },
     {
@@ -440,7 +440,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
       title: "Sectoral financial and insurance rules (still apply)",
       description:
         "Beyond the AI Act, your sectoral rules remain in force in parallel and may impose their own requirements: in credit, the Consumer Credit Directive (EU) 2023/2225 (creditworthiness-assessment obligation, rules on data use and the right to explanation/human review of scoring) and the Mortgage Credit Directive 2014/17/EU; in insurance, the IDD 2016/97 (distribution) and Solvency II (governance and risk management). This pack does not develop them; they are listed so that you verify how they fit with your sectoral supervisor. Evidence = identification of the applicable sectoral rules and confirmation of how they are addressed (or a supporting legal opinion).",
-      article: "CCD 2023/2225 · MCD 2014/17/UE · IDD 2016/97 · Solvencia II",
+      article: "CCD 2023/2225 · MCD 2014/17/UE · IDD 2016/97 · Solvency II",
       severity: "media",
       conditional:
         "The detail depends on the product (consumer credit, mortgage, insurance) and on the national transposition.",

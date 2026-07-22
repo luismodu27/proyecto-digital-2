@@ -181,7 +181,7 @@ export const RRHH_PACK_EN: PolicyPack = {
       title: "Effective human oversight in the decision",
       description:
         "Assign oversight to a competent person, trained and with authority to review, not follow or override the AI's recommendation before rejecting or advancing a candidate. As a deployer, DESIGNATING that person is your obligation (Art. 26.2); that the system enables oversight is the provider's design (Art. 14).",
-      article: "Art. 26.2 (y Art. 14)",
+      article: "Art. 26.2 (and Art. 14)",
       severity: "alta",
     },
     {
@@ -189,7 +189,7 @@ export const RRHH_PACK_EN: PolicyPack = {
       title: "Non-discrimination and bias control",
       description:
         "The employer's direct duty arises from anti-discrimination law (e.g. EU Directives 2000/78/EC, 2006/54/EC, 2000/43/EC and national law): monitor that the screening or ranking does not produce disparate impact on protected characteristics (sex, age, origin, disability) and document it. Also require from the provider evidence of its bias testing on the training data (a provider obligation, Art. 10, not yours as deployer).",
-      article: "Normativa antidiscriminación (Art. 10 = proveedor)",
+      article: "Anti-discrimination law (Art. 10 = provider)",
       severity: "alta",
     },
     {
@@ -197,7 +197,7 @@ export const RRHH_PACK_EN: PolicyPack = {
       title: "Decision not solely automated (GDPR)",
       description:
         "If there are decisions with a significant effect (e.g. automatic rejection), ensure genuine human intervention and the candidate's right to obtain an explanation and to contest the decision (GDPR Art. 22). The AI Act reinforces this with the affected person's right to a clear explanation of the system's role in decisions based on high-risk Annex III AI (Art. 86).",
-      article: "GDPR Art. 22 (y Art. 86)",
+      article: "GDPR Art. 22 (and Art. 86)",
       severity: "alta",
     },
     {
@@ -205,15 +205,15 @@ export const RRHH_PACK_EN: PolicyPack = {
       title: "Transparency and information to the candidate",
       description:
         "Inform candidates that they are subject to the use of a high-risk AI system (a deployer obligation, Art. 26.11) and provide the GDPR data-protection information: purpose, legal basis, logic involved and data processed (GDPR Arts. 13-14).",
-      article: "Art. 26.11 (y GDPR Arts. 13-14)",
+      article: "Art. 26.11 (and GDPR Arts. 13-14)",
       severity: "media",
     },
     {
       id: "transparencia-chatbot-emociones",
       title: "AI transparency in the interaction (Art. 50)",
       description:
-        "The deployer's OWN duties (applicable from 2 August 2026): if you expose candidates to an emotion-recognition or biometric-categorisation system, you must inform them of it (Art. 50.3); if you disseminate AI-generated or manipulated content (e.g. images or videos in process materials), you must label it as such (Art. 50.4). What you REQUIRE from the provider and keep as evidence: that a conversational chatbot discloses that one is speaking with an AI (Art. 50.1) and that it marks the content it generates in a machine-readable way (Art. 50.2). WARNING: inferring a person's emotions in the workplace (e.g. affect analysis or micro-expressions in video interviews) is a PROHIBITED practice except for medical or safety purposes (Art. 5.1.f); check whether your tool does this before using it.",
-      article: "Art. 50.3/50.4 (deployer) · 50.1/50.2 (proveedor) · prohib. 5.1.f",
+        "The deployer's OWN duties (applicable from 2 August 2026): if you expose candidates to an emotion-recognition or biometric-categorization system, you must inform them of it (Art. 50.3); if you disseminate AI-generated or manipulated content (e.g. images or videos in process materials), you must label it as such (Art. 50.4). What you REQUIRE from the provider and keep as evidence: that a conversational chatbot discloses that one is speaking with an AI (Art. 50.1) and that it marks the content it generates in a machine-readable way (Art. 50.2). WARNING: inferring a person's emotions in the workplace (e.g. affect analysis or micro-expressions in video interviews) is a PROHIBITED practice except for medical or safety purposes (Art. 5.1.f); check whether your tool does this before using it.",
+      article: "Art. 50.3/50.4 (deployer) · 50.1/50.2 (provider) · prohibition 5.1.f",
       severity: "alta",
       conditional:
         "Deployer transparency (Art. 50) applicable from 2 August 2026; the Art. 5.1.f prohibition is already in force.",
@@ -239,7 +239,7 @@ export const RRHH_PACK_EN: PolicyPack = {
       title: "Use in line with the provider's instructions and documentation",
       description:
         "Use the system in accordance with the provider's instructions for use (Art. 26.1). Require and keep as evidence the information the provider must supply to you (instructions for use and the Annex IV / Art. 11 information, which are provider obligations).",
-      article: "Art. 26.1 (Annex IV/Art. 11 = proveedor)",
+      article: "Art. 26.1 (Annex IV/Art. 11 = provider)",
       severity: "media",
     },
     {
@@ -255,7 +255,7 @@ export const RRHH_PACK_EN: PolicyPack = {
       title: "Accuracy, robustness and cybersecurity (require evidence)",
       description:
         "An appropriate level of accuracy, robustness and cybersecurity is the provider's design obligation (Art. 15): require from it the declared metrics and their limits, and monitor in real use that performance is maintained (Art. 26.5).",
-      article: "Art. 15 (proveedor) + Art. 26.5",
+      article: "Art. 15 (provider) + Art. 26.5",
       severity: "media",
     },
     {
@@ -271,7 +271,7 @@ export const RRHH_PACK_EN: PolicyPack = {
       title: "Retention of evidence of your own decisions",
       description:
         "Keep a record of the decisions and human reviews in the process (reason for the rejection/advancement, who reviewed and when) so as to be able to demonstrate accountability (GDPR Art. 5.2), respond to explanation requests (Art. 86) and defend yourself against possible discrimination claims.",
-      article: "GDPR Art. 5.2 (y Art. 86)",
+      article: "GDPR Art. 5.2 (and Art. 86)",
       severity: "media",
     },
     {

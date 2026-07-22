@@ -11,6 +11,7 @@
  */
 
 import type { RiskLevel } from "./mock-data";
+import type { Locale } from "./i18n/config";
 
 export type Choice = { value: string; label: string; hint?: string };
 
@@ -255,6 +256,65 @@ const CITATIONS: Record<RiskLevel, Citation[]> = {
   ],
 };
 
+/**
+ * Ramas de `rationale` que `classify()` ensambla (versión ES). Paralelo EXACTO a
+ * `RATIONALES_EN` (mismas 6 claves). El texto es idéntico al que antes vivía
+ * inline en `classify()`; se extrae aquí para seleccionar por locale sin cambiar
+ * la lógica. Ver `RATIONALES_EN` para el mapa rama → clave.
+ */
+export const RATIONALES = {
+  prohibited_classic:
+    "El sistema incurre en una o más prácticas prohibidas por el Art. 5. No puede usarse en la UE.",
+  prohibited_omnibus_in_force:
+    "El sistema incurre en una práctica prohibida por el Art. 5 —generación o manipulación de imágenes íntimas realistas no consentidas o de CSAM—, añadida por el Digital Omnibus y aplicable desde el 2 de diciembre de 2026. No puede ponerse en el mercado ni utilizarse en la UE. Con independencia del AI Act, generar o manipular este material ya constituye un ilícito penal (la Directiva 2011/93/UE para el CSAM; la Directiva (UE) 2024/1385 y la normativa penal nacional para las imágenes íntimas no consentidas).",
+  prohibited_omnibus_pending:
+    "El Digital Omnibus añadió al Art. 5 esta práctica —generación o manipulación de imágenes íntimas realistas no consentidas o de CSAM—, que será una práctica prohibida del EU AI Act aplicable desde el 2 de diciembre de 2026 (aún no en vigor a la fecha de esta evaluación). No obstante, generar o manipular este material ya es ilícito por derecho penal con independencia del AI Act (la Directiva 2011/93/UE para el CSAM; la Directiva (UE) 2024/1385 y la normativa penal nacional para las imágenes íntimas no consentidas), por lo que se clasifica como inaceptable. Valida esta clasificación con asesoría jurídica cualificada.",
+  high:
+    "El sistema opera en un área de alto riesgo del Anexo III y no le aplica ninguna excepción del Art. 6(3).",
+  limited:
+    "El sistema no es de alto riesgo, pero está sujeto a obligaciones de transparencia del Art. 50.",
+  minimal:
+    "El sistema no encaja en prácticas prohibidas, áreas de alto riesgo ni obligaciones de transparencia.",
+} as const;
+
+/**
+ * Citas extra (Directivas) que `classify()` añade a `CITATIONS.unacceptable`
+ * cuando la práctica marcada es EXCLUSIVAMENTE Omnibus (versión ES). Paralelo a
+ * `OMNIBUS_CITATIONS_EN`.
+ */
+export const OMNIBUS_CITATIONS: Citation[] = [
+  {
+    article: "Directiva 2011/93/UE",
+    text: "CSAM: ilícito penal con independencia del AI Act.",
+  },
+  {
+    article: "Directiva (UE) 2024/1385",
+    text: "Imágenes íntimas no consentidas: ilícito penal vía normativa nacional.",
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Selectores locale-aware (default ES, retrocompatibles)                     */
+/* -------------------------------------------------------------------------- */
+/* Las estructuras `_EN` están definidas más abajo en el archivo; se resuelven */
+/* en tiempo de llamada (module scope), por lo que el orden no importa.        */
+
+function questionsFor(locale: Locale): Question[] {
+  return locale === "en" ? RISK_QUESTIONS_EN : RISK_QUESTIONS;
+}
+function rationalesFor(locale: Locale): Record<keyof typeof RATIONALES, string> {
+  return locale === "en" ? RATIONALES_EN : RATIONALES;
+}
+function citationsFor(locale: Locale): Record<RiskLevel, Citation[]> {
+  return locale === "en" ? CITATIONS_EN : CITATIONS;
+}
+function omnibusCitationsFor(locale: Locale): Citation[] {
+  return locale === "en" ? OMNIBUS_CITATIONS_EN : OMNIBUS_CITATIONS;
+}
+function obligationsFor(locale: Locale): Record<RiskLevel, string[]> {
+  return locale === "en" ? OBLIGATIONS_BY_LEVEL_EN : OBLIGATIONS_BY_LEVEL;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Clasificación                                                              */
 /* -------------------------------------------------------------------------- */
@@ -272,7 +332,14 @@ export function isHighCandidate(answers: Answers): boolean {
 export function classify(
   answers: Answers,
   now: Date = new Date(),
+  locale: Locale = "es",
 ): ClassificationResult {
+  // Selección de TEXTO por locale (la lógica de clasificación no cambia).
+  const rationales = rationalesFor(locale);
+  const citations = citationsFor(locale);
+  const omnibusCitations = omnibusCitationsFor(locale);
+  const obligations = obligationsFor(locale);
+
   // 1) Prohibido (Art. 5) — cualquier práctica marcada, salvo "ninguna".
   const prohibited = (answers.prohibited ?? []).filter((v) => v !== NONE);
   if (prohibited.length > 0) {
@@ -284,33 +351,20 @@ export function classify(
     let rationale: string;
     if (!onlyOmnibus) {
       // Hay al menos una prohibición "clásica" (ya vigente desde 2-feb-2025).
-      rationale =
-        "El sistema incurre en una o más prácticas prohibidas por el Art. 5. No puede usarse en la UE.";
+      rationale = rationales.prohibited_classic;
     } else if (omnibusInForce) {
-      rationale =
-        "El sistema incurre en una práctica prohibida por el Art. 5 —generación o manipulación de imágenes íntimas realistas no consentidas o de CSAM—, añadida por el Digital Omnibus y aplicable desde el 2 de diciembre de 2026. No puede ponerse en el mercado ni utilizarse en la UE. Con independencia del AI Act, generar o manipular este material ya constituye un ilícito penal (la Directiva 2011/93/UE para el CSAM; la Directiva (UE) 2024/1385 y la normativa penal nacional para las imágenes íntimas no consentidas).";
+      rationale = rationales.prohibited_omnibus_in_force;
     } else {
-      rationale =
-        "El Digital Omnibus añadió al Art. 5 esta práctica —generación o manipulación de imágenes íntimas realistas no consentidas o de CSAM—, que será una práctica prohibida del EU AI Act aplicable desde el 2 de diciembre de 2026 (aún no en vigor a la fecha de esta evaluación). No obstante, generar o manipular este material ya es ilícito por derecho penal con independencia del AI Act (la Directiva 2011/93/UE para el CSAM; la Directiva (UE) 2024/1385 y la normativa penal nacional para las imágenes íntimas no consentidas), por lo que se clasifica como inaceptable. Valida esta clasificación con asesoría jurídica cualificada.";
+      rationale = rationales.prohibited_omnibus_pending;
     }
 
     return {
       level: "unacceptable",
       rationale,
       citations: onlyOmnibus
-        ? [
-            ...CITATIONS.unacceptable,
-            {
-              article: "Directiva 2011/93/UE",
-              text: "CSAM: ilícito penal con independencia del AI Act.",
-            },
-            {
-              article: "Directiva (UE) 2024/1385",
-              text: "Imágenes íntimas no consentidas: ilícito penal vía normativa nacional.",
-            },
-          ]
-        : CITATIONS.unacceptable,
-      obligations: OBLIGATIONS_BY_LEVEL.unacceptable,
+        ? [...citations.unacceptable, ...omnibusCitations]
+        : citations.unacceptable,
+      obligations: obligations.unacceptable,
     };
   }
 
@@ -326,10 +380,9 @@ export function classify(
     if (!exceptionApplies) {
       return {
         level: "high",
-        rationale:
-          "El sistema opera en un área de alto riesgo del Anexo III y no le aplica ninguna excepción del Art. 6(3).",
-        citations: CITATIONS.high,
-        obligations: OBLIGATIONS_BY_LEVEL.high,
+        rationale: rationales.high,
+        citations: citations.high,
+        obligations: obligations.high,
       };
     }
     // Si aplica excepción, cae a evaluar transparencia (limitado/mínimo).
@@ -340,27 +393,28 @@ export function classify(
   if (transparency.length > 0) {
     return {
       level: "limited",
-      rationale:
-        "El sistema no es de alto riesgo, pero está sujeto a obligaciones de transparencia del Art. 50.",
-      citations: CITATIONS.limited,
-      obligations: OBLIGATIONS_BY_LEVEL.limited,
+      rationale: rationales.limited,
+      citations: citations.limited,
+      obligations: obligations.limited,
     };
   }
 
   // 4) Riesgo mínimo.
   return {
     level: "minimal",
-    rationale:
-      "El sistema no encaja en prácticas prohibidas, áreas de alto riesgo ni obligaciones de transparencia.",
-    citations: CITATIONS.minimal,
-    obligations: OBLIGATIONS_BY_LEVEL.minimal,
+    rationale: rationales.minimal,
+    citations: citations.minimal,
+    obligations: obligations.minimal,
   };
 }
 
 /** Devuelve las preguntas visibles según las respuestas actuales. */
-export function visibleQuestions(answers: Answers): Question[] {
+export function visibleQuestions(
+  answers: Answers,
+  locale: Locale = "es",
+): Question[] {
   const highCandidate = isHighCandidate(answers);
-  return RISK_QUESTIONS.filter(
+  return questionsFor(locale).filter(
     (q) => !q.onlyIfHighCandidate || highCandidate,
   );
 }
@@ -407,7 +461,7 @@ export const RISK_QUESTIONS_EN: Question[] = [
       {
         value: "social_scoring",
         label: "Social scoring of individuals",
-        hint: "Evaluating or classifying people based on their social behaviour with a detrimental effect.",
+        hint: "Evaluating or classifying people based on their social behavior with a detrimental effect.",
       },
       {
         value: "predictive_policing",
@@ -417,7 +471,7 @@ export const RISK_QUESTIONS_EN: Question[] = [
       {
         value: "manipulation",
         label: "Subliminal or manipulative techniques",
-        hint: "That distort behaviour and may cause significant harm.",
+        hint: "That distort behavior and may cause significant harm.",
       },
       {
         value: "vulnerabilities",
@@ -426,7 +480,7 @@ export const RISK_QUESTIONS_EN: Question[] = [
       },
       {
         value: "biometric_categorization",
-        label: "Sensitive biometric categorisation",
+        label: "Sensitive biometric categorization",
         hint: "Inferring race, political opinions, religion, sexual orientation, etc.",
       },
       {
@@ -437,7 +491,7 @@ export const RISK_QUESTIONS_EN: Question[] = [
       {
         value: "rt_biometric",
         label: "Real-time remote biometric identification in publicly accessible spaces",
-        hint: "For law-enforcement purposes; the prohibition allows for narrowly defined exceptions and judicial authorisation.",
+        hint: "For law-enforcement purposes; the prohibition allows for narrowly defined exceptions and judicial authorization.",
       },
       {
         value: "face_scraping",
@@ -463,7 +517,7 @@ export const RISK_QUESTIONS_EN: Question[] = [
     help: "High-risk areas of Annex III. Choose the one that best describes the use.",
     type: "single",
     choices: [
-      { value: "biometrics", label: "Biometrics (permitted identification/categorisation)" },
+      { value: "biometrics", label: "Biometrics (permitted identification/categorization)" },
       { value: "critical_infra", label: "Critical infrastructure (safety component)" },
       { value: "education", label: "Education and vocational training" },
       {
@@ -500,7 +554,7 @@ export const RISK_QUESTIONS_EN: Question[] = [
       { value: "improve_human", label: "Improves the result of a previously completed human activity" },
       {
         value: "detect_patterns",
-        label: "Detects decision-making patterns without replacing human judgement",
+        label: "Detects decision-making patterns without replacing human judgment",
       },
       { value: "preparatory", label: "Is a preparatory task to an assessment" },
       {
@@ -530,7 +584,7 @@ export const RISK_QUESTIONS_EN: Question[] = [
       },
       {
         value: "emotion_or_biometric",
-        label: "Recognises emotions or performs biometric categorisation",
+        label: "Recognizes emotions or performs biometric categorization",
         hint: "Outside the prohibited cases.",
       },
       { value: NONE, label: "None of the above" },

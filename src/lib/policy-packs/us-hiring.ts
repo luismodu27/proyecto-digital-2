@@ -160,7 +160,7 @@ export const US_HIRING_PACK_EN: PolicyPack = {
       id: "identificar-aedt",
       title: "Identify which selection tools are an AEDT (indicative)",
       description:
-        "Review each recruiting tool (CV screening, ranking, scoring, certain video interviews) and determine whether it fits the definition of an «automated employment decision tool»: a computational process using machine learning, statistical modelling, AI or data analytics that issues a score, classification or recommendation that substitutes for or substantially weighs in the decision about a candidate or employee. That classification determines which LL144 obligations fall on you as an employer. Keep the reasoning for why a tool is or is not an AEDT.",
+        "Review each recruiting tool (CV screening, ranking, scoring, certain video interviews) and determine whether it fits the definition of an «automated employment decision tool»: a computational process using machine learning, statistical modeling, AI or data analytics that issues a score, classification or recommendation that substitutes for or substantially weighs in the decision about a candidate or employee. That classification determines which LL144 obligations fall on you as an employer. Keep the reasoning for why a tool is or is not an AEDT.",
       article: "NYC LL144 · 6 RCNY §5-300",
       severity: "alta",
       conditional:
@@ -255,7 +255,7 @@ export const US_HIRING_PACK_EN: PolicyPack = {
         "Keep evidence of audits, notices and consents (indicative)",
       description:
         "Maintain a traceable record per tool and per candidate: date and auditor of the most recent bias audit, URL of the published summary, notice templates and deliveries, AIVIA consents, deletion requests, and the evidence of the bias testing required from the provider. It is the basis for responding to a claim or to an investigation by the DCWP (NYC) or the IDHR (Illinois). Attesta acts as the system of record for that declared evidence, not as a certifier.",
-      article: "Transversal · 6 RCNY §§5-301 a 5-303; 820 ILCS 42; 775 ILCS 5",
+      article: "Cross-cutting · 6 RCNY §§5-301 to 5-303; 820 ILCS 42; 775 ILCS 5",
       severity: "media",
       conditional: "Applies whenever you use AI in hiring in the US.",
     },

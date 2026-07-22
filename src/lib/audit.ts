@@ -6,16 +6,22 @@
  * español y sin ruido técnico.
  */
 import {
-  RISK_LABEL,
-  ROLE_LABEL,
+  riskLabel,
+  roleLabel,
   type AuditEntry,
   type AuditAction,
   type MemberRole,
   type RiskLevel,
 } from "./mock-data";
-import { REGULATORY_EVENTS } from "./regulatory-watch";
+import { REGULATORY_EVENTS, REGULATORY_EVENTS_EN } from "./regulatory-watch";
+import type { Locale } from "./i18n/config";
 
 const EVENT_TITLE = new Map(REGULATORY_EVENTS.map((e) => [e.id, e.title]));
+const EVENT_TITLE_EN = new Map(REGULATORY_EVENTS_EN.map((e) => [e.id, e.title]));
+const EVENT_TITLE_BY_LOCALE: Record<Locale, Map<string, string>> = {
+  es: EVENT_TITLE,
+  en: EVENT_TITLE_EN,
+};
 
 /** Metadatos por tabla de negocio. */
 export const ENTITY_META: Record<
@@ -190,9 +196,30 @@ export const DERIVE_LABEL_PREFIX: Record<"es" | "en", { level: string; role: str
   en: { level: "level", role: "role" },
 };
 
+/* -------------------------------------------------------------------------- */
+/* Selectores locale-aware (default ES, retrocompatibles)                     */
+/* -------------------------------------------------------------------------- */
+
+/** Metadatos por entidad, por locale (para el ensamblado del feed en Fase 2). */
+export const ENTITY_META_BY_LOCALE: Record<Locale, typeof ENTITY_META> = {
+  es: ENTITY_META,
+  en: ENTITY_META_EN,
+};
+/** Metadatos por acción, por locale. */
+export const ACTION_META_BY_LOCALE: Record<Locale, typeof ACTION_META> = {
+  es: ACTION_META,
+  en: ACTION_META_EN,
+};
+/** Nombres de columnas, por locale. */
+export const FIELD_LABELS_BY_LOCALE: Record<Locale, typeof FIELD_LABELS> = {
+  es: FIELD_LABELS,
+  en: FIELD_LABELS_EN,
+};
+
 /** Resumen legible de la fila afectada (nombre del sistema, requisito, etc.). */
-export function deriveLabel(table: string, data: Json): string {
+export function deriveLabel(table: string, data: Json, locale: Locale = "es"): string {
   if (!data) return "";
+  const prefix = DERIVE_LABEL_PREFIX[locale];
   switch (table) {
     case "ai_systems":
       return String(data.name ?? data.code ?? "");
@@ -200,15 +227,15 @@ export function deriveLabel(table: string, data: Json): string {
       return String(data.requirement ?? "");
     case "risk_assessments": {
       const lvl = data.level as RiskLevel | undefined;
-      return lvl ? `nivel ${RISK_LABEL[lvl]}` : "";
+      return lvl ? `${prefix.level} ${riskLabel(lvl, locale)}` : "";
     }
     case "memberships": {
       const role = data.role as MemberRole | undefined;
-      return role ? `rol ${ROLE_LABEL[role]}` : "";
+      return role ? `${prefix.role} ${roleLabel(role, locale)}` : "";
     }
     case "regulatory_acks": {
       const eid = data.event_id as string | undefined;
-      const title = eid ? EVENT_TITLE.get(eid) : undefined;
+      const title = eid ? EVENT_TITLE_BY_LOCALE[locale].get(eid) : undefined;
       return title ? `«${title}»` : (eid ?? "");
     }
     case "action_tasks":
@@ -219,9 +246,9 @@ export function deriveLabel(table: string, data: Json): string {
 }
 
 /** Campos (humanos) cambiados en un update, sin ruido técnico. */
-export function deriveChanged(table: string, diff: Json): string[] {
+export function deriveChanged(table: string, diff: Json, locale: Locale = "es"): string[] {
   if (!diff) return [];
-  const labels = FIELD_LABELS[table] ?? {};
+  const labels = FIELD_LABELS_BY_LOCALE[locale][table] ?? {};
   return Object.keys(diff)
     .filter((k) => !NOISE.has(k))
     .map((k) => labels[k] ?? k);
@@ -241,15 +268,16 @@ export type RawAudit = {
 };
 
 /** Convierte una fila cruda del RPC en una entrada legible. */
-export function toAuditEntry(r: RawAudit): AuditEntry {
+export function toAuditEntry(r: RawAudit, locale: Locale = "es"): AuditEntry {
   return {
     id: r.id,
     actorEmail: r.actor_email ?? null,
     table: r.table_name,
     rowId: r.row_id,
     action: r.action,
-    label: deriveLabel(r.table_name, r.new_data ?? r.old_data),
-    changed: r.action === "update" ? deriveChanged(r.table_name, r.diff) : [],
+    label: deriveLabel(r.table_name, r.new_data ?? r.old_data, locale),
+    changed:
+      r.action === "update" ? deriveChanged(r.table_name, r.diff, locale) : [],
     at: String(r.at),
   };
 }
