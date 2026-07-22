@@ -2,51 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useT } from "@/lib/i18n/provider";
 import { SealMark } from "./SealMark";
-
-const MESSAGES: Record<string, string> = {
-  "system-created": "Sistema registrado en el inventario.",
-  "system-updated": "Sistema actualizado.",
-  "system-deleted": "Sistema eliminado.",
-  "system-error": "No se pudo guardar el sistema. Inténtalo de nuevo.",
-  seeded: "Datos de ejemplo cargados.",
-  "seed-error": "No se pudieron cargar los datos de ejemplo. Inténtalo de nuevo.",
-  "pack-applied": "Policy pack RRHH aplicado al sistema.",
-  "pack-error": "No se pudo aplicar el policy pack. Inténtalo de nuevo.",
-  "gap-created": "Brecha añadida.",
-  "gap-deleted": "Brecha eliminada.",
-  "gap-updated": "Estado de la brecha actualizado.",
-  "gap-error": "No se pudo completar la acción. Inténtalo de nuevo.",
-  "bias-saved": "Evidencia de auditoría de sesgo guardada.",
-  "bias-error": "No se pudo guardar la auditoría de sesgo. Inténtalo de nuevo.",
-  "member-added": "Miembro añadido al equipo.",
-  "member-invited": "Invitación enviada.",
-  "member-exists": "Esa persona ya es miembro del equipo.",
-  "role-updated": "Rol actualizado.",
-  "member-removed": "Miembro eliminado del equipo.",
-  "invite-revoked": "Invitación revocada.",
-  "team-forbidden": "No tienes permisos para esta acción.",
-  "team-lastowner": "Debe quedar al menos un propietario.",
-  "team-bademail": "Introduce un correo válido.",
-  "team-demo": "La gestión del equipo requiere conectar tu organización.",
-  "team-error": "No se pudo completar la acción. Inténtalo de nuevo.",
-  "cand-approved": "Candidato publicado en el radar regulatorio.",
-  "cand-saved": "Borrador del candidato guardado.",
-  "cand-rejected": "Candidato descartado.",
-  "cand-demo": "La validación de candidatos requiere conectar tu organización.",
-  "cand-error": "No se pudo completar la acción. Revisa e inténtalo de nuevo.",
-  "jur-saved": "Jurisdicciones actualizadas.",
-  "jur-demo": "Configurar jurisdicciones requiere conectar tu organización.",
-  "jur-error": "No se pudieron guardar las jurisdicciones.",
-  "task-created": "Tarea añadida al plan.",
-  "task-deleted": "Tarea eliminada.",
-  "task-demo": "Editar el plan requiere conectar tu organización.",
-  "task-error": "No se pudo completar la acción. Inténtalo de nuevo.",
-  "vigia-ok": "Vigía ejecutado. Revisa la bandeja si detectó cambios.",
-  "vigia-demo": "El Vigía requiere conectar tu organización.",
-  "vigia-denied": "Solo el equipo de validación de Attesta puede ejecutar el Vigía.",
-  "vigia-error": "El Vigía no pudo completar la revisión. Inténtalo de nuevo.",
-};
 
 /** Claves que son ERRORES o bloqueos → se pintan en tono de peligro (rojo). */
 const DANGER = new Set([
@@ -98,6 +55,8 @@ export function Toaster() {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const t = useT();
+  const MESSAGES = t.dashboard.toasts as Record<string, string>;
   const key = params.get("toast");
 
   const [msg, setMsg] = useState("");
@@ -118,9 +77,9 @@ export function Toaster() {
       scroll: false,
     });
 
-    const t = setTimeout(() => setShow(false), 4000);
-    return () => clearTimeout(t);
-  }, [key, params, pathname, router]);
+    const timer = setTimeout(() => setShow(false), 4000);
+    return () => clearTimeout(timer);
+  }, [key, params, pathname, router, MESSAGES]);
 
   if (!msg) return null;
 
@@ -171,7 +130,7 @@ export function Toaster() {
         <button
           type="button"
           onClick={() => setShow(false)}
-          aria-label="Cerrar notificación"
+          aria-label={t.dashboard.toastClose}
           className="ml-1 -mr-1 grid size-6 shrink-0 place-items-center rounded-md text-muted transition-colors hover:bg-paper-sunken hover:text-ink"
         >
           <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden>

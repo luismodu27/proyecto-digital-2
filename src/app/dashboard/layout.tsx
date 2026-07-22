@@ -8,6 +8,9 @@ import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
 import { getUserOrgs } from "@/lib/data";
 import { getOrgPlan, type PlanTier } from "@/lib/billing/plan";
 import type { UserOrg } from "@/lib/mock-data";
+import { I18nProvider } from "@/lib/i18n/provider";
+import { getDictionary } from "@/lib/i18n";
+import { resolveLocale } from "@/lib/i18n/resolve";
 
 export default async function DashboardLayout({
   children,
@@ -43,28 +46,33 @@ export default async function DashboardLayout({
     showGuide = meta.guide_seen !== true;
   }
 
+  const locale = await resolveLocale();
+  const dict = getDictionary(locale);
+
   return (
-    <div className="flex min-h-dvh flex-col bg-paper md:flex-row">
-      <a
-        href="#contenido"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
-      >
-        Saltar al contenido
-      </a>
-      <Sidebar
-        userEmail={userEmail}
-        userName={userName}
-        plan={plan}
-        orgs={orgs}
-        activeOrgId={activeOrgId}
-      />
-      <main id="contenido" className="flex-1 md:h-dvh md:overflow-y-auto">
-        <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">{children}</div>
-      </main>
-      {showGuide && <WelcomeGuide show userId={userId} />}
-      <Suspense>
-        <Toaster />
-      </Suspense>
-    </div>
+    <I18nProvider locale={locale} dict={dict}>
+      <div className="flex min-h-dvh flex-col bg-paper md:flex-row">
+        <a
+          href="#contenido"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
+        >
+          {dict.dashboard.skipToContent}
+        </a>
+        <Sidebar
+          userEmail={userEmail}
+          userName={userName}
+          plan={plan}
+          orgs={orgs}
+          activeOrgId={activeOrgId}
+        />
+        <main id="contenido" className="flex-1 md:h-dvh md:overflow-y-auto">
+          <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">{children}</div>
+        </main>
+        {showGuide && <WelcomeGuide show userId={userId} />}
+        <Suspense>
+          <Toaster />
+        </Suspense>
+      </div>
+    </I18nProvider>
   );
 }

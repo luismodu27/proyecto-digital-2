@@ -73,7 +73,16 @@ export function StatCard({
   return <div className={cls}>{inner}</div>;
 }
 
-export function Meter({ value, target }: { value: number; target?: number }) {
+export function Meter({
+  value,
+  target,
+  targetLabel,
+}: {
+  value: number;
+  target?: number;
+  /** Texto del tooltip del marcador de objetivo (i18n; lo pasa el caller). */
+  targetLabel?: string;
+}) {
   const color =
     value >= 75
       ? "bg-brand"
@@ -91,7 +100,7 @@ export function Meter({ value, target }: { value: number; target?: number }) {
           <span
             className="absolute inset-y-0 w-0.5 -translate-x-1/2 rounded-full bg-ink/45"
             style={{ left: `${target}%` }}
-            title={`Objetivo: ${target}%`}
+            title={targetLabel ?? `Objetivo: ${target}%`}
             aria-hidden
           />
         )}

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { signOut, switchAccount } from "@/lib/auth/actions";
 import { switchOrg } from "@/lib/data/org-actions";
+import { useT, useLocale } from "@/lib/i18n/provider";
+import { LocaleToggleCookie } from "@/components/ui/LocaleToggleCookie";
 import type { UserOrg } from "@/lib/mock-data";
 
 /** Iniciales a partir del nombre (2 palabras) o, si no hay, del correo. */
@@ -28,6 +30,9 @@ export function AccountMenu({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const t = useT();
+  const locale = useLocale();
+  const acc = t.dashboard.account;
 
   useEffect(() => {
     if (!open) return;
@@ -93,7 +98,7 @@ export function AccountMenu({
           {orgs.length > 1 && (
             <div className="border-b border-line">
               <p className="px-4 pb-1 pt-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
-                Organización
+                {acc.organization}
               </p>
               {orgs.map((o) =>
                 o.id === activeOrgId ? (
@@ -129,6 +134,15 @@ export function AccountMenu({
             </div>
           )}
 
+          <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-2">
+            <span className="text-sm text-ink-soft">{t.locale.label}</span>
+            <LocaleToggleCookie
+              locale={locale}
+              labelToEn={t.locale.switchToEn}
+              labelToEs={t.locale.switchToEs}
+            />
+          </div>
+
           <Link
             href="/dashboard/facturacion"
             role="menuitem"
@@ -144,7 +158,7 @@ export function AccountMenu({
                 strokeLinejoin="round"
               />
             </svg>
-            Plan y facturación
+            {acc.billing}
           </Link>
 
           <Link
@@ -162,7 +176,7 @@ export function AccountMenu({
                 strokeLinejoin="round"
               />
             </svg>
-            Ir al sitio público
+            {acc.goToSite}
           </Link>
 
           <form action={switchAccount} className="border-t border-line">
@@ -180,7 +194,7 @@ export function AccountMenu({
                   strokeLinejoin="round"
                 />
               </svg>
-              Cambiar de cuenta
+              {acc.switchAccount}
             </button>
           </form>
 
@@ -199,7 +213,7 @@ export function AccountMenu({
                   strokeLinejoin="round"
                 />
               </svg>
-              Cerrar sesión
+              {acc.signOut}
             </button>
           </form>
         </div>
