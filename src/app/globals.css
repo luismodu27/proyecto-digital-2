@@ -135,6 +135,8 @@
     font-family: var(--font-sans), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Evita huérfanos/viudas en párrafos largos (mejora progresiva). */
+    text-wrap: pretty;
   }
   ::selection {
     background: var(--color-brand);
@@ -142,7 +144,11 @@
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display), Georgia, serif;
-    letter-spacing: -0.01em;
+    /* Display serif ceñido y refinado: tracking negativo sutil, optical sizing
+       (Fraunces es variable con eje opsz) y saltos de línea equilibrados. */
+    letter-spacing: -0.014em;
+    font-optical-sizing: auto;
+    text-wrap: balance;
   }
 }
 
