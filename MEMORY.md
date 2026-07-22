@@ -127,6 +127,17 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **P2 (1er PR): sección de evidencia "Proof" + eyebrow de categoría + corrección de mono.**
+  Continuación del estudio del landing. (1) Nueva sección **`Evidence`** tras "Cómo funciona": showcase de evidencia
+  declarada (dossier PDF mock, entrada de audit-log inmutable con visual de cadena/sello, anillo SVG "% listo" al 78%),
+  encuadre "evidencia que tu organización declara, no un veredicto nuestro" + disclaimer. Copy con vocabulario ya vetado
+  (evidencia declarada, preparación para auditoría, clasificación orientativa); sin términos prohibidos. (2) **Decisión de
+  titular** (checkpoint del fundador): se **mantiene** el H1 "Contrata con IA sin miedo a la auditoría" (gancho emocional +
+  cuña RRHH) y el claim de categoría pasa al **eyebrow** ("El sistema de registro de tu gobernanza de IA · RRHH"). (3)
+  **Corrección:** las pills de la rejilla `Coverage` pasaron de `font-mono` a sans, para honrar la decisión del fundador de
+  NO usar mono en artículos/IDs (P1 las había dejado en mono por descuido). Bilingüe ES/EN; lint+tsc+build verdes.
+  **Pendiente P2:** elevar visual del hero (item 7), refinar sistema tipográfico (item 10).
+
 - **2026-07-22** · **Estudio comparativo del landing + mejoras P1 (contra Vanta/Drata/Secureframe y Linear/Stripe/Vercel).**
   A petición del fundador se hizo una crítica del landing comparándolo con las mejores páginas del sector y de diseño (dos
   agentes de investigación) + radiografía de nuestro landing. Veredicto: ya está en el tramo alto; faltan movimientos

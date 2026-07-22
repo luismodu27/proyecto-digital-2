@@ -22,7 +22,7 @@ export function Coverage({ t }: { t: Dictionary["landing"]["coverage"] }) {
             <div className="flex items-start justify-between gap-3">
               <h3 className="font-display text-lg font-semibold text-ink">{f.name}</h3>
               {f.tag && (
-                <span className="shrink-0 rounded-full bg-brand-soft px-2.5 py-1 font-mono text-[10px] font-medium leading-none text-brand-strong">
+                <span className="shrink-0 rounded-full bg-brand-soft px-2.5 py-1 text-[11px] font-semibold leading-none text-brand-strong">
                   {f.tag}
                 </span>
               )}

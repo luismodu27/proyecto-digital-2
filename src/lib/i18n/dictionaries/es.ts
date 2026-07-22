@@ -46,7 +46,7 @@ export const es = {
 
   landing: {
     hero: {
-      badge: "Gobernanza de IA para Recursos Humanos · EU AI Act",
+      badge: "El sistema de registro de tu gobernanza de IA · RRHH",
       titleLine1: "Contrata con IA",
       titleLine2: "sin miedo a la auditoría.",
       bodyBefore:
@@ -336,6 +336,36 @@ export const es = {
           body: "Genera su dossier de evidencia con un clic y el radar regulatorio queda vigilando: cuando algo cambia, se lo avisa antes del plazo.",
         },
       ],
+    },
+
+    evidence: {
+      eyebrow: "La prueba",
+      title: "La evidencia que enseñas al auditor.",
+      intro:
+        "Cada acción deja rastro: un dossier por sistema, un registro que nadie puede alterar y tu preparación medida al día. Es evidencia que tu organización declara, no un veredicto nuestro.",
+      dossier: {
+        label: "Dossier de gobernanza",
+        file: "Cribado de CVs.pdf",
+        caption: "Generado con tus datos, listo para el auditor.",
+        lines: [
+          "Clasificación de riesgo · Alto (Anexo III)",
+          "Obligaciones del deployer · Arts. 14 · 26 · 50",
+          "Evidencia declarada · 12 controles",
+        ],
+      },
+      audit: {
+        label: "Registro inmutable",
+        actor: "María G.",
+        action: "actualizó la evaluación de riesgo",
+        time: "hace 2 h",
+        sealNote: "Encadenado e inalterable: nadie puede editarlo ni borrarlo.",
+      },
+      readiness: {
+        label: "Preparación para auditoría",
+        value: 78,
+        caption: "Tu organización declara un 78% de preparación.",
+      },
+      note: "Evidencia declarada por tu organización y clasificación orientativa — no es certificación ni asesoría legal.",
     },
 
     honestidad: {

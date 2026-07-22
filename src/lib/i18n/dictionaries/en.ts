@@ -46,7 +46,7 @@ export const en: Dictionary = {
 
   landing: {
     hero: {
-      badge: "AI governance for Human Resources · EU AI Act",
+      badge: "The system of record for your AI governance · HR",
       titleLine1: "Hire with AI",
       titleLine2: "without fearing the audit.",
       bodyBefore:
@@ -336,6 +336,36 @@ export const en: Dictionary = {
           body: "It generates its evidence dossier in one click and the regulatory radar keeps watch: when something changes, it warns before the deadline.",
         },
       ],
+    },
+
+    evidence: {
+      eyebrow: "The proof",
+      title: "The evidence you hand the auditor.",
+      intro:
+        "Every action leaves a trail: a dossier per system, a record no one can alter, and your readiness measured daily. It's evidence your organization declares — not a verdict from us.",
+      dossier: {
+        label: "Governance dossier",
+        file: "CV screening.pdf",
+        caption: "Generated from your data, ready for the auditor.",
+        lines: [
+          "Risk classification · High (Annex III)",
+          "Deployer obligations · Arts. 14 · 26 · 50",
+          "Declared evidence · 12 controls",
+        ],
+      },
+      audit: {
+        label: "Immutable record",
+        actor: "María G.",
+        action: "updated the risk assessment",
+        time: "2 h ago",
+        sealNote: "Chained and tamper-evident: no one can edit or delete it.",
+      },
+      readiness: {
+        label: "Audit readiness",
+        value: 78,
+        caption: "Your organization declares 78% readiness.",
+      },
+      note: "Evidence declared by your organization and orientative classification — not certification or legal advice.",
     },
 
     honestidad: {
