@@ -217,6 +217,27 @@ Queda pendiente:
 - **Estados vacíos menores**: `riesgo/page.tsx` muestra las 4 secciones con "0 sistemas" en cuenta nueva.
 - **TODOs de andamiaje**: `context.ts:21` (selector de org activa), `analista/voyage.ts` (placeholder de embeddings).
 
+### 2.4 · i18n "INGLÉS TOTAL" — traducir TAMBIÉN el contenido regulatorio (en curso, 2026-07-22)
+El fundador pidió que la versión inglesa NO deje NADA en español y funcione igual que la española.
+Reconciliación con la regla dura: el contenido legal SÍ se traduce, pero **cada texto legal lo valida el
+`compliance-domain-expert`** (no traducción mecánica). Patrón: cada módulo mantiene el ES canónico + añade
+`_EN` validado + selector locale (`*_BY_LOCALE`/`fn(x,locale)`, default ES); la fachada de datos resuelve el
+locale por cookie internamente.
+- ✅ **Contenido `_EN` validado por experto:** policy-packs (5), risk-assessment, recommendations,
+  regulatory-watch, audit. (commits `add6c02`, `d5ee3b9`).
+- ✅ **Wiring Fase 1** (API locale en los 5 módulos) `e99e83a`; **Fase 2A** (fachada locale-aware +
+  reportes/plan/packs/riesgo/actividad) `10c4347`.
+- 🔄 **En curso:** chrome interno de páginas regulatorias (packs page, dossier/informe secciones+KPIs,
+  actividad ChainStatusCard/formatAgo) usando selectores locale; y `mock-data` demo + ruta `/demo`.
+- ⏳ **Pendiente — NARRATIVAS legales hand-written → experto + wiring:** resumen ejecutivo del dossier (s1–s5),
+  `RATIONALE_FALLBACK`, `summaryParagraph` del informe, hero/briefing "Aclaración de plazos" de vigilancia,
+  LegalNotes sin `_BY_LOCALE`, y el contenido regulatorio de las muestras de `mock-data` (SAMPLE gaps/assessments).
+- ⏳ **Limpieza final:** `Anexo`→`Annex` y `Directiva…UE/CE`→`Directive…EU/EC` dentro de las estructuras `_EN`;
+  **escaneo integral** de la versión EN hasta cero español; normalizar ortografía a americana.
+- **Datos persistidos** (gap_items ya guardados, rationale de evaluaciones históricas, eventos publicados) se
+  quedan en el idioma de guardado — no son retraducibles; es correcto (solo el contenido curado/computado en
+  display sale por locale).
+
 ### 2.3 · Internacionalización ES/EN — Inc 0–5 HECHOS (en la rama, 2026-07-22)
 Toda la UI (web pública + auth + dashboard) es bilingüe ES/EN. **En la rama `claude/init-3bwfhm`, NO desplegado a `main`**
 (el fundador decidió publicar cuando dé el visto bueno). Ver MEMORY §10 (2026-07-22). ✅ Inc 0–3 web pública + SEO,
