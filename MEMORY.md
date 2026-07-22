@@ -127,6 +127,13 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **P2 item 10: refinamiento tipográfico (cierra P2).** Ajuste conservador en `@layer base` de
+  `globals.css` (afecta landing + dashboard): titulares con `text-wrap: balance` + `font-optical-sizing: auto` (Fraunces
+  es variable con eje opsz) + tracking `-0.014em`; `body` con `text-wrap: pretty` (evita huérfanos). Verificado en landing
+  y dashboard demo, sin regresiones. **Con esto se cierra P2** (items 7, 8, 9, 10). Todo el estudio del landing
+  (P1 + P2) está en producción. **Pendientes de landing anotados** (fuera del estudio): card de California en la rejilla
+  de cobertura; alinear `regulatory-watch.ts` con Colorado en radar; sign-off de abogado UE/EE.UU. pre-GA.
+
 - **2026-07-22** · **P2 item 7: hero elevado.** Visual del hero mejorado (sin copy regulatorio): (1) el mock del
   producto flota ahora sobre un **suelo atmosférico** de gradiente (técnica Linear) con tokens `--color-brand-soft`/
   `--color-seal-soft` (theme-aware, nada de hex sueltos); (2) indicador **"En vivo"** con punto de pulso (`motion-safe:
