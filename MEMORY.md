@@ -127,6 +127,18 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Landing: card de California + chip de Colorado actualizado en la rejilla de cobertura.** Cierra dos
+  pendientes anotados del estudio del landing. (1) Se añadió **California (IA en empleo)** como 6ª card de "Cobertura de
+  marcos" (va en la rejilla de "en vigor" porque FEHA/ADS rige desde 2025-10-01 y CPPA/ADMT desde 2026-01-01): tag
+  `ADS (FEHA) · ADMT (CPPA)`, body "Reúne la evidencia declarada de tus sistemas de decisión automatizada y conserva los
+  registros que el empleo exige." (2) El chip de radar de Colorado pasó de `Colorado AI Act (SB 205)` (impreciso) a
+  **`Colorado AI Act (SB 26-189 · 2027)`**: SB 26-189 (firmada 14-may-2026) derogó y reescribió la SB 24-205 original y la
+  efectividad es 1-ene-2027 → sigue en radar, no en la rejilla. Ambas cadenas **validadas por `compliance-domain-expert`**
+  (número de bill confirmado SB 26-189, no SB 25-189; cero copy prohibido; encuadre deployer). `regulatory-watch.ts` YA
+  reflejaba Colorado correctamente (evento `us-co-aiact-effective` fechado 2027-01-01) y California (marcos `us-ca-feha` +
+  `us-ca-admt`), así que solo faltaba el landing. Bilingüe ES/EN; lint+tsc+build verdes. **Pendiente de landing restante:**
+  sign-off de abogado UE/EE.UU. de las etiquetas de marcos/artículos pre-GA.
+
 - **2026-07-22** · **P2 item 10: refinamiento tipográfico (cierra P2).** Ajuste conservador en `@layer base` de
   `globals.css` (afecta landing + dashboard): titulares con `text-wrap: balance` + `font-optical-sizing: auto` (Fraunces
   es variable con eje opsz) + tracking `-0.014em`; `body` con `text-wrap: pretty` (evita huérfanos). Verificado en landing

@@ -246,9 +246,14 @@ export const en: Dictionary = {
           body: "Document your AI-use notice and safeguards across hiring decisions.",
           tag: "AI Video Interview Act · HB 3773",
         },
+        {
+          name: "California (AI in employment)",
+          body: "Gather the declared evidence for your automated-decision systems and keep the records employment requires.",
+          tag: "ADS (FEHA) · ADMT (CPPA)",
+        },
       ],
       radarLabel: "On the compliance radar",
-      radar: ["Colorado AI Act (SB 205)", "Texas TRAIGA"],
+      radar: ["Colorado AI Act (SB 26-189 · 2027)", "Texas TRAIGA"],
       note: "Audit preparation and orientative classification — not certification or legal advice.",
     },
 

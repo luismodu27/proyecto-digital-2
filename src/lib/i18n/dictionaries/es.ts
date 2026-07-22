@@ -246,9 +246,14 @@ export const es = {
           body: "Documenta el aviso de uso de IA y las salvaguardas en selección.",
           tag: "AI Video Interview Act · HB 3773",
         },
+        {
+          name: "California (IA en empleo)",
+          body: "Reúne la evidencia declarada de tus sistemas de decisión automatizada y conserva los registros que el empleo exige.",
+          tag: "ADS (FEHA) · ADMT (CPPA)",
+        },
       ],
       radarLabel: "En el radar de vigilancia",
-      radar: ["Colorado AI Act (SB 205)", "Texas TRAIGA"],
+      radar: ["Colorado AI Act (SB 26-189 · 2027)", "Texas TRAIGA"],
       note: "Preparación para auditoría y clasificación orientativa — no es certificación ni asesoría legal.",
     },
 
