@@ -853,6 +853,16 @@ export type RegAck = {
 
 /** Acuses de ejemplo (modo demo), indexados por id de evento regulatorio. */
 export const SAMPLE_REG_ACKS: Record<string, RegAck> = {
+  "eu-transparency-art50": {
+    status: "planned",
+    note: "Aviso de IA a candidatos en revisión con RRHH.",
+    at: "2026-07-18T09:00:00Z",
+  },
+  "eu-highrisk-annex-iii": {
+    status: "planned",
+    note: "Gap assessment de alto riesgo agendado.",
+    at: "2026-07-10T09:00:00Z",
+  },
   "eu-omnibus-highrisk-delay": {
     status: "reviewed",
     note: "Revisado por Legal; plan de preparación de alto riesgo en marcha.",
@@ -871,6 +881,16 @@ export const SAMPLE_REG_ACKS: Record<string, RegAck> = {
  * y `at` idénticos.
  */
 export const SAMPLE_REG_ACKS_EN: Record<string, RegAck> = {
+  "eu-transparency-art50": {
+    status: "planned",
+    note: "Candidate AI notice under review with HR.",
+    at: "2026-07-18T09:00:00Z",
+  },
+  "eu-highrisk-annex-iii": {
+    status: "planned",
+    note: "High-risk gap assessment scheduled.",
+    at: "2026-07-10T09:00:00Z",
+  },
   "eu-omnibus-highrisk-delay": {
     status: "reviewed",
     note: "Reviewed by Legal; high-risk readiness plan under way.",
