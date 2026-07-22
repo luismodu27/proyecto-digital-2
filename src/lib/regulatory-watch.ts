@@ -78,6 +78,20 @@ export const REG_KIND_LABEL: Record<RegKind, string> = {
   enforcement: "Sanción",
 };
 
+/**
+ * EN — event-kind labels (parallel to REG_KIND_LABEL, same keys/enum values).
+ * Consumers (ES today): vigilancia/page.tsx (kind pill), candidatos/page.tsx
+ * (candidate kind), CandidateReviewControls.tsx (kind selector). To surface EN,
+ * pick this map when locale === "en"; logic/enum values are unchanged.
+ */
+export const REG_KIND_LABEL_EN: Record<RegKind, string> = {
+  deadline: "Deadline",
+  guidance: "Guidance",
+  standard: "Standard",
+  amendment: "Amendment",
+  enforcement: "Enforcement",
+};
+
 export const FRAMEWORK_META: Record<RegFramework, FrameworkMeta> = {
   "eu-ai-act": {
     label: "EU AI Act",
@@ -117,6 +131,55 @@ export const FRAMEWORK_META: Record<RegFramework, FrameworkMeta> = {
   },
 };
 
+/**
+ * EN — framework metadata (parallel to FRAMEWORK_META). Same keys, same
+ * `jurisdiction` codes; only human-facing `label`, `short`, `jurisdictionLabel`
+ * are translated. Proper names of laws/frameworks are kept (EU AI Act, NYC Local
+ * Law 144, Colorado AI Act, Illinois AI Video Interview Act, Illinois Human
+ * Rights Act, EEOC). Consumers (ES today): vigilancia/page.tsx (framework meta +
+ * jurisdiction), CandidateReviewControls.tsx (framework selector), dashboard/
+ * page.tsx & informe/page.tsx (read `.jurisdiction` only — code, no translation
+ * needed there). Wire by choosing this map when locale === "en".
+ */
+export const FRAMEWORK_META_EN: Record<RegFramework, FrameworkMeta> = {
+  "eu-ai-act": {
+    label: "EU AI Act",
+    short: "EU AI Act",
+    jurisdiction: "eu",
+    jurisdictionLabel: "European Union",
+  },
+  "us-nyc-ll144": {
+    label: "NYC Local Law 144 (AEDT)",
+    short: "NYC LL144",
+    jurisdiction: "us-ny",
+    jurisdictionLabel: "US — New York",
+  },
+  "us-co-aiact": {
+    label: "Colorado AI Act (SB 26-189)",
+    short: "Colorado AI Act",
+    jurisdiction: "us-co",
+    jurisdictionLabel: "US — Colorado",
+  },
+  "us-il-aivia": {
+    label: "Illinois AI Video Interview Act",
+    short: "IL AIVIA",
+    jurisdiction: "us-il",
+    jurisdictionLabel: "US — Illinois",
+  },
+  "us-il-hra": {
+    label: "Illinois Human Rights Act (HB 3773)",
+    short: "IL HRA",
+    jurisdiction: "us-il",
+    jurisdictionLabel: "US — Illinois",
+  },
+  "us-eeoc": {
+    label: "EEOC — federal guidance",
+    short: "EEOC",
+    jurisdiction: "us-federal",
+    jurisdictionLabel: "US — Federal",
+  },
+};
+
 /** Nombre del marco (con reserva segura para valores no conocidos de BD). */
 export function frameworkLabel(framework: string): string {
   return FRAMEWORK_META[framework as RegFramework]?.label ?? framework;
@@ -145,6 +208,20 @@ export const JURISDICTION_LABEL: Record<RegJurisdiction, string> = {
   "us-federal": "EE. UU. — Federal",
 };
 
+/**
+ * EN — jurisdiction labels for filter chips (parallel to JURISDICTION_LABEL,
+ * same keys). Consumers (ES today): vigilancia/page.tsx (filter chips + single-
+ * jurisdiction suffix), JurisdictionSettings.tsx (toggle labels). Wire by
+ * choosing this map when locale === "en".
+ */
+export const JURISDICTION_LABEL_EN: Record<RegJurisdiction, string> = {
+  eu: "European Union",
+  "us-ny": "US — New York",
+  "us-co": "US — Colorado",
+  "us-il": "US — Illinois",
+  "us-federal": "US — Federal",
+};
+
 /** Compatibilidad: mapa simple id de marco → nombre. */
 export const FRAMEWORK_LABEL: Record<RegFramework, string> = {
   "eu-ai-act": FRAMEWORK_META["eu-ai-act"].label,
@@ -153,6 +230,21 @@ export const FRAMEWORK_LABEL: Record<RegFramework, string> = {
   "us-il-aivia": FRAMEWORK_META["us-il-aivia"].label,
   "us-il-hra": FRAMEWORK_META["us-il-hra"].label,
   "us-eeoc": FRAMEWORK_META["us-eeoc"].label,
+};
+
+/**
+ * EN — simple framework-id → name map (parallel to FRAMEWORK_LABEL). Names are
+ * identical to the ES map (proper names, not translated); provided for symmetry
+ * so EN consumers can index one shape. Consumers (ES today): fuentes/page.tsx
+ * (source framework pill), candidatos/page.tsx (candidate framework pill).
+ */
+export const FRAMEWORK_LABEL_EN: Record<RegFramework, string> = {
+  "eu-ai-act": FRAMEWORK_META_EN["eu-ai-act"].label,
+  "us-nyc-ll144": FRAMEWORK_META_EN["us-nyc-ll144"].label,
+  "us-co-aiact": FRAMEWORK_META_EN["us-co-aiact"].label,
+  "us-il-aivia": FRAMEWORK_META_EN["us-il-aivia"].label,
+  "us-il-hra": FRAMEWORK_META_EN["us-il-hra"].label,
+  "us-eeoc": FRAMEWORK_META_EN["us-eeoc"].label,
 };
 
 /* -------------------------------------------------------------------------- */
@@ -484,6 +576,353 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     ],
     source: {
       label: "EEOC — Artificial Intelligence and the ADA (página oficial)",
+      url: "https://www.eeoc.gov/eeoc-disability-related-resources/artificial-intelligence-and-ada",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Catálogo curado — versión EN VALIDADA (paralela a REGULATORY_EVENTS)        */
+/* -------------------------------------------------------------------------- */
+/**
+ * EN parallel of REGULATORY_EVENTS. IDENTICAL to the ES array in: `id`, `date`,
+ * `kind`, `framework`, `articles`, `scope`, and `source.url`. Only user-facing
+ * prose is translated: `title`, `summary`, `impact`, `action`, and the
+ * descriptive part of `source.label` (official document/body names kept, e.g.
+ * "Regulation (EU) 2024/1689", "Council of the EU", "DCWP"). `articles` are
+ * kept byte-identical (legal citation tokens; a mistranslated cite is a
+ * liability) — a few carry a Spanish parenthetical (e.g. "Cap. V (gobernanza)",
+ * "820 ILCS 42/5 (consentimiento e información)"); left untouched on purpose,
+ * flag for the expert if the English UI should localise citation descriptors.
+ *
+ * Consumers (ES today): vigilancia/page.tsx, dashboard/page.tsx and
+ * informe/page.tsx read title/summary/impact/action (and scope/date via the
+ * relevance engine below). Wire by selecting REGULATORY_EVENTS_EN when
+ * locale === "en"; the engine + merge helpers are locale-agnostic and unchanged.
+ *
+ * Deployer framing preserved; no prohibited copy (no certified/compliant/
+ * guarantees). Legal fidelity: dates/articles not strengthened or softened.
+ */
+export const REGULATORY_EVENTS_EN: RegulatoryEvent[] = [
+  {
+    id: "eu-entry-into-force",
+    date: "2024-08-01",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "The EU AI Act enters into force",
+    summary:
+      "Regulation (EU) 2024/1689 was published on 12 July 2024 and entered into force on 1 August 2024, starting the staggered application timeline.",
+    impact:
+      "Marks the starting point: from here on, every deadline runs. No substantive obligation is enforceable yet, but it is already wise to inventory and classify your systems.",
+    action:
+      "Keep your AI system inventory up to date and classify its risk level to get ahead of the upcoming deadlines.",
+    articles: ["Art. 113"],
+    source: {
+      label: "Regulation (EU) 2024/1689 — EUR-Lex",
+      url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    },
+    scope: { all: true },
+  },
+  {
+    id: "eu-prohibited-practices",
+    date: "2025-02-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "Prohibited AI practices (Art. 5) become applicable",
+    summary:
+      "Since 2 February 2025, the prohibitions in Art. 5 are enforceable, together with the AI literacy obligation (Art. 4).",
+    impact:
+      "Critical for HR: inferring a person's emotions in the workplace (e.g. affect analysis or micro-expressions in video interviews) is a PROHIBITED practice except for medical or safety purposes. If a hiring tool does this, it cannot be used.",
+    action:
+      "Check whether any tool (especially video interviewing) infers emotions; if so, discard it or disable that feature. Ensure basic AI literacy for your team (Art. 4).",
+    articles: ["Art. 5", "Art. 4", "Art. 5.1.f"],
+    source: {
+      label: "Commission Guidelines on prohibited AI practices (Feb 2025)",
+      url: "https://digital-strategy.ec.europa.eu/en/library/commission-publishes-guidelines-prohibited-artificial-intelligence-ai-practices-defined-ai-act",
+    },
+    scope: { all: true },
+  },
+  {
+    id: "eu-gpai-governance",
+    date: "2025-08-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "General-purpose AI (GPAI) models, governance and penalties",
+    summary:
+      "Since 2 August 2025, the obligations for providers of general-purpose AI models (Chapter V), the governance framework (authorities) and the penalties regime apply.",
+    impact:
+      "Affects mainly providers of foundation models, not directly a deployer. But it establishes the penalties framework and the competent authorities: non-compliance now has consequences.",
+    action:
+      "If you use general-purpose models (e.g. a chatbot built on a commercial LLM), ask your provider for the GPAI compliance documentation and keep it as evidence.",
+    articles: ["Cap. V (Arts. 51–56)", "Cap. VII (gobernanza)", "Arts. 99–100"],
+    source: {
+      label: "AI Act application timeline — European Commission",
+      url: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+    },
+    scope: { all: true },
+  },
+  {
+    id: "eu-omnibus-highrisk-delay",
+    date: "2026-06-29",
+    kind: "amendment",
+    framework: "eu-ai-act",
+    title: "Digital Omnibus: the high-risk deadline is postponed",
+    summary:
+      "The Digital Omnibus package (adopted in 2026) reschedules the application of the high-risk obligations in Annex III: from 2 August 2026 to 2 December 2027 (and to 2 August 2028 for AI embedded in Annex I products).",
+    impact:
+      "Good news with a caveat: you have more time to prepare your high-risk systems, but the obligation is unavoidable. It is a window to get ready, not a cancellation.",
+    action:
+      "Use the window: close the gap assessment for your high-risk systems and gather the evidence calmly before December 2027.",
+    articles: ["Art. 113", "Anexo III"],
+    source: {
+      label: "Council of the EU — final green light to the Digital Omnibus (29 Jun 2026)",
+      url: "https://www.consilium.europa.eu/en/press/press-releases/2026/06/29/artificial-intelligence-council-gives-final-green-light-to-simplify-and-streamline-rules/",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "eu-transparency-art50",
+    date: "2026-08-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "General application of the Regulation and transparency (Art. 50)",
+    summary:
+      "Since 2 August 2026 the Regulation applies in general, including the transparency obligations of Art. 50. The Digital Omnibus did NOT postpone this date for the deployer: the only relief is a grace period until 2 December 2026 for the PROVIDER's machine-readable marking mechanism (Art. 50.2), and only for generative AI already on the market before 2 August 2026.",
+    impact:
+      "Relevant for HR: if you use a conversational chatbot with candidates, you must inform them that they are interacting with an AI. AI-generated content must also be labelled. Note: the Art. 50.2 marking extension belongs to the provider, not to you — your duty as a deployer to warn the candidate that they are talking to an AI still applies on 2 August 2026, with no extension.",
+    action:
+      "Check that your recruitment chatbot clearly discloses that it is an AI. Review where you generate or manipulate content with AI so you can label it.",
+    articles: ["Art. 50", "Art. 50.2"],
+    source: {
+      label: "Art. 50 — AI Act Service Desk (European Commission)",
+      url: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50",
+    },
+    scope: { riskLevels: ["limited", "high"] },
+  },
+  {
+    id: "eu-omnibus-art5-intimate",
+    date: "2026-12-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "New prohibited practice (Art. 5): non-consensual intimate images and CSAM",
+    summary:
+      "The Digital Omnibus added two new prohibited practices to Art. 5: AI systems that generate or manipulate realistic intimate images of an identifiable person without their freely given, specific, informed and unambiguous consent, and those that generate or manipulate child sexual abuse material (CSAM, within the meaning of Directive 2011/93/EU). The prohibition applies from 2 December 2026 (transitional period set by the Omnibus).",
+    impact:
+      "A cross-cutting prohibition, not HR-specific: in practice it does NOT affect hiring tools (CV screening, ranking, interviews, chatbots), unless your organisation generates or manipulates images or video of people with AI. It is worth knowing because it is an unacceptable practice, subject to the highest penalties in the Regulation (up to €35M or 7% of worldwide turnover).",
+    action:
+      "Confirm that no system in your inventory generates or manipulates images or video of people (deepfakes) without safeguards. If you later add generative image/video AI, require the provider to give evidence of technical measures that prevent these uses. For CV screening and interviews, it is usually enough to record that this does not apply.",
+    articles: ["Art. 5", "Directiva 2011/93/UE"],
+    source: {
+      label: "Council of the EU — final green light to the Digital Omnibus (29 Jun 2026)",
+      url: "https://www.consilium.europa.eu/en/press/press-releases/2026/06/29/artificial-intelligence-council-gives-final-green-light-to-simplify-and-streamline-rules/",
+    },
+    scope: { all: true },
+  },
+  {
+    id: "eu-highrisk-annex-iii",
+    date: "2027-12-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "High-risk obligations under Annex III become applicable",
+    summary:
+      "Since 2 December 2027 (deadline postponed by the Digital Omnibus) the obligations for high-risk systems under Annex III are enforceable, including the area of employment and worker management.",
+    impact:
+      "The central deadline for HR: your hiring systems (CV screening, ranking, tests) are high-risk under Annex III (employment). As a deployer, the obligations of Art. 26 apply to you: human oversight, informing workers, keeping logs and use in accordance with instructions. You must also require the provider's documentation (Arts. 9–15) and the CE marking.",
+    action:
+      "Run the gap assessment and apply the HR policy pack to each high-risk system. Assign human oversight, inform workers and require the technical documentation from the provider.",
+    articles: ["Art. 6", "Anexo III", "Art. 26", "Arts. 9–15"],
+    source: {
+      label: "Regulation (EU) 2024/1689, Annex III — EUR-Lex",
+      url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "eu-highrisk-annex-i",
+    date: "2028-08-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "High-risk embedded in regulated products (Annex I)",
+    summary:
+      "Since 2 August 2028, the obligations apply for high-risk systems that are safety components of products already regulated by EU harmonisation legislation (Annex I).",
+    impact:
+      "Uncommon in a pure HR SaaS; it is more relevant if your AI is embedded in machinery, medical devices or other regulated products.",
+    action:
+      "If any system is a safety component of a regulated product, plan its conformity for this later deadline.",
+    articles: ["Art. 6.1", "Anexo I"],
+    source: {
+      label: "AI Act application timeline — European Commission",
+      url: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── NYC Local Law 144 (AEDT) ──
+  {
+    id: "us-nyc-ll144-enforcement",
+    date: "2023-07-05",
+    kind: "enforcement",
+    framework: "us-nyc-ll144",
+    title: "NYC LL144 in force: bias audit, notice and publication (AEDT)",
+    summary:
+      "New York City's Local Law 144 of 2021 prohibits employers and employment agencies from using an automated employment decision tool (AEDT) unless three requirements are met: (1) the tool passed a bias audit within the past year, (2) a summary of that audit's results is publicly available, and (3) candidates/employees were notified. Enforcement by the DCWP began on 5 July 2023.",
+    impact:
+      "Applies directly to our ICP: if you use CV screening, candidate ranking or video interviews with people applying for a job in NYC (or NYC residents), the OBLIGATION falls on YOU as the employer-deployer, not on the vendor. Key nuance: although an independent auditor runs the bias audit, it is the employer who must ensure it exists, is recent (<12 months) and is published. It is not enough for the provider to say its tool is 'fair'.",
+    action:
+      "Identify which hiring tools fall within the AEDT definition. Commission (or require evidence of) an independent bias audit less than 1 year old, publish the summary of results on your website, and give the candidate notice at least 10 business days in advance (stating that an AEDT will be used, how, and what data is collected). Keep the evidence.",
+    articles: [
+      "NYC Admin. Code §§ 20-870 a 20-874 (Local Law 144 de 2021)",
+      "6 RCNY §§ 5-300 a 5-304 (Regla final DCWP, 6-abr-2023)",
+    ],
+    source: {
+      label:
+        "DCWP — Automated Employment Decision Tools (New York City)",
+      url: "https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-nyc-ll144-annual-audit",
+    date: "2023-07-05",
+    kind: "deadline",
+    framework: "us-nyc-ll144",
+    title: "NYC LL144: the bias audit expires every 12 months (renewal)",
+    summary:
+      "The rule requires the AEDT bias audit to be no more than one year old relative to its use. In practice it is a RECURRING obligation: each tool must be re-audited within its own 12-month cycle to keep being used lawfully in NYC.",
+    impact:
+      "It is not a fixed calendar deadline for everyone, but a ROLLING expiry per tool from the date of its last audit. For a deployer it means a continuous currency check: an expired audit turns use of the tool into non-compliance, with civil penalties of 500 to 1,500 USD per day and per violation (DCWP).",
+    action:
+      "Keep a record of the last bias-audit date for each AEDT and schedule its renewal before it turns 12 months old. In the Attesta inventory, tie the audit date to each hiring system and treat it as evidence with an expiry.",
+    articles: [
+      "6 RCNY § 5-301 (bias audit)",
+      "6 RCNY § 5-302 (publicación del resumen de resultados)",
+    ],
+    source: {
+      label: "DCWP — AEDT FAQ (official New York City PDF)",
+      url: "https://www.nyc.gov/assets/dca/downloads/pdf/about/DCWP-AEDT-FAQ.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── Colorado AI Act (repealed and rewritten by SB 26-189) ──
+  {
+    id: "us-co-aiact-effective",
+    date: "2027-01-01",
+    kind: "deadline",
+    framework: "us-co-aiact",
+    title: "Colorado: effectiveness of the rewritten AI law (SB 26-189, ADMT)",
+    summary:
+      "The original Colorado AI Act (SB 24-205, C.R.S. §§ 6-1-1701 to 6-1-1707) was postponed and then REPEALED AND REWRITTEN by SB 26-189 (signed 14 May 2026). The new version abandons the European-style 'high-risk' framework (it removes the duty of care, the mandatory risk-management programmes and the annual impact assessments) and regulates 'automated decision technology' (ADMT) used in consequential decisions, with developer documentation obligations, consumer notice, data access and a request for human review. Effective: 1 January 2027.",
+    impact:
+      "Employment is a 'consequential decision', so if you operate in Colorado and use AI in hiring, this law reaches you as a deployer/user. BUT beware of outdated material: much of what is published describes SB 24-205 (duty of care + impact assessments), which is NO LONGER the law in force. The regime applicable in 2027 is SB 26-189, lighter on risk burdens but focused on transparency, notice and human review. It is a window, not urgency.",
+    action:
+      "Do not yet invest in heavy documentation assuming the old Colorado model. Keep this event under watch and reconfirm the final content of SB 26-189 (consumer notice, right to human review, documentation required from the provider) as the consolidated text and the Attorney General's rules are published. Flag your hiring systems used in Colorado for review before 2027.",
+    articles: [
+      "SB 26-189 (deroga y reescribe C.R.S. § 6-1-1701 y ss.) — numeración consolidada a reconfirmar",
+    ],
+    source: {
+      label: "Colorado General Assembly — SB 26-189 (official legislative source)",
+      url: "https://leg.colorado.gov/bills/sb26-189",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-co-aiact-repeal-reenact",
+    date: "2026-05-14",
+    kind: "amendment",
+    framework: "us-co-aiact",
+    title: "Colorado repeals the original 'high-risk' model and rewrites it",
+    summary:
+      "SB 24-205 (signed 17 May 2024) was to take effect on 1 Feb 2026; it was postponed to 30 Jun 2026 (SB 25B-004, 28 Aug 2025) and finally SB 26-189 (14 May 2026) repealed and rewrote the framework, removing the 'high-risk' classification, the duty of care against algorithmic discrimination, the risk-management programmes and the annual impact assessments, and postponing the effective date to 1 Jan 2027.",
+    impact:
+      "A context record to avoid confusing versions. If a consultant or document cites 'Colorado's high-risk deployer obligations' (duty of care, annual impact assessment, report to the AG within 90 days), it is describing the REPEALED law. Attesta must reflect the current state so as not to give outdated guidance.",
+    action:
+      "Treat SB 24-205 as historical. Any mapping of Attesta controls to 'Colorado' must point to the SB 26-189 regime (ADMT), not to the original high-risk model.",
+    articles: [
+      "SB 24-205 (2024, derogada)",
+      "SB 25B-004 (2025, aplazamiento a 30-jun-2026)",
+      "SB 26-189 (2026, derogación y reescritura; efectiva 1-ene-2027)",
+    ],
+    source: {
+      label: "Colorado General Assembly — SB 24-205 (official history and status)",
+      url: "https://leg.colorado.gov/bills/sb24-205",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── Illinois — AI Video Interview Act (820 ILCS 42) ──
+  {
+    id: "us-il-aivia-inforce",
+    date: "2020-01-01",
+    kind: "enforcement",
+    framework: "us-il-aivia",
+    title: "Illinois AI Video Interview Act: consent and information",
+    summary:
+      "The Artificial Intelligence Video Interview Act (820 ILCS 42) has been in force since 1 Jan 2020. An employer that uses AI to analyse candidates' video interviews must, BEFORE the interview: (1) notify the candidate that AI may be used to analyse the video, (2) explain how the AI works and what types of characteristics it evaluates, and (3) obtain their consent. It cannot use AI to evaluate someone who did not consent and must delete the videos within 30 days if the candidate so requests.",
+    impact:
+      "Applies squarely to AI-analysed video interviewing, one of our core use cases. The obligation is the employer-deployer's. It is low operational burden (notice + explanation + consent + deletion on request) but a silent violation that is easy to commit if the video-interview provider does not give you the explanatory text.",
+    action:
+      "Before each AI-analysed video interview: deliver the notice and the explanation of what the system evaluates, collect consent and offer an alternative to those who do not consent. Enable video deletion within 30 days on request. Keep the consent as evidence.",
+    articles: [
+      "820 ILCS 42/5 (consentimiento e información)",
+      "820 ILCS 42/10 (límite de con quién se comparte el vídeo)",
+      "820 ILCS 42/15 (borrado en 30 días a petición)",
+      "820 ILCS 42/20 (reporte demográfico si solo se usa IA para cribar a entrevista presencial)",
+    ],
+    source: {
+      label: "Illinois General Assembly — 820 ILCS 42 (official legal text)",
+      url: "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=4015&ChapterID=68",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── Illinois — Human Rights Act amended (HB 3773) ──
+  {
+    id: "us-il-hra-ai-amendment",
+    date: "2026-01-01",
+    kind: "amendment",
+    framework: "us-il-hra",
+    title: "Illinois HRA (HB 3773): discriminatory AI in employment + notice",
+    summary:
+      "HB 3773 amends the Illinois Human Rights Act (775 ILCS 5) and, since 1 Jan 2026, expressly prohibits an employer from using AI that has the effect of discriminating by protected class in recruitment, hiring, promotion, training, dismissal, discipline and other conditions of employment. It also prohibits using ZIP code as a proxy for protected class and requires NOTIFYING candidates and employees when AI is used in those decisions. The IDHR's detailed regulations were temporarily withdrawn, but the statutory obligations remain in force.",
+    impact:
+      "It is an anti-discrimination law applied to employment AI, not an audit regime. It fits our European framing: bias in hiring tools is tackled via anti-discrimination law (here the IHRA), not as a 'provider' obligation. The deployer's burden: understand how its tool decides, avoid discriminatory effects (including the ZIP proxy) and notify the use of AI. The uncertainty is in the exact FORM of the notice, because the detailed rules were withdrawn.",
+    action:
+      "If you hire in Illinois: inventory where AI intervenes in employment decisions, require the provider to give evidence of bias/adverse-impact testing, avoid proxy variables (e.g. ZIP code), and prepare a clear notice of AI use for candidates and employees. Watch for the IDHR regulations to reappear so you can adjust the notice format.",
+    articles: [
+      "775 ILCS 5/2-102 (prácticas de empleo, enmendado)",
+      "775 ILCS 5/1-103 (definiciones, IA y ZIP como proxy)",
+      "HB 3773 (Public Act 103-0804)",
+    ],
+    source: {
+      label:
+        "Illinois General Assembly — Illinois Human Rights Act (775 ILCS 5)",
+      url: "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=2266&ChapterID=64",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── EEOC (federal) — context: guidance withdrawn, not law ──
+  {
+    id: "us-eeoc-ai-guidance-withdrawn",
+    date: "2025-01-01",
+    kind: "guidance",
+    framework: "us-eeoc",
+    title: "EEOC: AI guidance (Title VII/ADA) WITHDRAWN (not law)",
+    summary:
+      "The EEOC had published technical assistance on the use of AI in employment: May 2022 on the ADA ('screen out' of people with disabilities) and May 2023 on Title VII (adverse impact). In January 2025 the EEOC WITHDREW that material from eeoc.gov; the detailed ADA document returns 404 and the surviving page is a shell. Important: it was GUIDANCE, not law, and its withdrawal does NOT change the underlying laws.",
+    impact:
+      "For the deployer, the honest message is: the federal anti-discrimination laws (Title VII, ADA, ADEA) STILL apply to AI hiring tools; what disappeared is the AI-specific interpretive guidance. There is no new federal obligation to 'audit AI', but a tool that produces adverse impact or screens out people with disabilities is still a federal legal risk. Do not over-state that 'there is no longer a federal rule'.",
+    action:
+      "Do not rely on the withdrawn guidance as a source. Keep the good practices it required (adverse-impact testing, reasonable accommodations for candidates with disabilities, accessible alternatives) because the underlying laws did not change. Watch for possible re-issues of the guidance.",
+    articles: [
+      "Title VII (42 U.S.C. § 2000e y ss.)",
+      "ADA (42 U.S.C. § 12101 y ss.)",
+      "ADEA (29 U.S.C. § 621 y ss.)",
+    ],
+    source: {
+      label: "EEOC — Artificial Intelligence and the ADA (official page)",
       url: "https://www.eeoc.gov/eeoc-disability-related-resources/artificial-intelligence-and-ada",
     },
     scope: { riskLevels: ["high"] },

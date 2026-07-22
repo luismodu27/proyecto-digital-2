@@ -366,3 +366,253 @@ export function visibleQuestions(answers: Answers): Question[] {
 }
 
 export { has };
+
+/* ========================================================================== */
+/* CONTENIDO EN INGLÉS (validado por compliance-domain-expert)                */
+/* -------------------------------------------------------------------------- */
+/* Estructuras paralelas `_EN` con la MISMA forma, claves, ids, valores de     */
+/* enum y números de artículo/Anexo que las de arriba. SOLO cambia el texto    */
+/* orientado al usuario. La LÓGICA (classify, visibleQuestions, isHighCandidate*/
+/* HIGH_DOMAINS, REAL_EXCEPTIONS, fechas Omnibus) NO se duplica: opera igual   */
+/* en ambos idiomas porque solo depende de ids/valores, no de etiquetas.       */
+/*                                                                             */
+/* WIRING (para el frontend-engineer):                                         */
+/*  - RISK_QUESTIONS_EN      -> alterna con RISK_QUESTIONS en visibleQuestions()*/
+/*                             y en RiskWizard.tsx (render del cuestionario).   */
+/*  - OBLIGATIONS_BY_LEVEL_EN-> alterna con OBLIGATIONS_BY_LEVEL en classify()  */
+/*                             (result.obligations) y en dossier/page.tsx       */
+/*                             (import directo, indexado por `level`).          */
+/*  - CITATIONS_EN           -> alterna con el CITATIONS privado en classify()  */
+/*                             (result.citations).                              */
+/*  - RATIONALES_EN          -> las 6 ramas de rationale que classify() ensambla*/
+/*                             inline en ES; el engineer parametriza classify() */
+/*                             por locale seleccionando la clave que corresponde*/
+/*                             a cada rama (mapa de ramas -> clave abajo).       */
+/*  - OMNIBUS_CITATIONS_EN   -> las 2 citas extra (Directivas) que classify()   */
+/*                             añade a CITATIONS.unacceptable cuando la práctica */
+/*                             marcada es EXCLUSIVAMENTE Omnibus (intimate/csam).*/
+/*                                                                             */
+/* NOTA: la `rationale` histórica persistida (assessment_history.rationale /   */
+/* a.rationale) se guardó en el idioma del momento; NO es retraducible aquí.   */
+/* ========================================================================== */
+
+export const RISK_QUESTIONS_EN: Question[] = [
+  {
+    id: "prohibited",
+    step: 1,
+    title: "Does the system carry out any of these practices?",
+    help: "Practices prohibited by Article 5 of the AI Act. Check all that apply.",
+    type: "multi",
+    choices: [
+      {
+        value: "social_scoring",
+        label: "Social scoring of individuals",
+        hint: "Evaluating or classifying people based on their social behaviour with a detrimental effect.",
+      },
+      {
+        value: "predictive_policing",
+        label: "Predicting crime based solely on profiling",
+        hint: "Assessing the risk of a person committing a criminal offence based solely on their profile or personality traits.",
+      },
+      {
+        value: "manipulation",
+        label: "Subliminal or manipulative techniques",
+        hint: "That distort behaviour and may cause significant harm.",
+      },
+      {
+        value: "vulnerabilities",
+        label: "Exploitation of vulnerabilities",
+        hint: "Based on age, disability or socio-economic situation.",
+      },
+      {
+        value: "biometric_categorization",
+        label: "Sensitive biometric categorisation",
+        hint: "Inferring race, political opinions, religion, sexual orientation, etc.",
+      },
+      {
+        value: "emotion_work_edu",
+        label: "Emotion recognition in the workplace or education",
+        hint: "Except for medical or safety reasons.",
+      },
+      {
+        value: "rt_biometric",
+        label: "Real-time remote biometric identification in publicly accessible spaces",
+        hint: "For law-enforcement purposes; the prohibition allows for narrowly defined exceptions and judicial authorisation.",
+      },
+      {
+        value: "face_scraping",
+        label: "Untargeted scraping of facial images to build databases",
+      },
+      {
+        value: "intimate_images",
+        label: "Generation of non-consensual realistic intimate images",
+        hint: "Systems whose purpose is to create or manipulate realistic intimate images or video of an identifiable person without their consent. Do NOT check this for normal recruitment use (CV screening, ranking, interviews): only if the system produces such material.",
+      },
+      {
+        value: "csam",
+        label: "Generation of child sexual abuse material (CSAM)",
+        hint: "Systems that generate or manipulate CSAM (within the meaning of Directive 2011/93/EU). Not applicable to HR use of AI; check it only if the system produces this material.",
+      },
+      { value: NONE, label: "None of the above" },
+    ],
+  },
+  {
+    id: "domain",
+    step: 2,
+    title: "In what area is the system mainly used?",
+    help: "High-risk areas of Annex III. Choose the one that best describes the use.",
+    type: "single",
+    choices: [
+      { value: "biometrics", label: "Biometrics (permitted identification/categorisation)" },
+      { value: "critical_infra", label: "Critical infrastructure (safety component)" },
+      { value: "education", label: "Education and vocational training" },
+      {
+        value: "employment",
+        label: "Employment and workers management",
+        hint: "Recruitment, CV screening, promotion, task allocation.",
+      },
+      {
+        value: "credit",
+        label: "Creditworthiness / credit scoring",
+        hint: "Access to essential private services.",
+      },
+      { value: "insurance", label: "Life and health insurance (risk and pricing)" },
+      { value: "public_services", label: "Public services and benefits / emergencies" },
+      { value: "law_enforcement", label: "Law enforcement" },
+      { value: "migration", label: "Migration, asylum and border control" },
+      { value: "justice", label: "Administration of justice and democratic processes" },
+      {
+        value: NONE,
+        label: "None / general business use",
+        hint: "Marketing, internal productivity, content recommendation, etc.",
+      },
+    ],
+  },
+  {
+    id: "exception",
+    step: 3,
+    title: "Does any exception under Article 6(3) apply?",
+    help: "A system in an Annex III area is NOT high-risk if it only does the following and does not profile natural persons.",
+    type: "single",
+    onlyIfHighCandidate: true,
+    choices: [
+      { value: "narrow_task", label: "Performs a narrow procedural task" },
+      { value: "improve_human", label: "Improves the result of a previously completed human activity" },
+      {
+        value: "detect_patterns",
+        label: "Detects decision-making patterns without replacing human judgement",
+      },
+      { value: "preparatory", label: "Is a preparatory task to an assessment" },
+      {
+        value: "profiling",
+        label: "Profiles natural persons or influences decisions about them",
+        hint: "If it profiles individuals, NO exception applies: it remains high-risk.",
+      },
+      { value: NONE, label: "None: it influences the final decision" },
+    ],
+  },
+  {
+    id: "transparency",
+    step: 4,
+    title: "Does the system do any of the following towards people?",
+    help: "Transparency obligations under Article 50. Check all that apply.",
+    type: "multi",
+    choices: [
+      {
+        value: "interacts",
+        label: "Interacts directly with natural persons",
+        hint: "Chatbots, conversational assistants.",
+      },
+      {
+        value: "synthetic",
+        label: "Generates or manipulates synthetic content",
+        hint: "Image, audio, video or text (incl. deepfakes).",
+      },
+      {
+        value: "emotion_or_biometric",
+        label: "Recognises emotions or performs biometric categorisation",
+        hint: "Outside the prohibited cases.",
+      },
+      { value: NONE, label: "None of the above" },
+    ],
+  },
+];
+
+export const OBLIGATIONS_BY_LEVEL_EN: Record<RiskLevel, string[]> = {
+  unacceptable: [
+    "Prohibited: the system cannot be placed on the market or used in the EU.",
+    "Cease use and document the withdrawal.",
+  ],
+  high: [
+    // Deployer's OWN duties (our ICP).
+    "Own duty: effective human oversight over the decision (Art. 26(2), supported by the provider's design under Art. 14).",
+    "Own duty: deployer obligations (Art. 26) — use in accordance with the instructions for use, information to affected persons and to workers, keeping of logs and monitoring of operation.",
+    "Own duty: transparency towards affected persons (Art. 50) and, where applicable, registration in the EU database (Art. 49) and a fundamental rights impact assessment (Art. 27).",
+    // PROVIDER obligations: the deployer requires and retains them as evidence.
+    "Require and retain provider evidence: risk-management system (Art. 9), data governance and quality (Art. 10), Annex IV technical documentation (Art. 11), logging (Art. 12), instructions for use (Art. 13), accuracy/robustness/cybersecurity (Art. 15) and the CE marking / EU Declaration of Conformity.",
+  ],
+  limited: [
+    "Inform people that they are interacting with an AI system (Art. 50).",
+    "Label AI-generated or AI-manipulated content as artificial.",
+  ],
+  minimal: [
+    "No specific obligations under the AI Act.",
+    "Voluntary codes of conduct are recommended (Art. 95).",
+  ],
+};
+
+export const CITATIONS_EN: Record<RiskLevel, Citation[]> = {
+  unacceptable: [
+    { article: "Art. 5", text: "Prohibited AI practices." },
+  ],
+  high: [
+    { article: "Art. 6 + Annex III", text: "Classification as a high-risk system." },
+    { article: "Arts. 9–15", text: "Requirements for high-risk systems." },
+  ],
+  limited: [
+    { article: "Art. 50", text: "Transparency obligations." },
+  ],
+  minimal: [
+    { article: "Art. 95", text: "Voluntary codes of conduct." },
+  ],
+};
+
+/**
+ * Ramas de rationale que `classify()` ensambla inline en ES. Mapa rama -> clave:
+ *  - prohibited && !onlyOmnibus                     -> prohibited_classic
+ *  - prohibited && onlyOmnibus && omnibusInForce    -> prohibited_omnibus_in_force
+ *  - prohibited && onlyOmnibus && !omnibusInForce   -> prohibited_omnibus_pending
+ *  - highCandidate && !exceptionApplies             -> high
+ *  - transparency.length > 0                        -> limited
+ *  - (fallback)                                     -> minimal
+ */
+export const RATIONALES_EN = {
+  prohibited_classic:
+    "The system engages in one or more practices prohibited by Article 5. It cannot be used in the EU.",
+  prohibited_omnibus_in_force:
+    "The system engages in a practice prohibited by Article 5 — the generation or manipulation of non-consensual realistic intimate images or of CSAM — added by the Digital Omnibus and applicable from 2 December 2026. It cannot be placed on the market or used in the EU. Irrespective of the AI Act, generating or manipulating this material already constitutes a criminal offence (Directive 2011/93/EU for CSAM; Directive (EU) 2024/1385 and national criminal law for non-consensual intimate images).",
+  prohibited_omnibus_pending:
+    "The Digital Omnibus added this practice — the generation or manipulation of non-consensual realistic intimate images or of CSAM — to Article 5; it will be a prohibited practice of the EU AI Act applicable from 2 December 2026 (not yet in force as of the date of this assessment). Nevertheless, generating or manipulating this material is already unlawful under criminal law irrespective of the AI Act (Directive 2011/93/EU for CSAM; Directive (EU) 2024/1385 and national criminal law for non-consensual intimate images), and it is therefore classified as unacceptable. Validate this classification with qualified legal advice.",
+  high:
+    "The system operates in a high-risk area of Annex III and no exception under Article 6(3) applies to it.",
+  limited:
+    "The system is not high-risk but is subject to the transparency obligations of Article 50.",
+  minimal:
+    "The system does not fall under prohibited practices, high-risk areas or transparency obligations.",
+} as const;
+
+/**
+ * Citas extra (Directivas) que classify() añade a CITATIONS.unacceptable cuando
+ * la práctica marcada es EXCLUSIVAMENTE Omnibus. Uso EN paralelo al ES inline:
+ *   [...CITATIONS_EN.unacceptable, ...OMNIBUS_CITATIONS_EN]
+ */
+export const OMNIBUS_CITATIONS_EN: Citation[] = [
+  {
+    article: "Directive 2011/93/EU",
+    text: "CSAM: a criminal offence irrespective of the AI Act.",
+  },
+  {
+    article: "Directive (EU) 2024/1385",
+    text: "Non-consensual intimate images: a criminal offence via national law.",
+  },
+];
