@@ -1,7 +1,14 @@
 import { ButtonLink } from "@/components/ui/Button";
 import { HeroPreview } from "./HeroPreview";
+import type { Dictionary } from "@/lib/i18n";
 
-export function Hero() {
+export function Hero({
+  t,
+  preview,
+}: {
+  t: Dictionary["landing"]["hero"];
+  preview: Dictionary["landing"]["heroPreview"];
+}) {
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 grid-paper opacity-50" aria-hidden />
@@ -19,40 +26,36 @@ export function Hero() {
         <div className="reveal is-visible text-center lg:text-left">
           <span className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-paper-raised px-3 py-1 text-xs font-medium text-ink-soft">
             <span className="size-1.5 rounded-full bg-brand" />
-            Gobernanza de IA para Recursos Humanos · EU AI Act
+            {t.badge}
           </span>
 
           <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-5xl md:text-6xl">
-            Contrata con IA
+            {t.titleLine1}
             <br />
-            <span className="text-brand">sin miedo a la auditoría.</span>
+            <span className="text-brand">{t.titleLine2}</span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-ink-soft lg:mx-0">
-            La IA que usas para contratar —cribado de CVs, entrevistas, scoring de
-            candidatos— es de <span className="font-medium text-ink">alto riesgo</span>{" "}
-            bajo el EU AI Act. Attesta la inventaría, clasifica su riesgo, genera tu
-            evidencia y vigila los cambios normativos. Sin necesitar un equipo GRC.
+            {t.bodyBefore}
+            <span className="font-medium text-ink">{t.bodyEmphasis}</span>
+            {t.bodyAfter}
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
             <ButtonLink href="#waitlist" variant="primary" className="px-6 py-3">
-              Solicitar acceso anticipado
+              {t.ctaPrimary}
             </ButtonLink>
             <ButtonLink href="/demo" variant="outline" className="px-6 py-3">
-              Explorar la demo
+              {t.ctaSecondary}
             </ButtonLink>
           </div>
 
-          <p className="mt-4 text-xs text-muted">
-            Más de 3 de cada 4 empresas van más rápido en IA que en su gobierno.
-            Tú puedes ir por delante.
-          </p>
+          <p className="mt-4 text-xs text-muted">{t.footnote}</p>
         </div>
 
         {/* Mockup */}
         <div className="reveal is-visible [transition-delay:120ms]">
-          <HeroPreview />
+          <HeroPreview t={preview} />
         </div>
       </div>
     </section>

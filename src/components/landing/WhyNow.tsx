@@ -1,27 +1,6 @@
-const milestones = [
-  {
-    date: "Feb 2025 · en vigor",
-    title: "Alfabetización en IA (Art. 4)",
-    body: "Ya exigible: tu organización debe procurar que quien opera estas herramientas tenga formación suficiente en IA. Es un deber propio del deployer, no del proveedor.",
-  },
-  {
-    date: "2 ago 2026",
-    title: "Transparencia (Art. 50)",
-    body: "El plazo más cercano: empiezan a aplicarse los deberes de transparencia sobre la IA que interactúa con candidatos o genera contenido. Afecta directamente a un proceso de selección con IA.",
-  },
-  {
-    date: "Dic 2027",
-    title: "Obligaciones de alto riesgo",
-    body: "El Digital Omnibus movió aquí las obligaciones del Anexo III (empleo). No es agosto de 2026 —un error extendido en el mercado—: tienes una ventana para prepararte bien, no para ignorarlo.",
-  },
-  {
-    date: "2026 →",
-    title: "Leyes estatales en EE.UU.",
-    body: "Se suman regulaciones de IA a nivel estatal (p. ej. Nueva York, Illinois, Colorado). La superficie regulatoria crece.",
-  },
-];
+import type { Dictionary } from "@/lib/i18n";
 
-export function WhyNow() {
+export function WhyNow({ t }: { t: Dictionary["landing"]["whyNow"] }) {
   return (
     <section
       id="por-que-ahora"
@@ -31,22 +10,22 @@ export function WhyNow() {
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.16em] text-brand-bright">
-              Por qué ahora
+              {t.eyebrow}
             </p>
             <h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">
-              Una obligación inevitable, con una ventana para adelantarse.
+              {t.title}
             </h2>
             <p className="mt-5 text-lg leading-relaxed text-paper/70">
-              El mercado de software de gobernanza de IA pasará de{" "}
-              <span className="text-paper">$492M en 2026</span> a{" "}
-              <span className="text-paper">$15.8B en 2030</span> (~30–36% CAGR).
-              Quien se convierta hoy en el sistema de registro de la gobernanza,
-              se queda.
+              {t.introBefore}
+              <span className="text-paper">{t.introValue1}</span>
+              {t.introMid}
+              <span className="text-paper">{t.introValue2}</span>
+              {t.introAfter}
             </p>
           </div>
 
           <ol className="relative space-y-8 border-l border-paper/15 pl-8">
-            {milestones.map((m) => (
+            {t.milestones.map((m) => (
               <li key={m.title} className="relative">
                 <span className="absolute -left-[2.6rem] top-1 flex size-5 items-center justify-center rounded-full border border-brand-bright/50 bg-ink">
                   <span className="size-2 rounded-full bg-brand-bright" />

@@ -1,46 +1,27 @@
-const modules = [
-  {
-    step: "01",
-    title: "Inventario de sistemas de IA",
-    body: "Un catálogo vivo de cada modelo y sistema en uso: quién lo opera, qué datos toca y para qué decisión se usa. Más de la mitad de las empresas no lo tiene; tú sí.",
-    points: ["Descubrimiento guiado", "Propietario y proveedor", "Estado siempre al día"],
-  },
-  {
-    step: "02",
-    title: "Clasificación de riesgo",
-    body: "Un asistente guiado clasifica cada sistema según el EU AI Act —inaceptable, alto, limitado o mínimo— y te dice exactamente qué obligaciones aplican, distinguiendo lo tuyo (deployer) de lo del proveedor.",
-    points: ["Mapeo a artículos del AI Act", "Captura de evidencia y atestación", "Explicable y defendible"],
-  },
-  {
-    step: "03",
-    title: "Gap assessment y plan",
-    body: "Qué te falta, priorizado por severidad, con plan de acción por artículo. Aplica un policy pack por dominio (RRHH, gestión de trabajadores, atención al cliente e IA generativa o crédito/seguros) y precarga los controles típicos del caso.",
-    points: ["Brechas priorizadas", "Policy packs por dominio", "Plan de acción por artículo"],
-  },
-];
+import type { Dictionary } from "@/lib/i18n";
 
-export function Modules() {
+const STEPS = ["01", "02", "03"];
+
+export function Modules({ t }: { t: Dictionary["landing"]["modules"] }) {
   return (
     <section id="producto" className="container-page py-20 md:py-28">
       <div className="max-w-2xl">
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-brand">
-          El producto
+          {t.eyebrow}
         </p>
         <h2 className="mt-3 font-display text-3xl font-semibold text-ink sm:text-4xl">
-          El sistema de registro de tu gobernanza de IA.
+          {t.title}
         </h2>
-        <p className="mt-4 text-lg text-ink-soft">
-          El flujo completo: del inventario a la evidencia lista para auditar.
-        </p>
+        <p className="mt-4 text-lg text-ink-soft">{t.intro}</p>
       </div>
 
       <div className="mt-14 grid gap-6 lg:grid-cols-3">
-        {modules.map((m) => (
+        {t.items.map((m, i) => (
           <article
-            key={m.step}
+            key={m.title}
             className="group flex flex-col rounded-2xl border border-line bg-paper-raised p-7 transition-colors hover:border-line-strong"
           >
-            <span className="font-mono text-sm text-seal">{m.step}</span>
+            <span className="font-mono text-sm text-seal">{STEPS[i]}</span>
             <h3 className="mt-4 font-display text-xl font-semibold text-ink">
               {m.title}
             </h3>

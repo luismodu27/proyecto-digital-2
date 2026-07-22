@@ -1,15 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LocaleToggle } from "@/components/ui/LocaleToggle";
+import type { Locale } from "@/lib/i18n/config";
 
 type NavItem = { label: string; href: string };
 
 /**
  * Navegación móvil de la landing: botón hamburguesa + panel desplegable con las
- * mismas anclas de sección y el acceso a "Entrar". Solo se muestra en móvil
- * (`md:hidden`); en escritorio la nav horizontal de `SiteHeader` la sustituye.
+ * mismas anclas de sección, el acceso a "Entrar" y el selector de idioma. Solo se
+ * muestra en móvil (`md:hidden`); en escritorio la nav horizontal de `SiteHeader`
+ * la sustituye. Todas las cadenas llegan por props (sin provider en la landing).
  */
-export function MobileNav({ items }: { items: NavItem[] }) {
+export function MobileNav({
+  items,
+  loginLabel,
+  openLabel,
+  closeLabel,
+  locale,
+  localeToEn,
+  localeToEs,
+}: {
+  items: NavItem[];
+  loginLabel: string;
+  openLabel: string;
+  closeLabel: string;
+  locale: Locale;
+  localeToEn: string;
+  localeToEs: string;
+}) {
   const [open, setOpen] = useState(false);
 
   // Cierra con Escape y bloquea el scroll del fondo mientras está abierto.
@@ -29,7 +48,7 @@ export function MobileNav({ items }: { items: NavItem[] }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="mobile-nav-panel"
-        aria-label={open ? "Cerrar menú" : "Abrir menú"}
+        aria-label={open ? closeLabel : openLabel}
         className="inline-flex size-9 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-paper-sunken hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
       >
         <svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden>
@@ -76,13 +95,20 @@ export function MobileNav({ items }: { items: NavItem[] }) {
                   {item.label}
                 </a>
               ))}
-              <a
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="mt-1 border-t border-line px-2 py-3 text-sm font-medium text-brand"
-              >
-                Entrar
-              </a>
+              <div className="mt-1 flex items-center justify-between gap-3 border-t border-line px-2 py-3">
+                <a
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="text-sm font-medium text-brand"
+                >
+                  {loginLabel}
+                </a>
+                <LocaleToggle
+                  locale={locale}
+                  labelToEn={localeToEn}
+                  labelToEs={localeToEs}
+                />
+              </div>
             </nav>
           </div>
         </>

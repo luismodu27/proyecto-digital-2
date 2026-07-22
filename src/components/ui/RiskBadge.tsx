@@ -10,13 +10,24 @@ const styles: Record<RiskLevel, string> = {
     "bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)] border-[var(--tone-good-bd)]",
 };
 
-export function RiskBadge({ level }: { level: RiskLevel }) {
+export function RiskBadge({
+  level,
+  label,
+}: {
+  level: RiskLevel;
+  /**
+   * Etiqueta a mostrar. Por defecto la canónica en español (`RISK_LABEL`, usada
+   * en el dashboard). La landing en inglés pasa aquí la etiqueta traducida
+   * (chrome de UI, no contenido regulatorio).
+   */
+  label?: string;
+}) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${styles[level]}`}
     >
       <span className="size-1.5 rounded-full bg-current" />
-      {RISK_LABEL[level]}
+      {label ?? RISK_LABEL[level]}
     </span>
   );
 }

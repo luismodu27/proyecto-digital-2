@@ -1,53 +1,20 @@
-const faqs = [
-  {
-    q: "¿Attesta certifica mi cumplimiento del EU AI Act?",
-    a: "No. Attesta es una herramienta de autoevaluación y preparación para auditoría: organiza tu inventario, tu clasificación de riesgo y tu evidencia. La certificación de conformidad, cuando procede, solo la emiten organismos notificados acreditados. No prestamos asesoría legal.",
-  },
-  {
-    q: "¿La IA que filtra o puntúa candidatos es de alto riesgo?",
-    a: "Por regla general, sí. La IA usada para selección de personal (cribado de CVs, ranking, entrevistas por vídeo, tests) entra en el Anexo III (empleo) del EU AI Act como alto riesgo. Existe una excepción acotada (Art. 6.3) para tareas muy limitadas, pero casi nunca aplica cuando el sistema perfila o puntúa a personas. Implica obligaciones de supervisión humana, control de sesgo y evidencia — justo lo que Attesta organiza por ti, y el asistente de riesgo evalúa esa excepción por ti.",
-  },
-  {
-    q: "Usamos IA de terceros, no la desarrollamos. ¿Nos sirve?",
-    a: "Sí — de hecho ese es nuestro foco. Como responsable del despliegue (deployer) tienes obligaciones propias (uso conforme, supervisión humana, conservación de logs, en ciertos casos una evaluación de impacto). Attesta te ayuda a cumplirlas y a demostrarlo con evidencia.",
-  },
-  {
-    q: "El deadline se aplazó a 2027, ¿para qué empezar ahora?",
-    a: "Justo por eso: tienes más ventana para prepararte bien, sin prisas ni consultores caros de última hora. El aplazamiento del alto riesgo del Anexo III a diciembre de 2027 proviene del Digital Omnibus, acordado por el Parlamento y el Consejo en junio de 2026 y pendiente de publicación formal en el DOUE. La obligación sigue siendo inevitable; adelantarte es más barato y menos arriesgado. (Ojo: la alfabetización en IA y las prohibiciones del Art. 5 ya son exigibles desde febrero de 2025.)",
-  },
-  {
-    q: "¿En qué se diferencia de un consultor o de una hoja de cálculo?",
-    a: "Un consultor te entrega una foto fija —cara y desactualizada en cuanto la norma cambia—; un Excel no vigila nada ni deja rastro verificable. Attesta es un sistema de registro vivo: mantiene tu inventario y tu evidencia al día, vigila los cambios regulatorios y encadena cada registro con SHA-256 para que sea auditable. No sustituye el criterio jurídico cuando lo necesites, pero sí el trabajo repetitivo de organizarlo y mantenerlo.",
-  },
-  {
-    q: "¿Qué pasa con mi evidencia si me doy de baja?",
-    a: "Es tuya. Puedes exportar tu dossier y tu informe ejecutivo en PDF en cualquier momento, así que la evidencia que has preparado no queda atrapada en la herramienta.",
-  },
-  {
-    q: "¿Necesito un equipo de compliance para usarlo?",
-    a: "No. Attesta está pensado para el mid-market sin equipo GRC: cuestionarios guiados, recomendaciones priorizadas y evidencia lista para auditoría, en un lenguaje claro.",
-  },
-  {
-    q: "¿Cómo protegen nuestros datos?",
-    a: "Cada organización está aislada de las demás (multi-tenant con control de acceso a nivel de fila) y todos los cambios quedan en un registro de auditoría verificable: encadenado con SHA-256, de forma que cualquier alteración posterior es detectable.",
-  },
-];
+import type { Dictionary } from "@/lib/i18n";
 
-export function FAQ() {
+export function FAQ({ t }: { t: Dictionary["landing"]["faq"] }) {
   return (
     <section id="faq" className="border-t border-line bg-paper-sunken/40">
       <div className="container-page py-20 md:py-28">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-brand">
-            Preguntas frecuentes
+            {t.eyebrow}
           </p>
           <h2 className="mt-3 font-display text-3xl font-semibold text-ink sm:text-4xl">
-            Lo que sueles querer saber.
+            {t.title}
           </h2>
         </div>
 
         <div className="mx-auto mt-12 max-w-3xl divide-y divide-line rounded-2xl border border-line bg-paper-raised">
-          {faqs.map((f) => (
+          {t.items.map((f) => (
             <details key={f.q} className="group px-6 [&_svg]:open:rotate-45">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-left font-medium text-ink transition-colors hover:text-brand-strong">
                 {f.q}
