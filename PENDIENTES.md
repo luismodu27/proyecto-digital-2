@@ -6,7 +6,7 @@
 > - **[CLAUDE.md](./CLAUDE.md)** — mapa técnico del código.
 > - **[docs/supabase.md](./docs/supabase.md)** — backend/migraciones.
 >
-> Última actualización: **2026-07-20**.
+> Última actualización: **2026-07-22**.
 
 ---
 
@@ -216,6 +216,24 @@ Queda pendiente:
   aplicado a los 5 borrados (sistema, brecha, tarea, miembro, invitación). Verificado con captura.
 - **Estados vacíos menores**: `riesgo/page.tsx` muestra las 4 secciones con "0 sistemas" en cuenta nueva.
 - **TODOs de andamiaje**: `context.ts:21` (selector de org activa), `analista/voyage.ts` (placeholder de embeddings).
+
+### 2.3 · Internacionalización ES/EN — Inc 4–5 pendientes (iniciada 2026-07-22)
+Web pública ya bilingüe (Inc 0–3, ver MEMORY §10 2026-07-22). **Falta:**
+- **Inc 4 · Auth chrome:** `login`, `onboarding`, `reset-password` leen `resolveLocale()` (cookie) y traducen su
+  chrome; `LocaleToggle` en modo cookie (server action `setLocale`). Traducir cadenas de UI de `AuthForm`/`friendlyError`
+  (no las de compliance).
+- **Inc 5 · Dashboard chrome por clusters:** `I18nProvider` en el layout del dashboard + `useT()`; traducir navegación
+  (`Sidebar`, `AccountMenu`), estados vacíos, toasts (mapa `?toast=`→clave i18n), labels de formularios (inventario, gap,
+  riesgo), botones. **Los módulos legales deterministas NO se tocan** (siguen en español desde `policy-packs`/
+  `risk-assessment`/`recommendations`/`regulatory-watch` hasta validación del experto). Incluye traducir `RISK_LABEL` de
+  `mock-data.ts` (hoy la landing lo sortea con el `label` de `RiskBadge`; el dashboard necesita la traducción central).
+  Toggle EN/ES en `AccountMenu`.
+- **Inc 6 · PDF/dossier (necesita decisión):** cuerpo legal del dossier/informe **en español** (regla dura: contenido
+  regulatorio validado) aunque la UI esté en EN, con nota visible; solo el chrome del documento (encabezados) podría ir en
+  EN. `ScopeNote` ya es locale-aware; las notas `LEGAL_*_BY_LOCALE` ya tienen EN validado por el experto.
+- **Diferidos técnicos:** (a) leer `headers()` en el root layout volvió dinámicas todas las rutas (la landing dejó de
+  prerenderarse estática) — optimizable con root layouts separados por route-group si el TTFB lo pidiera; (b) auto-detección
+  `Accept-Language` NO se implementó (decisión: no forzar redirección; como mucho un banner "View in English" fuera de MVP).
 
 ### 2.2 · Ampliar el foso — leyes de EE. UU. de contratación con IA (esperando visto bueno)
 Recomendación del experto lista (ver MEMORY §10, 2026-07-18). **2º marco** = NYC LL144 + Illinois HB 3773 (en vigor),

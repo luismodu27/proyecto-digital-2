@@ -127,6 +127,28 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Internacionalización ES/EN — web pública completa (Inc 0–3).** El fundador pidió que la
+  página web también esté en inglés; eligió **alcance web + dashboard** y **URLs `/en`** (no solo toggle). Se
+  consultó al `product-architect`: arquitectura **híbrida** — URL real `/en` solo para la web pública (SEO/hreflang);
+  auth + dashboard resolverán el locale por **cookie `NEXT_LOCALE`** sin cambiar la URL (tras auth el SEO es irrelevante).
+  - **Frontera legal (regla dura):** los diccionarios i18n (`src/lib/i18n/dictionaries/{es,en}.ts`) contienen **solo
+    chrome de UI**. El contenido regulatorio determinista (policy-packs, risk-assessment, recommendations,
+    regulatory-watch, dossier/informe) **no se traduce** hasta validación del experto. Se blindó con un **guard de
+    ESLint** (`no-restricted-imports`) que prohíbe que `src/lib/i18n/**` importe esos módulos.
+  - **Copy prohibido también en inglés:** la traducción respeta el marco seguro (*readiness, self-assessment, audit-ready,
+    "we don't certify"*), nunca *certified/compliant/guarantees*; score = "% ready", framing **deployer**.
+  - **Tipado:** `type Dictionary = typeof es` (sin `as const`) → falta de clave/firma en `en.ts` = error de `tsc`.
+  - **Inc 0** andamiaje (config/resolve/actions/provider). **Inc 1** `<html lang>` dinámico vía header `x-attesta-locale`
+    que pone el middleware (sin tocar la lógica de auth de `updateSession`); nota: leer `headers()` en el root layout
+    vuelve las rutas dinámicas (landing deja de ser estática, aceptable). **Inc 2** landing entera data-driven por
+    diccionario + ruta `/en` + `LocaleToggle` (URL) + `LandingPage(locale)`; `RiskBadge` acepta `label` opcional para
+    traducir la etiqueta de riesgo en la landing sin tocar `mock-data`. Notas legales (`LegalNote.tsx`) con versiones EN
+    **validadas por el experto de compliance** y mapas `*_BY_LOCALE` (el texto legal vive FUERA del diccionario).
+    **Inc 3** SEO: `buildLandingMetadata(locale)` (title/description por idioma, canonical, hreflang es/en/x-default,
+    OG `es_ES`/`en_US`), `sitemap.ts`, `robots.ts`. Verificado por curl en runtime (`/`→es, `/en`→en, sin fugas).
+  - **Pendiente (Inc 4–5):** chrome de auth (login/onboarding/reset) por cookie e i18n del dashboard por clusters
+    (nav, formularios, toasts, estados vacíos) — los módulos legales deterministas NO se tocan.
+
 - **2026-07-21** · **Stat de la landing actualizado a fuente 2026 (IBM), a petición del fundador.**
   El fundador pidió reponer el 78%/83% por ser "más nuevo". Se buscó (WebSearch) y se confirmó que el **78% sigue
   proviniendo del mismo press release de proveedor** (Vision Compliance/Secure Privacy, conflicto de interés) → no se
