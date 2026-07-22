@@ -1053,6 +1053,15 @@ export const en: Dictionary = {
       severityPrefix: "· severity ",
       affectedSystemPrefix: "Affected system: ",
       status: { missing: "Missing", partial: "Partial", done: "Covered" },
+      prohibited: {
+        badge: "Prohibited practice (Art. 5)",
+        level: "Unacceptable",
+        actionShort: "Legal review / stop use",
+        action:
+          "Requires legal review and, where applicable, cessation of use. This is not prepared for audit: a prohibited practice is verified and stopped, not prepared.",
+        note:
+          "This item is not included in the '% ready'. A prohibited practice (unacceptable risk, Art. 5) is not prepared for audit: your organization must verify its absence or stop using the system. The percentage measures readiness for applicable obligations, not the resolution of prohibitions.",
+      },
       newTitle: "Add gap",
       newSubtitle: "Register a pending control or requirement for a system.",
       backToGap: "← Back to gap assessment",

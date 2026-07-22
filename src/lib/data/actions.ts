@@ -55,14 +55,30 @@ async function recomputeReadiness(
   org: string,
   aiSystemId: string,
 ): Promise<void> {
-  const { data } = await supabase
+  // Se intenta leer la marca `prohibited` (migración 0022). Si la columna aún no
+  // existe, se cae al cálculo clásico (todas las brechas cuentan) — degradación
+  // segura sin romper el recálculo.
+  let items: { status: string | null; prohibited?: boolean }[] = [];
+  const withFlag = await supabase
     .from("gap_items")
-    .select("status")
+    .select("status, prohibited")
     .eq("organization_id", org)
     .eq("ai_system_id", aiSystemId);
-  const items = data ?? [];
-  const total = items.length;
-  const done = items.filter((r) => r.status === "done").length;
+  if (withFlag.error) {
+    const base = await supabase
+      .from("gap_items")
+      .select("status")
+      .eq("organization_id", org)
+      .eq("ai_system_id", aiSystemId);
+    items = base.data ?? [];
+  } else {
+    items = withFlag.data ?? [];
+  }
+  // Las prácticas prohibidas (Art. 5, riesgo inaceptable) NO se "preparan para
+  // auditoría": quedan fuera del cómputo de preparación ("% listo").
+  const counted = items.filter((r) => !r.prohibited);
+  const total = counted.length;
+  const done = counted.filter((r) => r.status === "done").length;
   const pct = total ? Math.round((done / total) * 100) : 0;
   await supabase
     .from("ai_systems")
@@ -117,12 +133,25 @@ export async function applyPolicyPack(formData: FormData) {
       article: c.article,
       status: "missing",
       severity: SEVERITY_EN[c.severity] ?? "medium",
+      // Práctica prohibida del Art. 5 (fuera del "% listo"). La columna la aporta
+      // la migración 0022; si no está aplicada, el insert de abajo reintenta sin ella.
+      prohibited: c.prohibited ?? false,
       created_by: user?.id,
     }));
 
   if (rows.length > 0) {
     const { error } = await supabase.from("gap_items").insert(rows);
-    if (error) redirect("/dashboard/packs?toast=pack-error");
+    if (error) {
+      // Degradación: si la columna `prohibited` aún no existe (migración 0022 sin
+      // aplicar), se reinserta sin ella (todos los controles como brecha ordinaria).
+      const legacy = rows.map((r) => {
+        const rest: Record<string, unknown> = { ...r };
+        delete rest.prohibited;
+        return rest;
+      });
+      const retry = await supabase.from("gap_items").insert(legacy);
+      if (retry.error) redirect("/dashboard/packs?toast=pack-error");
+    }
   }
 
   // El pack añadió controles como brechas ⇒ recalcula el "% listo" del sistema.

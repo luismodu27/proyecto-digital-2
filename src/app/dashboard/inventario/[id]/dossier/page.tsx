@@ -137,6 +137,7 @@ export default async function DossierPage({
   const tp = dict.pages;
   const td = tp.dossier;
   const rc = tp.reportChrome;
+  const gp = dict.gap.prohibited;
   const statusLabelMap = {
     missing: rc.statusMissing,
     partial: rc.statusPartial,
@@ -198,8 +199,12 @@ export default async function DossierPage({
     locale === "en" ? OBLIGATIONS_BY_LEVEL_EN : OBLIGATIONS_BY_LEVEL
   )[level];
   const recs = recommendationsForLevel(level, locale);
-  const openGaps = gaps.filter((g) => g.status !== "done").length;
-  const criticalOpen = gaps.filter(
+  // Las prácticas prohibidas (Art. 5) no son "brechas abiertas": no se preparan.
+  // Se excluyen del recuento de brechas y se rotulan aparte en la tabla.
+  const countableGaps = gaps.filter((g) => !g.prohibited);
+  const hasProhibited = gaps.some((g) => g.prohibited);
+  const openGaps = countableGaps.filter((g) => g.status !== "done").length;
+  const criticalOpen = countableGaps.filter(
     (g) => g.status !== "done" && g.severity === "alta",
   ).length;
   const isUnacceptable = level === "unacceptable";
@@ -493,6 +498,34 @@ export default async function DossierPage({
               <tbody>
                 {gaps.map((g) => {
                   const st = STATUS_META[g.status];
+                  // Práctica prohibida (Art. 5): no lleva estado de preparación;
+                  // se rotula la severidad como "Inaceptable" y el estado como
+                  // acción debida (revisión jurídica / cese), no como brecha.
+                  if (g.prohibited) {
+                    return (
+                      <tr
+                        key={g.id}
+                        className="break-inside-avoid border-b border-line align-top"
+                      >
+                        <td className="py-3 pr-3 font-mono text-xs text-seal">
+                          {g.article || "—"}
+                        </td>
+                        <td className="py-3 pr-3">{g.requirement}</td>
+                        <td
+                          className="py-3 pr-3"
+                          style={{ color: SEVERITY_COLOR.alta }}
+                        >
+                          {gp.level}
+                        </td>
+                        <td
+                          className="py-3 font-medium"
+                          style={{ color: SEVERITY_COLOR.alta }}
+                        >
+                          {gp.actionShort}
+                        </td>
+                      </tr>
+                    );
+                  }
                   return (
                     <tr
                       key={g.id}
@@ -519,6 +552,9 @@ export default async function DossierPage({
               </tbody>
             </table>
             </div>
+          )}
+          {hasProhibited && (
+            <p className="mt-3 text-xs text-muted">{gp.note}</p>
           )}
         </section>
 

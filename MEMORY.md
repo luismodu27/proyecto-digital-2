@@ -127,6 +127,22 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Práctica prohibida (Art. 5) fuera del "% listo": nuevo flag `prohibited` en los policy packs.**
+  Problema de integridad de marca: un control cuyo objeto ES una práctica PROHIBIDA del Art. 5 (riesgo inaceptable —
+  p. ej. reconocimiento de emociones en el trabajo, Art. 5.1.f) se insertaba como `gap_item` "missing" que computaba en
+  el "% listo" igual que una brecha ordinaria. Una práctica prohibida no se "prepara para auditoría", se cesa; contarla
+  daba un falso confort. **Decisión (validada por el `compliance-domain-expert`):** flag `prohibited?: boolean` en
+  `PolicyControl` + `GapItem`; se marca **solo cuando el OBJETO del control ES la práctica del Art. 5** (por eso solo
+  `emociones-prohibicion`; `transparencia-chatbot-emociones` sigue como brecha ordinaria de Art. 50, y `scoring-social-limite`
+  / `practicas-manipulativas` siguen como controles de "mantente dentro de límites"). Los ítems prohibidos quedan **fuera
+  del cómputo** (`recomputeReadiness` los excluye; el dossier los saca de `openGaps`/`criticalOpen`) y se renderizan como
+  **Inaceptable / "Práctica prohibida (Art. 5)"** con acción "Revisión jurídica / cese de uso" + nota de por qué no cuentan,
+  en gap + dossier + packs (ES+EN, copy del experto). Persistencia por **migración 0022** (`gap_items.prohibited` boolean
+  default false) con **degradación segura** triple: `applyPolicyPack` reintenta el insert sin la columna, `getGapItems`
+  reintenta el select, y `recomputeReadiness` cae al cálculo clásico — si 0022 no está aplicada, la app funciona como hoy.
+  Verificado con tsc+lint+build (exit 0). Diferido menor: el "override/tope" (banner que domine el % mientras haya una
+  práctica prohibida sin resolver) y un ítem prohibido en el dataset demo — no bloqueantes.
+
 - **2026-07-22** · **Radar de vigilancia de California (4 eventos ES+EN) — complemento de los 2 packs de CA.**
   A petición del fundador, se añadieron los eventos de radar de California a `regulatory-watch.ts` (validados por el
   `compliance-domain-expert` contra Civil Rights Council y CPPA): FEHA ADS en vigor (1-oct-2025), reglamento CCPA/CPPA

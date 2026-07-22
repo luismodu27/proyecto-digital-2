@@ -45,6 +45,7 @@ export const GESTION_TRABAJADORES_PACK: PolicyPack = {
         "Comprueba, ANTES de usar el sistema, si infiere emociones, afecto, estado de ánimo, estrés, atención o «compromiso» de trabajadores (p. ej. análisis de sentimiento de mensajes, tono de voz en llamadas, expresión facial o microexpresiones por webcam, señales de engagement). Inferir emociones de personas en el lugar de trabajo es una práctica PROHIBIDA por el AI Act, salvo fines médicos o de seguridad interpretados de forma estricta; una práctica prohibida no se prepara para auditoría, se cesa. Esto convierte a la herramienta en no comercializable ni utilizable en la UE (vigente desde el 2-feb-2025), no en un mero sistema de alto riesgo. Evidencia = confirmación documentada de si el sistema infiere o no emociones (funcionalidad declarada por el proveedor) y, si aplica, base médica/de seguridad y criterio jurídico que la respalde.",
       article: "Art. 5.1.f",
       severity: "alta",
+      prohibited: true,
       conditional:
         "Prohibición ya vigente (desde el 2-feb-2025). Si el sistema infiere emociones sin fin médico/seguridad, requiere revisión jurídica, no preparación.",
     },
@@ -247,6 +248,7 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
         "Check, BEFORE using the system, whether it infers emotions, affect, mood, stress, attention or \"engagement\" of workers (e.g. sentiment analysis of messages, tone of voice in calls, facial expression or micro-expressions via webcam, engagement signals). Inferring the emotions of people in the workplace is a practice PROHIBITED by the AI Act, except for medical or safety purposes interpreted strictly; a prohibited practice is not prepared for audit, it is stopped. This makes the tool non-marketable and unusable in the EU (in force since 2 Feb 2025), not merely a high-risk system. Evidence = documented confirmation of whether or not the system infers emotions (functionality declared by the provider) and, where applicable, the medical/safety basis and the legal reasoning supporting it.",
       article: "Art. 5.1.f",
       severity: "alta",
+      prohibited: true,
       conditional:
         "Prohibition already in force (since 2 Feb 2025). If the system infers emotions without a medical/safety purpose, it requires legal review, not preparation.",
     },

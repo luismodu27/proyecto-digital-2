@@ -1501,3 +1501,16 @@ drop trigger if exists enforce_membership_guards on public.memberships;
 create trigger enforce_membership_guards
   before update or delete on public.memberships
   for each row execute function public.enforce_membership_guards();
+
+-- ============================================================================
+-- 0022_gap_prohibited.sql
+-- ============================================================================
+-- Marca de "práctica prohibida" en las brechas (gap_items). Un control cuyo objeto
+-- es una práctica prohibida del Art. 5 (riesgo inaceptable) no es una brecha
+-- ordinaria: queda fuera del cómputo de preparación y se trata como revisión
+-- jurídica. Columna booleana con default false (degradación segura).
+alter table public.gap_items
+  add column if not exists prohibited boolean not null default false;
+
+comment on column public.gap_items.prohibited is
+  'true = el control corresponde a una práctica prohibida del Art. 5 (riesgo inaceptable); queda fuera del cómputo de preparación y se trata como revisión jurídica, no como brecha a cerrar.';

@@ -42,6 +42,15 @@ Para encenderla:
    ```
 4. Cuando Stripe esté activo (§1.2), una suscripción activa sube la org a **preparación** sola.
 
+### 1.1-sexies · Migración 0022 (práctica prohibida en brechas) — PENDIENTE de aplicar ⚠️
+Añade la columna `gap_items.prohibited` (boolean, default false) para que un control cuyo objeto es una **práctica
+PROHIBIDA del Art. 5** (p. ej. reconocimiento de emociones en el trabajo, Art. 5.1.f) quede **fuera del cómputo de
+"% listo"** y se trate como Inaceptable / revisión jurídica, en vez de contar como una brecha ordinaria. **Degradación
+segura:** mientras no la apliques, la app funciona igual que hoy (todos los controles cuentan; el badge "Práctica
+prohibida" se sigue viendo en la vista de *packs*, pero el ítem no se excluye del % ni aparece marcado en el gap/dossier
+conectado). Para encenderla: pega **`supabase/migrations/0022_gap_prohibited.sql`** en el SQL Editor de Supabase (solo ese
+archivo; es idempotente, `add column if not exists`). Sin impacto en datos existentes.
+
 ### 1.1-quinquies · Migración 0021 (guardas de membresías) — ✅ APLICADA (2026-07-21)
 Trigger `enforce_membership_guards` (BEFORE UPDATE/DELETE en `memberships`) que impone en la BD "solo un owner
 otorga/retira el rol owner" y "una organización nunca se queda sin owner". **Aplicada y verificada por SQL**
@@ -419,10 +428,15 @@ Ejecutado: Tier 0 (bugs "% listo" y plan de acción), Tier 2 (a11y), Tier 3-4 + 
   registry/ticketing (pegajosidad + activación), paquete de auditoría firmado (ZIP con manifiesto SHA-256 verificable).
 - [ ] **Narrativa (mejoras no ejecutadas):** subir `UseCaseStory` aún más arriba (tras RecruitmentFocus); tabla comparativa
   "Attesta vs consultor vs Excel"; fuente para la cifra de mercado de `WhyNow` (o moverla a un deck de inversión).
-- [ ] **Policy packs — tipo "prohibido" propio (a raíz del pack `gestion-trabajadores`, 2026-07-21).** El
-  `emociones-prohibicion` (Art. 5.1.f) es práctica PROHIBIDA, no una brecha ordinaria; hoy `applyPolicyPack` lo inserta
-  como `gap_item` "missing" que computa en "% listo" igual que los demás (se mitiga por copy: control de triaje). Más
-  limpio sería un flag/severidad "prohibido" en `PolicyControl` que quede **fuera del cómputo de preparación** y se
-  renderice como el nivel Inaceptable del dossier ("Práctica prohibida (Art. 5)" + "Revisión jurídica"). Requiere tocar
-  `types.ts` + `applyPolicyPack` + la UI de `packs`/`gap` → tanda propia, no cambio suelto. Aplica también al control
-  `transparencia-chatbot-emociones` del pack RRHH.
+- [x] ~~**Policy packs — tipo "prohibido" propio (a raíz del pack `gestion-trabajadores`, 2026-07-21).**~~ ✅ HECHO
+  (2026-07-22, validado por el `compliance-domain-expert`). Nuevo flag `prohibited?: boolean` en `PolicyControl` y
+  `GapItem`. Marcado **solo** `emociones-prohibicion` (Art. 5.1.f) — el experto confirmó que `transparencia-chatbot-emociones`
+  sigue siendo brecha ordinaria de Art. 50 (su objeto es transparencia; la mención al Art. 5 es solo advertencia). Regla:
+  marcar `prohibited` cuando el OBJETO del control ES la práctica del Art. 5, no cuando meramente se cita. Los ítems
+  prohibidos quedan **fuera del cómputo de "% listo"** (`recomputeReadiness` los excluye) y se renderizan como **Inaceptable
+  / "Práctica prohibida (Art. 5)"** con acción "Revisión jurídica / cese de uso" y nota de por qué no cuentan, en gap +
+  dossier + packs (ES+EN). Persistencia por **migración 0022** (ver §1.1-sexies) con degradación segura si no está aplicada.
+  - **Diferido menor (no bloqueante):** el "override/tope" que el experto recomendó (banner en la cabecera del sistema que
+    domine el "% listo" mientras exista una práctica prohibida sin resolver) NO se implementó aún; hoy la señal es el badge
+    Inaceptable + la nota. Y no se inyectó un ítem prohibido en el dataset demo (el badge sí se ve en la vista de *packs* en
+    demo). Ambos, si se quieren, en una iteración futura.

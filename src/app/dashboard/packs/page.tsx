@@ -24,7 +24,9 @@ export default async function PolicyPacksPage({
   // Preselección desde el RiskWizard (?system=<id>): solo si es un sistema real.
   const preselect = systems.some((s) => s.id === system) ? system : "";
   const locale = await resolveLocale();
-  const t = getDictionary(locale).dashboard.pages.packsPage;
+  const dict = getDictionary(locale).dashboard;
+  const t = dict.pages.packsPage;
+  const gp = dict.gap.prohibited;
   // La fachada de packs sirve el contenido validado en el idioma de la UI.
   const packs = policyPacks(locale);
 
@@ -67,11 +69,19 @@ export default async function PolicyPacksPage({
                       <span className="font-mono text-xs font-medium text-seal">
                         {c.article}
                       </span>
-                      <span
-                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium capitalize ${severityCls[c.severity]}`}
-                      >
-                        {severityLabel(c.severity as GapSeverity, locale)}
-                      </span>
+                      {c.prohibited ? (
+                        // Práctica prohibida (Art. 5): no es una brecha ordinaria;
+                        // se rotula como Inaceptable / revisión jurídica.
+                        <span className="inline-flex items-center rounded-full border border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)] px-2 py-0.5 text-xs font-semibold text-[var(--tone-danger-fg)]">
+                          {gp.badge} · {gp.level}
+                        </span>
+                      ) : (
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium capitalize ${severityCls[c.severity]}`}
+                        >
+                          {severityLabel(c.severity as GapSeverity, locale)}
+                        </span>
+                      )}
                     </div>
                     <p className="mt-1.5 font-medium text-ink">{c.title}</p>
                     <p className="text-sm text-ink-soft">{c.description}</p>

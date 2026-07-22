@@ -823,13 +823,36 @@ export async function getGapItems(): Promise<GapItem[]> {
   const org = await getActiveOrg();
   if (!org) return [];
 
-  const { data, error } = await supabase
+  const COLS_BASE =
+    "id, requirement, article, status, severity, ai_system_id, ai_systems(code)";
+  // Se pide `prohibited` (migración 0022). Si la columna aún no existe, se
+  // reintenta con las columnas base — degradación segura (todo como no prohibido).
+  type RawGap = {
+    id: string;
+    requirement: string;
+    article: string | null;
+    status: GapItem["status"];
+    severity: string;
+    ai_system_id: string;
+    ai_systems: { code: string } | { code: string }[] | null;
+    prohibited?: boolean;
+  };
+  const primary = await supabase
     .from("gap_items")
-    .select("id, requirement, article, status, severity, ai_system_id, ai_systems(code)")
+    .select(`${COLS_BASE}, prohibited`)
     .eq("organization_id", org)
     .order("created_at", { ascending: true });
-
-  if (error || !data) return [];
+  let data = primary.data as RawGap[] | null;
+  if (primary.error) {
+    const fb = await supabase
+      .from("gap_items")
+      .select(COLS_BASE)
+      .eq("organization_id", org)
+      .order("created_at", { ascending: true });
+    if (fb.error || !fb.data) return [];
+    data = fb.data as RawGap[];
+  }
+  if (!data) return [];
 
   const VALID_STATUS: GapItem["status"][] = ["missing", "partial", "done"];
   return data.map((row) => {
@@ -847,6 +870,7 @@ export async function getGapItems(): Promise<GapItem[]> {
       status: VALID_STATUS.includes(row.status) ? row.status : "missing",
       severity: SEVERITY_ES[row.severity] ?? "media",
       system: sys?.code ?? row.ai_system_id,
+      prohibited: row.prohibited === true,
     };
   });
 }

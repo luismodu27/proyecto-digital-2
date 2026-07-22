@@ -1056,6 +1056,15 @@ export const es = {
       severityPrefix: "· severidad ",
       affectedSystemPrefix: "Sistema afectado: ",
       status: { missing: "Falta", partial: "Parcial", done: "Cubierto" },
+      prohibited: {
+        badge: "Práctica prohibida (Art. 5)",
+        level: "Inaceptable",
+        actionShort: "Revisión jurídica / cese de uso",
+        action:
+          "Requiere revisión jurídica y, en su caso, cese del uso. No se prepara para auditoría: una práctica prohibida se verifica y se cesa, no se prepara.",
+        note:
+          "Este ítem no se incluye en el «% listo». Una práctica prohibida (riesgo inaceptable, Art. 5) no se prepara para auditoría: tu organización debe verificar su ausencia o cesar el uso. El porcentaje mide preparación de obligaciones exigibles, no la resolución de prohibiciones.",
+      },
       newTitle: "Añadir brecha",
       newSubtitle: "Registra un control o requisito pendiente para un sistema.",
       backToGap: "← Volver al gap assessment",

@@ -266,6 +266,12 @@ export type GapItem = {
   status: "missing" | "partial" | "done";
   severity: GapSeverity;
   system: string;
+  /**
+   * `true` cuando el ítem corresponde a una práctica PROHIBIDA del Art. 5 (riesgo
+   * inaceptable). No es una brecha a cerrar: queda fuera del cómputo de "% listo"
+   * y se renderiza como Inaceptable / revisión jurídica (ver `PolicyControl`).
+   */
+  prohibited?: boolean;
 };
 
 /** Una evaluación de riesgo guardada (para el historial de un sistema). */
