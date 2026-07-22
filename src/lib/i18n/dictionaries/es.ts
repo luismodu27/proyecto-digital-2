@@ -639,7 +639,10 @@ export const es = {
       monitoring: "Vigilancia",
       team: "Equipo",
       activity: "Actividad",
+      organizations: "Organizaciones",
+      security: "Seguridad",
       lockedTitle: "Función del plan Preparación",
+      lockedTitleEnterprise: "Función del plan Enterprise",
       lockedLabel: "Bloqueado",
     },
 
@@ -868,6 +871,57 @@ export const es = {
       back: "Volver al resumen",
       footer:
         "Inventario y clasificación de riesgo siguen disponibles en el plan gratuito.",
+    },
+
+    organizations: {
+      title: "Organizaciones",
+      subtitle:
+        "Gestiona todas las entidades de tu grupo desde una sola cuenta.",
+      gateFeature: "Multi-organización",
+      gateDescription:
+        "Administra varias entidades bajo una misma cuenta desde el plan Enterprise: cámbiate entre ellas y crea nuevas organizaciones. Cada organización conserva su propio plan, sus datos y su audit-trail por separado.",
+      listTitle: "Tus organizaciones",
+      listSubtitle:
+        "El plan se aplica por organización. Al cambiarte, verás el plan y las funciones de la organización activa.",
+      activeBadge: "Activa",
+      planLabel: "Plan",
+      roleLabel: "Tu rol",
+      switchCta: "Cambiar a esta",
+      switchingCta: "Cambiando…",
+      createTitle: "Crear una organización",
+      createSubtitle:
+        "La nueva entidad empieza en el plan gratuito, con sus datos separados. Serás su propietario.",
+      nameLabel: "Nombre de la organización",
+      namePlaceholder: "p. ej. Filial Norte, S. L.",
+      createCta: "Crear organización",
+      creatingCta: "Creando…",
+      createdToast: "Organización creada.",
+      emptyDemo:
+        "En la vista de demostración no hay varias organizaciones. Crea tu cuenta para gestionar tus entidades reales.",
+      roles: { owner: "Propietario", admin: "Administrador", member: "Miembro" },
+    },
+
+    security: {
+      title: "Seguridad",
+      subtitle: "SSO y controles avanzados para tu organización.",
+      gateFeature: "SSO y controles avanzados",
+      gateDescription:
+        "El inicio de sesión único (SSO) y los controles de acceso avanzados forman parte del plan Enterprise. Actívalos coordinándote con el equipo de Attesta.",
+      ssoTitle: "Inicio de sesión único (SSO)",
+      ssoBody:
+        "Conecta tu proveedor de identidad (SAML 2.0 u OIDC) para que tu equipo entre con las credenciales corporativas. La activación se coordina con nuestro equipo.",
+      ssoStatusLabel: "Estado",
+      ssoStatusNotConfigured: "No configurado",
+      ssoIncludesTitle: "Incluye",
+      ssoIncludes: [
+        "SAML 2.0 y OpenID Connect",
+        "Dominios de correo permitidos",
+        "Aprovisionamiento y baja de usuarios",
+      ],
+      requestCta: "Solicitar activación de SSO",
+      controlsTitle: "Controles avanzados",
+      controlsBody:
+        "Política de sesión, restricción por dominio de correo y registro de acceso ampliado. Disponibles con SSO en el plan Enterprise.",
     },
 
     deadlines: {

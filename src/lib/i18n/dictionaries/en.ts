@@ -639,7 +639,10 @@ export const en: Dictionary = {
       monitoring: "Monitoring",
       team: "Team",
       activity: "Activity",
+      organizations: "Organizations",
+      security: "Security",
       lockedTitle: "Readiness plan feature",
+      lockedTitleEnterprise: "Enterprise plan feature",
       lockedLabel: "Locked",
     },
 
@@ -868,6 +871,56 @@ export const en: Dictionary = {
       back: "Back to overview",
       footer:
         "Inventory and risk classification remain available on the free plan.",
+    },
+
+    organizations: {
+      title: "Organizations",
+      subtitle: "Manage every entity in your group from a single account.",
+      gateFeature: "Multi-organization",
+      gateDescription:
+        "Manage several entities under one account on the Enterprise plan: switch between them and create new organizations. Each organization keeps its own plan, data and audit trail separately.",
+      listTitle: "Your organizations",
+      listSubtitle:
+        "The plan applies per organization. When you switch, you'll see the plan and features of the active organization.",
+      activeBadge: "Active",
+      planLabel: "Plan",
+      roleLabel: "Your role",
+      switchCta: "Switch to this",
+      switchingCta: "Switching…",
+      createTitle: "Create an organization",
+      createSubtitle:
+        "The new entity starts on the free plan, with its data kept separate. You'll be its owner.",
+      nameLabel: "Organization name",
+      namePlaceholder: "e.g. Northern Subsidiary Ltd.",
+      createCta: "Create organization",
+      creatingCta: "Creating…",
+      createdToast: "Organization created.",
+      emptyDemo:
+        "The demo view doesn't include multiple organizations. Create your account to manage your real entities.",
+      roles: { owner: "Owner", admin: "Admin", member: "Member" },
+    },
+
+    security: {
+      title: "Security",
+      subtitle: "SSO and advanced controls for your organization.",
+      gateFeature: "SSO and advanced controls",
+      gateDescription:
+        "Single sign-on (SSO) and advanced access controls are part of the Enterprise plan. Turn them on by coordinating with the Attesta team.",
+      ssoTitle: "Single sign-on (SSO)",
+      ssoBody:
+        "Connect your identity provider (SAML 2.0 or OIDC) so your team signs in with corporate credentials. Activation is coordinated with our team.",
+      ssoStatusLabel: "Status",
+      ssoStatusNotConfigured: "Not configured",
+      ssoIncludesTitle: "Includes",
+      ssoIncludes: [
+        "SAML 2.0 and OpenID Connect",
+        "Allowed email domains",
+        "User provisioning and deprovisioning",
+      ],
+      requestCta: "Request SSO activation",
+      controlsTitle: "Advanced controls",
+      controlsBody:
+        "Session policy, email-domain restriction and extended access logging. Available with SSO on the Enterprise plan.",
     },
 
     deadlines: {

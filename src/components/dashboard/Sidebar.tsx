@@ -29,6 +29,8 @@ const nav: {
   { key: "monitoring", href: "/dashboard/vigilancia", icon: "M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", requires: "preparacion" },
   { key: "team", href: "/dashboard/equipo", icon: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75", requires: "preparacion" },
   { key: "activity", href: "/dashboard/actividad", icon: "M12 7v5l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0Z", requires: "preparacion" },
+  { key: "organizations", href: "/dashboard/organizaciones", icon: "M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01", requires: "enterprise" },
+  { key: "security", href: "/dashboard/seguridad", icon: "M12 3 4 6v5c0 4.5 3.4 8.3 8 9.9 4.6-1.6 8-5.4 8-9.9V6l-8-3Z", requires: "enterprise" },
 ];
 
 export function Sidebar({
@@ -62,11 +64,15 @@ export function Sidebar({
               ? pathname === "/dashboard"
               : pathname.startsWith(item.href);
           const locked = item.requires ? planRank < RANK[item.requires] : false;
+          const lockedTitle =
+            item.requires === "enterprise"
+              ? td.nav.lockedTitleEnterprise
+              : td.nav.lockedTitle;
           return (
             <Link
               key={item.href}
               href={item.href}
-              title={locked ? td.nav.lockedTitle : undefined}
+              title={locked ? lockedTitle : undefined}
               className={`relative flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
                 active
                   ? "bg-brand-soft text-brand-strong"

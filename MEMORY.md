@@ -127,6 +127,27 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Gating Enterprise por-organización: Multi-organización y SSO como funciones exclusivas.**
+  El fundador pidió que la suscripción Enterprise se aplique **a todos los miembros** de la organización que la tiene,
+  **solo en esa organización**, y que al **cambiar a otra org sin Enterprise** se **bloqueen** las funciones exclusivas.
+  Hallazgo: el gating **ya era por-organización activa** (`getActiveOrg` cookie `attesta_org` → `getOrgPlan(orgId)` →
+  `orgHasTier`; el plan vive en `organizations.plan`, es org-level → aplica a todos los miembros por igual; `switchOrg`
+  cambia cookie + revalida → re-resuelve). El hueco: **ninguna función estaba marcada como enterprise-only** (todos los
+  `PaidGate` usaban el default `preparacion`). El fundador confirmó (2 preguntas) que **solo** Multi-organización y SSO
+  son exclusivas de Enterprise; Vigilancia/Plan/Packs **se quedan en Preparación** (descartó subirlas).
+  - **Implementado:** 2 rutas nuevas gateadas `requires="enterprise"` (patrón `layout.tsx` + `PaidGate`, como vigilancia):
+    (1) **`/dashboard/organizaciones`** — portfolio multi-entidad (lista orgs con plan/rol/activa + `switchOrg`) y
+    **crear entidad** (`NewEntityForm` reutiliza la RPC `create_org_and_owner`; la nueva org nace `free` y **NO** se
+    auto-cambia para no perder el acceso Enterprise de la activa). (2) **`/dashboard/seguridad`** — SSO + controles
+    avanzados, **placeholder honesto** (estado "No configurado", incluye SAML/OIDC/dominios/aprovisionamiento, CTA
+    "Solicitar activación" → facturación; sin fingir que está activo, dejando el gate listo). Sidebar: 2 items con
+    `requires:"enterprise"` (candado automático) + `lockedTitleEnterprise`. i18n: namespaces `dashboard.organizations` y
+    `dashboard.security` en es+en (100% dirigido por diccionario → sin fugas de español; el `Paywall` ya soportaba
+    `tier="enterprise"`). **Sin cambios de BD** (columna `plan` = migración 0018 ya existe; RPC ya existe).
+  - **Cómo se concede Enterprise a una org (manual, ventas "A medida"):** poner `organizations.plan = 'enterprise'` en
+    Supabase. Stripe solo sube a `preparacion`; Enterprise no es self-serve por diseño.
+  - Verificado: tsc + eslint + build (exit 0); ambas rutas compilan como dinámicas.
+
 - **2026-07-22** · **"INGLÉS TOTAL": la versión EN no deja NADA en español (contenido regulatorio incluido).**
   El fundador pidió que la versión inglesa funcione igual que la española sin nada en español. Se reconcilió con la
   regla dura de "contenido legal validado por experto" traduciendo TODO el contenido regulatorio pero con el
