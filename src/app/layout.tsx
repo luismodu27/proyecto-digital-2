@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
+import { localeFromHeader } from "@/lib/i18n/resolve";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -59,14 +60,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await localeFromHeader();
   return (
     <html
-      lang="es"
+      lang={locale}
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
     >
