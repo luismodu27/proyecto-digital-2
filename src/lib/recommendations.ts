@@ -33,6 +33,27 @@ const PRIORITY_ORDER: Record<Priority, number> = {
   media: 2,
 };
 
+// Etiqueta visible de la prioridad, locale-aware. El valor del enum `Priority`
+// sigue en español (es también la clave de estilo/orden); solo se traduce lo que
+// ve el usuario. `capitalize` en la UI maneja la mayúscula inicial.
+const PRIORITY_LABEL_ES: Record<Priority, string> = {
+  crítica: "crítica",
+  alta: "alta",
+  media: "media",
+};
+const PRIORITY_LABEL_EN: Record<Priority, string> = {
+  crítica: "critical",
+  alta: "high",
+  media: "medium",
+};
+const PRIORITY_LABEL_BY_LOCALE: Record<Locale, Record<Priority, string>> = {
+  es: PRIORITY_LABEL_ES,
+  en: PRIORITY_LABEL_EN,
+};
+export function priorityLabel(p: Priority, locale: Locale): string {
+  return PRIORITY_LABEL_BY_LOCALE[locale][p];
+}
+
 /**
  * Catálogo de remediaciones por artículo. Base defendible para el mid-market
  * deployer; los casos límite deben revisarse con un experto.

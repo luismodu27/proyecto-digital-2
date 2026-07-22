@@ -1244,6 +1244,48 @@ export const es = {
         selectMultiple: "Selección múltiple: puedes marcar varias opciones.",
         evaluateAnother: "Evaluar otro sistema",
         backToRisk: "Volver a riesgo",
+        result: {
+          indicativeLabel: "Resultado orientativo",
+          indicativeSuffix: "(indicativo)",
+          indicativeDesc:
+            "Clasificación orientativa según los criterios del EU AI Act, a partir de lo que tu organización ha declarado.",
+          transparencyPre:
+            "Además, este sistema está sujeto a las obligaciones de transparencia del ",
+          transparencyArticle: "Art. 50",
+          transparencyMid: ", que se ",
+          transparencyEmphasis: "suman",
+          transparencyPost: " a las de alto riesgo.",
+          obligationsTitle: "Obligaciones aplicables",
+          regulatoryBasisTitle: "Base regulatoria",
+          immediateAction: "Acción inmediata",
+          criticalPoints: "Puntos críticos y próximos pasos",
+          prohibitedNote:
+            "Una práctica prohibida (Art. 5) no se prepara: se cesa. Valida con asesoría jurídica antes de continuar.",
+          prioritizeNote:
+            "Qué priorizar para tu preparación, ordenado por urgencia.",
+          savedPre: "✓ Autoevaluación guardada como ",
+          withEvidenceTag: "con evidencia",
+          declaredTag: "declarado",
+          savedMid:
+            ". El sistema se actualizó y quedó registrado en el audit-trail",
+          savedAttestedPrefix: ", atestado por ",
+          viewDossier: "Ver dossier del sistema →",
+          saveTitle: "Guardar como autoevaluación",
+          systemLabel: "Sistema",
+          systemPlaceholder: "Selecciona un sistema…",
+          attestedByLabel: "Responsable que atesta",
+          attestedByPlaceholder: "Nombre y cargo",
+          evidenceLabel: "Evidencia de soporte",
+          optional: "(opcional)",
+          evidencePlaceholder: "Enlace o descripción del documento",
+          evidenceHintYes:
+            "Se guardará como «con evidencia»: aportas soporte documental.",
+          evidenceHintNo:
+            "Sin evidencia se guardará como «declarado» (sin verificar). Añade un enlace o documento para respaldarlo.",
+          saving: "Guardando…",
+          saveButton: "Guardar autoevaluación",
+          saveError: "No se pudo guardar. Inténtalo de nuevo.",
+        },
       },
 
       plan: {

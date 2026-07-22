@@ -12,11 +12,11 @@ import {
   type Answers,
   type Question,
 } from "@/lib/risk-assessment";
-import { RISK_LABEL } from "@/lib/mock-data";
+import { riskLabel } from "@/lib/mock-data";
 import { saveRiskAssessment } from "@/lib/data/actions";
 import { recommendationsForLevel } from "@/lib/recommendations";
 import { RecommendationList } from "@/components/dashboard/Recommendations";
-import { LegalNote, LEGAL_RESULT } from "@/components/ui/LegalNote";
+import { LegalNote, LEGAL_RESULT_BY_LOCALE } from "@/components/ui/LegalNote";
 import { useT, useLocale } from "@/lib/i18n/provider";
 
 type SystemOption = { id: string; name: string };
@@ -46,6 +46,7 @@ export function RiskWizard({
 }) {
   const router = useRouter();
   const tw = useT().dashboard.pages.wizard;
+  const tr = tw.result;
   const locale = useLocale();
   const [answers, setAnswers] = useState<Answers>({});
   const [index, setIndex] = useState(0);
@@ -128,18 +129,17 @@ export function RiskWizard({
         <div className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted">
-              Resultado orientativo
+              {tr.indicativeLabel}
             </p>
             <h2 className="mt-2 font-display text-2xl font-semibold text-ink">
-              {RISK_LABEL[result.level]}{" "}
-              <span className="text-base font-normal text-muted">(indicativo)</span>
+              {riskLabel(result.level, locale)}{" "}
+              <span className="text-base font-normal text-muted">
+                {tr.indicativeSuffix}
+              </span>
             </h2>
-            <p className="mt-1 text-sm text-ink-soft">
-              Clasificación orientativa según los criterios del EU AI Act, a partir de
-              lo que tu organización ha declarado.
-            </p>
+            <p className="mt-1 text-sm text-ink-soft">{tr.indicativeDesc}</p>
           </div>
-          <RiskBadge level={result.level} />
+          <RiskBadge level={result.level} label={riskLabel(result.level, locale)} />
         </div>
 
         <p className="mt-6 text-sm leading-relaxed text-ink-soft">
@@ -148,16 +148,18 @@ export function RiskWizard({
 
         {alsoTransparency && (
           <p className="mt-4 rounded-lg border border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] px-4 py-3 text-sm text-[var(--tone-warn-fg)]">
-            Además, este sistema está sujeto a las obligaciones de transparencia
-            del <span className="font-medium">Art. 50</span>, que se{" "}
-            <span className="font-medium">suman</span> a las de alto riesgo.
+            {tr.transparencyPre}
+            <span className="font-medium">{tr.transparencyArticle}</span>
+            {tr.transparencyMid}
+            <span className="font-medium">{tr.transparencyEmphasis}</span>
+            {tr.transparencyPost}
           </p>
         )}
 
         <div className="mt-6 grid gap-6 md:grid-cols-2">
           <div>
             <h3 className="font-display text-sm font-semibold text-ink">
-              Obligaciones aplicables
+              {tr.obligationsTitle}
             </h3>
             <ul className="mt-3 space-y-2">
               {result.obligations.map((o) => (
@@ -170,7 +172,7 @@ export function RiskWizard({
           </div>
           <div>
             <h3 className="font-display text-sm font-semibold text-ink">
-              Base regulatoria
+              {tr.regulatoryBasisTitle}
             </h3>
             <ul className="mt-3 space-y-2">
               {result.citations.map((c) => (
@@ -192,16 +194,16 @@ export function RiskWizard({
           <div className="mt-8 border-t border-line pt-6">
             <h3 className="font-display text-sm font-semibold text-ink">
               {result.level === "unacceptable"
-                ? "Acción inmediata"
-                : "Puntos críticos y próximos pasos"}
+                ? tr.immediateAction
+                : tr.criticalPoints}
             </h3>
             <p className="mt-1 text-xs text-muted">
               {result.level === "unacceptable"
-                ? "Una práctica prohibida (Art. 5) no se prepara: se cesa. Valida con asesoría jurídica antes de continuar."
-                : "Qué priorizar para tu preparación, ordenado por urgencia."}
+                ? tr.prohibitedNote
+                : tr.prioritizeNote}
             </p>
             <div className="mt-4">
-              <RecommendationList recs={recs} />
+              <RecommendationList recs={recs} locale={locale} />
             </div>
           </div>
         )}
@@ -211,33 +213,36 @@ export function RiskWizard({
             {saveState === "saved" ? (
               <div className="rounded-xl border border-[var(--tone-good-bd)] bg-brand-soft px-4 py-3 text-sm text-brand-strong">
                 <p>
-                  ✓ Autoevaluación guardada como{" "}
+                  {tr.savedPre}
                   <span className="font-medium">
-                    {hasEvidence ? "con evidencia" : "declarado"}
+                    {hasEvidence ? tr.withEvidenceTag : tr.declaredTag}
                   </span>
-                  . El sistema se actualizó y quedó registrado en el audit-trail
-                  {attestedBy.trim() ? `, atestado por ${attestedBy.trim()}` : ""}.
+                  {tr.savedMid}
+                  {attestedBy.trim()
+                    ? `${tr.savedAttestedPrefix}${attestedBy.trim()}`
+                    : ""}
+                  .
                 </p>
                 {systemId && (
                   <Link
                     href={`/dashboard/inventario/${systemId}/dossier`}
                     className="mt-2 inline-flex items-center gap-1 font-medium underline"
                   >
-                    Ver dossier del sistema →
+                    {tr.viewDossier}
                   </Link>
                 )}
               </div>
             ) : (
               <div className="space-y-4">
                 <h3 className="font-display text-sm font-semibold text-ink">
-                  Guardar como autoevaluación
+                  {tr.saveTitle}
                 </h3>
                 <div>
                   <label
                     htmlFor="save-system"
                     className="block text-sm font-medium text-ink"
                   >
-                    Sistema
+                    {tr.systemLabel}
                   </label>
                   <select
                     id="save-system"
@@ -246,7 +251,7 @@ export function RiskWizard({
                     disabled={!!presetSystemId}
                     className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand disabled:opacity-60"
                   >
-                    <option value="">Selecciona un sistema…</option>
+                    <option value="">{tr.systemPlaceholder}</option>
                     {systems.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.name}
@@ -260,13 +265,13 @@ export function RiskWizard({
                       htmlFor="attested-by"
                       className="block text-sm font-medium text-ink"
                     >
-                      Responsable que atesta
+                      {tr.attestedByLabel}
                     </label>
                     <input
                       id="attested-by"
                       value={attestedBy}
                       onChange={(e) => setAttestedBy(e.target.value)}
-                      placeholder="Nombre y cargo"
+                      placeholder={tr.attestedByPlaceholder}
                       className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
                     />
                   </div>
@@ -275,35 +280,33 @@ export function RiskWizard({
                       htmlFor="evidence"
                       className="block text-sm font-medium text-ink"
                     >
-                      Evidencia de soporte{" "}
-                      <span className="font-normal text-muted">(opcional)</span>
+                      {tr.evidenceLabel}{" "}
+                      <span className="font-normal text-muted">{tr.optional}</span>
                     </label>
                     <input
                       id="evidence"
                       value={evidence}
                       onChange={(e) => setEvidence(e.target.value)}
-                      placeholder="Enlace o descripción del documento"
+                      placeholder={tr.evidencePlaceholder}
                       className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
                     />
                   </div>
                 </div>
                 <p className="text-xs text-muted">
-                  {hasEvidence
-                    ? "Se guardará como «con evidencia»: aportas soporte documental."
-                    : "Sin evidencia se guardará como «declarado» (sin verificar). Añade un enlace o documento para respaldarlo."}
+                  {hasEvidence ? tr.evidenceHintYes : tr.evidenceHintNo}
                 </p>
                 <Button
                   onClick={handleSave}
                   disabled={!systemId || saveState === "saving"}
                   variant="primary"
                 >
-                  {saveState === "saving" ? "Guardando…" : "Guardar autoevaluación"}
+                  {saveState === "saving" ? tr.saving : tr.saveButton}
                 </Button>
               </div>
             )}
             {saveState === "error" && (
               <p className="mt-2 text-sm text-[var(--tone-danger-fg)]" role="alert">
-                No se pudo guardar. Inténtalo de nuevo.
+                {tr.saveError}
               </p>
             )}
           </div>
@@ -321,7 +324,7 @@ export function RiskWizard({
           </Link>
         </div>
 
-        <LegalNote text={LEGAL_RESULT} className="mt-6" />
+        <LegalNote text={LEGAL_RESULT_BY_LOCALE[locale]} className="mt-6" />
       </div>
     );
   }

@@ -1237,6 +1237,48 @@ export const en: Dictionary = {
         selectMultiple: "Multiple choice: you can select several options.",
         evaluateAnother: "Assess another system",
         backToRisk: "Back to risk",
+        result: {
+          indicativeLabel: "Indicative result",
+          indicativeSuffix: "(indicative)",
+          indicativeDesc:
+            "Indicative classification based on EU AI Act criteria, drawn from what your organization has declared.",
+          transparencyPre:
+            "This system is also subject to the transparency obligations of ",
+          transparencyArticle: "Art. 50",
+          transparencyMid: ", which are ",
+          transparencyEmphasis: "added",
+          transparencyPost: " to the high-risk ones.",
+          obligationsTitle: "Applicable obligations",
+          regulatoryBasisTitle: "Regulatory basis",
+          immediateAction: "Immediate action",
+          criticalPoints: "Critical points and next steps",
+          prohibitedNote:
+            "A prohibited practice (Art. 5) is not prepared for audit — it is stopped. Validate with legal counsel before proceeding.",
+          prioritizeNote:
+            "What to prioritize for your preparation, ordered by urgency.",
+          savedPre: "✓ Self-assessment saved as ",
+          withEvidenceTag: "with evidence",
+          declaredTag: "declared",
+          savedMid:
+            ". The system was updated and recorded in the audit-trail",
+          savedAttestedPrefix: ", attested by ",
+          viewDossier: "View system dossier →",
+          saveTitle: "Save as self-assessment",
+          systemLabel: "System",
+          systemPlaceholder: "Select a system…",
+          attestedByLabel: "Attesting owner",
+          attestedByPlaceholder: "Name and role",
+          evidenceLabel: "Supporting evidence",
+          optional: "(optional)",
+          evidencePlaceholder: "Document link or description",
+          evidenceHintYes:
+            'It will be saved as "with evidence": you provide documentary support.',
+          evidenceHintNo:
+            'Without evidence it will be saved as "declared" (unverified). Add a link or document to back it up.',
+          saving: "Saving…",
+          saveButton: "Save self-assessment",
+          saveError: "Could not save. Please try again.",
+        },
       },
 
       plan: {
