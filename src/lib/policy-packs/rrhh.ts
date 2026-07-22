@@ -150,3 +150,146 @@ export const RRHH_PACK: PolicyPack = {
     },
   ],
 };
+
+/**
+ * English (validated) mirror of RRHH_PACK. Content only: `id`, `article`,
+ * `severity` and `conditional` logic are kept identical to the ES pack (stable
+ * keys / enums translated in another layer / legal citations unchanged, only
+ * "Anexo" → "Annex"); `name`, `tag`, `summary`, `note`, titles and descriptions
+ * are translated. Deployer framing and the prohibited-copy rules are preserved.
+ */
+export const RRHH_PACK_EN: PolicyPack = {
+  id: "rrhh",
+  name: "Recruitment and selection (EU AI Act)",
+  tag: "EU · Recruitment",
+  summary:
+    "Typical controls for personnel-selection AI (high-risk, Annex III). Apply it to a system to preload its gaps.",
+  note:
+    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions are already enforceable (since 2 Feb 2025); Art. 50 transparency applies on 2 Aug 2026. The Annex III high-risk obligations (employment, Arts. 14/26/27) were postponed to 2 Dec 2027 by the Digital Omnibus — NOT 2 Aug 2026, a widespread misconception in the market. This pack gets your evidence ready ahead of time.",
+  controls: [
+    {
+      id: "alfabetizacion-ia",
+      title: "AI literacy of staff",
+      description:
+        "Take measures so that the people who operate or oversee the selection tool have a sufficient level of AI literacy (its capabilities, limits and risks), proportionate to their role and context. This is a DIRECT, OWN duty of the deployer, enforceable since 2 February 2025. Evidence = record of the training or onboarding delivered (date, attendees and content).",
+      article: "Art. 4",
+      severity: "media",
+      conditional: "Enforceable since 2 February 2025 (already in force).",
+    },
+    {
+      id: "supervision-humana",
+      title: "Effective human oversight in the decision",
+      description:
+        "Assign oversight to a competent person, trained and with authority to review, not follow or override the AI's recommendation before rejecting or advancing a candidate. As a deployer, DESIGNATING that person is your obligation (Art. 26.2); that the system enables oversight is the provider's design (Art. 14).",
+      article: "Art. 26.2 (y Art. 14)",
+      severity: "alta",
+    },
+    {
+      id: "sesgo",
+      title: "Non-discrimination and bias control",
+      description:
+        "The employer's direct duty arises from anti-discrimination law (e.g. EU Directives 2000/78/EC, 2006/54/EC, 2000/43/EC and national law): monitor that the screening or ranking does not produce disparate impact on protected characteristics (sex, age, origin, disability) and document it. Also require from the provider evidence of its bias testing on the training data (a provider obligation, Art. 10, not yours as deployer).",
+      article: "Normativa antidiscriminación (Art. 10 = proveedor)",
+      severity: "alta",
+    },
+    {
+      id: "decision-automatizada",
+      title: "Decision not solely automated (GDPR)",
+      description:
+        "If there are decisions with a significant effect (e.g. automatic rejection), ensure genuine human intervention and the candidate's right to obtain an explanation and to contest the decision (GDPR Art. 22). The AI Act reinforces this with the affected person's right to a clear explanation of the system's role in decisions based on high-risk Annex III AI (Art. 86).",
+      article: "GDPR Art. 22 (y Art. 86)",
+      severity: "alta",
+    },
+    {
+      id: "transparencia-candidato",
+      title: "Transparency and information to the candidate",
+      description:
+        "Inform candidates that they are subject to the use of a high-risk AI system (a deployer obligation, Art. 26.11) and provide the GDPR data-protection information: purpose, legal basis, logic involved and data processed (GDPR Arts. 13-14).",
+      article: "Art. 26.11 (y GDPR Arts. 13-14)",
+      severity: "media",
+    },
+    {
+      id: "transparencia-chatbot-emociones",
+      title: "AI transparency in the interaction (Art. 50)",
+      description:
+        "The deployer's OWN duties (applicable from 2 August 2026): if you expose candidates to an emotion-recognition or biometric-categorisation system, you must inform them of it (Art. 50.3); if you disseminate AI-generated or manipulated content (e.g. images or videos in process materials), you must label it as such (Art. 50.4). What you REQUIRE from the provider and keep as evidence: that a conversational chatbot discloses that one is speaking with an AI (Art. 50.1) and that it marks the content it generates in a machine-readable way (Art. 50.2). WARNING: inferring a person's emotions in the workplace (e.g. affect analysis or micro-expressions in video interviews) is a PROHIBITED practice except for medical or safety purposes (Art. 5.1.f); check whether your tool does this before using it.",
+      article: "Art. 50.3/50.4 (deployer) · 50.1/50.2 (proveedor) · prohib. 5.1.f",
+      severity: "alta",
+      conditional:
+        "Deployer transparency (Art. 50) applicable from 2 August 2026; the Art. 5.1.f prohibition is already in force.",
+    },
+    {
+      id: "info-trabajadores",
+      title: "Information to workers and their representatives",
+      description:
+        "As an employer, before putting the high-risk AI into service or using it in the workplace, inform the affected workers and their representatives that they will be subject to it.",
+      article: "Art. 26.7",
+      severity: "media",
+    },
+    {
+      id: "datos-entrada",
+      title: "Relevant and representative input data",
+      description:
+        "To the extent that you control the input data (CVs, job criteria, weightings), ensure that they are relevant and sufficiently representative for the intended purpose.",
+      article: "Art. 26.4",
+      severity: "media",
+    },
+    {
+      id: "documentacion",
+      title: "Use in line with the provider's instructions and documentation",
+      description:
+        "Use the system in accordance with the provider's instructions for use (Art. 26.1). Require and keep as evidence the information the provider must supply to you (instructions for use and the Annex IV / Art. 11 information, which are provider obligations).",
+      article: "Art. 26.1 (Annex IV/Art. 11 = proveedor)",
+      severity: "media",
+    },
+    {
+      id: "logs",
+      title: "Retention of the system's logs",
+      description:
+        "Keep the logs automatically generated by the system, to the extent they are under your control, for a period appropriate to the purpose and of at least 6 months.",
+      article: "Art. 26.6",
+      severity: "media",
+    },
+    {
+      id: "exactitud-robustez",
+      title: "Accuracy, robustness and cybersecurity (require evidence)",
+      description:
+        "An appropriate level of accuracy, robustness and cybersecurity is the provider's design obligation (Art. 15): require from it the declared metrics and their limits, and monitor in real use that performance is maintained (Art. 26.5).",
+      article: "Art. 15 (proveedor) + Art. 26.5",
+      severity: "media",
+    },
+    {
+      id: "monitoreo",
+      title: "Monitoring of operation and periodic review",
+      description:
+        "Monitor the system's operation in accordance with the instructions; if you find that its use may present a risk, suspend use and inform the provider and, where appropriate, the authority, and report serious incidents. Schedule a periodic review (e.g. annual or upon changes).",
+      article: "Art. 26.5",
+      severity: "media",
+    },
+    {
+      id: "conservacion-evidencia",
+      title: "Retention of evidence of your own decisions",
+      description:
+        "Keep a record of the decisions and human reviews in the process (reason for the rejection/advancement, who reviewed and when) so as to be able to demonstrate accountability (GDPR Art. 5.2), respond to explanation requests (Art. 86) and defend yourself against possible discrimination claims.",
+      article: "GDPR Art. 5.2 (y Art. 86)",
+      severity: "media",
+    },
+    {
+      id: "dpia",
+      title: "Data protection impact assessment (DPIA)",
+      description:
+        "The systematic evaluation of candidates with profiling usually requires a prior DPIA under the GDPR (Art. 35, especially 35.3.a); carry it out and document it before starting the processing.",
+      article: "GDPR Art. 35",
+      severity: "alta",
+    },
+    {
+      id: "fria",
+      title:
+        "Fundamental rights impact assessment (FRIA) — usually does NOT apply",
+      description:
+        "The AI Act FRIA is NOT required of an ordinary private employer that uses selection AI (Annex III.4). It only applies if you are a public-law body or a private entity providing public services (or for credit/insurance under Annex III 5.b and 5.c). It is included solely to record that its applicability was assessed; in most private cases it is marked as not applicable.",
+      article: "Art. 27",
+      severity: "baja",
+    },
+  ],
+};

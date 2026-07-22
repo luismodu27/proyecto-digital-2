@@ -189,3 +189,179 @@ export const ATENCION_CLIENTE_GENAI_PACK: PolicyPack = {
     },
   ],
 };
+
+/**
+ * English (validated) mirror of ATENCION_CLIENTE_GENAI_PACK. Content only:
+ * `id`/`article`/`severity`/`conditional` logic kept identical to the ES pack;
+ * `name`, `tag`, `summary`, `note`, titles and descriptions translated.
+ * Deployer-vs-provider framing (Art. 50.1/50.2 = provider; 50.3/50.4 = deployer)
+ * and prohibited-copy rules preserved. Triage controls remain triage.
+ */
+export const ATENCION_CLIENTE_GENAI_PACK_EN: PolicyPack = {
+  id: "atencion-cliente-genai",
+  name: "Customer service and generative AI (EU AI Act · transparency)",
+  tag: "EU · Transparency (Art. 50)",
+  summary:
+    "Controls for customer-support chatbots and generative AI for public content (limited risk / Art. 50 transparency, GPAI and GDPR; as a general rule NOT high-risk under Annex III). Apply it to a system to preload its gaps.",
+  note:
+    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions are already enforceable (since 2 Feb 2025); Art. 50 transparency (chatbot notices, deepfakes, synthetic content) applies on 2 Aug 2026 and was NOT postponed by the Digital Omnibus (which only moved Annex III high-risk to 2 Dec 2027). These systems are, as a general rule, LIMITED risk: do not confuse transparency with the high-risk obligations. The GPAI obligations (Chapter V) fall on the model provider, not on someone who merely uses it via API/SaaS. Beyond the AI Act, the GDPR always applies. This pack gets your evidence ready ahead of time.",
+  controls: [
+    {
+      id: "clasificacion-triaje",
+      title:
+        "Classification triage — confirm it is limited risk, not high-risk (triage)",
+      description:
+        "Before applying the rest of the pack, confirm that the system is LIMITED risk (transparency). A support chatbot or generative AI for content are, as a general rule, limited risk. It ESCALATES to HIGH-RISK under Annex III (and requires the high-risk pack/controls, not this one) if the system decides or co-decides on: eligibility for essential public benefits or services (Annex III.5.a), creditworthiness or credit scoring (III.5.b), price or risk assessment in life/health insurance (III.5.c), or emergency triage (III.5.d); or if it is an emotion-recognition or biometric-categorisation system (Annex III.1). Evidence = triage note declaring the system's actual purpose and why it remains limited risk (or its reclassification if it escalates).",
+      article: "Art. 6(2) + Anexo III (1 y 5)",
+      severity: "alta",
+    },
+    {
+      id: "practicas-prohibidas-triaje",
+      title: "No manipulation or exploitation of vulnerabilities (triage)",
+      description:
+        "Verify that the assistant/generative AI does NOT employ subliminal, deliberately manipulative or deceptive techniques that materially distort the consumer's behaviour (e.g. covertly pushing towards a purchase or a waiver of rights, or deceptively making people believe they are talking to a human in order to manipulate them), nor exploit vulnerabilities due to age, disability or socio-economic situation. Both are practices PROHIBITED by the AI Act (in force since 2 Feb 2025): a prohibited practice is not prepared for audit, it is stopped. Evidence = description of the system's persuasive/design mechanisms and confirmation that these techniques are absent (or, if detected, legal review and cessation).",
+      article: "Art. 5.1.a / 5.1.b",
+      severity: "alta",
+      conditional: "Prohibitions already in force (since 2 Feb 2025).",
+    },
+    {
+      id: "emociones-clientes-triaje",
+      title:
+        "Emotion recognition of customers — not prohibited, but escalates to high-risk (triage)",
+      description:
+        "If the system infers the emotions of CUSTOMERS from biometric data (e.g. tone of voice or facial expression in customer service), bear in mind a key nuance: it is NOT prohibited by Art. 5.1.f (that prohibition covers only workers and students, not customers), BUT it is a HIGH-RISK system under Annex III.1.c and it processes biometric data (special category, GDPR Art. 9). That is, it escalates out of the limited-risk regime of this pack: it requires the high-risk regime, Art. 50.3 transparency and a reinforced GDPR legal basis. Evidence = confirmation of whether or not the system infers emotions; if it does, a note reclassifying it to high-risk and on the processing of biometric data.",
+      article: "Art. 5.1.f (alcance) + Annex III.1.c + RGPD Art. 9",
+      severity: "alta",
+      conditional:
+        "Applies only if the system infers customers' emotions from biometric data. Not prohibited, but reclassifies to high-risk.",
+    },
+    {
+      id: "alfabetizacion-ia",
+      title: "AI literacy of staff",
+      description:
+        "Take measures so that support agents and those who operate or oversee the chatbot or generative AI (marketing, communications, customer service) have a sufficient level of AI literacy —capabilities, limits and risks such as hallucinations—, proportionate to their role. This is a DIRECT, OWN duty of the deployer, enforceable since 2 February 2025. Evidence = record of the training or onboarding delivered (date, attendees and content).",
+      article: "Art. 4",
+      severity: "media",
+      conditional: "Enforceable since 2 February 2025 (already in force).",
+    },
+    {
+      id: "aviso-chatbot",
+      title: "Notice that one is interacting with an AI (chatbot)",
+      description:
+        "The user must know they are talking to an AI and not a person, unless it is obvious. The duty to DESIGN the system so that it informs lies with the PROVIDER (Art. 50.1). As a deployer deploying a third party's chatbot, your practical control is to verify that this notice is ACTIVE and visible in production and to keep evidence that the provider complies with it. WARNING: if you build the chatbot in-house or substantially customise it and publish it under your brand, you may become a provider (Art. 25) and take on Art. 50.1 directly. Evidence = screenshot of the AI notice active in production + provider confirmation/documentation.",
+      article: "Art. 50.1 (proveedor; deployer verifica)",
+      severity: "alta",
+      conditional:
+        "Applicable from 2 Aug 2026. If you build/customise the chatbot under your brand, the duty may be yours as a provider.",
+    },
+    {
+      id: "etiquetado-deepfakes",
+      title: "Labelling of deepfakes (image/audio/video)",
+      description:
+        "The deployer's OWN duty (applicable from 2 Aug 2026): if you disseminate images, audio or video generated or manipulated by AI that constitute a deepfake (they appear authentic and resemble real persons, objects, places or events), you must disclose that the content is artificial (Art. 50.4). Narrow EXCEPTION: if it is part of an evidently artistic, creative, satirical or fictional work, the obligation is REDUCED to disclosing its existence in a way that does not spoil the work (e.g. in credits or metadata), but it does NOT disappear. Evidence = record of the synthetic content disseminated and of how it was labelled, with the exception applied where appropriate.",
+      article: "Art. 50.4 (deployer)",
+      severity: "alta",
+      conditional:
+        "Applicable from 2 Aug 2026. Only if you disseminate deepfakes to the public.",
+    },
+    {
+      id: "etiquetado-texto-publico",
+      title: "Labelling of AI text on matters of public interest",
+      description:
+        "The deployer's OWN duty (applicable from 2 Aug 2026): if you publish text generated or manipulated by AI for the purpose of informing the public on matters of PUBLIC INTEREST, you must disclose that it is artificial (Art. 50.4). EXCEPTION: this does not apply if the content has undergone SUBSTANTIVE human editorial review and a natural or legal person assumes editorial responsibility for the publication. Note: the Commission has clarified that a mere human «check» is not enough; it must be genuine editorial control with clear responsibility. Most ordinary commercial/marketing content is not «public interest», but assess it case by case. Evidence = documented criteria for when you apply the label and when you invoke the editorial exception (who assumes responsibility).",
+      article: "Art. 50.4 (deployer)",
+      severity: "media",
+      conditional:
+        "Applicable from 2 Aug 2026. Only for AI text published to inform the public on matters of public interest.",
+    },
+    {
+      id: "transparencia-emociones-biometrica",
+      title:
+        "Emotion-recognition / biometric-categorisation information",
+      description:
+        "The deployer's OWN duty (applicable from 2 Aug 2026): if you expose customers to an emotion-recognition or biometric-categorisation system, you must inform them of its operation (Art. 50.3), in addition to complying with the GDPR (biometric data = special category, Art. 9). Remember that such a system, although not prohibited for customers, is high-risk under Annex III (see the emotions triage). Evidence = operation notice given to the exposed customers and a documented GDPR legal basis.",
+      article: "Art. 50.3 (deployer) + RGPD Art. 9",
+      severity: "media",
+      conditional:
+        "Applicable from 2 Aug 2026. Only if you use emotion recognition or biometric categorisation.",
+    },
+    {
+      id: "info-chatbot-rgpd",
+      title: "Data protection information in the chatbot (GDPR)",
+      description:
+        "As controller, inform the user at the point of interaction: what data the chatbot processes, for what purpose, legal basis, retention and their rights (GDPR Arts. 13-14), with an accessible link to the privacy policy. Evidence = information text shown in the chat and its link to the data-protection information.",
+      article: "RGPD Arts. 13-14",
+      severity: "media",
+    },
+    {
+      id: "base-juridica",
+      title: "Legal basis for the processing (GDPR)",
+      description:
+        "Determine and document the legal basis for processing the data that passes through the chatbot or generative AI (GDPR Art. 6): usually performance of the contract or legitimate interest for customer service. If you process special categories (e.g. health mentioned by the customer) you need an Art. 9 condition. Evidence = record of processing activities with the legal basis identified per purpose.",
+      article: "RGPD Art. 6 (y Art. 9)",
+      severity: "media",
+    },
+    {
+      id: "decision-automatizada",
+      title: "Decision not solely automated (GDPR Art. 22)",
+      description:
+        "If the chatbot takes decisions with a legal or significant effect on the person without human intervention (e.g. automatically denies a refund, cancels a service or rejects a claim), GDPR Art. 22 applies: guarantee genuine human intervention, the person's right to express their point of view, obtain an explanation and contest it. Evidence = flow design that ensures human intervention and the channel to contest (or confirmation that the chatbot does not take significant decisions on its own).",
+      article: "RGPD Art. 22",
+      severity: "alta",
+      conditional:
+        "Applies only if the system takes automated decisions with a significant effect (e.g. denying a service/refund).",
+    },
+    {
+      id: "minimizacion",
+      title: "Data minimisation in the conversation (GDPR)",
+      description:
+        "Limit the data the chatbot collects and retains to what is necessary for the purpose (GDPR Art. 5.1.c): avoid requesting or storing more personal data than needed, and define a limited retention of transcripts. Evidence = collection/retention configuration and a minimisation policy applied to the chatbot.",
+      article: "RGPD Art. 5.1.c",
+      severity: "media",
+    },
+    {
+      id: "entrenamiento-conversaciones",
+      title:
+        "Do not train the model on customer conversations without a legal basis",
+      description:
+        "Reusing customer conversations to train or fine-tune models is a new processing: it needs its own legal basis and respects purpose limitation (GDPR Arts. 5.1.b and 6); using data collected to «provide support» for the different purpose of «training AI» without a basis or information is a real risk. Also, require and keep from the provider its policy on whether it uses your data/prompts to train (many offer «zero-retention»/opt-out). Evidence = documented decision on whether or not conversations are used for training, its legal basis and information, and the provider's clause on training with your data.",
+      article: "RGPD Arts. 5.1.b y 6 (limitación de finalidad)",
+      severity: "alta",
+    },
+    {
+      id: "marca-contenido-sintetico",
+      title:
+        "Machine-readable synthetic-content marking (require from the provider)",
+      description:
+        "Marking the generated output (text, image, audio, video) in a machine-readable format detectable as artificial is an obligation of the PROVIDER of the generative system (Art. 50.2), not yours as deployer. Your control = require the provider to embed that interoperable mark/watermark in its output and keep it as evidence; it also helps you meet your own Art. 50.4 labelling. Evidence = provider confirmation that it marks the content (technical documentation / contractual clause).",
+      article: "Art. 50.2 (proveedor; deployer exige)",
+      severity: "media",
+      conditional: "Applicable from 2 Aug 2026.",
+    },
+    {
+      id: "gpai-evidencia-proveedor",
+      title: "GPAI model documentation (require and keep from the provider)",
+      description:
+        "If you only USE a general-purpose model (e.g. GPT or Claude) via API or a SaaS product, you are a deployer/end user, NOT a GPAI provider: the Chapter V obligations (technical documentation Art. 53, public summary of the training data Art. 53.1.d, copyright policy, systemic risk Art. 55) fall on the model PROVIDER. Your control = require and keep from the provider: model documentation, acceptable-use policy, training-data summary and the content-marking mechanism. LINE to watch: if you do substantial fine-tuning that changes the model's capabilities and publish it under your brand, you may become a provider (Art. 25 / GPAI guidance) and take on those obligations. Evidence = archived provider documentation + confirmation that your use is «deployment only», not substantial modification under your brand.",
+      article: "Cap. V (proveedor) + Art. 25 (línea deployer→proveedor)",
+      severity: "media",
+    },
+    {
+      id: "exactitud-supervision",
+      title: "Reliability, human oversight and disclaimers (good practice)",
+      description:
+        "The AI Act does NOT impose on these limited-risk systems the high-risk accuracy/robustness obligations; a chatbot hallucinating false information is not, in itself, a breach of the AI Act. But it is a real consumer-protection and contractual-liability risk, so it is treated as GOOD governance PRACTICE (not as an AI Act obligation): require from the provider reliability metrics and their limits, offer an escalation route to a human agent, and add a notice that the answers are indicative and may contain errors. Evidence = reliability metrics/limitations declared by the provider, the human-escalation design and the disclaimer text.",
+      article:
+        "Buena práctica (protección al consumidor); no es obligación de alto riesgo del AI Act",
+      severity: "media",
+    },
+    {
+      id: "conservacion-evidencia",
+      title: "Retention of evidence and accountability",
+      description:
+        "Keep a record of the governance decisions and of the transparency evidence: what AI content was labelled and how, the active chatbot notices, the classification triage note, the training (Art. 4) and the clauses required from the provider. It serves to demonstrate accountability (GDPR Art. 5.2) and to prove Art. 50 transparency before an authority. Evidence = file with the notices, labelling, triage and provider documentation, dated.",
+      article: "RGPD Art. 5.2 (responsabilidad proactiva)",
+      severity: "media",
+    },
+  ],
+};

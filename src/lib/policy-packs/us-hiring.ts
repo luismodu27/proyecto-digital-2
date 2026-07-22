@@ -140,3 +140,135 @@ export const US_HIRING_PACK: PolicyPack = {
     },
   ],
 };
+
+/**
+ * English (validated) mirror of US_HIRING_PACK. Content only:
+ * `id`/`article`/`severity`/`conditional` logic kept identical to the ES pack;
+ * `name`, `tag`, `summary`, `note`, titles and descriptions translated. The
+ * employer is the direct obligee (no provider/deployer reframing). Attesta does
+ * NOT perform or validate the bias audit — that stays as an explicit negation.
+ */
+export const US_HIRING_PACK_EN: PolicyPack = {
+  id: "us-hiring",
+  name: "AI hiring — United States",
+  tag: "US · Hiring",
+  summary:
+    "Obligations of the employer that uses AI to hire in the US (NYC Local Law 144 and Illinois). Apply it to a selection system to preload its gaps.",
+  note: "Territorial obligations: they apply depending on where you hire. Regulatory snapshot: July 2026. Indicative, not legal advice.",
+  controls: [
+    {
+      id: "identificar-aedt",
+      title: "Identify which selection tools are an AEDT (indicative)",
+      description:
+        "Review each recruiting tool (CV screening, ranking, scoring, certain video interviews) and determine whether it fits the definition of an «automated employment decision tool»: a computational process using machine learning, statistical modelling, AI or data analytics that issues a score, classification or recommendation that substitutes for or substantially weighs in the decision about a candidate or employee. That classification determines which LL144 obligations fall on you as an employer. Keep the reasoning for why a tool is or is not an AEDT.",
+      article: "NYC LL144 · 6 RCNY §5-300",
+      severity: "alta",
+      conditional:
+        "Only if you assess candidates/employees for a position in New York City (or NYC residents).",
+    },
+    {
+      id: "auditoria-sesgo-independiente",
+      title:
+        "Record an independent bias audit less than 12 months old (indicative)",
+      description:
+        "Before using an AEDT, your organization must ensure that the tool passed a bias audit performed by an independent auditor (not involved in developing or operating the tool and with no financial interest) no more than one year old. Attesta does NOT perform or validate the audit: it records the date, the name of the independent auditor and the URL of the summary as declared evidence. Key note: the law requires conducting and publishing the audit, not «passing» it; an audit that shows adverse impact does not by itself prevent use under LL144, but it raises your anti-discrimination exposure (Title VII).",
+      article: "NYC LL144 · 6 RCNY §5-301",
+      severity: "alta",
+      conditional: "Only if the tool is an AEDT used for positions in NYC.",
+    },
+    {
+      id: "publicar-resumen-auditoria",
+      title:
+        "Publish the summary of audit results on your website (indicative)",
+      description:
+        "Your organization must publish, in an accessible section of its website, before using the AEDT, the summary of results of the most recent bias audit (selection/scoring rates and impact ratios by sex, race/ethnicity and intersectional categories, the date the tool was distributed and the date of the audit). Attesta keeps the public link and the publication date as evidence; it does not host or certify the content.",
+      article: "NYC LL144 · 6 RCNY §5-302",
+      severity: "alta",
+      conditional: "Only if the tool is an AEDT used for positions in NYC.",
+    },
+    {
+      id: "aviso-candidato-nyc",
+      title:
+        "Notify the candidate at least 10 business days in advance (indicative)",
+      description:
+        "At least 10 business days before using the AEDT, inform each candidate or employee residing in NYC of: (a) that an AEDT will be used in their assessment; (b) the job qualifications or characteristics the tool will assess; (c) the type of data collected and its source (and, if requested, the retention policy); and (d) that they may request an alternative selection process or an accommodation. Keep the notice template and evidence of its delivery.",
+      article: "NYC LL144 · 6 RCNY §5-303",
+      severity: "alta",
+      conditional: "Only if the tool is an AEDT used for positions in NYC.",
+    },
+    {
+      id: "aviso-uso-ia-illinois",
+      title:
+        "Notify the use of AI to candidates and employees (Illinois, indicative)",
+      description:
+        "If you use AI in employment decisions in Illinois (recruitment, hiring, promotion, training, dismissal, discipline or terms of employment), you must notify the affected person that AI is being used. Prepare and keep a clear notice. Caution: the IDHR's detailed rules (the exact circumstances, timing and form of the notice) are pending, so the precise format is uncertain; treat it as indicative and watch for its reappearance to adjust the notice.",
+      article: "Illinois HRA (HB 3773) · 775 ILCS 5/2-102",
+      severity: "media",
+      conditional: "Only if you hire or manage employment in Illinois.",
+    },
+    {
+      id: "evitar-efecto-discriminatorio-il",
+      title:
+        "Prevent the AI from producing a discriminatory effect or using proxies such as the ZIP code (indicative)",
+      description:
+        "In Illinois it is a civil rights violation to use AI that has the effect of discriminating on a protected class in employment decisions, and to use the ZIP code as a proxy for a protected class. Liability is based on effect, not intent. As a deployer: understand how your tool decides, require from the provider evidence of its bias/adverse-impact testing, remove proxy variables and document your reviews.",
+      article: "Illinois HRA (HB 3773) · 775 ILCS 5/2-102, 1-103",
+      severity: "alta",
+      conditional: "Only if you hire or manage employment in Illinois.",
+    },
+    {
+      id: "aivia-consentimiento",
+      title:
+        "Obtain consent and explain how the AI works before the video interview (indicative)",
+      description:
+        "Before an AI-analyzed video interview, your organization must: (a) notify the candidate that AI may be used to analyze the video; (b) explain how the AI works and what types of characteristics it uses to evaluate; and (c) obtain their consent. You may not analyze with AI anyone who does not consent; offer an alternative. Keep the consent and the explanatory text as evidence (this often depends on the provider supplying that text to you).",
+      article: "Illinois AIVIA · 820 ILCS 42/5",
+      severity: "alta",
+      conditional:
+        "Only if you use AI to analyze candidates' video interviews in Illinois.",
+    },
+    {
+      id: "aivia-borrado-30",
+      title:
+        "Delete the video within 30 days when the candidate requests it (indicative)",
+      description:
+        "If a candidate requests it, your organization must delete their video interviews within 30 days of the request and instruct any third party that received copies (including backups) to also delete them. Enable a channel to receive these requests and record the date of the request and of the deletion.",
+      article: "Illinois AIVIA · 820 ILCS 42/15",
+      severity: "media",
+      conditional:
+        "Only if you use AI to analyze candidates' video interviews in Illinois.",
+    },
+    {
+      id: "aivia-reporte-demografico",
+      title:
+        "Collect and report demographic data if AI alone decides who advances (indicative)",
+      description:
+        "If your organization relies solely on AI analysis to decide which candidates advance to an in-person interview, it must collect and annually report to the Department of Commerce the race and ethnicity data of those who did and did not receive the in-person interview. This applies only in that narrow scenario.",
+      article: "Illinois AIVIA · 820 ILCS 42/20",
+      severity: "baja",
+      conditional:
+        "Only if you use AI as the sole criterion to select who advances to an in-person interview in Illinois.",
+    },
+    {
+      id: "conservar-evidencia-us",
+      title:
+        "Keep evidence of audits, notices and consents (indicative)",
+      description:
+        "Maintain a traceable record per tool and per candidate: date and auditor of the most recent bias audit, URL of the published summary, notice templates and deliveries, AIVIA consents, deletion requests, and the evidence of the bias testing required from the provider. It is the basis for responding to a claim or to an investigation by the DCWP (NYC) or the IDHR (Illinois). Attesta acts as the system of record for that declared evidence, not as a certifier.",
+      article: "Transversal · 6 RCNY §§5-301 a 5-303; 820 ILCS 42; 775 ILCS 5",
+      severity: "media",
+      conditional: "Applies whenever you use AI in hiring in the US.",
+    },
+    {
+      id: "baseline-federal-antidiscriminacion",
+      title:
+        "Maintain federal anti-discrimination good practices (indicative)",
+      description:
+        "Regardless of the state, federal anti-discrimination laws still apply to AI selection tools: adverse-impact testing (Title VII), reasonable accommodations and avoiding «screening out» people with disabilities (ADA), and age (ADEA). The EEOC withdrew its specific AI guidance in 2025, but the underlying laws did not change: do not assume that «there is no longer a federal rule».",
+      article: "Federal · Title VII, ADA, ADEA",
+      severity: "media",
+      conditional:
+        "Applies always in the US (underlying legal risk, not a duty to «audit the AI»).",
+    },
+  ],
+};
