@@ -127,6 +127,15 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Vigilancia: estado interno siempre visible en hero y tarjetas de próximos plazos.** A petición del
+  fundador. Antes el estado interno (Revisado / Plan en marcha / No aplica) solo se veía al abrir cada evento de la
+  cronología. Ahora un componente `StatusChip` lo muestra **siempre** en el hero de "próximo plazo" y en las tarjetas de
+  "más plazos por venir": si hay acuse, su pill de estado; si no, un chip sutil **"Sin marcar"** (borde discontinuo, tono
+  apagado) que comunica lo pendiente sin alarmar → sensación de "esto está bajo control". Se añadieron **2 acks demo** en
+  eventos próximos (`eu-transparency-art50` → Plan en marcha; `eu-highrisk-annex-iii` → Plan en marcha) en `mock-data.ts`
+  (ES+EN) para que la mezcla realista (algunos con plan, otros sin marcar) se vea en la demo. lint+tsc+build verdes;
+  verificado en demo.
+
 - **2026-07-22** · **Vigilancia (dashboard): pulido + banda de orientación.** Revisión de la vista de vigilancia
   (`src/app/dashboard/vigilancia/page.tsx`) a petición del fundador. Tres mejoras (sin tocar contenido legal): (1)
   **arreglo de bug visual** en el hero — el marco aparecía duplicado ("EU AI Act · EU AI Act") cuando el nombre corto y el

@@ -79,6 +79,29 @@ function AckPill({
   return <Pill tone={ACK_TONE[status]}>{regAckLabel(status, locale)}</Pill>;
 }
 
+/**
+ * Estado interno de un evento, siempre visible: si hay acuse muestra su estado
+ * (Revisado / Plan en marcha / No aplica); si no, un chip sutil "Sin marcar"
+ * (borde discontinuo, tono apagado) para que cada plazo comunique su situación
+ * de un vistazo sin tener que abrirlo.
+ */
+function StatusChip({
+  ack,
+  locale,
+  notMarked,
+}: {
+  ack?: RegAck;
+  locale: Locale;
+  notMarked: string;
+}) {
+  if (ack) return <AckPill status={ack.status} locale={locale} />;
+  return (
+    <span className="inline-flex items-center rounded-full border border-dashed border-line-strong px-2.5 py-0.5 text-xs font-medium text-muted">
+      {notMarked}
+    </span>
+  );
+}
+
 /** Pill sutil con el marco/jurisdicción de un evento. */
 function FrameworkPill({
   framework,
@@ -519,7 +542,7 @@ export default async function VigilanciaPage({
                 {heroFull && heroFull !== heroShort && (
                   <span className="text-xs text-muted">{heroFull}</span>
                 )}
-                {heroAck && <AckPill status={heroAck.status} locale={locale} />}
+                <StatusChip ack={heroAck} locale={locale} notMarked={tm.notMarked} />
               </div>
               <h2 className="mt-2 font-display text-xl font-semibold text-ink">
                 {hero.title}
@@ -588,7 +611,7 @@ export default async function VigilanciaPage({
                     <p className="text-xs text-muted">
                       {n} {n === 1 ? tm.affectedOne : tm.affectedOther}
                     </p>
-                    {ack && <AckPill status={ack.status} locale={locale} />}
+                    <StatusChip ack={ack} locale={locale} notMarked={tm.notMarked} />
                   </div>
                 </div>
               );
