@@ -3,13 +3,12 @@ import { SealMark } from "@/components/ui/SealMark";
 import { PrintButton } from "@/components/dashboard/PrintButton";
 import { getAiSystems, getGapItems, getOrganizationName } from "@/lib/data";
 import { LEGAL_PDF_BY_LOCALE, ScopeNote } from "@/components/ui/LegalNote";
-import type { GapItem } from "@/lib/mock-data";
+import { severityLabel, type GapItem } from "@/lib/mock-data";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
-const STATUS_LABEL = { missing: "Falta", partial: "Parcial", done: "Cubierto" } as const;
 const STATUS_TONE = {
   missing: "danger",
   partial: "warn",
@@ -57,7 +56,15 @@ export default async function InformeGapPage() {
     getOrganizationName(),
   ]);
   const locale = await resolveLocale();
-  const tp = getDictionary(locale).dashboard.pages;
+  const dd = getDictionary(locale).dashboard;
+  const tp = dd.pages;
+  const tg = tp.gapReport;
+  const rc = tp.reportChrome;
+  const statusLabel = {
+    missing: rc.statusMissing,
+    partial: rc.statusPartial,
+    done: rc.statusDone,
+  } as const;
 
   const nameById = new Map(systems.map((s) => [s.id, s.name]));
   const total = gapItems.length;
@@ -94,7 +101,7 @@ export default async function InformeGapPage() {
     );
 
   const org = orgName ?? "La organización";
-  const fecha = new Date().toLocaleDateString("es-ES", {
+  const fecha = new Date().toLocaleDateString(locale === "en" ? "en-GB" : "es-ES", {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -121,11 +128,11 @@ export default async function InformeGapPage() {
         ].join(" ");
 
   const kpis = [
-    { k: "Controles evaluados", v: total },
-    { k: "Brechas abiertas", v: open },
-    { k: "Abiertas de sev. alta", v: openAlta },
-    { k: "Cubierto", v: `${coveragePct}%` },
-    { k: "Sistemas", v: groups.length },
+    { k: tg.kpiEvaluated, v: total },
+    { k: tg.kpiOpen, v: open },
+    { k: tg.kpiOpenHigh, v: openAlta },
+    { k: tg.kpiCovered, v: `${coveragePct}%` },
+    { k: tg.kpiSystems, v: groups.length },
   ];
 
   return (
@@ -149,27 +156,28 @@ export default async function InformeGapPage() {
             <span className="font-display text-2xl font-semibold">Attesta</span>
           </div>
           <div className="text-right text-xs text-muted">
-            <p>Informe de evidencia</p>
+            <p>{tg.coverTag}</p>
             <p>{fecha}</p>
           </div>
         </header>
 
         <div className="mt-6">
           <p className="text-xs uppercase tracking-[0.2em] text-muted">
-            Autoevaluación · EU AI Act
+            {tg.coverKicker}
           </p>
           <h1 className="mt-2 font-display text-2xl font-semibold">
-            Brechas y preparación para auditoría
+            {tg.coverTitle}
           </h1>
           <p className="mt-1 text-sm text-ink-soft">
-            Organización: <span className="font-medium text-ink">{orgName ?? "—"}</span>{" "}
-            · datos autodeclarados
+            {rc.organizationLabel}{" "}
+            <span className="font-medium text-ink">{orgName ?? "—"}</span> ·{" "}
+            {rc.selfDeclaredData}
           </p>
         </div>
 
-        {/* Resumen ejecutivo (narrativa determinista) */}
+        {/* Resumen ejecutivo (narrativa determinista, ES → experto) */}
         <section className="mt-6 break-inside-avoid">
-          <h2 className="font-display text-base font-semibold">Resumen ejecutivo</h2>
+          <h2 className="font-display text-base font-semibold">{rc.execSummary}</h2>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
             {summaryParagraph}
           </p>
@@ -203,7 +211,8 @@ export default async function InformeGapPage() {
               />
             </div>
             <span className="shrink-0 text-xs tabular-nums text-muted">
-              {done}/{total} cubierto
+              {done}/{total}
+              {tg.coveredSuffix}
             </span>
           </div>
         )}
@@ -211,8 +220,7 @@ export default async function InformeGapPage() {
         {/* Brechas por sistema */}
         {groups.length === 0 ? (
           <p className="mt-10 rounded-xl border border-dashed border-line-strong px-4 py-10 text-center text-sm text-muted">
-            Aún no hay controles evaluados. Aplica un policy pack a los sistemas de tu
-            organización desde el gap assessment para evaluar su preparación.
+            {tg.groupsEmpty}
           </p>
         ) : (
           <div className="mt-8 space-y-8">
@@ -225,12 +233,14 @@ export default async function InformeGapPage() {
                   <div className="flex items-center gap-2 text-xs text-muted">
                     {grp.gAlta > 0 && (
                       <Chip tone="danger">
-                        {grp.gAlta} sev. alta {pl(grp.gAlta, "abierta", "abiertas")}
+                        {grp.gAlta}
+                        {tg.chipHighOpenPrefix}
+                        {pl(grp.gAlta, tg.chipOpenOne, tg.chipOpenOther)}
                       </Chip>
                     )}
                     <span className="tabular-nums">
-                      {grp.gOpen} {pl(grp.gOpen, "abierta", "abiertas")} ·{" "}
-                      {grp.gCov}% cubierto
+                      {grp.gOpen} {pl(grp.gOpen, tg.chipOpenOne, tg.chipOpenOther)} ·{" "}
+                      {grp.gCov}% {tg.coveredWord}
                     </span>
                   </div>
                 </div>
@@ -238,10 +248,10 @@ export default async function InformeGapPage() {
                 <table className="w-full border-collapse text-left text-sm">
                   <thead>
                     <tr className="text-xs uppercase tracking-wide text-muted">
-                      <th className="py-2 pr-3 font-medium">Artículo</th>
-                      <th className="py-2 pr-3 font-medium">Requisito</th>
-                      <th className="py-2 pr-3 font-medium">Severidad</th>
-                      <th className="py-2 font-medium">Estado</th>
+                      <th className="py-2 pr-3 font-medium">{rc.colArticle}</th>
+                      <th className="py-2 pr-3 font-medium">{tg.colRequirement}</th>
+                      <th className="py-2 pr-3 font-medium">{rc.colSeverity}</th>
+                      <th className="py-2 font-medium">{rc.colStatus}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -256,12 +266,14 @@ export default async function InformeGapPage() {
                         <td className="py-3 pr-3">{g.requirement}</td>
                         <td className="py-3 pr-3">
                           <Chip tone={SEVERITY_TONE[g.severity]}>
-                            <span className="capitalize">{g.severity}</span>
+                            <span className="capitalize">
+                              {severityLabel(g.severity, locale)}
+                            </span>
                           </Chip>
                         </td>
                         <td className="py-3">
                           <Chip tone={STATUS_TONE[g.status]}>
-                            {STATUS_LABEL[g.status]}
+                            {statusLabel[g.status]}
                           </Chip>
                         </td>
                       </tr>
@@ -276,8 +288,10 @@ export default async function InformeGapPage() {
 
         <footer className="mt-10 border-t border-line pt-5 text-xs text-muted">
           <p>
-            Generado por <span className="font-medium text-ink">Attesta</span> el {fecha}.
-            Documento de trabajo para preparación de auditoría.
+            {rc.generatedByPrefix}
+            <span className="font-medium text-ink">Attesta</span>
+            {rc.generatedByOn}
+            {fecha}. {rc.footerWorkingDoc}
           </p>
           <p className="mt-1">{LEGAL_PDF_BY_LOCALE[locale]}</p>
         </footer>

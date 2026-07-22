@@ -20,31 +20,29 @@ const TONE_PILL: Record<string, string> = {
     "bg-[var(--tone-neutral-bg)] text-[var(--tone-neutral-fg)] border-[var(--tone-neutral-bd)]",
 };
 
-const TYPES = [
-  { key: "", label: "Todo" },
-  { key: "ai_systems", label: "Sistemas" },
-  { key: "risk_assessments", label: "Evaluaciones" },
-  { key: "gap_items", label: "Brechas" },
-  { key: "memberships", label: "Equipo" },
-];
+const TYPE_KEYS = ["", "ai_systems", "risk_assessments", "gap_items", "memberships"];
 
-function formatAgo(iso: string, now: Date): string {
+type ActivityDict = ReturnType<typeof getDictionary>["dashboard"]["pages"]["activity"];
+type UnitsDict = ReturnType<typeof getDictionary>["dashboard"]["units"];
+
+function formatAgo(iso: string, now: Date, t: ActivityDict, u: UnitsDict): string {
   const diff = now.getTime() - new Date(iso).getTime();
+  const wrap = (n: number, unit: string) => `${t.agoPrefix}${n} ${unit}${t.agoSuffix}`;
   const min = Math.round(diff / 60000);
-  if (min < 1) return "ahora mismo";
-  if (min < 60) return `hace ${min} min`;
+  if (min < 1) return t.justNow;
+  if (min < 60) return wrap(min, u.minute);
   const h = Math.round(min / 60);
-  if (h < 24) return `hace ${h} h`;
+  if (h < 24) return wrap(h, u.hour);
   const d = Math.round(h / 24);
-  if (d < 30) return `hace ${d} ${d === 1 ? "día" : "días"}`;
+  if (d < 30) return wrap(d, d === 1 ? u.dayOne : u.dayOther);
   const mo = Math.round(d / 30);
-  if (mo < 12) return `hace ${mo} ${mo === 1 ? "mes" : "meses"}`;
+  if (mo < 12) return wrap(mo, mo === 1 ? u.monthOne : u.monthOther);
   const y = Math.round(mo / 12);
-  return `hace ${y} ${y === 1 ? "año" : "años"}`;
+  return wrap(y, y === 1 ? u.yearOne : u.yearOther);
 }
 
-function formatExact(iso: string): string {
-  return new Date(iso).toLocaleString("es-ES", {
+function formatExact(iso: string, locale: Locale): string {
+  return new Date(iso).toLocaleString(locale === "en" ? "en-GB" : "es-ES", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -60,11 +58,13 @@ export default async function ActividadPage({
 }) {
   const { t } = await searchParams;
   const [all, chain] = await Promise.all([getAuditLog(), verifyAuditChain()]);
-  const filter = TYPES.some((x) => x.key === t) ? t : "";
+  const filter = TYPE_KEYS.includes(t ?? "") ? (t ?? "") : "";
   const entries = filter ? all.filter((e) => e.table === filter) : all;
   const now = new Date();
   const locale = await resolveLocale();
-  const tr = getDictionary(locale).dashboard.pages.activity;
+  const dd = getDictionary(locale).dashboard;
+  const tr = dd.pages.activity;
+  const u = dd.units;
   const filterLabels: Record<string, string> = {
     "": tr.filterAll,
     ai_systems: tr.filterSystems,
@@ -100,7 +100,7 @@ export default async function ActividadPage({
         }
       />
 
-      {chain && <ChainStatusCard chain={chain} />}
+      {chain && <ChainStatusCard chain={chain} t={tr} locale={locale} />}
 
       {!isSupabaseConfigured && (
         <div className="mb-6 rounded-2xl border border-[var(--tone-info-bd)] bg-[var(--tone-info-bg)] px-5 py-4 text-sm text-[var(--tone-info-fg)]">
@@ -112,19 +112,19 @@ export default async function ActividadPage({
 
       {/* Filtros */}
       <div className="mb-6 flex flex-wrap gap-2">
-        {TYPES.map((x) => {
-          const active = filter === x.key;
+        {TYPE_KEYS.map((key) => {
+          const active = filter === key;
           return (
             <Link
-              key={x.key || "all"}
-              href={x.key ? `/dashboard/actividad?t=${x.key}` : "/dashboard/actividad"}
+              key={key || "all"}
+              href={key ? `/dashboard/actividad?t=${key}` : "/dashboard/actividad"}
               className={`rounded-full border px-3 py-1 text-sm font-medium transition-colors ${
                 active
                   ? "border-brand bg-brand-soft text-brand-strong"
                   : "border-line bg-paper-raised text-ink-soft hover:bg-paper-sunken"
               }`}
             >
-              {filterLabels[x.key] ?? x.label}
+              {filterLabels[key]}
             </Link>
           );
         })}
@@ -137,7 +137,14 @@ export default async function ActividadPage({
       ) : (
         <ol className="space-y-2">
           {entries.map((e) => (
-            <ActivityRow key={e.id} entry={e} now={now} locale={locale} />
+            <ActivityRow
+              key={e.id}
+              entry={e}
+              now={now}
+              locale={locale}
+              t={tr}
+              u={u}
+            />
           ))}
         </ol>
       )}
@@ -149,7 +156,15 @@ export default async function ActividadPage({
  * Tarjeta de estado de la cadena de integridad (encadenado SHA-256). Es evidencia
  * de integridad técnica del registro, no una afirmación de conformidad.
  */
-function ChainStatusCard({ chain }: { chain: AuditChainStatus }) {
+function ChainStatusCard({
+  chain,
+  t,
+  locale,
+}: {
+  chain: AuditChainStatus;
+  t: ActivityDict;
+  locale: Locale;
+}) {
   const ok = chain.ok;
   return (
     <div
@@ -192,9 +207,7 @@ function ChainStatusCard({ chain }: { chain: AuditChainStatus }) {
             ok ? "text-[var(--tone-good-fg)]" : "text-[var(--tone-danger-fg)]"
           }`}
         >
-          {ok
-            ? "Integridad de la cadena verificada"
-            : "Se detectó una alteración en el registro"}
+          {ok ? t.chainOkTitle : t.chainBrokenTitle}
         </p>
         <p
           className={`mt-1 text-sm ${
@@ -203,24 +216,23 @@ function ChainStatusCard({ chain }: { chain: AuditChainStatus }) {
         >
           {ok ? (
             <>
-              Los <span className="font-medium">{chain.total}</span>{" "}
-              {chain.total === 1 ? "evento está encadenado" : "eventos están encadenados"} con
-              SHA-256: cada registro incorpora el hash del anterior, así que alterar
-              o borrar cualquiera —incluso con acceso directo a la base de datos—
-              rompería la cadena y quedaría en evidencia.
+              {t.chainOkBodyPrefix}
+              <span className="font-medium">{chain.total}</span>{" "}
+              {chain.total === 1 ? t.eventChainedOne : t.eventChainedOther}
+              {t.chainOkBodyRest}
             </>
           ) : (
             <>
-              La cadena se rompe en el evento{" "}
-              <span className="font-medium">#{chain.brokenId}</span>: un registro fue
-              modificado o eliminado fuera de la aplicación. Conserva esta evidencia
-              y revisa el acceso a la base de datos.
+              {t.chainBrokenBodyPrefix}
+              <span className="font-medium">{chain.brokenId}</span>
+              {t.chainBrokenBodyRest}
             </>
           )}
         </p>
         {ok && (
           <p className="mt-1.5 text-xs text-[var(--tone-good-fg)] opacity-80">
-            Verificado en vivo · {formatExact(chain.checkedAt)}
+            {t.verifiedLive}
+            {formatExact(chain.checkedAt, locale)}
           </p>
         )}
       </div>
@@ -232,10 +244,14 @@ function ActivityRow({
   entry,
   now,
   locale,
+  t,
+  u,
 }: {
   entry: AuditEntry;
   now: Date;
   locale: Locale;
+  t: ActivityDict;
+  u: UnitsDict;
 }) {
   const entity = ENTITY_META_BY_LOCALE[locale][entry.table] ?? {
     label: entry.table,
@@ -243,7 +259,7 @@ function ActivityRow({
     tone: "neutral",
   };
   const act = ACTION_META_BY_LOCALE[locale][entry.action];
-  const actor = entry.actorEmail ?? "El sistema";
+  const actor = entry.actorEmail ?? t.actorSystem;
   const initial = (entry.actorEmail ?? "·").slice(0, 1).toUpperCase();
 
   return (
@@ -261,11 +277,12 @@ function ActivityRow({
         </p>
         {entry.changed.length > 0 && (
           <p className="mt-0.5 text-xs text-muted">
-            Cambió: {entry.changed.join(", ")}
+            {t.changedPrefix}
+            {entry.changed.join(", ")}
           </p>
         )}
-        <p className="mt-1 text-xs text-muted" title={formatExact(entry.at)}>
-          {formatAgo(entry.at, now)} · {formatExact(entry.at)}
+        <p className="mt-1 text-xs text-muted" title={formatExact(entry.at, locale)}>
+          {formatAgo(entry.at, now, t, u)} · {formatExact(entry.at, locale)}
         </p>
       </div>
       <span
@@ -274,10 +291,10 @@ function ActivityRow({
         }`}
       >
         {entry.action === "insert"
-          ? "Alta"
+          ? t.pillInsert
           : entry.action === "update"
-            ? "Cambio"
-            : "Baja"}
+            ? t.pillUpdate
+            : t.pillDelete}
       </span>
     </li>
   );

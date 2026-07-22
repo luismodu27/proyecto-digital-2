@@ -1,5 +1,5 @@
 import {
-  AI_SYSTEMS,
+  aiSystems,
   GAP_ITEMS,
   SAMPLE_ASSESSMENTS,
   SAMPLE_BIAS_AUDITS,
@@ -29,9 +29,19 @@ import {
 import { mergeCatalog, type RegulatoryEvent } from "@/lib/regulatory-watch";
 import { resolveLocale } from "@/lib/i18n/resolve";
 
-/** Repositorio de datos de ejemplo (modo demo). */
+/**
+ * Repositorio de datos de ejemplo (modo demo).
+ *
+ * La METADATA de producto de los sistemas (nombre/área/dominio/proveedor) es
+ * locale-aware: en `en` se sirve `AI_SYSTEMS_EN` resolviendo el locale por
+ * cookie con `resolveLocale()`, igual que la fachada hace para los eventos
+ * regulatorios. El resto de muestras (brechas, evaluaciones, tareas, audit,
+ * candidatos, fuentes) contiene texto REGULATORIO y permanece en ES a la espera
+ * de la validación del experto — ver informe de entrega.
+ */
 export async function getAiSystems(): Promise<AiSystem[]> {
-  return AI_SYSTEMS;
+  const locale = await resolveLocale();
+  return aiSystems(locale);
 }
 
 export async function getGapItems(): Promise<GapItem[]> {
@@ -41,7 +51,8 @@ export async function getGapItems(): Promise<GapItem[]> {
 export async function getSystemsForSelect(): Promise<
   { id: string; name: string }[]
 > {
-  return AI_SYSTEMS.map((s) => ({ id: s.id, name: s.name }));
+  const locale = await resolveLocale();
+  return aiSystems(locale).map((s) => ({ id: s.id, name: s.name }));
 }
 
 export async function getOrganizationName(): Promise<string | null> {
@@ -99,7 +110,8 @@ export async function verifyAuditChain(): Promise<AuditChainStatus | null> {
 }
 
 export async function getExportBundle(): Promise<ExportBundle | null> {
-  const systems: ExportedSystem[] = AI_SYSTEMS.map((system) => ({
+  const locale = await resolveLocale();
+  const systems: ExportedSystem[] = aiSystems(locale).map((system) => ({
     system,
     assessments: SAMPLE_ASSESSMENTS[system.id] ?? [],
     biasAudit: SAMPLE_BIAS_AUDITS[system.id] ?? null,
@@ -166,7 +178,8 @@ export async function getActionTasks(): Promise<ActionTask[]> {
 export async function getSystemDossier(
   id: string,
 ): Promise<DossierData | null> {
-  const system = AI_SYSTEMS.find((s) => s.id === id);
+  const locale = await resolveLocale();
+  const system = aiSystems(locale).find((s) => s.id === id);
   if (!system) return null;
   return {
     system: { ...system, actorRole: "deployer" },

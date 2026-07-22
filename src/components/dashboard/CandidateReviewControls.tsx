@@ -2,13 +2,16 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { enrichCandidate, rejectCandidate } from "@/lib/data/reg-pipeline-actions";
-import { REG_KIND_LABEL, FRAMEWORK_META } from "@/lib/regulatory-watch";
-import { RISK_LABEL, type RegCandidate } from "@/lib/mock-data";
-import { useT } from "@/lib/i18n/provider";
+import {
+  REG_KIND_LABEL_BY_LOCALE,
+  FRAMEWORK_META_BY_LOCALE,
+  type RegKind,
+  type RegFramework,
+} from "@/lib/regulatory-watch";
+import { riskLabel, type RegCandidate, type RiskLevel } from "@/lib/mock-data";
+import { useT, useLocale } from "@/lib/i18n/provider";
 
 const RISK_LEVELS = ["unacceptable", "high", "limited", "minimal"] as const;
-const FRAMEWORKS = Object.entries(FRAMEWORK_META);
-const KINDS = Object.entries(REG_KIND_LABEL);
 
 const inputCls =
   "w-full rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand";
@@ -22,6 +25,15 @@ const labelCls =
  */
 export function CandidateReviewControls({ c }: { c: RegCandidate }) {
   const tcc = useT().dashboard.pages.candidateControls;
+  const locale = useLocale();
+  const frameworks = Object.entries(FRAMEWORK_META_BY_LOCALE[locale]) as [
+    RegFramework,
+    (typeof FRAMEWORK_META_BY_LOCALE)[typeof locale][RegFramework],
+  ][];
+  const kinds = Object.entries(REG_KIND_LABEL_BY_LOCALE[locale]) as [
+    RegKind,
+    string,
+  ][];
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState(c.kind ?? "");
   const [date, setDate] = useState(c.date ?? "");
@@ -118,7 +130,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={3}
-              placeholder="p. ej. duplicado, ruido, ya cubierto…"
+              placeholder={tcc.rejectPlaceholder}
               className={`${inputCls} mt-1`}
             />
             <div className="mt-5 flex justify-end gap-2.5">
@@ -147,10 +159,9 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
       {isSignal && !open && (
         <p className="max-w-xl text-xs text-muted">
           <span className="font-medium text-ink-soft">
-            Señal del Vigía sin analizar.
-          </span>{" "}
-          Ábrela para completar fecha y tipo de evento (obligatorios para
-          publicar) y afinar los textos; o descártala si es ruido.
+            {tcc.signalUnanalyzedBold}
+          </span>
+          {tcc.signalUnanalyzedRest}
         </p>
       )}
 
@@ -161,7 +172,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label htmlFor={`t-${c.id}`} className={labelCls}>
-                Título
+                {tcc.fieldTitle}
               </label>
               <input
                 id={`t-${c.id}`}
@@ -174,7 +185,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
 
             <div>
               <label htmlFor={`fw-${c.id}`} className={labelCls}>
-                Marco
+                {tcc.fieldFramework}
               </label>
               <select
                 id={`fw-${c.id}`}
@@ -182,7 +193,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
                 defaultValue={c.framework}
                 className={inputCls}
               >
-                {FRAMEWORKS.map(([value, meta]) => (
+                {frameworks.map(([value, meta]) => (
                   <option key={value} value={value}>
                     {meta.short}
                   </option>
@@ -192,7 +203,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
 
             <div>
               <label htmlFor={`k-${c.id}`} className={labelCls}>
-                Tipo de evento <span className="text-[var(--tone-danger-fg)]">*</span>
+                {tcc.fieldKind} <span className="text-[var(--tone-danger-fg)]">*</span>
               </label>
               <select
                 id={`k-${c.id}`}
@@ -201,8 +212,8 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
                 onChange={(e) => setKind(e.target.value)}
                 className={inputCls}
               >
-                <option value="">— elegir —</option>
-                {KINDS.map(([value, label]) => (
+                <option value="">{tcc.fieldKindChoose}</option>
+                {kinds.map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
                   </option>
@@ -212,7 +223,8 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
 
             <div>
               <label htmlFor={`d-${c.id}`} className={labelCls}>
-                Fecha del evento <span className="text-[var(--tone-danger-fg)]">*</span>
+                {tcc.fieldEventDate}{" "}
+                <span className="text-[var(--tone-danger-fg)]">*</span>
               </label>
               <input
                 id={`d-${c.id}`}
@@ -226,20 +238,20 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
 
             <div>
               <label htmlFor={`eid-${c.id}`} className={labelCls}>
-                Id del evento al publicar
+                {tcc.fieldEventId}
               </label>
               <input
                 id={`eid-${c.id}`}
                 name="proposed_event_id"
                 defaultValue={c.proposedEventId ?? ""}
-                placeholder="se genera si lo dejas vacío"
+                placeholder={tcc.fieldEventIdPlaceholder}
                 className={inputCls}
               />
             </div>
 
             <div className="sm:col-span-2">
               <label htmlFor={`s-${c.id}`} className={labelCls}>
-                Resumen (qué es)
+                {tcc.fieldSummary}
               </label>
               <textarea
                 id={`s-${c.id}`}
@@ -252,7 +264,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
 
             <div className="sm:col-span-2">
               <label htmlFor={`im-${c.id}`} className={labelCls}>
-                Impacto para el deployer
+                {tcc.fieldImpact}
               </label>
               <textarea
                 id={`im-${c.id}`}
@@ -265,7 +277,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
 
             <div className="sm:col-span-2">
               <label htmlFor={`ac-${c.id}`} className={labelCls}>
-                Acción propuesta (qué hacer)
+                {tcc.fieldAction}
               </label>
               <textarea
                 id={`ac-${c.id}`}
@@ -278,19 +290,19 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
 
             <div className="sm:col-span-2">
               <label htmlFor={`ar-${c.id}`} className={labelCls}>
-                Artículos (separados por coma)
+                {tcc.fieldArticles}
               </label>
               <input
                 id={`ar-${c.id}`}
                 name="articles"
                 defaultValue={c.articles.join(", ")}
-                placeholder="Art. 26, Anexo III"
+                placeholder={tcc.fieldArticlesPlaceholder}
                 className={inputCls}
               />
             </div>
 
             <div className="sm:col-span-2">
-              <span className={labelCls}>Alcance (a qué sistemas afecta)</span>
+              <span className={labelCls}>{tcc.fieldScope}</span>
               <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1.5">
                 <label className="flex items-center gap-1.5 text-sm text-ink-soft">
                   <input
@@ -299,7 +311,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
                     defaultChecked={c.scope.all ?? false}
                     className="accent-[var(--color-brand)]"
                   />
-                  Toda la organización
+                  {tcc.scopeAll}
                 </label>
                 {RISK_LEVELS.map((lvl) => (
                   <label
@@ -312,7 +324,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
                       defaultChecked={c.scope.riskLevels?.includes(lvl) ?? false}
                       className="accent-[var(--color-brand)]"
                     />
-                    {RISK_LABEL[lvl]}
+                    {riskLabel(lvl as RiskLevel, locale)}
                   </label>
                 ))}
               </div>
@@ -338,9 +350,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
               {tcc.saveDraft}
             </button>
             {!publishable && (
-              <span className="text-xs text-muted">
-                Fecha y tipo de evento son obligatorios para publicar.
-              </span>
+              <span className="text-xs text-muted">{tcc.publishRequired}</span>
             )}
           </div>
         </form>

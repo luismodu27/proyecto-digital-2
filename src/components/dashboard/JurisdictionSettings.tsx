@@ -3,9 +3,9 @@
 import { setOrgJurisdictions } from "@/lib/data/jurisdiction-actions";
 import {
   JURISDICTION_ORDER,
-  JURISDICTION_LABEL,
+  JURISDICTION_LABEL_BY_LOCALE,
 } from "@/lib/regulatory-watch";
-import { useT } from "@/lib/i18n/provider";
+import { useT, useLocale } from "@/lib/i18n/provider";
 
 /**
  * Configurador del nexo de jurisdicción (owner/admin): marca dónde contrata la
@@ -14,6 +14,8 @@ import { useT } from "@/lib/i18n/provider";
  */
 export function JurisdictionSettings({ selected }: { selected: string[] }) {
   const j = useT().dashboard.controls.jurisdiction;
+  const locale = useLocale();
+  const jurLabels = JURISDICTION_LABEL_BY_LOCALE[locale];
   return (
     <details className="mb-6 rounded-2xl border border-line bg-paper-raised">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-3 [&::-webkit-details-marker]:hidden">
@@ -41,7 +43,7 @@ export function JurisdictionSettings({ selected }: { selected: string[] }) {
                 defaultChecked={selected.includes(jur)}
                 className="size-4 rounded border-line-strong text-brand focus:ring-brand"
               />
-              {JURISDICTION_LABEL[jur]}
+              {jurLabels[jur]}
             </label>
           ))}
         </div>

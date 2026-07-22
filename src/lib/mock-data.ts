@@ -148,6 +148,92 @@ export const AI_SYSTEMS: AiSystem[] = [
   },
 ];
 
+/*
+ * Variante en inglés de los sistemas de ejemplo (modo demo).
+ * Solo METADATA de producto (nombre del sistema, propietario/área, dominio y
+ * proveedor) — NO hay contenido regulatorio en estos campos. Misma forma e
+ * `id`/`risk`/`compliance`/`lastReviewed` que `AI_SYSTEMS` (los valores no-texto
+ * son idénticos: sostienen KPIs y gráficos por igual en ambos idiomas). Los
+ * nombres de proveedor ficticios se mantienen; roles/áreas/dominios van en inglés.
+ */
+export const AI_SYSTEMS_EN: AiSystem[] = [
+  {
+    id: "SYS-001",
+    name: "CV screening — ATS",
+    owner: "HR",
+    domain: "Hiring",
+    vendor: "HireFlow",
+    risk: "high",
+    compliance: 42,
+    lastReviewed: "2026-06-28",
+  },
+  {
+    id: "SYS-002",
+    name: "Candidate ranking",
+    owner: "Talent Acquisition",
+    domain: "Selection",
+    vendor: "In-house",
+    risk: "high",
+    compliance: 61,
+    lastReviewed: "2026-07-02",
+    evidenceState: "evidenced",
+  },
+  {
+    id: "SYS-003",
+    name: "AI video interviews",
+    owner: "HR",
+    domain: "Assessment",
+    vendor: "VidAssess",
+    risk: "high",
+    compliance: 35,
+    lastReviewed: "2026-05-30",
+  },
+  {
+    id: "SYS-004",
+    name: "Recruitment chatbot",
+    owner: "Talent Acquisition",
+    domain: "Candidate support",
+    vendor: "OpenAI",
+    risk: "limited",
+    compliance: 70,
+    lastReviewed: "2026-07-05",
+  },
+  {
+    id: "SYS-005",
+    name: "Automated psychometric test",
+    owner: "HR",
+    domain: "Assessment",
+    vendor: "PsychMetric",
+    risk: "high",
+    compliance: 55,
+    lastReviewed: "2026-07-10",
+    evidenceState: "reviewed",
+  },
+  {
+    id: "SYS-006",
+    name: "Interview scheduling",
+    owner: "People Ops",
+    domain: "Logistics",
+    vendor: "In-house",
+    risk: "minimal",
+    compliance: 88,
+    lastReviewed: "2026-06-20",
+  },
+];
+
+/**
+ * Selector locale-aware del inventario de ejemplo. Retrocompatible: default ES
+ * (`AI_SYSTEMS`); en `en` sirve `AI_SYSTEMS_EN`. Consúmelo desde la fachada de
+ * datos (mock-repo) pasando el locale ya resuelto.
+ */
+export const AI_SYSTEMS_BY_LOCALE: Record<Locale, AiSystem[]> = {
+  es: AI_SYSTEMS,
+  en: AI_SYSTEMS_EN,
+};
+export function aiSystems(locale: Locale = "es"): AiSystem[] {
+  return AI_SYSTEMS_BY_LOCALE[locale];
+}
+
 /** Severidad de una brecha (gap item). */
 export type GapSeverity = "alta" | "media" | "baja";
 
@@ -536,6 +622,22 @@ export const REG_ACK_LABEL: Record<RegAckStatus, string> = {
   not_applicable: "No aplica",
 };
 
+/** EN — internal review status labels (parallel to REG_ACK_LABEL, same keys). */
+const REG_ACK_LABEL_EN: Record<RegAckStatus, string> = {
+  reviewed: "Reviewed",
+  planned: "Plan under way",
+  not_applicable: "Not applicable",
+};
+
+export const REG_ACK_LABEL_BY_LOCALE: Record<Locale, Record<RegAckStatus, string>> = {
+  es: REG_ACK_LABEL,
+  en: REG_ACK_LABEL_EN,
+};
+
+export function regAckLabel(status: RegAckStatus, locale: Locale = "es"): string {
+  return REG_ACK_LABEL_BY_LOCALE[locale][status];
+}
+
 export type RegAck = {
   status: RegAckStatus;
   note: string | null;
@@ -568,6 +670,29 @@ export const REG_CANDIDATE_STATUS_LABEL: Record<RegCandidateStatus, string> = {
   rejected: "Descartado",
   superseded: "Reemplazado",
 };
+
+/** EN — candidate status labels (parallel to REG_CANDIDATE_STATUS_LABEL). */
+const REG_CANDIDATE_STATUS_LABEL_EN: Record<RegCandidateStatus, string> = {
+  draft: "Draft",
+  approved: "Published",
+  rejected: "Discarded",
+  superseded: "Superseded",
+};
+
+export const REG_CANDIDATE_STATUS_LABEL_BY_LOCALE: Record<
+  Locale,
+  Record<RegCandidateStatus, string>
+> = {
+  es: REG_CANDIDATE_STATUS_LABEL,
+  en: REG_CANDIDATE_STATUS_LABEL_EN,
+};
+
+export function regCandidateStatusLabel(
+  status: RegCandidateStatus,
+  locale: Locale = "es",
+): string {
+  return REG_CANDIDATE_STATUS_LABEL_BY_LOCALE[locale][status];
+}
 
 /** Procedencia del borrador: qué agente lo generó y con qué señal. */
 export type RegCandidateProvenance = {
@@ -692,6 +817,29 @@ export const REG_SOURCE_STATUS_LABEL: Record<RegSourceStatus, string> = {
   changed: "Cambió",
   error: "Error",
 };
+
+/** EN — source check status labels (parallel to REG_SOURCE_STATUS_LABEL). */
+const REG_SOURCE_STATUS_LABEL_EN: Record<RegSourceStatus, string> = {
+  baseline: "Baseline",
+  ok: "No changes",
+  changed: "Changed",
+  error: "Error",
+};
+
+export const REG_SOURCE_STATUS_LABEL_BY_LOCALE: Record<
+  Locale,
+  Record<RegSourceStatus, string>
+> = {
+  es: REG_SOURCE_STATUS_LABEL,
+  en: REG_SOURCE_STATUS_LABEL_EN,
+};
+
+export function regSourceStatusLabel(
+  status: RegSourceStatus,
+  locale: Locale = "es",
+): string {
+  return REG_SOURCE_STATUS_LABEL_BY_LOCALE[locale][status];
+}
 
 /** Fuente oficial que el Vigía monitorea por fetch+hash. */
 export type RegSource = {

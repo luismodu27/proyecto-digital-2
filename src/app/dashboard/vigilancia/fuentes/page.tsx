@@ -1,17 +1,18 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
-import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
+import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { VigiaRunButton } from "@/components/dashboard/VigiaRunButton";
 import { getRegSources, getIsPlatformAdmin, isSupabaseConfigured } from "@/lib/data";
 import {
-  REG_SOURCE_STATUS_LABEL,
+  regSourceStatusLabel,
   type RegSource,
   type RegSourceStatus,
 } from "@/lib/mock-data";
-import { FRAMEWORK_LABEL, type RegFramework } from "@/lib/regulatory-watch";
+import { frameworkLabel } from "@/lib/regulatory-watch";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
 
 export const dynamic = "force-dynamic";
 
@@ -41,9 +42,9 @@ function Pill({
   );
 }
 
-function relTime(iso: string | null): string {
-  if (!iso) return "nunca";
-  return new Date(iso).toLocaleString("es-ES", {
+function relTime(iso: string | null, locale: Locale, never: string): string {
+  if (!iso) return never;
+  return new Date(iso).toLocaleString(locale === "en" ? "en-GB" : "es-ES", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -53,10 +54,12 @@ function relTime(iso: string | null): string {
 
 function SourceRow({
   s,
-  unreviewedLabel,
+  locale,
+  tf,
 }: {
   s: RegSource;
-  unreviewedLabel: string;
+  locale: Locale;
+  tf: ReturnType<typeof getDictionary>["dashboard"]["pages"]["sources"];
 }) {
   const status = s.lastStatus;
   return (
@@ -71,11 +74,11 @@ function SourceRow({
           {s.label} ↗
         </a>
         <div className="mt-1 flex flex-wrap items-center gap-2">
-          <Pill>{FRAMEWORK_LABEL[s.framework as RegFramework] ?? s.framework}</Pill>
+          <Pill>{frameworkLabel(s.framework, locale)}</Pill>
           <span className="text-[11px] text-muted">{s.sourceKind}</span>
           {s.failCount > 0 && (
             <span className="text-[11px] text-[var(--tone-danger-fg)]">
-              {s.failCount} fallo{s.failCount === 1 ? "" : "s"}
+              {s.failCount} {s.failCount === 1 ? tf.failOne : tf.failOther}
             </span>
           )}
         </div>
@@ -83,17 +86,17 @@ function SourceRow({
       <td className="py-3 pr-4 whitespace-nowrap">
         {status ? (
           <Pill className={STATUS_TONE[status]}>
-            {REG_SOURCE_STATUS_LABEL[status]}
+            {regSourceStatusLabel(status, locale)}
           </Pill>
         ) : (
-          <Pill>{unreviewedLabel}</Pill>
+          <Pill>{tf.unreviewed}</Pill>
         )}
       </td>
       <td className="py-3 pr-4 whitespace-nowrap text-xs text-muted">
-        {relTime(s.lastCheckedAt)}
+        {relTime(s.lastCheckedAt, locale, tf.never)}
       </td>
       <td className="py-3 whitespace-nowrap text-xs text-muted">
-        {relTime(s.lastChangeAt)}
+        {relTime(s.lastChangeAt, locale, tf.never)}
       </td>
     </tr>
   );
@@ -104,7 +107,8 @@ export default async function FuentesPage() {
     getIsPlatformAdmin(),
     getRegSources(),
   ]);
-  const d = getDictionary(await resolveLocale()).dashboard.pages;
+  const locale = await resolveLocale();
+  const d = getDictionary(locale).dashboard.pages;
   const tf = d.sources;
 
   // En modo conectado, el panel del Vigía es solo para el equipo de Attesta.
@@ -185,13 +189,13 @@ export default async function FuentesPage() {
           </thead>
           <tbody className="[&_td:first-child]:pl-5 [&_td:last-child]:pr-5">
             {sources.map((s) => (
-              <SourceRow key={s.id} s={s} unreviewedLabel={tf.unreviewed} />
+              <SourceRow key={s.id} s={s} locale={locale} tf={tf} />
             ))}
           </tbody>
         </table>
       </div>
 
-      <LegalNote className="mt-10" text={LEGAL_FOOTER} />
+      <LegalNote className="mt-10" text={LEGAL_FOOTER_BY_LOCALE[locale]} />
     </>
   );
 }

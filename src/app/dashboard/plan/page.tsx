@@ -79,7 +79,9 @@ export default async function PlanPage() {
     getSystemsForSelect(),
   ]);
   const locale = await resolveLocale();
-  const tp = getDictionary(locale).dashboard.pages.plan;
+  const dd = getDictionary(locale).dashboard;
+  const tp = dd.pages.plan;
+  const u = dd.units;
 
   const now = new Date();
   const todayIso = now.toISOString().slice(0, 10);
@@ -352,7 +354,7 @@ export default async function PlanPage() {
                     {r.systems && r.systems.length > 0 && (
                       <span className="text-xs text-muted">
                         · {r.systems.length}{" "}
-                        {r.systems.length === 1 ? "sistema" : "sistemas"}
+                        {r.systems.length === 1 ? u.systemOne : u.systemOther}
                       </span>
                     )}
                   </div>

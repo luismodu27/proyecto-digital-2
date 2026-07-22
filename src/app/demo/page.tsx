@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/ui/Logo";
@@ -8,26 +9,31 @@ import { RiskBadge } from "@/components/ui/RiskBadge";
 import { Meter } from "@/components/dashboard/parts";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
 import {
-  AI_SYSTEMS,
+  aiSystems,
   riskCounts,
   avgCompliance,
+  riskLabel,
+  RISK_LABEL_BY_LOCALE,
   AUDIT_READY_THRESHOLD,
 } from "@/lib/mock-data";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
-export const metadata = {
-  title: "Demo · Attesta",
-  description:
-    "Una muestra de Attesta con datos de ejemplo: inventario y clasificación de riesgo de IA.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = getDictionary(await resolveLocale()).dashboard.demoPage;
+  return { title: t.metaTitle, description: t.metaDescription };
+}
 
 /** Tarjeta de función bloqueada: muestra el titular y un candado con CTA. */
 function LockedCard({
   title,
   description,
+  unlockCta,
   children,
 }: {
   title: string;
   description: string;
+  unlockCta: string;
   children: ReactNode;
 }) {
   return (
@@ -58,15 +64,17 @@ function LockedCard({
           href="/login"
           className="mt-1 text-xs font-semibold text-brand hover:text-brand-strong"
         >
-          Regístrate para desbloquear →
+          {unlockCta}
         </Link>
       </div>
     </div>
   );
 }
 
-export default function DemoPage() {
-  const systems = AI_SYSTEMS;
+export default async function DemoPage() {
+  const locale = await resolveLocale();
+  const t = getDictionary(locale).dashboard.demoPage;
+  const systems = aiSystems(locale);
   const counts = riskCounts(systems);
   const avg = avgCompliance(systems);
   const high = counts.high + counts.unacceptable;
@@ -92,12 +100,12 @@ export default function DemoPage() {
                   strokeLinejoin="round"
                 />
               </svg>
-              <span className="hidden sm:inline">Volver al sitio</span>
-              <span className="sm:hidden">Sitio</span>
+              <span className="hidden sm:inline">{t.backToSiteLong}</span>
+              <span className="sm:hidden">{t.backToSiteShort}</span>
             </Link>
             <ThemeToggle />
             <ButtonLink href="/login" className="px-4 py-2 text-sm">
-              Crear cuenta
+              {t.createAccount}
             </ButtonLink>
           </div>
         </div>
@@ -110,26 +118,27 @@ export default function DemoPage() {
             <SealMark size={22} className="mt-0.5 shrink-0 text-brand" />
             <div>
               <p className="text-sm font-semibold text-ink">
-                Estás viendo una muestra con datos de ejemplo.
+                {t.sampleNoticeTitle}
               </p>
-              <p className="text-sm text-ink-soft">
-                Inventario y clasificación de riesgo, abiertos. El resto se
-                desbloquea al crear tu cuenta y usar tus propios datos.
-              </p>
+              <p className="text-sm text-ink-soft">{t.sampleNoticeBody}</p>
             </div>
           </div>
           <ButtonLink href="/login" className="shrink-0 px-5 py-2 text-sm">
-            Empezar gratis
+            {t.startFree}
           </ButtonLink>
         </div>
 
         {/* KPIs */}
         <section className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { k: "Sistemas de IA", v: String(systems.length), hint: "en inventario" },
-            { k: "Alto riesgo", v: String(high), hint: "obligaciones estrictas" },
-            { k: "Preparación media", v: `${avg}%`, hint: `objetivo ≥ ${AUDIT_READY_THRESHOLD}%` },
-            { k: "Marco", v: "EU AI Act", hint: "+ marcos de EE. UU." },
+            { k: t.kpiSystems, v: String(systems.length), hint: t.kpiSystemsHint },
+            { k: t.kpiHighRisk, v: String(high), hint: t.kpiHighRiskHint },
+            {
+              k: t.kpiReadiness,
+              v: `${avg}%`,
+              hint: `${t.kpiReadinessHintPrefix}${AUDIT_READY_THRESHOLD}%`,
+            },
+            { k: t.kpiFramework, v: "EU AI Act", hint: t.kpiFrameworkHint },
           ].map((c) => (
             <div key={c.k} className="rounded-2xl border border-line bg-paper-raised p-5">
               <p className="font-display text-2xl font-semibold text-ink">{c.v}</p>
@@ -144,10 +153,10 @@ export default function DemoPage() {
           <section className="rounded-2xl border border-line bg-paper-raised p-6">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-lg font-semibold text-ink">
-                Inventario de IA
+                {t.inventoryTitle}
               </h2>
               <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-medium text-brand-strong">
-                Muestra
+                {t.sampleBadge}
               </span>
             </div>
             <ul className="mt-4 divide-y divide-line">
@@ -163,7 +172,7 @@ export default function DemoPage() {
                     <div className="hidden w-24 sm:block">
                       <Meter value={s.compliance} target={AUDIT_READY_THRESHOLD} />
                     </div>
-                    <RiskBadge level={s.risk} />
+                    <RiskBadge level={s.risk} label={riskLabel(s.risk, locale)} />
                   </div>
                 </li>
               ))}
@@ -173,10 +182,14 @@ export default function DemoPage() {
           {/* Riesgo (abierto) */}
           <section className="rounded-2xl border border-line bg-paper-raised p-6">
             <h2 className="font-display text-lg font-semibold text-ink">
-              Distribución de riesgo
+              {t.riskDistributionTitle}
             </h2>
             <div className="mt-6">
-              <RiskDonut counts={counts} />
+              <RiskDonut
+                counts={counts}
+                labels={RISK_LABEL_BY_LOCALE[locale]}
+                systemsLabel={t.systemsLabel}
+              />
             </div>
           </section>
         </div>
@@ -185,26 +198,28 @@ export default function DemoPage() {
         <div className="mt-8">
           <div className="flex items-center gap-3">
             <h2 className="font-display text-lg font-semibold text-ink">
-              Con tu cuenta desbloqueas
+              {t.unlockSectionTitle}
             </h2>
             <span className="h-px flex-1 bg-line" />
           </div>
           <div className="mt-5 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <LockedCard
-              title="Gap assessment"
-              description="Mide tu «% listo» frente a cada obligación y detecta brechas."
+              title={t.lockGapTitle}
+              description={t.lockGapDesc}
+              unlockCta={t.unlockCta}
             >
-              <p className="text-sm font-medium text-ink">Preparación para auditoría</p>
+              <p className="text-sm font-medium text-ink">{t.lockGapPreview}</p>
               <p className="mt-2 font-display text-3xl font-semibold text-ink">78%</p>
               <div className="mt-2 h-2 rounded-full bg-paper-sunken">
                 <div className="h-full w-3/4 rounded-full bg-brand" />
               </div>
             </LockedCard>
             <LockedCard
-              title="Plan de acción"
-              description="Convierte las brechas en tareas con responsables y fechas."
+              title={t.lockPlanTitle}
+              description={t.lockPlanDesc}
+              unlockCta={t.unlockCta}
             >
-              <p className="text-sm font-medium text-ink">Tareas abiertas</p>
+              <p className="text-sm font-medium text-ink">{t.lockPlanPreview}</p>
               <div className="mt-3 space-y-2">
                 <div className="h-6 rounded-md bg-paper-sunken" />
                 <div className="h-6 rounded-md bg-paper-sunken" />
@@ -212,18 +227,24 @@ export default function DemoPage() {
               </div>
             </LockedCard>
             <LockedCard
-              title="Vigilancia regulatoria"
-              description="Radar de fuentes oficiales que te avisa de cada cambio y plazo."
+              title={t.lockWatchTitle}
+              description={t.lockWatchDesc}
+              unlockCta={t.unlockCta}
             >
-              <p className="text-sm font-medium text-ink">Próximo hito</p>
-              <p className="mt-2 text-sm text-ink-soft">Transparencia (Art. 50)</p>
+              <p className="text-sm font-medium text-ink">
+                {t.lockWatchPreviewLabel}
+              </p>
+              <p className="mt-2 text-sm text-ink-soft">
+                {t.lockWatchPreviewMilestone}
+              </p>
               <p className="mt-2 font-display text-2xl font-semibold text-brand-strong">
-                en 16 días
+                {t.lockWatchPreviewCountdown}
               </p>
             </LockedCard>
             <LockedCard
-              title="Dossier e informe (PDF)"
-              description="Evidencia lista para el auditor, generada con un clic."
+              title={t.lockDossierTitle}
+              description={t.lockDossierDesc}
+              unlockCta={t.unlockCta}
             >
               <p className="text-sm font-medium text-ink">Dossier.pdf</p>
               <div className="mt-3 space-y-1.5">
@@ -239,18 +260,15 @@ export default function DemoPage() {
         {/* CTA final */}
         <section className="mt-10 rounded-3xl border border-line-strong bg-paper-raised px-6 py-10 text-center">
           <h2 className="font-display text-2xl font-semibold text-ink sm:text-3xl">
-            Úsalo con tus propios sistemas de IA.
+            {t.ctaTitle}
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-ink-soft">
-            Crea tu cuenta gratis: inventaría tu IA y obtén su clasificación de
-            riesgo hoy mismo. Desbloquea la preparación completa cuando quieras.
-          </p>
+          <p className="mx-auto mt-3 max-w-md text-ink-soft">{t.ctaBody}</p>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <ButtonLink href="/login" className="px-6 py-3">
-              Crear cuenta gratis
+              {t.ctaCreate}
             </ButtonLink>
             <ButtonLink href="/#precios" variant="outline" className="px-6 py-3">
-              Ver planes
+              {t.ctaPlans}
             </ButtonLink>
           </div>
         </section>

@@ -15,7 +15,8 @@ import { Paywall } from "@/components/dashboard/Paywall";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
 import {
-  RISK_LABEL,
+  riskLabel,
+  severityLabel,
   RISK_ORDER,
   AUDIT_READY_THRESHOLD,
   avgCompliance,
@@ -50,6 +51,9 @@ export default async function InformeEjecutivoPage() {
   const locale = await resolveLocale();
   const dict = getDictionary(locale).dashboard;
   const tp = dict.pages;
+  const tr = tp.reportExec;
+  const rc = tp.reportChrome;
+  const u = dict.units;
   const gateOrg = await getActiveOrg();
   if (gateOrg && !(await orgHasTier(gateOrg, "preparacion"))) {
     return (
@@ -104,7 +108,7 @@ export default async function InformeEjecutivoPage() {
     )
     .slice(0, 3);
 
-  const fecha = now.toLocaleDateString("es-ES", {
+  const fecha = now.toLocaleDateString(locale === "en" ? "en-GB" : "es-ES", {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -148,11 +152,11 @@ export default async function InformeEjecutivoPage() {
           .join(" ");
 
   const kpis = [
-    { k: "Sistemas de IA", v: String(total) },
-    { k: "Alto riesgo", v: String(highRisk), color: highRisk > 0 ? RISK_COLOR.high : undefined },
-    { k: "Preparación media", v: `${avg}%` },
-    { k: "Brechas abiertas", v: String(openGaps.length) },
-    { k: "Con respaldo", v: `${backedPct}%` },
+    { k: tr.kpiSystems, v: String(total) },
+    { k: tr.kpiHighRisk, v: String(highRisk), color: highRisk > 0 ? RISK_COLOR.high : undefined },
+    { k: tr.kpiAvgReadiness, v: `${avg}%` },
+    { k: tr.kpiOpenGaps, v: String(openGaps.length) },
+    { k: tr.kpiBacked, v: `${backedPct}%` },
   ];
 
   return (
@@ -175,28 +179,28 @@ export default async function InformeEjecutivoPage() {
             <span className="font-display text-2xl font-semibold">Attesta</span>
           </div>
           <div className="text-right text-xs text-muted">
-            <p>Informe ejecutivo</p>
+            <p>{tr.coverTag}</p>
             <p>{fecha}</p>
           </div>
         </header>
 
         <div className="mt-6">
           <p className="text-xs uppercase tracking-[0.2em] text-muted">
-            Gobernanza de IA · Estado de la organización · EU AI Act
+            {tr.coverKicker}
           </p>
           <h1 className="mt-2 font-display text-2xl font-semibold">
-            Informe ejecutivo de gobernanza de IA
+            {tr.coverTitle}
           </h1>
           <p className="mt-1 text-sm text-ink-soft">
-            Organización:{" "}
-            <span className="font-medium text-ink">{orgName ?? "—"}</span> · datos
-            autodeclarados
+            {rc.organizationLabel}{" "}
+            <span className="font-medium text-ink">{orgName ?? "—"}</span> ·{" "}
+            {rc.selfDeclaredData}
           </p>
         </div>
 
-        {/* Resumen ejecutivo (narrativa determinista) */}
+        {/* Resumen ejecutivo (narrativa determinista, ES → experto) */}
         <section className="mt-6 break-inside-avoid">
-          <h2 className="font-display text-base font-semibold">Resumen ejecutivo</h2>
+          <h2 className="font-display text-base font-semibold">{rc.execSummary}</h2>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
             {summaryParagraph}
           </p>
@@ -226,7 +230,7 @@ export default async function InformeEjecutivoPage() {
         {/* Distribución de riesgo */}
         <section className="mt-8 break-inside-avoid">
           <h2 className="font-display text-base font-semibold">
-            Distribución de riesgo
+            {tr.riskDistribution}
           </h2>
           <div className="mt-3 space-y-2">
             {RISK_ORDER.map((level) => {
@@ -235,7 +239,7 @@ export default async function InformeEjecutivoPage() {
               return (
                 <div key={level} className="flex items-center gap-3">
                   <span className="w-28 shrink-0 text-sm text-ink-soft">
-                    {RISK_LABEL[level]}
+                    {riskLabel(level, locale)}
                   </span>
                   <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-paper-sunken">
                     <div
@@ -258,24 +262,23 @@ export default async function InformeEjecutivoPage() {
         {/* Sistemas prioritarios */}
         <section className="mt-8 break-inside-avoid">
           <h2 className="font-display text-base font-semibold">
-            Sistemas que requieren atención
+            {tr.needAttention}
           </h2>
           <p className="mt-0.5 text-xs text-muted">
-            Los más urgentes: alto riesgo con preparación por debajo del 60% (el
-            umbral orientativo de preparación es {AUDIT_READY_THRESHOLD}%).
+            {tr.needAttentionHintPrefix}
+            {AUDIT_READY_THRESHOLD}
+            {tr.needAttentionHintSuffix}
           </p>
           {priority.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-soft">
-              Ningún sistema de alto riesgo está por debajo del umbral. 👍
-            </p>
+            <p className="mt-3 text-sm text-ink-soft">{tr.allAboveThreshold}</p>
           ) : (
             <div className="mt-3 overflow-x-auto print:overflow-visible">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-line-strong text-xs uppercase tracking-wide text-muted">
-                  <th className="py-2 pr-3 font-medium">Sistema</th>
-                  <th className="py-2 pr-3 font-medium">Riesgo</th>
-                  <th className="py-2 font-medium">Preparación</th>
+                  <th className="py-2 pr-3 font-medium">{tr.colSystem}</th>
+                  <th className="py-2 pr-3 font-medium">{tr.colRisk}</th>
+                  <th className="py-2 font-medium">{tr.colReadiness}</th>
                 </tr>
               </thead>
               <tbody>
@@ -287,7 +290,7 @@ export default async function InformeEjecutivoPage() {
                     </td>
                     <td className="py-2.5 pr-3">
                       <span style={{ color: RISK_COLOR[s.risk] }}>
-                        {RISK_LABEL[s.risk]}
+                        {riskLabel(s.risk, locale)}
                       </span>
                     </td>
                     <td className="py-2.5 font-medium tabular-nums">
@@ -304,15 +307,16 @@ export default async function InformeEjecutivoPage() {
         {/* Brechas abiertas */}
         <section className="mt-8 break-inside-avoid">
           <h2 className="font-display text-base font-semibold">
-            Brechas abiertas prioritarias
+            {tr.openGapsTitle}
           </h2>
           <p className="mt-0.5 text-xs text-muted">
-            {openGaps.length} abiertas · {criticalGaps.length} de severidad alta.
+            {openGaps.length}
+            {tr.openGapsHintMid}
+            {criticalGaps.length}
+            {tr.openGapsHintSuffix}
           </p>
           {topGaps.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-soft">
-              No hay brechas abiertas registradas.
-            </p>
+            <p className="mt-3 text-sm text-ink-soft">{tr.noOpenGaps}</p>
           ) : (
             <ul className="mt-3 space-y-2">
               {topGaps.map((g) => (
@@ -331,7 +335,7 @@ export default async function InformeEjecutivoPage() {
                     className="shrink-0 text-xs font-medium uppercase"
                     style={{ color: SEVERITY_COLOR[g.severity] }}
                   >
-                    {g.severity}
+                    {severityLabel(g.severity, locale)}
                   </span>
                 </li>
               ))}
@@ -342,12 +346,10 @@ export default async function InformeEjecutivoPage() {
         {/* Próximos plazos regulatorios */}
         <section className="mt-8 break-inside-avoid">
           <h2 className="font-display text-base font-semibold">
-            Próximos plazos regulatorios
+            {tr.deadlinesTitle}
           </h2>
           {deadlines.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-soft">
-              No hay plazos futuros en el radar.
-            </p>
+            <p className="mt-3 text-sm text-ink-soft">{tr.noFutureDeadlines}</p>
           ) : (
             <ul className="mt-3 space-y-2">
               {deadlines.map((e) => {
@@ -363,12 +365,14 @@ export default async function InformeEjecutivoPage() {
                       <span className="ml-1 text-xs text-muted">
                         ·{" "}
                         {frameworkMeta(e.framework, locale)?.short ??
-                          e.framework}{" "}
-                        · afecta a {n} {n === 1 ? "sistema" : "sistemas"}
+                          e.framework}
+                        {tr.affectsMid}
+                        {n} {n === 1 ? u.systemOne : u.systemOther}
                       </span>
                     </span>
                     <span className="shrink-0 text-xs font-medium tabular-nums text-ink-soft">
-                      en {d} {d === 1 ? "día" : "días"}
+                      {tr.inDaysPrefix}
+                      {d} {d === 1 ? u.dayOne : u.dayOther}
                     </span>
                   </li>
                 );
@@ -379,8 +383,10 @@ export default async function InformeEjecutivoPage() {
 
         <footer className="mt-10 border-t border-line pt-5 text-xs text-muted">
           <p>
-            Generado por <span className="font-medium text-ink">Attesta</span> el{" "}
-            {fecha}. Resumen de dirección para preparación de auditoría.
+            {rc.generatedByPrefix}
+            <span className="font-medium text-ink">Attesta</span>
+            {rc.generatedByOn}
+            {fecha}. {tr.footerNote}
           </p>
           <p className="mt-1">{LEGAL_PDF_BY_LOCALE[locale]}</p>
         </footer>

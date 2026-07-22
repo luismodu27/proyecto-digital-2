@@ -10,6 +10,7 @@ import { getActiveOrg } from "@/lib/data/context";
 import { orgHasTier } from "@/lib/billing/plan";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
 import {
   OBLIGATIONS_BY_LEVEL,
   OBLIGATIONS_BY_LEVEL_EN,
@@ -25,6 +26,9 @@ import {
 import {
   EVIDENCE_LABEL,
   RISK_LABEL,
+  riskLabel,
+  evidenceLabel,
+  severityLabel,
   type EvidenceState,
   type RiskLevel,
 } from "@/lib/mock-data";
@@ -70,8 +74,8 @@ const RATIONALE_FALLBACK: Record<RiskLevel, string> = {
     "El sistema no encaja en prácticas prohibidas, áreas de alto riesgo ni obligaciones de transparencia. Se recomiendan códigos de conducta voluntarios (Art. 95).",
 };
 
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("es-ES", {
+function formatDateTime(iso: string, locale: Locale): string {
+  return new Date(iso).toLocaleString(locale === "en" ? "en-GB" : "es-ES", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -112,6 +116,13 @@ export default async function DossierPage({
   const locale = await resolveLocale();
   const dict = getDictionary(locale).dashboard;
   const tp = dict.pages;
+  const td = tp.dossier;
+  const rc = tp.reportChrome;
+  const statusLabelMap = {
+    missing: rc.statusMissing,
+    partial: rc.statusPartial,
+    done: rc.statusDone,
+  } as const;
   const gateOrg = await getActiveOrg();
   if (gateOrg && !(await orgHasTier(gateOrg, "preparacion"))) {
     return (
@@ -128,7 +139,7 @@ export default async function DossierPage({
     getOrganizationName(),
   ]);
 
-  const fecha = new Date().toLocaleDateString("es-ES", {
+  const fecha = new Date().toLocaleDateString(locale === "en" ? "en-GB" : "es-ES", {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -174,6 +185,14 @@ export default async function DossierPage({
 
   const org = orgName ?? "La organización";
   const rol = ROLE_LABEL[system.actorRole] ?? system.actorRole;
+  // Etiqueta de rol para el chrome (locale-aware); `rol` (ES) se reserva para
+  // la narrativa del resumen ejecutivo (s1), que permanece en español.
+  const roleChrome =
+    system.actorRole === "deployer"
+      ? rc.roleDeployer
+      : system.actorRole === "provider"
+        ? rc.roleProvider
+        : system.actorRole;
   const vendorPart = system.vendor ? `, proveedor: ${system.vendor}` : "";
 
   // Resumen ejecutivo ensamblado de forma determinista (cero LLM) a partir de los
@@ -192,7 +211,7 @@ export default async function DossierPage({
       }`;
   const s4 = latest
     ? latest.attestedByName
-      ? `La evaluación de riesgo vigente fue atestada por ${latest.attestedByName} el ${formatDateTime(latest.assessedAt)}.`
+      ? `La evaluación de riesgo vigente fue atestada por ${latest.attestedByName} el ${formatDateTime(latest.assessedAt, locale)}.`
       : "La evaluación de riesgo vigente no está atestada nominalmente."
     : "El nivel de riesgo se asignó en la ficha del sistema, sin una evaluación guardada con el asistente de riesgo.";
   const s5 =
@@ -205,16 +224,16 @@ export default async function DossierPage({
   // prohibido pudiera prepararse; se muestra la prohibición y la acción debida.
   const summary = isUnacceptable
     ? [
-        { k: "Nivel de riesgo", v: RISK_LABEL[level], color: RISK_COLOR[level] },
-        { k: "Clasificación", v: "Práctica prohibida (Art. 5)", color: RISK_COLOR[level] },
-        { k: "Prioridad", v: "Revisión jurídica", color: RISK_COLOR[level] },
-        { k: "Respaldo", v: EVIDENCE_LABEL[evidenceState] },
+        { k: td.kpiRiskLevel, v: riskLabel(level, locale), color: RISK_COLOR[level] },
+        { k: td.kpiClassification, v: td.kpiProhibited, color: RISK_COLOR[level] },
+        { k: td.kpiPriority, v: td.kpiLegalReview, color: RISK_COLOR[level] },
+        { k: td.kpiBacking, v: evidenceLabel(evidenceState, locale) },
       ]
     : [
-        { k: "Nivel de riesgo", v: RISK_LABEL[level], color: RISK_COLOR[level] },
-        { k: "Preparación", v: `${system.compliance}%` },
-        { k: "Brechas abiertas", v: String(openGaps) },
-        { k: "Respaldo", v: EVIDENCE_LABEL[evidenceState] },
+        { k: td.kpiRiskLevel, v: riskLabel(level, locale), color: RISK_COLOR[level] },
+        { k: td.kpiReadiness, v: `${system.compliance}%` },
+        { k: td.kpiOpenGaps, v: String(openGaps) },
+        { k: td.kpiBacking, v: evidenceLabel(evidenceState, locale) },
       ];
 
   return (
@@ -243,32 +262,34 @@ export default async function DossierPage({
             <span className="font-display text-2xl font-semibold">Attesta</span>
           </div>
           <div className="text-right text-xs text-muted">
-            <p>Dossier de gobernanza de IA</p>
-            <p>Ref. {system.id}</p>
+            <p>{td.docType}</p>
+            <p>
+              {td.refPrefix}
+              {system.id}
+            </p>
             <p>{fecha}</p>
           </div>
         </header>
 
         <div className="mt-6">
           <p className="text-xs uppercase tracking-[0.2em] text-muted">
-            Documentación técnica · Preparación para auditoría · EU AI Act
+            {td.docKicker}
           </p>
           <h1 className="mt-2 font-display text-2xl font-semibold">
             {system.name}
           </h1>
           <p className="mt-1 text-sm text-ink-soft">
-            Organización:{" "}
-            <span className="font-medium text-ink">{orgName ?? "—"}</span> · rol:{" "}
-            <span className="font-medium text-ink">
-              {ROLE_LABEL[system.actorRole] ?? system.actorRole}
-            </span>{" "}
-            · datos autodeclarados
+            {rc.organizationLabel}{" "}
+            <span className="font-medium text-ink">{orgName ?? "—"}</span> ·{" "}
+            {rc.roleWord}{" "}
+            <span className="font-medium text-ink">{roleChrome}</span> ·{" "}
+            {rc.selfDeclaredData}
           </p>
         </div>
 
-        {/* Resumen ejecutivo (narrativa determinista) */}
+        {/* Resumen ejecutivo (narrativa determinista, ES → experto) */}
         <section className="mt-6 break-inside-avoid">
-          <h2 className="font-display text-base font-semibold">Resumen ejecutivo</h2>
+          <h2 className="font-display text-base font-semibold">{rc.execSummary}</h2>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
             {summaryParagraph}
           </p>
@@ -297,30 +318,28 @@ export default async function DossierPage({
 
         {/* 1 · Identificación */}
         <section className="mt-9">
-          <SectionTitle n={1}>Identificación del sistema</SectionTitle>
+          <SectionTitle n={1}>{td.sec1}</SectionTitle>
           <dl className="grid gap-x-8 sm:grid-cols-2">
-            <Field label="Código" value={system.id} />
-            <Field label="Nombre" value={system.name} />
-            <Field label="Área responsable" value={system.owner} />
-            <Field label="Dominio de uso" value={system.domain} />
-            <Field label="Proveedor" value={system.vendor} />
-            <Field
-              label="Vuestro rol"
-              value={ROLE_LABEL[system.actorRole] ?? system.actorRole}
-            />
-            <Field label="Última revisión" value={system.lastReviewed} />
-            <Field label="Preparación declarada" value={`${system.compliance}%`} />
+            <Field label={td.fieldCode} value={system.id} />
+            <Field label={td.fieldName} value={system.name} />
+            <Field label={td.fieldOwnerArea} value={system.owner} />
+            <Field label={td.fieldDomain} value={system.domain} />
+            <Field label={td.fieldVendor} value={system.vendor} />
+            <Field label={td.fieldYourRole} value={roleChrome} />
+            <Field label={td.fieldLastReview} value={system.lastReviewed} />
+            <Field label={td.fieldDeclaredReadiness} value={`${system.compliance}%`} />
           </dl>
         </section>
 
         {/* 2 · Clasificación de riesgo */}
         <section className="mt-9 break-inside-avoid">
-          <SectionTitle n={2}>Clasificación de riesgo</SectionTitle>
+          <SectionTitle n={2}>{td.sec2}</SectionTitle>
           <div className="rounded-xl border border-line p-5">
             <div className="flex items-center gap-3">
-              <RiskBadge level={level} />
+              <RiskBadge level={level} label={riskLabel(level, locale)} />
               <span className="text-xs text-muted">
-                Respaldo: {EVIDENCE_LABEL[evidenceState]}
+                {td.backingPrefix}
+                {evidenceLabel(evidenceState, locale)}
               </span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-ink-soft">
@@ -328,16 +347,16 @@ export default async function DossierPage({
             </p>
             {latest ? (
               <p className="mt-3 text-xs text-muted">
-                Evaluación vigente del {formatDateTime(latest.assessedAt)}
+                {td.currentAssessmentPrefix}
+                {formatDateTime(latest.assessedAt, locale)}
                 {latest.attestedByName
-                  ? ` · atestada por ${latest.attestedByName}`
-                  : " · sin atestación nominal"}
+                  ? ` ${td.attestedByPrefix}${latest.attestedByName}`
+                  : ` ${td.noNominalAttestation}`}
                 .
               </p>
             ) : (
               <p className="mt-3 text-xs text-muted">
-                Nivel asignado a la ficha del sistema; sin evaluación guardada con
-                el asistente de riesgo.
+                {td.levelAssignedNoAssessment}
               </p>
             )}
           </div>
@@ -345,7 +364,7 @@ export default async function DossierPage({
 
         {/* 3 · Obligaciones aplicables */}
         <section className="mt-9 break-inside-avoid">
-          <SectionTitle n={3}>Obligaciones aplicables</SectionTitle>
+          <SectionTitle n={3}>{td.sec3}</SectionTitle>
           <ul className="space-y-2">
             {obligations.map((o) => (
               <li key={o} className="flex gap-2.5 text-sm text-ink-soft">
@@ -364,39 +383,37 @@ export default async function DossierPage({
           <section className="mt-9 break-inside-avoid">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-display text-lg font-semibold text-ink">
-                Auditoría de sesgo — EE. UU. (NYC LL144)
+                {td.biasSectionTitle}
               </h2>
               <BiasAuditBadge status={biasStatus} days={biasDays} />
             </div>
             <div className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2">
               <Field
-                label="Última auditoría de sesgo"
+                label={td.biasFieldLast}
                 value={biasAudit.lastAuditDate ?? "—"}
               />
+              <Field label={td.biasFieldNext} value={biasDue ?? "—"} />
               <Field
-                label="Próxima auditoría (12 meses)"
-                value={biasDue ?? "—"}
-              />
-              <Field
-                label="Auditor independiente"
+                label={td.biasFieldAuditor}
                 value={biasAudit.auditorName ?? "—"}
               />
               <Field
-                label="Independencia confirmada"
-                value={biasAudit.auditorIndependenceConfirmed ? "Sí (declarado)" : "No"}
-              />
-              <Field
-                label="Resumen publicado"
+                label={td.biasFieldIndependence}
                 value={
-                  publicationComplete(biasAudit)
-                    ? `Sí · ${biasAudit.summaryPublishedDate}`
-                    : "Pendiente"
+                  biasAudit.auditorIndependenceConfirmed
+                    ? td.biasYesDeclared
+                    : td.biasNo
                 }
               />
               <Field
-                label="URL del resumen"
-                value={biasAudit.summaryUrl ?? "—"}
+                label={td.biasFieldPublished}
+                value={
+                  publicationComplete(biasAudit)
+                    ? `${td.biasPublishedYesPrefix}${biasAudit.summaryPublishedDate}`
+                    : td.biasPending
+                }
               />
+              <Field label={td.biasFieldUrl} value={biasAudit.summaryUrl ?? "—"} />
             </div>
             <p className="mt-4 text-xs leading-relaxed text-muted">
               La auditoría de sesgo la realiza un auditor independiente; Attesta
@@ -409,21 +426,20 @@ export default async function DossierPage({
 
         {/* 4 · Controles y brechas */}
         <section className="mt-9">
-          <SectionTitle n={4}>Controles y brechas</SectionTitle>
+          <SectionTitle n={4}>{td.sec4}</SectionTitle>
           {gaps.length === 0 ? (
             <p className="rounded-xl border border-dashed border-line-strong px-4 py-6 text-center text-sm text-muted">
-              No hay controles registrados para este sistema. Aplica el policy
-              pack de RRHH o añade brechas desde el gap assessment.
+              {td.gapsEmpty}
             </p>
           ) : (
             <div className="overflow-x-auto print:overflow-visible">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-line-strong text-xs uppercase tracking-wide text-muted">
-                  <th className="py-2 pr-3 font-medium">Artículo</th>
-                  <th className="py-2 pr-3 font-medium">Requisito / control</th>
-                  <th className="py-2 pr-3 font-medium">Severidad</th>
-                  <th className="py-2 font-medium">Estado</th>
+                  <th className="py-2 pr-3 font-medium">{rc.colArticle}</th>
+                  <th className="py-2 pr-3 font-medium">{td.colRequirementControl}</th>
+                  <th className="py-2 pr-3 font-medium">{rc.colSeverity}</th>
+                  <th className="py-2 font-medium">{rc.colStatus}</th>
                 </tr>
               </thead>
               <tbody>
@@ -440,14 +456,14 @@ export default async function DossierPage({
                       <td className="py-3 pr-3">{g.requirement}</td>
                       <td className="py-3 pr-3 capitalize">
                         <span style={{ color: SEVERITY_COLOR[g.severity] }}>
-                          {g.severity}
+                          {severityLabel(g.severity, locale)}
                         </span>
                       </td>
                       <td
                         className="py-3 font-medium"
                         style={{ color: st.color }}
                       >
-                        {st.label}
+                        {statusLabelMap[g.status]}
                       </td>
                     </tr>
                   );
@@ -460,7 +476,7 @@ export default async function DossierPage({
 
         {/* 5 · Plan de acción priorizado */}
         <section className="mt-9">
-          <SectionTitle n={5}>Plan de acción priorizado</SectionTitle>
+          <SectionTitle n={5}>{td.sec5}</SectionTitle>
           {recs.length === 0 ? (
             <p className="text-sm text-ink-soft">
               Sin acciones obligatorias bajo el EU AI Act para este nivel de
@@ -486,7 +502,8 @@ export default async function DossierPage({
                       · {r.priority}
                     </span>
                     <span className="text-[11px] text-muted">
-                      · esfuerzo {r.effort}
+                      {td.effortPrefix}
+                      {r.effort}
                     </span>
                     <span className="font-mono text-[11px] text-seal">
                       · {r.article}
@@ -503,11 +520,9 @@ export default async function DossierPage({
 
         {/* 6 · Historial de evaluaciones */}
         <section className="mt-9">
-          <SectionTitle n={6}>Historial de evaluaciones</SectionTitle>
+          <SectionTitle n={6}>{td.sec6}</SectionTitle>
           {assessments.length === 0 ? (
-            <p className="text-sm text-ink-soft">
-              No hay evaluaciones guardadas para este sistema.
-            </p>
+            <p className="text-sm text-ink-soft">{td.historyEmpty}</p>
           ) : (
             <ol className="space-y-3">
               {assessments.map((a, i) => (
@@ -516,24 +531,26 @@ export default async function DossierPage({
                   className="break-inside-avoid border-b border-line pb-3 text-sm"
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <RiskBadge level={a.level} />
+                    <RiskBadge level={a.level} label={riskLabel(a.level, locale)} />
                     <span className="text-xs text-muted">
-                      {EVIDENCE_LABEL[a.evidenceState]}
+                      {evidenceLabel(a.evidenceState, locale)}
                     </span>
                     {i === 0 && (
                       <span className="text-[11px] font-medium text-brand-strong">
-                        vigente
+                        {td.currentBadge}
                       </span>
                     )}
                   </div>
                   <p className="mt-1.5 text-ink-soft">{a.rationale}</p>
                   <p className="mt-1 text-xs text-muted">
-                    {formatDateTime(a.assessedAt)}
-                    {a.attestedByName ? ` · atestada por ${a.attestedByName}` : ""}
+                    {formatDateTime(a.assessedAt, locale)}
+                    {a.attestedByName
+                      ? ` ${td.attestedByPrefix}${a.attestedByName}`
+                      : ""}
                   </p>
                   {(a.evidenceNote || a.evidenceUrl) && (
                     <p className="mt-1 text-xs text-ink-soft">
-                      <span className="text-muted">Evidencia: </span>
+                      <span className="text-muted">{td.evidencePrefix}</span>
                       {a.evidenceNote}
                       {a.evidenceNote && a.evidenceUrl ? " · " : ""}
                       {a.evidenceUrl && (
@@ -556,7 +573,7 @@ export default async function DossierPage({
 
         {/* 7 · Declaración de responsabilidad */}
         <section className="mt-9 break-inside-avoid">
-          <SectionTitle n={7}>Declaración de responsabilidad</SectionTitle>
+          <SectionTitle n={7}>{td.sec7}</SectionTitle>
           <div className="rounded-xl border border-line p-5 text-sm text-ink-soft">
             <p>
               Los datos de este dossier han sido{" "}
@@ -567,11 +584,11 @@ export default async function DossierPage({
             </p>
             <dl className="mt-4 grid gap-x-8 sm:grid-cols-2">
               <Field
-                label="Nivel de respaldo"
-                value={EVIDENCE_LABEL[evidenceState]}
+                label={td.declFieldBackingLevel}
+                value={evidenceLabel(evidenceState, locale)}
               />
               <Field
-                label="Atestado por"
+                label={td.declFieldAttestedBy}
                 value={latest?.attestedByName ?? "—"}
               />
             </dl>
@@ -580,8 +597,10 @@ export default async function DossierPage({
 
         <footer className="mt-10 border-t border-line pt-5 text-xs text-muted">
           <p>
-            Generado por <span className="font-medium text-ink">Attesta</span> el{" "}
-            {fecha}. Documento de trabajo para preparación de auditoría.
+            {rc.generatedByPrefix}
+            <span className="font-medium text-ink">Attesta</span>
+            {rc.generatedByOn}
+            {fecha}. {rc.footerWorkingDoc}
           </p>
           <p className="mt-1">{LEGAL_PDF_BY_LOCALE[locale]}</p>
         </footer>

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
-import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
+import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { EventStatusControl } from "@/components/dashboard/EventStatusControl";
 import {
   getAiSystems,
@@ -14,16 +14,17 @@ import {
 } from "@/lib/data";
 import { JurisdictionSettings } from "@/components/dashboard/JurisdictionSettings";
 import {
-  REG_ACK_LABEL,
+  regAckLabel,
   type RegAck,
   type RegAckStatus,
 } from "@/lib/mock-data";
 import {
-  REG_KIND_LABEL,
+  regKindLabel,
   FRAMEWORK_META,
   JURISDICTION_ORDER,
-  JURISDICTION_LABEL,
+  JURISDICTION_LABEL_BY_LOCALE,
   frameworkLabel,
+  frameworkMeta,
   affectedSystems,
   daysUntil,
   upcomingDeadlines,
@@ -33,6 +34,12 @@ import {
 } from "@/lib/regulatory-watch";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
+
+type MonitoringDict = ReturnType<
+  typeof getDictionary
+>["dashboard"]["pages"]["monitoring"];
+type UnitsDict = ReturnType<typeof getDictionary>["dashboard"]["units"];
 
 // El radar depende de la fecha actual: nunca prerenderizar el countdown.
 export const dynamic = "force-dynamic";
@@ -62,16 +69,27 @@ const ACK_TONE: Record<RegAckStatus, keyof typeof TONE_PILL> = {
   not_applicable: "neutral",
 };
 
-function AckPill({ status }: { status: RegAckStatus }) {
-  return <Pill tone={ACK_TONE[status]}>{REG_ACK_LABEL[status]}</Pill>;
+function AckPill({
+  status,
+  locale,
+}: {
+  status: RegAckStatus;
+  locale: Locale;
+}) {
+  return <Pill tone={ACK_TONE[status]}>{regAckLabel(status, locale)}</Pill>;
 }
 
 /** Pill sutil con el marco/jurisdicción de un evento. */
-function FrameworkPill({ framework }: { framework: string }) {
-  const meta = FRAMEWORK_META[framework as RegulatoryEvent["framework"]];
+function FrameworkPill({
+  framework,
+  locale,
+}: {
+  framework: string;
+  locale: Locale;
+}) {
   return (
     <span className="inline-flex items-center rounded-full border border-line bg-paper px-2 py-0.5 text-[11px] font-medium text-ink-soft">
-      {meta?.short ?? framework}
+      {frameworkMeta(framework, locale)?.short ?? framework}
     </span>
   );
 }
@@ -82,11 +100,13 @@ function JurisdictionChip({
   href,
   active,
   inNexus = false,
+  nexusAria,
 }: {
   label: string;
   href: string;
   active: boolean;
   inNexus?: boolean;
+  nexusAria: string;
 }) {
   return (
     <Link
@@ -98,10 +118,7 @@ function JurisdictionChip({
       }`}
     >
       {inNexus && (
-        <span
-          className="size-1.5 rounded-full bg-brand"
-          aria-label="en tu nexo"
-        />
+        <span className="size-1.5 rounded-full bg-brand" aria-label={nexusAria} />
       )}
       {label}
     </Link>
@@ -116,31 +133,34 @@ function countdownTone(days: number): keyof typeof TONE_PILL {
   return "info";
 }
 
-function formatDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+function formatDate(iso: string, locale: Locale): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString(
+    locale === "en" ? "en-GB" : "es-ES",
+    {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    },
+  );
 }
 
 /** Etiqueta de tiempo relativa: "en 16 días", "hoy", "hace 3 meses". */
-function relativeLabel(days: number): string {
-  if (days === 0) return "hoy";
+function relativeLabel(days: number, t: MonitoringDict): string {
+  if (days === 0) return t.relToday;
   if (days > 0) {
-    if (days === 1) return "mañana";
-    if (days < 45) return `en ${days} días`;
+    if (days === 1) return t.relTomorrow;
+    if (days < 45) return `${t.relInPrefix}${days} ${t.relDays}`;
     const months = Math.round(days / 30);
-    if (months < 24) return `en ${months} meses`;
-    return `en ${Math.round(days / 365)} años`;
+    if (months < 24) return `${t.relInPrefix}${months} ${t.relMonths}`;
+    return `${t.relInPrefix}${Math.round(days / 365)} ${t.relYears}`;
   }
   const abs = Math.abs(days);
-  if (abs === 1) return "ayer";
-  if (abs < 45) return `hace ${abs} días`;
+  if (abs === 1) return t.relYesterday;
+  if (abs < 45) return `${t.relAgoPrefix}${abs} ${t.relDays}${t.relAgoSuffix}`;
   const months = Math.round(abs / 30);
-  if (months < 24) return `hace ${months} meses`;
-  return `hace ${Math.round(abs / 365)} años`;
+  if (months < 24) return `${t.relAgoPrefix}${months} ${t.relMonths}${t.relAgoSuffix}`;
+  return `${t.relAgoPrefix}${Math.round(abs / 365)} ${t.relYears}${t.relAgoSuffix}`;
 }
 
 function Pill({
@@ -169,10 +189,14 @@ function EuReadinessBriefing({
   art50,
   highRisk,
   now,
+  locale,
+  t,
 }: {
   art50: RegulatoryEvent;
   highRisk: RegulatoryEvent;
   now: Date;
+  locale: Locale;
+  t: MonitoringDict;
 }) {
   const art50Days = daysUntil(art50.date, now);
   const hrDays = daysUntil(highRisk.date, now);
@@ -210,8 +234,10 @@ function EuReadinessBriefing({
             Es un error extendido en el mercado. El{" "}
             <span className="font-medium text-ink">Digital Omnibus</span> movió las
             obligaciones de alto riesgo del Anexo III (empleo) al{" "}
-            <span className="font-medium text-ink">{formatDate(highRisk.date)}</span>
-            {hrDays > 0 && ` (${relativeLabel(hrDays)})`}. Lo que tu organización sí
+            <span className="font-medium text-ink">
+              {formatDate(highRisk.date, locale)}
+            </span>
+            {hrDays > 0 && ` (${relativeLabel(hrDays, t)})`}. Lo que tu organización sí
             debe tener listo pronto como{" "}
             <span className="font-medium text-ink">deployer</span>:
           </p>
@@ -227,7 +253,7 @@ function EuReadinessBriefing({
                 Transparencia <span className="text-muted">· Art. 50.3/50.4</span>
               </span>
               <Pill tone={countdownTone(art50Days)}>
-                {art50Days >= 0 ? relativeLabel(art50Days) : "en vigor"}
+                {art50Days >= 0 ? relativeLabel(art50Days, t) : "en vigor"}
               </Pill>
             </li>
           </ul>
@@ -258,7 +284,11 @@ export default async function VigilanciaPage({
     getOrgJurisdictions(),
   ]);
   const now = new Date();
-  const tm = getDictionary(await resolveLocale()).dashboard.pages.monitoring;
+  const locale = await resolveLocale();
+  const dd = getDictionary(locale).dashboard;
+  const tm = dd.pages.monitoring;
+  const u = dd.units;
+  const jurLabels = JURISDICTION_LABEL_BY_LOCALE[locale];
   const canManage =
     isSupabaseConfigured && (role === "owner" || role === "admin");
 
@@ -356,35 +386,44 @@ export default async function VigilanciaPage({
       {jurisdictions.length > 1 && (
         <div className="mb-6 flex flex-wrap items-center gap-2">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-            Jurisdicción
+            {tm.jurisdictionFilter}
           </span>
           {nexus.length > 0 && (
             <JurisdictionChip
-              label="Mis jurisdicciones"
+              label={tm.myJurisdictions}
               href="/dashboard/vigilancia"
               active={usingNexus}
+              nexusAria={tm.inNexus}
             />
           )}
           {jurisdictions.map((j) => (
             <JurisdictionChip
               key={j}
-              label={JURISDICTION_LABEL[j]}
+              label={jurLabels[j]}
               href={`/dashboard/vigilancia?j=${j}`}
               active={singleJ === j}
               inNexus={nexus.includes(j)}
+              nexusAria={tm.inNexus}
             />
           ))}
           <JurisdictionChip
-            label="Todas"
+            label={tm.allJurisdictions}
             href="/dashboard/vigilancia?j=all"
             active={showAll || (!singleJ && nexus.length === 0)}
+            nexusAria={tm.inNexus}
           />
         </div>
       )}
 
       {/* Briefing: aclaración del plazo del 2-ago-2026 (corrige el error de mercado) */}
       {showBriefing && art50Ev && highRiskEv && (
-        <EuReadinessBriefing art50={art50Ev} highRisk={highRiskEv} now={now} />
+        <EuReadinessBriefing
+          art50={art50Ev}
+          highRisk={highRiskEv}
+          now={now}
+          locale={locale}
+          t={tm}
+        />
       )}
 
       {/* Hero: próximo plazo */}
@@ -393,26 +432,27 @@ export default async function VigilanciaPage({
           <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <Pill tone={countdownTone(heroDays)}>Próximo plazo</Pill>
-                <FrameworkPill framework={hero.framework} />
+                <Pill tone={countdownTone(heroDays)}>{tm.nextDeadline}</Pill>
+                <FrameworkPill framework={hero.framework} locale={locale} />
                 <span className="text-xs text-muted">
-                  {frameworkLabel(hero.framework)}
+                  {frameworkLabel(hero.framework, locale)}
                 </span>
-                {heroAck && <AckPill status={heroAck.status} />}
+                {heroAck && <AckPill status={heroAck.status} locale={locale} />}
               </div>
               <h2 className="mt-2 font-display text-xl font-semibold text-ink">
                 {hero.title}
               </h2>
               <p className="mt-1 text-sm text-ink-soft">
-                {formatDate(hero.date)} ·{" "}
+                {formatDate(hero.date, locale)} ·{" "}
                 {heroAffected.length > 0 ? (
                   <span className="font-medium text-ink">
-                    afecta a {heroAffected.length}{" "}
-                    {heroAffected.length === 1 ? "sistema" : "sistemas"} de tu
-                    inventario
+                    {tm.affectsPrefix}
+                    {heroAffected.length}{" "}
+                    {heroAffected.length === 1 ? u.systemOne : u.systemOther}
+                    {tm.affectsSuffix}
                   </span>
                 ) : (
-                  "sin sistemas afectados en tu inventario"
+                  tm.noAffected
                 )}
               </p>
             </div>
@@ -422,14 +462,14 @@ export default async function VigilanciaPage({
                   {heroDays}
                 </p>
                 <p className="text-[11px] uppercase tracking-wide text-muted">
-                  {heroDays === 1 ? "día" : "días"}
+                  {heroDays === 1 ? u.dayOne : u.dayOther}
                 </p>
               </div>
               <Link
                 href="/dashboard/inventario"
                 className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
               >
-                Ver sistemas →
+                {tm.viewSystems}
               </Link>
             </div>
           </div>
@@ -440,7 +480,7 @@ export default async function VigilanciaPage({
       {otherDeadlines.length > 0 && (
         <section className="mb-8">
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
-            Más plazos por venir
+            {tm.morePastDeadlines}
           </h3>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {otherDeadlines.map((e) => {
@@ -453,20 +493,20 @@ export default async function VigilanciaPage({
                   className="card-lift rounded-2xl border border-line bg-paper-raised p-4"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <Pill tone={countdownTone(d)}>{relativeLabel(d)}</Pill>
+                    <Pill tone={countdownTone(d)}>{relativeLabel(d, tm)}</Pill>
                     <span className="text-xs tabular-nums text-muted">
-                      {formatDate(e.date)}
+                      {formatDate(e.date, locale)}
                     </span>
                   </div>
                   <div className="mt-2 flex items-center gap-2">
-                    <FrameworkPill framework={e.framework} />
+                    <FrameworkPill framework={e.framework} locale={locale} />
                   </div>
                   <p className="mt-1.5 text-sm font-medium text-ink">{e.title}</p>
                   <div className="mt-1 flex items-center justify-between gap-2">
                     <p className="text-xs text-muted">
-                      {n} {n === 1 ? "sistema afectado" : "sistemas afectados"}
+                      {n} {n === 1 ? tm.affectedOne : tm.affectedOther}
                     </p>
-                    {ack && <AckPill status={ack.status} />}
+                    {ack && <AckPill status={ack.status} locale={locale} />}
                   </div>
                 </div>
               );
@@ -478,11 +518,11 @@ export default async function VigilanciaPage({
       {/* Cronología completa */}
       <section>
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
-          Cronología regulatoria
+          {tm.regulatoryTimeline}
           {singleJ
-            ? ` · ${JURISDICTION_LABEL[singleJ]}`
+            ? ` · ${jurLabels[singleJ]}`
             : usingNexus
-              ? " · mis jurisdicciones"
+              ? tm.timelineMyJurisdictions
               : ""}
         </h3>
         <div className="space-y-3">
@@ -495,12 +535,15 @@ export default async function VigilanciaPage({
               affected={affected}
               ack={acks[ev.id]}
               canManage={canManage}
+              locale={locale}
+              t={tm}
+              u={u}
             />
           ))}
         </div>
       </section>
 
-      <LegalNote text={LEGAL_FOOTER} className="mt-8" />
+      <LegalNote text={LEGAL_FOOTER_BY_LOCALE[locale]} className="mt-8" />
     </>
   );
 }
@@ -512,6 +555,9 @@ function EventRow({
   affected,
   ack,
   canManage,
+  locale,
+  t,
+  u,
 }: {
   ev: RegulatoryEvent;
   days: number;
@@ -519,6 +565,9 @@ function EventRow({
   affected: { id: string; name: string }[];
   ack?: RegAck;
   canManage: boolean;
+  locale: Locale;
+  t: MonitoringDict;
+  u: UnitsDict;
 }) {
   const upcoming = days >= 0;
   return (
@@ -526,28 +575,28 @@ function EventRow({
       <summary className="flex cursor-pointer list-none items-start gap-4 p-5 [&::-webkit-details-marker]:hidden">
         <div className="mt-0.5 flex w-24 shrink-0 flex-col items-start gap-1">
           <span className="text-xs font-medium tabular-nums text-ink-soft">
-            {relativeLabel(days)}
+            {relativeLabel(days, t)}
           </span>
           <span className="text-[11px] tabular-nums text-muted">
-            {formatDate(ev.date).replace(/ de \d{4}$/, (m) => m)}
+            {formatDate(ev.date, locale)}
           </span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <Pill tone={KIND_TONE[ev.kind]}>{REG_KIND_LABEL[ev.kind]}</Pill>
-            <FrameworkPill framework={ev.framework} />
+            <Pill tone={KIND_TONE[ev.kind]}>{regKindLabel(ev.kind, locale)}</Pill>
+            <FrameworkPill framework={ev.framework} locale={locale} />
             {upcoming ? (
-              <span className="text-[11px] font-medium text-muted">por venir</span>
+              <span className="text-[11px] font-medium text-muted">{t.upcoming}</span>
             ) : (
-              <span className="text-[11px] font-medium text-muted">en vigor</span>
+              <span className="text-[11px] font-medium text-muted">{t.inForce}</span>
             )}
-            {ack && <AckPill status={ack.status} />}
+            {ack && <AckPill status={ack.status} locale={locale} />}
           </div>
           <p className="mt-1.5 font-medium text-ink">{ev.title}</p>
           <p className="mt-0.5 text-xs text-muted">
             {affectedCount > 0
-              ? `Afecta a ${affectedCount} ${affectedCount === 1 ? "sistema" : "sistemas"} de tu inventario`
-              : "Sin sistemas afectados en tu inventario"}
+              ? `${t.affectsPrefixCap}${affectedCount} ${affectedCount === 1 ? u.systemOne : u.systemOther}${t.affectsSuffix}`
+              : t.noAffectedCap}
           </p>
         </div>
         <svg
@@ -568,9 +617,9 @@ function EventRow({
 
       <div className="border-t border-line px-5 pb-5 pt-4">
         <div className="grid gap-4 sm:grid-cols-3">
-          <Detail label="Qué es">{ev.summary}</Detail>
-          <Detail label="Qué significa para ti">{ev.impact}</Detail>
-          <Detail label="Qué hacer">{ev.action}</Detail>
+          <Detail label={t.detailWhat}>{ev.summary}</Detail>
+          <Detail label={t.detailMeaning}>{ev.impact}</Detail>
+          <Detail label={t.detailAction}>{ev.action}</Detail>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -607,14 +656,14 @@ function EventRow({
 
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line pt-4">
           <p className="text-[11px] uppercase tracking-wide text-muted">
-            Estado interno
+            {t.internalStatus}
           </p>
           {canManage ? (
             <EventStatusControl eventId={ev.id} status={ack?.status} />
           ) : ack ? (
-            <AckPill status={ack.status} />
+            <AckPill status={ack.status} locale={locale} />
           ) : (
-            <span className="text-xs text-muted">Sin marcar</span>
+            <span className="text-xs text-muted">{t.notMarked}</span>
           )}
           {ack?.note && (
             <span className="text-xs text-ink-soft">· {ack.note}</span>
@@ -624,7 +673,7 @@ function EventRow({
         {affected.length > 0 && (
           <div className="mt-4 border-t border-line pt-4">
             <p className="text-[11px] uppercase tracking-wide text-muted">
-              Sistemas afectados
+              {t.affectedSystemsLabel}
             </p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {affected.map((s) => (

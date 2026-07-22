@@ -1,10 +1,12 @@
 import { PageHeader } from "@/components/dashboard/parts";
 import { Button } from "@/components/ui/Button";
-import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
+import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { getSystemsForSelect, isSupabaseConfigured } from "@/lib/data";
 import { applyPolicyPack } from "@/lib/data/actions";
 import { policyPacks, type PolicySeverity } from "@/lib/policy-packs";
+import { severityLabel, type GapSeverity } from "@/lib/mock-data";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 const severityCls: Record<PolicySeverity, string> = {
   alta: "bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)] border-[var(--tone-danger-bd)]",
@@ -14,15 +16,14 @@ const severityCls: Record<PolicySeverity, string> = {
 
 export default async function PolicyPacksPage() {
   const systems = isSupabaseConfigured ? await getSystemsForSelect() : [];
+  const locale = await resolveLocale();
+  const t = getDictionary(locale).dashboard.pages.packsPage;
   // La fachada de packs sirve el contenido validado en el idioma de la UI.
-  const packs = policyPacks(await resolveLocale());
+  const packs = policyPacks(locale);
 
   return (
     <>
-      <PageHeader
-        title="Policy packs"
-        subtitle="Plantillas de controles por caso de uso y marco. Aplícalas para precargar las brechas de un sistema."
-      />
+      <PageHeader title={t.title} subtitle={t.subtitle} />
 
       <div className="space-y-6">
         {packs.map((pack) => (
@@ -44,7 +45,7 @@ export default async function PolicyPacksPage() {
                 )}
               </div>
               <span className="shrink-0 text-sm text-muted">
-                {pack.controls.length} controles
+                {pack.controls.length} {t.controlsUnit}
               </span>
             </div>
 
@@ -62,7 +63,7 @@ export default async function PolicyPacksPage() {
                       <span
                         className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium capitalize ${severityCls[c.severity]}`}
                       >
-                        {c.severity}
+                        {severityLabel(c.severity as GapSeverity, locale)}
                       </span>
                     </div>
                     <p className="mt-1.5 font-medium text-ink">{c.title}</p>
@@ -84,7 +85,8 @@ export default async function PolicyPacksPage() {
                           />
                         </svg>
                         <span>
-                          <span className="font-medium">Aplica:</span> {c.conditional}
+                          <span className="font-medium">{t.applies}</span>{" "}
+                          {c.conditional}
                         </span>
                       </p>
                     )}
@@ -107,7 +109,7 @@ export default async function PolicyPacksPage() {
                         htmlFor={`systemId-${pack.id}`}
                         className="block text-sm font-medium text-ink"
                       >
-                        Aplicar a un sistema
+                        {t.applyToSystem}
                       </label>
                       <select
                         id={`systemId-${pack.id}`}
@@ -115,7 +117,7 @@ export default async function PolicyPacksPage() {
                         required
                         className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
                       >
-                        <option value="">Selecciona un sistema…</option>
+                        <option value="">{t.selectSystem}</option>
                         {systems.map((s) => (
                           <option key={s.id} value={s.id}>
                             {s.name}
@@ -123,26 +125,23 @@ export default async function PolicyPacksPage() {
                         ))}
                       </select>
                     </div>
-                    <Button type="submit">Aplicar policy pack</Button>
+                    <Button type="submit">{t.applyButton}</Button>
                   </form>
                 ) : (
-                  <p className="text-sm text-ink-soft">
-                    Registra un sistema en el inventario para poder aplicarle este
-                    pack.
-                  </p>
+                  <p className="text-sm text-ink-soft">{t.needSystem}</p>
                 )
               ) : (
-                <p className="text-sm text-ink-soft">
-                  En modo demo puedes ver el pack. Conecta Supabase para aplicarlo a
-                  tus sistemas.
-                </p>
+                <p className="text-sm text-ink-soft">{t.demoNote}</p>
               )}
             </div>
           </article>
         ))}
       </div>
 
-      <LegalNote text={`Controles orientativos. ${LEGAL_FOOTER}`} className="mt-6" />
+      <LegalNote
+        text={`${t.legalPrefix} ${LEGAL_FOOTER_BY_LOCALE[locale]}`}
+        className="mt-6"
+      />
     </>
   );
 }
