@@ -148,6 +148,30 @@ function JurisdictionChip({
   );
 }
 
+/** Chip de filtro simple (sin punto de nexo), p. ej. para el estado interno. */
+function FilterChip({
+  label,
+  href,
+  active,
+}: {
+  label: string;
+  href: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+        active
+          ? "border-brand bg-brand-soft text-brand-strong"
+          : "border-line-strong text-ink-soft hover:bg-paper-sunken"
+      }`}
+    >
+      {label}
+    </Link>
+  );
+}
+
 /** Tono del countdown según cercanía. */
 function countdownTone(days: number): keyof typeof TONE_PILL {
   if (days < 0) return "neutral";
@@ -355,7 +379,7 @@ function EuReadinessBriefing({
 export default async function VigilanciaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ j?: string }>;
+  searchParams: Promise<{ j?: string; s?: string }>;
 }) {
   const sp = await searchParams;
   const [systems, acks, role, events, isAdmin, orgJur] = await Promise.all([
@@ -443,6 +467,57 @@ export default async function VigilanciaPage({
   const showBriefing =
     !!art50Ev && !!highRiskEv && daysUntil(highRiskEv.date, now) > 0;
 
+  // Filtro por estado interno: una lente sobre la cronología (la lista de trabajo).
+  // No altera el hero ni la banda de resumen, que siguen siendo la orientación global.
+  const STATUS_KEYS = ["unmarked", "reviewed", "planned", "not_applicable"] as const;
+  type StatusKey = (typeof STATUS_KEYS)[number];
+  const statusOf = (evId: string): StatusKey =>
+    (acks[evId]?.status as StatusKey | undefined) ?? "unmarked";
+  const activeStatus: StatusKey | "all" =
+    sp.s && (STATUS_KEYS as readonly string[]).includes(sp.s)
+      ? (sp.s as StatusKey)
+      : "all";
+  const matchesStatus = (evId: string) =>
+    activeStatus === "all" || statusOf(evId) === activeStatus;
+
+  const timelineUpcoming = upcoming.filter((x) => matchesStatus(x.ev.id));
+  const timelinePast = past.filter((x) => matchesStatus(x.ev.id));
+
+  // Conteos por estado sobre todo el feed de la jurisdicción activa (para las pills).
+  const feedAll = [...upcoming, ...past];
+  const statusCounts: Record<StatusKey, number> = {
+    unmarked: 0,
+    reviewed: 0,
+    planned: 0,
+    not_applicable: 0,
+  };
+  feedAll.forEach((x) => {
+    statusCounts[statusOf(x.ev.id)] += 1;
+  });
+  // Chips a mostrar: los estados con eventos + el activo (aunque quede en 0, para poder limpiarlo).
+  const statusChipKeys = STATUS_KEYS.filter(
+    (k) => statusCounts[k] > 0 || k === activeStatus,
+  );
+  const showStatusFilter =
+    feedAll.length > 0 &&
+    (statusChipKeys.filter((k) => statusCounts[k] > 0).length >= 2 ||
+      activeStatus !== "all");
+  const statusLabel = (k: StatusKey | "all"): string =>
+    k === "all"
+      ? tm.statusAll
+      : k === "unmarked"
+        ? tm.notMarked
+        : regAckLabel(k, locale);
+
+  // Construye la URL preservando ambos filtros (jurisdicción + estado).
+  const hrefFor = (j?: string, s?: string): string => {
+    const p = new URLSearchParams();
+    if (j) p.set("j", j);
+    if (s && s !== "all") p.set("s", s);
+    const qs = p.toString();
+    return `/dashboard/vigilancia${qs ? `?${qs}` : ""}`;
+  };
+
   return (
     <>
       <PageHeader
@@ -482,7 +557,7 @@ export default async function VigilanciaPage({
           {nexus.length > 0 && (
             <JurisdictionChip
               label={tm.myJurisdictions}
-              href="/dashboard/vigilancia"
+              href={hrefFor(undefined, activeStatus)}
               active={usingNexus}
               nexusAria={tm.inNexus}
             />
@@ -491,7 +566,7 @@ export default async function VigilanciaPage({
             <JurisdictionChip
               key={j}
               label={jurLabels[j]}
-              href={`/dashboard/vigilancia?j=${j}`}
+              href={hrefFor(j, activeStatus)}
               active={singleJ === j}
               inNexus={nexus.includes(j)}
               nexusAria={tm.inNexus}
@@ -499,7 +574,7 @@ export default async function VigilanciaPage({
           ))}
           <JurisdictionChip
             label={tm.allJurisdictions}
-            href="/dashboard/vigilancia?j=all"
+            href={hrefFor("all", activeStatus)}
             active={showAll || (!singleJ && nexus.length === 0)}
             nexusAria={tm.inNexus}
           />
@@ -630,8 +705,31 @@ export default async function VigilanciaPage({
               ? tm.timelineMyJurisdictions
               : ""}
         </h3>
+
+        {/* Filtro por estado interno (lista de trabajo: "solo lo que aún no marqué") */}
+        {showStatusFilter && (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+              {tm.internalStatus}
+            </span>
+            <FilterChip
+              label={`${tm.statusAll} · ${feedAll.length}`}
+              href={hrefFor(sp.j, "all")}
+              active={activeStatus === "all"}
+            />
+            {statusChipKeys.map((k) => (
+              <FilterChip
+                key={k}
+                label={`${statusLabel(k)} · ${statusCounts[k]}`}
+                href={hrefFor(sp.j, k)}
+                active={activeStatus === k}
+              />
+            ))}
+          </div>
+        )}
+
         <div className="space-y-3">
-          {upcoming.map(({ ev, days, affected }) => (
+          {timelineUpcoming.map(({ ev, days, affected }) => (
             <EventRow
               key={ev.id}
               ev={ev}
@@ -645,7 +743,7 @@ export default async function VigilanciaPage({
               u={u}
             />
           ))}
-          {upcoming.length > 0 && past.length > 0 && (
+          {timelineUpcoming.length > 0 && timelinePast.length > 0 && (
             <div className="flex items-center gap-3 pt-3">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
                 {tm.timelineInForceDivider}
@@ -653,7 +751,7 @@ export default async function VigilanciaPage({
               <span className="h-px flex-1 bg-line" />
             </div>
           )}
-          {past.map(({ ev, days, affected }) => (
+          {timelinePast.map(({ ev, days, affected }) => (
             <EventRow
               key={ev.id}
               ev={ev}
@@ -667,6 +765,11 @@ export default async function VigilanciaPage({
               u={u}
             />
           ))}
+          {timelineUpcoming.length === 0 && timelinePast.length === 0 && (
+            <p className="rounded-2xl border border-dashed border-line-strong bg-paper-raised p-6 text-center text-sm text-muted">
+              {tm.timelineEmptyFiltered}
+            </p>
+          )}
         </div>
       </section>
 

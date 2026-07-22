@@ -127,6 +127,15 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Vigilancia: filtro por estado interno en la cronología.** A petición del fundador. Nueva fila de chips
+  "Estado interno" sobre la cronología (`?s=` en la URL): `Todos · N` + un chip con conteo por cada estado presente
+  (Sin marcar / Revisado / Plan en marcha / No aplica). Filtra **solo la cronología** (la lista de trabajo: "solo lo que
+  aún no marqué"); el hero y la banda de resumen siguen siendo orientación global. El filtro **compone** con el de
+  jurisdicción (`hrefFor(j, s)` preserva ambos parámetros en todos los chips). Estado vacío propio cuando un filtro no
+  deja eventos, y el chip activo se mantiene aunque quede en 0 para poder limpiarlo. Componente `FilterChip` reutilizable;
+  claves nuevas `statusAll` + `timelineEmptyFiltered` (ES/EN). lint+tsc+build verdes; verificado en demo (conteos cuadran:
+  19 = 15 sin marcar + 1 revisado + 2 plan + 1 n/a).
+
 - **2026-07-22** · **Vigilancia: estado interno siempre visible en hero y tarjetas de próximos plazos.** A petición del
   fundador. Antes el estado interno (Revisado / Plan en marcha / No aplica) solo se veía al abrir cada evento de la
   cronología. Ahora un componente `StatusChip` lo muestra **siempre** en el hero de "próximo plazo" y en las tarjetas de
