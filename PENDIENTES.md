@@ -42,8 +42,10 @@ Para encenderla:
    ```
 4. Cuando Stripe esté activo (§1.2), una suscripción activa sube la org a **preparación** sola.
 
-### 1.1-sexies · Migración 0022 (práctica prohibida en brechas) — PENDIENTE de aplicar ⚠️
-Añade la columna `gap_items.prohibited` (boolean, default false) para que un control cuyo objeto es una **práctica
+### 1.1-sexies · Migración 0022 (práctica prohibida en brechas) — ✅ APLICADA (2026-07-22)
+Aplicada por el fundador y **verificada por API** (probe con la anon key: `select=prohibited` → HTTP 200; columna
+inventada → HTTP 400 `42703 does not exist`, prueba de contraste). El gating queda activo. Añade la columna
+`gap_items.prohibited` (boolean, default false) para que un control cuyo objeto es una **práctica
 PROHIBIDA del Art. 5** (p. ej. reconocimiento de emociones en el trabajo, Art. 5.1.f) quede **fuera del cómputo de
 "% listo"** y se trate como Inaceptable / revisión jurídica, en vez de contar como una brecha ordinaria. **Degradación
 segura:** mientras no la apliques, la app funciona igual que hoy (todos los controles cuentan; el badge "Práctica
