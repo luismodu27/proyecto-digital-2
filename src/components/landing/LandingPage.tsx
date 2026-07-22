@@ -5,6 +5,7 @@ import { ProblemStats } from "@/components/landing/ProblemStats";
 import { RecruitmentFocus } from "@/components/landing/RecruitmentFocus";
 import { Modules } from "@/components/landing/Modules";
 import { Platform } from "@/components/landing/Platform";
+import { Coverage } from "@/components/landing/Coverage";
 import { WhyNow } from "@/components/landing/WhyNow";
 import { UseCaseStory } from "@/components/landing/UseCaseStory";
 import { Honestidad } from "@/components/landing/Honestidad";
@@ -57,6 +58,9 @@ export function LandingPage({ locale }: { locale: Locale }) {
         </Reveal>
         <Reveal>
           <Platform t={l.platform} />
+        </Reveal>
+        <Reveal>
+          <Coverage t={l.coverage} />
         </Reveal>
         <Reveal>
           <WhyNow t={l.whyNow} />

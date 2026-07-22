@@ -50,6 +50,11 @@ export function Hero({
             </ButtonLink>
           </div>
 
+          <p className="mt-3 flex items-center justify-center gap-2 text-xs font-medium text-brand-strong lg:justify-start">
+            <span className="size-1.5 rounded-full bg-brand" aria-hidden />
+            {t.ctaNote}
+          </p>
+
           <p className="mt-4 text-xs text-muted">{t.footnote}</p>
         </div>
 

@@ -55,7 +55,8 @@ export const en: Dictionary = {
       bodyAfter:
         " under the EU AI Act. Attesta inventories it, classifies its risk, generates your evidence and watches regulatory changes. Without needing a GRC team.",
       ctaPrimary: "Request early access",
-      ctaSecondary: "Explore the demo",
+      ctaSecondary: "Explore the live demo",
+      ctaNote: "No sales call · no sign-up",
       footnote:
         "More than 3 in 4 companies move faster on AI than on governing it. You can stay ahead.",
     },
@@ -76,15 +77,24 @@ export const en: Dictionary = {
     },
 
     trustStrip: {
-      eyebrow:
-        "For HR, Talent Acquisition and People Ops leaders who use AI to hire",
-      sectors: [
-        "CV screening",
-        "Video interviews",
-        "Candidate scoring",
-        "AI-powered ATS",
-        "Automated tests",
-        "Hiring chatbots",
+      eyebrow: "Built to stand up to an audit",
+      signals: [
+        {
+          title: "Zero hallucinations",
+          body: "Regulatory text is 100% deterministic, no LLM.",
+        },
+        {
+          title: "Data hosted in the EU",
+          body: "Hosted within the European Union.",
+        },
+        {
+          title: "Immutable audit trail",
+          body: "Every change lands in a tamper-evident log.",
+        },
+        {
+          title: "Expert-reviewed content",
+          body: "Regulatory content reviewed by a compliance expert.",
+        },
       ],
     },
 
@@ -149,6 +159,7 @@ export const en: Dictionary = {
         {
           title: "AI systems inventory",
           body: "A living catalog of every model and system in use: who operates it, what data it touches and which decision it serves. More than half of companies don't have one; you will.",
+          stat: { v: "1", k: "source of truth, not scattered sheets" },
           points: [
             "Guided discovery",
             "Owner and vendor",
@@ -158,6 +169,7 @@ export const en: Dictionary = {
         {
           title: "Risk classification",
           body: "A guided wizard classifies each system under the EU AI Act —unacceptable, high, limited or minimal— and tells you exactly which obligations apply, separating what's yours (deployer) from the provider's.",
+          stat: { v: "5", k: "deployer obligations · Arts. 14·26·27·50·86" },
           points: [
             "Mapping to AI Act articles",
             "Evidence capture and attestation",
@@ -167,6 +179,7 @@ export const en: Dictionary = {
         {
           title: "Gap assessment and plan",
           body: "What you're missing, prioritized by severity, with an action plan per article. Apply a domain policy pack (HR, workforce management, customer service & generative AI, or credit/insurance) and preload the typical controls for the case.",
+          stat: { v: "Minutes", k: "for your dossier, not weeks" },
           points: [
             "Prioritized gaps",
             "Domain policy packs",
@@ -199,6 +212,43 @@ export const en: Dictionary = {
           body: "HR, Legal and audit working in one place, with role-based permissions and per-organization isolation. Invite whoever you need in seconds.",
         },
       ],
+    },
+
+    coverage: {
+      eyebrow: "Framework coverage",
+      title: "Prepare evidence for the frameworks that apply to you",
+      intro:
+        "One system of record to self-assess your AI and gather audit-ready evidence across the frameworks that apply to you.",
+      frameworks: [
+        {
+          name: "EU AI Act",
+          body: "Organize the human oversight, transparency and evidence your deployment must retain.",
+          tag: "Arts. 14·26·27·50·86",
+        },
+        {
+          name: "ISO/IEC 42001",
+          body: "Structure your AI management system and gather its declared evidence.",
+          tag: "Clauses 4–10 · Annex A",
+        },
+        {
+          name: "NIST AI RMF",
+          body: "Organize your AI governance practices across its four core functions.",
+          tag: "Govern · Map · Measure · Manage",
+        },
+        {
+          name: "NYC Local Law 144",
+          body: "Keep the independent bias audit and candidate notices on file.",
+          tag: "Bias audit · AEDT",
+        },
+        {
+          name: "Illinois (AI in employment)",
+          body: "Document your AI-use notice and safeguards across hiring decisions.",
+          tag: "AI Video Interview Act · HB 3773",
+        },
+      ],
+      radarLabel: "On the compliance radar",
+      radar: ["Colorado AI Act (SB 205)", "Texas TRAIGA"],
+      note: "Audit preparation and orientative classification — not certification or legal advice.",
     },
 
     whyNow: {
@@ -237,6 +287,7 @@ export const en: Dictionary = {
     useCaseStory: {
       eyebrow: "In action",
       title: "From doubt to evidence, in an afternoon.",
+      verbs: ["Inventory your AI", "Classify the risk", "Prove you're ready"],
       intro:
         "Here's how a mid-market company goes from “I think we use AI in hiring” to having everything classified, gaps closed and evidence ready for the auditor.",
       inventory: {
