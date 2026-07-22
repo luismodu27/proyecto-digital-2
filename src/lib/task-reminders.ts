@@ -1,5 +1,6 @@
 import type { ActionTask } from "@/lib/mock-data";
 import { daysUntil } from "@/lib/regulatory-watch";
+import type { Locale } from "@/lib/i18n/config";
 
 /** Ventana por defecto (días) para considerar una tarea "próxima a vencer". */
 export const SOON_WINDOW_DAYS = 14;
@@ -47,9 +48,21 @@ export function bucketTaskDeadlines(
   return { overdue, dueSoon };
 }
 
-/** Texto relativo de vencimiento en español ("vence hoy", "hace 3 días"…). */
-export function dueLabel(dueIso: string, now: Date): string {
+/**
+ * Texto relativo de vencimiento ("vence hoy", "hace 3 días"…). Locale-aware
+ * (chrome de UI); por defecto ES para no romper llamadores no migrados.
+ */
+export function dueLabel(dueIso: string, now: Date, locale: Locale = "es"): string {
   const d = daysUntil(dueIso, now);
+  if (locale === "en") {
+    if (d < 0) {
+      const n = Math.abs(d);
+      return `overdue by ${n} ${n === 1 ? "day" : "days"}`;
+    }
+    if (d === 0) return "due today";
+    if (d === 1) return "due tomorrow";
+    return `due in ${d} days`;
+  }
   if (d < 0) {
     const n = Math.abs(d);
     return `venció hace ${n} ${n === 1 ? "día" : "días"}`;

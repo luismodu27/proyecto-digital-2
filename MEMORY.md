@@ -127,6 +127,33 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **i18n dashboard — sub-incremento 5e (etiquetas de enum locale-aware, FINAL de la i18n del dashboard).**
+  Las etiquetas canónicas ES de los mapas `*_LABEL` de dominio (que 5a–5d dejaron a propósito en español) ahora son
+  **locale-aware** como terminología de UI (no afirmaciones legales). Patrón por enum: junto al mapa canónico ES (sin
+  cambios → default seguro) vive un mapa EN privado, un `*_BY_LOCALE: Record<Locale, …>` y una función `xLabel(v, locale)`.
+  Los módulos de dominio importan **solo `type Locale`** de `@/lib/i18n/config` (dirección permitida por el guard ESLint).
+  **NO** se metió ninguna de estas etiquetas en el diccionario i18n.
+  - **Enums traducidos (mapeo EN, terminología EU AI Act oficial donde aplica):** RiskLevel (`riskLabel`, mock-data):
+    unacceptable→"Unacceptable risk", high→"High risk", limited→"Limited risk", minimal→"Minimal risk". EvidenceState
+    (`evidenceLabel`): declared→"Declared", evidenced→"With evidence", reviewed→"Reviewed". GapSeverity (`severityLabel`,
+    minúscula por CSS uppercase): alta→"high", media→"medium", baja→"low". TaskPriority (`taskPriorityLabel`):
+    critica→"Critical", alta→"High", media→"Medium", baja→"Low". TaskStatus (`taskStatusLabel`): todo→"To do",
+    in_progress→"In progress", blocked→"Blocked", done→"Done". MemberRole (`roleLabel`): owner→"Owner", admin→"Admin",
+    member→"Member". BiasAuditStatus (`biasStatusLabel`, bias-audit): coincide con `dashboard.bias.labels` del dict.
+    `dueLabel` (task-reminders) locale-aware con default ES ("overdue by N days"/"due today"/"due tomorrow"/"due in N days").
+  - **Resolución del locale en consumidores:** SERVER pages resuelven `resolveLocale()` y pasan `label`/`locale`
+    (`riesgo`, `inventario`, `dashboard` overview, `plan`, `gap`); `DeadlineReminders` (server) recibe `locale` por prop.
+    CLIENT: `AssessmentHistory` usa su `useLocale()` ya existente. `EvidenceBadge` ganó prop `locale?` (default ES) que
+    traduce también el estado "Sin clasificar"/"Unclassified". `RiskBadge`/`RoleBadge` siguen recibiendo `label` (patrón
+    landing/equipo). `BiasAuditBadge` ya auto-resolvía (5b).
+  - **Dejado en ES a propósito (frontera 5d / regulatorio):** el bloque de RESULTADO de `RiskWizard` (RISK_LABEL + RiskBadge
+    conviven con "Resultado orientativo"/rationale ES → se mantiene coherente en ES); el editor de eventos de
+    `CandidateReviewControls` (checkboxes de scope por nivel + "Toda la organización" son field-labels ES por 5d); los PDF
+    `informe`/`dossier`/`gap/informe` y `/demo` (RISK/EVIDENCE/severity en ES); severidad en `packs` (contenido de policy);
+    `audit.ts` (traduce a ES legible). **Zona gris NO tocada:** FRAMEWORK_*/JURISDICTION_*/tipos de evento de
+    `regulatory-watch` (nombres propios/sustantivos regulatorios) → pendientes de revisión del experto.
+  - Verificado: tsc + eslint + build (exit 0). Sin commit.
+
 - **2026-07-22** · **i18n dashboard — sub-incremento 5d (chrome de páginas/componentes regulatorios).**
   Nuevo sub-namespace `dashboard.pages` (es/en) SOLO con chrome de navegación: títulos/subtítulos genéricos de
   `PageHeader`, botones de acción/navegación (descargar/imprimir/exportar/volver), estados vacíos de producto,

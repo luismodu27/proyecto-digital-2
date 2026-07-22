@@ -8,6 +8,7 @@
  * ⚠️ Attesta REGISTRA la evidencia declarada; no realiza ni valida la auditoría.
  * "Auditoría realizada" ≠ "aprobada" ≠ "sin discriminación".
  */
+import type { Locale } from "./i18n/config";
 
 /** Umbral (días) para avisar de que una auditoría está por vencer. Un solo sitio. */
 export const BIAS_AUDIT_WARN_DAYS = 60;
@@ -35,6 +36,22 @@ export const BIAS_STATUS_LABEL: Record<BiasAuditStatus, string> = {
   por_vencer: "Próxima a vencer",
   vigente: "Auditoría vigente",
 };
+// Etiqueta EN (chrome de UI, neutral — no es un juicio de cumplimiento). Coincide
+// con `dashboard.bias.labels` del diccionario (usado por `BiasAuditBadge`).
+const BIAS_STATUS_LABEL_EN: Record<BiasAuditStatus, string> = {
+  no_aplica: "Not an AEDT",
+  sin_auditoria: "No audit",
+  vencida: "Audit expired",
+  por_vencer: "Expiring soon",
+  vigente: "Audit valid",
+};
+export const BIAS_STATUS_LABEL_BY_LOCALE: Record<Locale, Record<BiasAuditStatus, string>> = {
+  es: BIAS_STATUS_LABEL,
+  en: BIAS_STATUS_LABEL_EN,
+};
+export function biasStatusLabel(status: BiasAuditStatus, locale: Locale): string {
+  return BIAS_STATUS_LABEL_BY_LOCALE[locale][status];
+}
 
 /** Tono semántico para el badge (danger/warn/good/neutral). */
 export const BIAS_STATUS_TONE: Record<BiasAuditStatus, "danger" | "warn" | "good" | "neutral"> = {

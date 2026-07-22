@@ -2,7 +2,7 @@
 
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { EvidenceBadge } from "@/components/ui/EvidenceBadge";
-import type { AssessmentRecord } from "@/lib/mock-data";
+import { riskLabel, type AssessmentRecord } from "@/lib/mock-data";
 import { useT, useLocale } from "@/lib/i18n/provider";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -45,8 +45,8 @@ export function AssessmentHistory({
             }`}
           />
           <div className="flex flex-wrap items-center gap-2">
-            <RiskBadge level={a.level} />
-            <EvidenceBadge state={a.evidenceState} />
+            <RiskBadge level={a.level} label={riskLabel(a.level, locale)} />
+            <EvidenceBadge state={a.evidenceState} locale={locale} />
             {i === 0 && (
               <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-medium text-brand-strong">
                 {h.current}

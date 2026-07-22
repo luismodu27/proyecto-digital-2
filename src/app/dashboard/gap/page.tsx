@@ -4,6 +4,7 @@ import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
 import { GapStatusControl } from "@/components/dashboard/GapStatusControl";
 import { DeleteGapButton } from "@/components/dashboard/DeleteGapButton";
 import { getAiSystems, getGapItems, isSupabaseConfigured } from "@/lib/data";
+import { severityLabel } from "@/lib/mock-data";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
 
@@ -23,7 +24,8 @@ const statusCls = {
 
 export default async function GapPage() {
   const [gapItems, systems] = await Promise.all([getGapItems(), getAiSystems()]);
-  const t = getDictionary(await resolveLocale()).dashboard.gap;
+  const locale = await resolveLocale();
+  const t = getDictionary(locale).dashboard.gap;
   const open = gapItems.filter((g) => g.status !== "done").length;
   // El nombre real del sistema (getGapItems deja el uuid si el sistema no tiene
   // `code`, p. ej. los creados por el usuario). Misma resolución que el PDF.
@@ -59,7 +61,7 @@ export default async function GapPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-xs text-muted">{g.article}</span>
                   <span className={`text-xs font-medium uppercase ${severityMeta[g.severity]}`}>
-                    {t.severityPrefix}{g.severity}
+                    {t.severityPrefix}{severityLabel(g.severity, locale)}
                   </span>
                 </div>
                 <p className="mt-1 font-medium text-ink">{g.requirement}</p>

@@ -17,8 +17,8 @@ import {
   getSystemsForSelect,
 } from "@/lib/data";
 import {
-  TASK_STATUS_LABEL,
-  TASK_PRIORITY_LABEL,
+  taskStatusLabel,
+  taskPriorityLabel,
   TASK_PRIORITY_ORDER,
   type TaskStatus,
   type TaskPriority,
@@ -78,7 +78,8 @@ export default async function PlanPage() {
     getOrgMembers(),
     getSystemsForSelect(),
   ]);
-  const tp = getDictionary(await resolveLocale()).dashboard.pages.plan;
+  const locale = await resolveLocale();
+  const tp = getDictionary(locale).dashboard.pages.plan;
 
   const now = new Date();
   const todayIso = now.toISOString().slice(0, 10);
@@ -194,7 +195,7 @@ export default async function PlanPage() {
             >
               {TASK_PRIORITY_ORDER.map((p) => (
                 <option key={p} value={p}>
-                  {TASK_PRIORITY_LABEL[p]}
+                  {taskPriorityLabel(p, locale)}
                 </option>
               ))}
             </select>
@@ -275,10 +276,10 @@ export default async function PlanPage() {
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Pill className={PRIORITY_TONE[t.priority]}>
-                    {TASK_PRIORITY_LABEL[t.priority]}
+                    {taskPriorityLabel(t.priority, locale)}
                   </Pill>
                   <Pill className={STATUS_TONE[t.status]}>
-                    {TASK_STATUS_LABEL[t.status]}
+                    {taskStatusLabel(t.status, locale)}
                   </Pill>
                   {t.article && (
                     <span className="rounded-md border border-line bg-paper px-2 py-0.5 font-mono text-[11px] text-seal">
@@ -343,7 +344,7 @@ export default async function PlanPage() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <Pill className={PRIORITY_TONE[PRIORITY_ASCII[r.priority]]}>
-                      {TASK_PRIORITY_LABEL[PRIORITY_ASCII[r.priority]]}
+                      {taskPriorityLabel(PRIORITY_ASCII[r.priority], locale)}
                     </Pill>
                     <span className="rounded-md border border-line bg-paper px-2 py-0.5 font-mono text-[11px] text-seal">
                       {r.article}

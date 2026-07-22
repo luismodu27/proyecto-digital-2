@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { ActionTask } from "@/lib/data";
-import { TASK_PRIORITY_LABEL, type TaskPriority } from "@/lib/mock-data";
+import { taskPriorityLabel, type TaskPriority } from "@/lib/mock-data";
 import { bucketTaskDeadlines, dueLabel } from "@/lib/task-reminders";
 import type { Dictionary } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
 
 const PRIORITY_TONE: Record<TaskPriority, string> = {
   critica:
@@ -17,10 +18,12 @@ function ReminderRow({
   task,
   now,
   overdue,
+  locale,
 }: {
   task: ActionTask;
   now: Date;
   overdue: boolean;
+  locale: Locale;
 }) {
   return (
     <li className="flex items-center justify-between gap-3 py-2.5">
@@ -42,14 +45,14 @@ function ReminderRow({
         <span
           className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${PRIORITY_TONE[task.priority]}`}
         >
-          {TASK_PRIORITY_LABEL[task.priority]}
+          {taskPriorityLabel(task.priority, locale)}
         </span>
         <span
           className={`whitespace-nowrap text-xs font-medium tabular-nums ${
             overdue ? "text-[var(--tone-danger-fg)]" : "text-muted"
           }`}
         >
-          {task.dueDate ? dueLabel(task.dueDate, now) : ""}
+          {task.dueDate ? dueLabel(task.dueDate, now, locale) : ""}
         </span>
       </div>
     </li>
@@ -65,11 +68,13 @@ export function DeadlineReminders({
   now,
   limit = 5,
   t,
+  locale,
 }: {
   tasks: ActionTask[];
   now: Date;
   limit?: number;
   t: Dictionary["dashboard"]["deadlines"];
+  locale: Locale;
 }) {
   const { overdue, dueSoon } = bucketTaskDeadlines(tasks, now);
   const total = overdue.length + dueSoon.length;
@@ -103,10 +108,10 @@ export function DeadlineReminders({
 
       <ul className="mt-2 divide-y divide-line">
         {shownOverdue.map((t) => (
-          <ReminderRow key={t.id} task={t} now={now} overdue />
+          <ReminderRow key={t.id} task={t} now={now} overdue locale={locale} />
         ))}
         {shownSoon.map((t) => (
-          <ReminderRow key={t.id} task={t} now={now} overdue={false} />
+          <ReminderRow key={t.id} task={t} now={now} overdue={false} locale={locale} />
         ))}
       </ul>
 

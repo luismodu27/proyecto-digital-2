@@ -5,14 +5,15 @@ import { SubmitButton } from "@/components/ui/SubmitButton";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { EvidenceBadge } from "@/components/ui/EvidenceBadge";
 import { getAiSystems, isSupabaseConfigured } from "@/lib/data";
-import { AUDIT_READY_THRESHOLD } from "@/lib/mock-data";
+import { AUDIT_READY_THRESHOLD, riskLabel } from "@/lib/mock-data";
 import { seedSampleData } from "@/lib/data/actions";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
 
 export default async function InventarioPage() {
   const systems = await getAiSystems();
-  const t = getDictionary(await resolveLocale()).dashboard.inventory;
+  const locale = await resolveLocale();
+  const t = getDictionary(locale).dashboard.inventory;
 
   return (
     <>
@@ -85,10 +86,10 @@ export default async function InventarioPage() {
                     </td>
                     <td className="px-5 py-4 text-ink-soft">{s.domain}</td>
                     <td className="px-5 py-4">
-                      <RiskBadge level={s.risk} />
+                      <RiskBadge level={s.risk} label={riskLabel(s.risk, locale)} />
                     </td>
                     <td className="px-5 py-4">
-                      <EvidenceBadge state={s.evidenceState} />
+                      <EvidenceBadge state={s.evidenceState} locale={locale} />
                     </td>
                     <td className="px-5 py-4">
                       <div className="w-32">

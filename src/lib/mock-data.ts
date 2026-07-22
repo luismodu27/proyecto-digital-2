@@ -3,17 +3,38 @@
  * TODO(backend): reemplazar por datos reales cuando exista la capa de datos.
  */
 import type { BiasAudit } from "./bias-audit";
+import type { Locale } from "./i18n/config";
 
 export type RiskLevel = "unacceptable" | "high" | "limited" | "minimal";
 
 /** Nivel de respaldo de una autoevaluación. */
 export type EvidenceState = "declared" | "evidenced" | "reviewed";
 
+/*
+ * Etiquetas de enum LOCALE-AWARE (terminología de UI, no afirmaciones legales).
+ * Patrón: el mapa canónico ES conserva su nombre y valor (default seguro para
+ * llamadores no migrados); junto a él viven el mapa EN, un selector `*_BY_LOCALE`
+ * y una función `xLabel(value, locale)`. Estas etiquetas NO van al diccionario
+ * i18n: viven aquí, junto al enum de dominio que describen.
+ */
+
 export const EVIDENCE_LABEL: Record<EvidenceState, string> = {
   declared: "Declarado",
   evidenced: "Con evidencia",
   reviewed: "Revisado",
 };
+const EVIDENCE_LABEL_EN: Record<EvidenceState, string> = {
+  declared: "Declared",
+  evidenced: "With evidence",
+  reviewed: "Reviewed",
+};
+export const EVIDENCE_LABEL_BY_LOCALE: Record<Locale, Record<EvidenceState, string>> = {
+  es: EVIDENCE_LABEL,
+  en: EVIDENCE_LABEL_EN,
+};
+export function evidenceLabel(state: EvidenceState, locale: Locale): string {
+  return EVIDENCE_LABEL_BY_LOCALE[locale][state];
+}
 
 export const RISK_LABEL: Record<RiskLevel, string> = {
   unacceptable: "Inaceptable",
@@ -21,6 +42,20 @@ export const RISK_LABEL: Record<RiskLevel, string> = {
   limited: "Riesgo limitado",
   minimal: "Riesgo mínimo",
 };
+// Términos oficiales del EU AI Act en inglés (no inventar otros).
+const RISK_LABEL_EN: Record<RiskLevel, string> = {
+  unacceptable: "Unacceptable risk",
+  high: "High risk",
+  limited: "Limited risk",
+  minimal: "Minimal risk",
+};
+export const RISK_LABEL_BY_LOCALE: Record<Locale, Record<RiskLevel, string>> = {
+  es: RISK_LABEL,
+  en: RISK_LABEL_EN,
+};
+export function riskLabel(level: RiskLevel, locale: Locale): string {
+  return RISK_LABEL_BY_LOCALE[locale][level];
+}
 
 /**
  * Paleta de riesgo (hex saturado, igual en claro y oscuro) para SVG/gráficos
@@ -113,12 +148,37 @@ export const AI_SYSTEMS: AiSystem[] = [
   },
 ];
 
+/** Severidad de una brecha (gap item). */
+export type GapSeverity = "alta" | "media" | "baja";
+
+// Etiqueta natural de severidad. En ES se muestra el propio valor del enum
+// ("alta"/"media"/"baja"); en EN su equivalente ("high"/"medium"/"low"). El
+// consumidor aplica el casing por CSS (uppercase/capitalize), así que aquí van
+// en minúscula para no romper ese estilo.
+export const SEVERITY_LABEL: Record<GapSeverity, string> = {
+  alta: "alta",
+  media: "media",
+  baja: "baja",
+};
+const SEVERITY_LABEL_EN: Record<GapSeverity, string> = {
+  alta: "high",
+  media: "medium",
+  baja: "low",
+};
+export const SEVERITY_LABEL_BY_LOCALE: Record<Locale, Record<GapSeverity, string>> = {
+  es: SEVERITY_LABEL,
+  en: SEVERITY_LABEL_EN,
+};
+export function severityLabel(severity: GapSeverity, locale: Locale): string {
+  return SEVERITY_LABEL_BY_LOCALE[locale][severity];
+}
+
 export type GapItem = {
   id: string;
   requirement: string;
   article: string;
   status: "missing" | "partial" | "done";
-  severity: "alta" | "media" | "baja";
+  severity: GapSeverity;
   system: string;
 };
 
@@ -271,6 +331,18 @@ export const ROLE_LABEL: Record<MemberRole, string> = {
   admin: "Administrador",
   member: "Miembro",
 };
+const ROLE_LABEL_EN: Record<MemberRole, string> = {
+  owner: "Owner",
+  admin: "Admin",
+  member: "Member",
+};
+export const ROLE_LABEL_BY_LOCALE: Record<Locale, Record<MemberRole, string>> = {
+  es: ROLE_LABEL,
+  en: ROLE_LABEL_EN,
+};
+export function roleLabel(role: MemberRole, locale: Locale): string {
+  return ROLE_LABEL_BY_LOCALE[locale][role];
+}
 
 export const ROLE_HINT: Record<MemberRole, string> = {
   owner: "Control total: gestiona el equipo, la organización y puede borrar sistemas.",
@@ -692,6 +764,19 @@ export const TASK_STATUS_LABEL: Record<TaskStatus, string> = {
   blocked: "Bloqueada",
   done: "Hecha",
 };
+const TASK_STATUS_LABEL_EN: Record<TaskStatus, string> = {
+  todo: "To do",
+  in_progress: "In progress",
+  blocked: "Blocked",
+  done: "Done",
+};
+export const TASK_STATUS_LABEL_BY_LOCALE: Record<Locale, Record<TaskStatus, string>> = {
+  es: TASK_STATUS_LABEL,
+  en: TASK_STATUS_LABEL_EN,
+};
+export function taskStatusLabel(status: TaskStatus, locale: Locale): string {
+  return TASK_STATUS_LABEL_BY_LOCALE[locale][status];
+}
 
 export const TASK_STATUS_ORDER: TaskStatus[] = [
   "todo",
@@ -706,6 +791,19 @@ export const TASK_PRIORITY_LABEL: Record<TaskPriority, string> = {
   media: "Media",
   baja: "Baja",
 };
+const TASK_PRIORITY_LABEL_EN: Record<TaskPriority, string> = {
+  critica: "Critical",
+  alta: "High",
+  media: "Medium",
+  baja: "Low",
+};
+export const TASK_PRIORITY_LABEL_BY_LOCALE: Record<Locale, Record<TaskPriority, string>> = {
+  es: TASK_PRIORITY_LABEL,
+  en: TASK_PRIORITY_LABEL_EN,
+};
+export function taskPriorityLabel(priority: TaskPriority, locale: Locale): string {
+  return TASK_PRIORITY_LABEL_BY_LOCALE[locale][priority];
+}
 
 export const TASK_PRIORITY_ORDER: TaskPriority[] = [
   "critica",

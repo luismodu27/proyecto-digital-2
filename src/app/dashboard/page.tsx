@@ -23,6 +23,7 @@ import {
   riskCounts,
   AUDIT_READY_THRESHOLD,
   isAuditReady,
+  riskLabel,
 } from "@/lib/mock-data";
 import {
   upcomingDeadlines,
@@ -50,7 +51,8 @@ export default async function DashboardOverview() {
       getRegulatoryEvents(),
     ]);
 
-  const d = getDictionary(await resolveLocale()).dashboard;
+  const locale = await resolveLocale();
+  const d = getDictionary(locale).dashboard;
 
   // Nombre de pila para el saludo (solo si hay un nombre real en el perfil; no
   // usamos el prefijo del email para no mostrar algo poco natural).
@@ -241,7 +243,7 @@ export default async function DashboardOverview() {
         </Link>
       )}
 
-      <DeadlineReminders tasks={tasks} now={now} t={d.deadlines} />
+      <DeadlineReminders tasks={tasks} now={now} t={d.deadlines} locale={locale} />
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">
@@ -297,7 +299,7 @@ export default async function DashboardOverview() {
                     <div className="w-24">
                       <Meter value={s.compliance} target={AUDIT_READY_THRESHOLD} />
                     </div>
-                    <RiskBadge level={s.risk} />
+                    <RiskBadge level={s.risk} label={riskLabel(s.risk, locale)} />
                   </div>
                 </li>
               ))}

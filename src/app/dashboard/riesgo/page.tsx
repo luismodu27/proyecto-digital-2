@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { getAiSystems } from "@/lib/data";
-import { RISK_LABEL, RISK_ORDER, type RiskLevel } from "@/lib/mock-data";
+import { riskLabel, RISK_ORDER, type RiskLevel } from "@/lib/mock-data";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
 
@@ -16,7 +16,8 @@ const guidance: Record<RiskLevel, string> = {
 
 export default async function RiesgoPage() {
   const allSystems = await getAiSystems();
-  const d = getDictionary(await resolveLocale()).dashboard;
+  const locale = await resolveLocale();
+  const d = getDictionary(locale).dashboard;
   const t = d.riskPage;
   const grouped = RISK_ORDER.map((level) => ({
     level,
@@ -43,14 +44,14 @@ export default async function RiesgoPage() {
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
-                <RiskBadge level={level} />
+                <RiskBadge level={level} label={riskLabel(level, locale)} />
                 <span className="text-sm text-muted">
                   {systems.length}{" "}
                   {systems.length === 1 ? d.units.systemOne : d.units.systemOther}
                 </span>
               </div>
               <span className="font-display text-sm font-medium text-ink">
-                {RISK_LABEL[level]}
+                {riskLabel(level, locale)}
               </span>
             </div>
             <p className="mt-3 border-l-2 border-line-strong pl-3 text-sm text-ink-soft">
