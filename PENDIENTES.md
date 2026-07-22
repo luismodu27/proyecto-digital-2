@@ -217,23 +217,24 @@ Queda pendiente:
 - **Estados vacíos menores**: `riesgo/page.tsx` muestra las 4 secciones con "0 sistemas" en cuenta nueva.
 - **TODOs de andamiaje**: `context.ts:21` (selector de org activa), `analista/voyage.ts` (placeholder de embeddings).
 
-### 2.3 · Internacionalización ES/EN — Inc 4–5 pendientes (iniciada 2026-07-22)
-Web pública ya bilingüe (Inc 0–3, ver MEMORY §10 2026-07-22). **Falta:**
-- **Inc 4 · Auth chrome:** `login`, `onboarding`, `reset-password` leen `resolveLocale()` (cookie) y traducen su
-  chrome; `LocaleToggle` en modo cookie (server action `setLocale`). Traducir cadenas de UI de `AuthForm`/`friendlyError`
-  (no las de compliance).
-- **Inc 5 · Dashboard chrome por clusters:** `I18nProvider` en el layout del dashboard + `useT()`; traducir navegación
-  (`Sidebar`, `AccountMenu`), estados vacíos, toasts (mapa `?toast=`→clave i18n), labels de formularios (inventario, gap,
-  riesgo), botones. **Los módulos legales deterministas NO se tocan** (siguen en español desde `policy-packs`/
-  `risk-assessment`/`recommendations`/`regulatory-watch` hasta validación del experto). Incluye traducir `RISK_LABEL` de
-  `mock-data.ts` (hoy la landing lo sortea con el `label` de `RiskBadge`; el dashboard necesita la traducción central).
-  Toggle EN/ES en `AccountMenu`.
-- **Inc 6 · PDF/dossier (necesita decisión):** cuerpo legal del dossier/informe **en español** (regla dura: contenido
-  regulatorio validado) aunque la UI esté en EN, con nota visible; solo el chrome del documento (encabezados) podría ir en
-  EN. `ScopeNote` ya es locale-aware; las notas `LEGAL_*_BY_LOCALE` ya tienen EN validado por el experto.
-- **Diferidos técnicos:** (a) leer `headers()` en el root layout volvió dinámicas todas las rutas (la landing dejó de
-  prerenderarse estática) — optimizable con root layouts separados por route-group si el TTFB lo pidiera; (b) auto-detección
-  `Accept-Language` NO se implementó (decisión: no forzar redirección; como mucho un banner "View in English" fuera de MVP).
+### 2.3 · Internacionalización ES/EN — Inc 0–5 HECHOS (en la rama, 2026-07-22)
+Toda la UI (web pública + auth + dashboard) es bilingüe ES/EN. **En la rama `claude/init-3bwfhm`, NO desplegado a `main`**
+(el fundador decidió publicar cuando dé el visto bueno). Ver MEMORY §10 (2026-07-22). ✅ Inc 0–3 web pública + SEO,
+✅ Inc 4 auth por cookie, ✅ Inc 5a–5e dashboard (shell/nav/toasts, genéricos, formularios, chrome de páginas
+regulatorias, enums de dominio).
+- **Falta que el fundador decida:** publicar a producción (`main`) — es un hito coherente y completo por sí mismo.
+- **Pendiente de validación del EXPERTO antes de exponer en EN** (hoy en español, degradación segura):
+  1. Etiquetas de `regulatory-watch.ts`: `FRAMEWORK_*`, `JURISDICTION_*` y tipos de evento regulatorio (nombres de
+     marcos/jurisdicciones y descripciones cargadas). El patrón `*_BY_LOCALE` ya está montado para los demás enums;
+     solo falta añadir la columna EN validada aquí.
+  2. **Inc 6 · Cuerpo de los PDF** (dossier/informe/gap-informe): decisión tomada = el cuerpo legal se mantiene en
+     **español** aunque la UI esté en inglés (regla dura). `ScopeNote` ya es locale-aware y `LEGAL_*_BY_LOCALE` ya tienen
+     EN validado; si en el futuro se quiere el documento entero en EN, requiere validación del experto del cuerpo completo.
+- **Diferidos técnicos (míos):** (a) leer `headers()` en el root layout volvió dinámicas todas las rutas (la landing dejó
+  de prerenderarse estática) — optimizable con root layouts separados por route-group si el TTFB lo pidiera; (b)
+  auto-detección `Accept-Language` NO se implementó (decisión: no forzar redirección; como mucho un banner "View in
+  English" fuera de MVP); (c) el toast `pack-applied` dice "policy pack RRHH" fijo aunque se aplique otro pack
+  (preexistente, menor).
 
 ### 2.2 · Ampliar el foso — leyes de EE. UU. de contratación con IA (esperando visto bueno)
 Recomendación del experto lista (ver MEMORY §10, 2026-07-18). **2º marco** = NYC LL144 + Illinois HB 3773 (en vigor),

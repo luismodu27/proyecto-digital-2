@@ -127,6 +127,23 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **i18n ES/EN COMPLETA (web pública + auth + dashboard) — Inc 0–5, en la rama.** Cierre de la
+  internacionalización que pidió el fundador (alcance web + dashboard, URLs `/en`). Estado: **todo en la rama
+  `claude/init-3bwfhm`, NO desplegado a `main`** por decisión del fundador (se publica cuando él dé el visto bueno).
+  Recorrido: **Inc 0–3** web pública (andamiaje, `<html lang>`, landing `/en`, SEO/hreflang) — ver entrada más abajo.
+  **Inc 4** auth por cookie (login/onboarding/reset + `LocaleToggleCookie`). **Inc 5** dashboard por clusters:
+  **5a** shell+`I18nProvider`+nav+toasts · **5b** genéricos/estados vacíos/onboarding/botones · **5c** formularios y
+  controles simples · **5d** chrome exterior de páginas regulatorias (solo lista blanca; cuerpos legales en ES) ·
+  **5e** enums de dominio locale-aware. Todos los sub-incrementos con tsc+lint+build exit 0 y verificados.
+  - **Frontera legal mantenida en TODO el trabajo:** el contenido regulatorio determinista (policy-packs,
+    risk-assessment, recommendations, regulatory-watch, audit, cuerpos de dossier/informe, articulado) permanece en
+    español; los diccionarios i18n solo llevan chrome (guard de ESLint activo). Copy prohibido respetado también en
+    inglés (readiness / self-assessment / "we don't certify"; framing deployer). Notas legales EN validadas por el experto.
+  - **Pendiente de validación del experto antes de exponerlas en EN:** (1) etiquetas de `regulatory-watch.ts`
+    (`FRAMEWORK_*`, `JURISDICTION_*`, tipos de evento) — hoy en ES; (2) **Inc 6**: cuerpo legal de los PDF (dossier/
+    informe) — decisión = se mantiene en ES aunque la UI esté en EN (regla dura), con `ScopeNote`/`LEGAL_*` ya con EN
+    validado disponible. Ver PENDIENTES §2.3.
+
 - **2026-07-22** · **i18n dashboard — sub-incremento 5e (etiquetas de enum locale-aware, FINAL de la i18n del dashboard).**
   Las etiquetas canónicas ES de los mapas `*_LABEL` de dominio (que 5a–5d dejaron a propósito en español) ahora son
   **locale-aware** como terminología de UI (no afirmaciones legales). Patrón por enum: junto al mapa canónico ES (sin
