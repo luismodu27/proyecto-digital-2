@@ -658,17 +658,18 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
  *
  * `articles`: the numeric citation identifiers are kept byte-identical (a
  * mistranslated cite is a liability), but the Spanish DESCRIPTIVE text that some
- * carried has now been translated to English (e.g. "Cap. VII (gobernanza)" →
- * "Ch. VII (governance)"; "(publicación del resumen de resultados)" →
+ * carried has been translated to English (e.g. "Cap. VII (gobernanza)" →
+ * "Chapter VII (governance)"; "(publicación del resumen de resultados)" →
  * "(publication of the summary of results)"; range connector "a" → "to"; dates
- * "6-abr-2023" → "6 Apr 2023"). EXPERT FLAG: standalone language-suffixed
- * statute tokens are intentionally left as-is pending expert sign-off —
- * "Anexo I/III" (vs "Annex"), "Directiva 2011/93/UE" (vs "Directive .../EU").
+ * "6-abr-2023" → "6 Apr 2023"). Language-suffixed statute tokens are also
+ * translated to the official EUR-Lex English forms: "Anexo I/III" → "Annex I/III",
+ * "Directiva 2011/93/UE" → "Directive 2011/93/EU", "Reglamento (UE)" →
+ * "Regulation (EU)". Signed off by the compliance-domain-expert (2026-07-22).
  *
- * Consumers (ES today): vigilancia/page.tsx, dashboard/page.tsx and
- * informe/page.tsx read title/summary/impact/action (and scope/date via the
- * relevance engine below). Wire by selecting REGULATORY_EVENTS_EN when
- * locale === "en"; the engine + merge helpers are locale-agnostic and unchanged.
+ * Consumers read title/summary/impact/action (and scope/date via the relevance
+ * engine below) through `regulatoryEventsBase(locale)`/`mergeCatalog(...,locale)`,
+ * which select REGULATORY_EVENTS_EN when locale === "en"; the engine + merge
+ * helpers are locale-agnostic and unchanged.
  *
  * Deployer framing preserved; no prohibited copy (no certified/compliant/
  * guarantees). Legal fidelity: dates/articles not strengthened or softened.
@@ -724,7 +725,7 @@ export const REGULATORY_EVENTS_EN: RegulatoryEvent[] = [
       "Affects mainly providers of foundation models, not directly a deployer. But it establishes the penalties framework and the competent authorities: non-compliance now has consequences.",
     action:
       "If you use general-purpose models (e.g. a chatbot built on a commercial LLM), ask your provider for the GPAI compliance documentation and keep it as evidence.",
-    articles: ["Ch. V (Arts. 51–56)", "Ch. VII (governance)", "Arts. 99–100"],
+    articles: ["Chapter V (Arts. 51–56)", "Chapter VII (governance)", "Arts. 99–100"],
     source: {
       label: "AI Act application timeline — European Commission",
       url: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",

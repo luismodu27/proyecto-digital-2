@@ -136,10 +136,26 @@ export const RISK_QUESTIONS: Question[] = [
     ],
   },
   {
-    id: "exception",
+    id: "profiling_gate",
     step: 3,
+    title: "¿El sistema efectúa perfilado de personas físicas?",
+    help: "Perfilado = tratamiento automatizado de datos personales para evaluar aspectos de una persona física: rendimiento laboral, situación económica, salud, preferencias, intereses, fiabilidad, comportamiento, localización o movimientos (Art. 4(4) del RGPD). Si el sistema opera en un área del Anexo III y efectúa perfilado, el Art. 6(3) impide que se aplique ninguna excepción: siempre se considera de alto riesgo.",
+    type: "single",
+    onlyIfHighCandidate: true,
+    choices: [
+      {
+        value: "yes",
+        label: "Sí, efectúa perfilado de personas físicas",
+        hint: "Con perfilado no cabe excepción del Art. 6(3): el sistema es de alto riesgo directamente.",
+      },
+      { value: "no", label: "No efectúa perfilado de personas físicas" },
+    ],
+  },
+  {
+    id: "exception",
+    step: 4,
     title: "¿Aplica alguna excepción del Art. 6(3)?",
-    help: "Un sistema en un área del Anexo III NO es de alto riesgo si solo hace lo siguiente y no perfila a personas.",
+    help: "Un sistema en un área del Anexo III NO es de alto riesgo si solo hace una de estas tareas acotadas (y no efectúa perfilado, ya confirmado en el paso anterior).",
     type: "single",
     onlyIfHighCandidate: true,
     choices: [
@@ -150,17 +166,12 @@ export const RISK_QUESTIONS: Question[] = [
         label: "Detecta patrones de decisión sin sustituir el juicio humano",
       },
       { value: "preparatory", label: "Es una tarea preparatoria de una evaluación" },
-      {
-        value: "profiling",
-        label: "Perfila a personas o influye en decisiones sobre ellas",
-        hint: "Si perfila personas, NO hay excepción: sigue siendo alto riesgo.",
-      },
       { value: NONE, label: "Ninguna: influye en la decisión final" },
     ],
   },
   {
     id: "transparency",
-    step: 4,
+    step: 5,
     title: "¿El sistema hace algo de esto de cara a las personas?",
     help: "Obligaciones de transparencia del Art. 50. Marca todas las que apliquen.",
     type: "multi",
@@ -271,6 +282,8 @@ export const RATIONALES = {
     "El Digital Omnibus añadió al Art. 5 esta práctica —generación o manipulación de imágenes íntimas realistas no consentidas o de CSAM—, que será una práctica prohibida del EU AI Act aplicable desde el 2 de diciembre de 2026 (aún no en vigor a la fecha de esta evaluación). No obstante, generar o manipular este material ya es ilícito por derecho penal con independencia del AI Act (la Directiva 2011/93/UE para el CSAM; la Directiva (UE) 2024/1385 y la normativa penal nacional para las imágenes íntimas no consentidas), por lo que se clasifica como inaceptable. Valida esta clasificación con asesoría jurídica cualificada.",
   high:
     "El sistema opera en un área de alto riesgo del Anexo III y no le aplica ninguna excepción del Art. 6(3).",
+  high_profiling:
+    "El sistema opera en un área de alto riesgo del Anexo III y efectúa perfilado de personas físicas. Conforme al Art. 6(3), párrafo segundo, del Reglamento (UE) 2024/1689, un sistema del Anexo III que efectúa perfilado se considera siempre de alto riesgo, por lo que las excepciones del Art. 6(3) no pueden aplicarse.",
   limited:
     "El sistema no es de alto riesgo, pero está sujeto a obligaciones de transparencia del Art. 50.",
   minimal:
@@ -372,11 +385,23 @@ export function classify(
   const highCandidate = isHighCandidate(answers);
 
   if (highCandidate) {
+    // Art. 6(3), párrafo 2: un sistema del Anexo III que efectúa perfilado de
+    // personas físicas se considera SIEMPRE de alto riesgo — el perfilado anula
+    // toda excepción, con independencia de lo acotada que sea la tarea.
+    if (has(answers, "profiling_gate", "yes")) {
+      return {
+        level: "high",
+        rationale: rationales.high_profiling,
+        citations: citations.high,
+        obligations: obligations.high,
+      };
+    }
+
     const exception = (answers.exception ?? [])[0];
     const exceptionApplies =
       exception !== undefined && REAL_EXCEPTIONS.has(exception);
 
-    // La excepción NO aplica si perfila personas o si no eligió excepción real.
+    // Sin perfilado: la excepción NO aplica si no eligió una excepción real.
     if (!exceptionApplies) {
       return {
         level: "high",
@@ -414,9 +439,14 @@ export function visibleQuestions(
   locale: Locale = "es",
 ): Question[] {
   const highCandidate = isHighCandidate(answers);
-  return questionsFor(locale).filter(
-    (q) => !q.onlyIfHighCandidate || highCandidate,
-  );
+  const profiles = has(answers, "profiling_gate", "yes");
+  return questionsFor(locale).filter((q) => {
+    if (q.onlyIfHighCandidate && !highCandidate) return false;
+    // Con perfilado confirmado, la excepción del Art. 6(3) no puede aplicar:
+    // se omite la pregunta de excepción (el resultado ya es alto riesgo).
+    if (q.id === "exception" && profiles) return false;
+    return true;
+  });
 }
 
 export { has };
@@ -543,10 +573,26 @@ export const RISK_QUESTIONS_EN: Question[] = [
     ],
   },
   {
-    id: "exception",
+    id: "profiling_gate",
     step: 3,
+    title: "Does the system perform profiling of natural persons?",
+    help: "Profiling = automated processing of personal data to evaluate aspects of a natural person: work performance, economic situation, health, preferences, interests, reliability, behavior, location or movements (Article 4(4) GDPR). If the system operates in an Annex III area and performs profiling, Article 6(3) prevents any exception from applying: it is always considered high-risk.",
+    type: "single",
+    onlyIfHighCandidate: true,
+    choices: [
+      {
+        value: "yes",
+        label: "Yes, it performs profiling of natural persons",
+        hint: "With profiling, no Article 6(3) exception is available: the system is high-risk outright.",
+      },
+      { value: "no", label: "No, it does not perform profiling of natural persons" },
+    ],
+  },
+  {
+    id: "exception",
+    step: 4,
     title: "Does any exception under Article 6(3) apply?",
-    help: "A system in an Annex III area is NOT high-risk if it only does the following and does not profile natural persons.",
+    help: "A system in an Annex III area is NOT high-risk if it only performs one of these narrow tasks (and does not perform profiling, already confirmed in the previous step).",
     type: "single",
     onlyIfHighCandidate: true,
     choices: [
@@ -557,17 +603,12 @@ export const RISK_QUESTIONS_EN: Question[] = [
         label: "Detects decision-making patterns without replacing human judgment",
       },
       { value: "preparatory", label: "Is a preparatory task to an assessment" },
-      {
-        value: "profiling",
-        label: "Profiles natural persons or influences decisions about them",
-        hint: "If it profiles individuals, NO exception applies: it remains high-risk.",
-      },
       { value: NONE, label: "None: it influences the final decision" },
     ],
   },
   {
     id: "transparency",
-    step: 4,
+    step: 5,
     title: "Does the system do any of the following towards people?",
     help: "Transparency obligations under Article 50. Check all that apply.",
     type: "multi",
@@ -636,6 +677,7 @@ export const CITATIONS_EN: Record<RiskLevel, Citation[]> = {
  *  - prohibited && !onlyOmnibus                     -> prohibited_classic
  *  - prohibited && onlyOmnibus && omnibusInForce    -> prohibited_omnibus_in_force
  *  - prohibited && onlyOmnibus && !omnibusInForce   -> prohibited_omnibus_pending
+ *  - highCandidate && profiling_gate === "yes"      -> high_profiling
  *  - highCandidate && !exceptionApplies             -> high
  *  - transparency.length > 0                        -> limited
  *  - (fallback)                                     -> minimal
@@ -649,6 +691,8 @@ export const RATIONALES_EN = {
     "The Digital Omnibus added this practice — the generation or manipulation of non-consensual realistic intimate images or of CSAM — to Article 5; it will be a prohibited practice of the EU AI Act applicable from 2 December 2026 (not yet in force as of the date of this assessment). Nevertheless, generating or manipulating this material is already unlawful under criminal law irrespective of the AI Act (Directive 2011/93/EU for CSAM; Directive (EU) 2024/1385 and national criminal law for non-consensual intimate images), and it is therefore classified as unacceptable. Validate this classification with qualified legal advice.",
   high:
     "The system operates in a high-risk area of Annex III and no exception under Article 6(3) applies to it.",
+  high_profiling:
+    "The system operates in a high-risk area of Annex III and performs profiling of natural persons. Under the second subparagraph of Article 6(3) of Regulation (EU) 2024/1689, an Annex III system that performs profiling is always considered high-risk, so the Article 6(3) exceptions cannot apply.",
   limited:
     "The system is not high-risk but is subject to the transparency obligations of Article 50.",
   minimal:

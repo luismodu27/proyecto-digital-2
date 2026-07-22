@@ -224,12 +224,20 @@ export function RiskWizard({
                   .
                 </p>
                 {systemId && (
-                  <Link
-                    href={`/dashboard/inventario/${systemId}/dossier`}
-                    className="mt-2 inline-flex items-center gap-1 font-medium underline"
-                  >
-                    {tr.viewDossier}
-                  </Link>
+                  <div className="mt-2 flex flex-col gap-1.5 sm:flex-row sm:gap-4">
+                    <Link
+                      href={`/dashboard/inventario/${systemId}/dossier`}
+                      className="inline-flex items-center gap-1 font-medium underline"
+                    >
+                      {tr.viewDossier}
+                    </Link>
+                    <Link
+                      href={`/dashboard/packs?system=${systemId}`}
+                      className="inline-flex items-center gap-1 font-medium underline"
+                    >
+                      {tr.detectGaps}
+                    </Link>
+                  </div>
                 )}
               </div>
             ) : (

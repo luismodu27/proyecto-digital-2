@@ -14,8 +14,15 @@ const severityCls: Record<PolicySeverity, string> = {
   baja: "bg-[var(--tone-neutral-bg)] text-[var(--tone-neutral-fg)] border-[var(--tone-neutral-bd)]",
 };
 
-export default async function PolicyPacksPage() {
+export default async function PolicyPacksPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ system?: string }>;
+}) {
   const systems = isSupabaseConfigured ? await getSystemsForSelect() : [];
+  const { system } = await searchParams;
+  // Preselección desde el RiskWizard (?system=<id>): solo si es un sistema real.
+  const preselect = systems.some((s) => s.id === system) ? system : "";
   const locale = await resolveLocale();
   const t = getDictionary(locale).dashboard.pages.packsPage;
   // La fachada de packs sirve el contenido validado en el idioma de la UI.
@@ -115,6 +122,7 @@ export default async function PolicyPacksPage() {
                         id={`systemId-${pack.id}`}
                         name="systemId"
                         required
+                        defaultValue={preselect}
                         className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
                       >
                         <option value="">{t.selectSystem}</option>

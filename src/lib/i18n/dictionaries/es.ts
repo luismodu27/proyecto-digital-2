@@ -1324,6 +1324,7 @@ export const es = {
             ". El sistema se actualizó y quedó registrado en el audit-trail",
           savedAttestedPrefix: ", atestado por ",
           viewDossier: "Ver dossier del sistema →",
+          detectGaps: "Detectar brechas con un policy pack →",
           saveTitle: "Guardar como autoevaluación",
           systemLabel: "Sistema",
           systemPlaceholder: "Selecciona un sistema…",

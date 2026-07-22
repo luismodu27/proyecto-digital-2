@@ -253,9 +253,10 @@ Toda la UI (web pública + auth + dashboard) es bilingüe ES/EN. **En la rama `c
 regulatorias, enums de dominio).
 - **Falta que el fundador decida:** publicar a producción (`main`) — es un hito coherente y completo por sí mismo.
 - **Pendiente de validación del EXPERTO antes de exponer en EN** (hoy en español, degradación segura):
-  1. Etiquetas de `regulatory-watch.ts`: `FRAMEWORK_*`, `JURISDICTION_*` y tipos de evento regulatorio (nombres de
-     marcos/jurisdicciones y descripciones cargadas). El patrón `*_BY_LOCALE` ya está montado para los demás enums;
-     solo falta añadir la columna EN validada aquí.
+  1. ✅ **HECHO (2026-07-22).** Etiquetas de `regulatory-watch.ts` (`FRAMEWORK_*`, `JURISDICTION_*`, tipos de evento) +
+     el catálogo `REGULATORY_EVENTS_EN` completo: traducidas y **firmadas por el `compliance-domain-expert`**
+     (veredicto APROBADO; verificó denominaciones oficiales en EUR-Lex: Annex I/III, Directive 2011/93/EU, Regulation
+     (EU) 2024/1689; pulido Ch.→Chapter aplicado). Se retiró el flag "pendiente de sign-off" del comentario de cabecera.
   2. **Inc 6 · Cuerpo de los PDF** (dossier/informe/gap-informe): decisión tomada = el cuerpo legal se mantiene en
      **español** aunque la UI esté en inglés (regla dura). `ScopeNote` ya es locale-aware y `LEGAL_*_BY_LOCALE` ya tienen
      EN validado; si en el futuro se quiere el documento entero en EN, requiere validación del experto del cuerpo completo.
@@ -391,10 +392,14 @@ Ejecutado: Tier 0 (bugs "% listo" y plan de acción), Tier 2 (a11y), Tier 3-4 + 
   sustituyó por Deloitte Legal (48,6%) + CSA (>50%). Antes de reponer, CONFIRMAR la fuente nueva y citarla (regla de marca).
 - [ ] **`compliance_pct` → renombrar a `readinessPct`** (sugerencia del crítico): el campo nunca se renderiza pero el
   término "compliance/cumplimiento" es prohibido en la marca; un `{s.compliance}` mal colocado lo filtraría. Cosmético/deuda.
-- [ ] **RiskWizard — gate de perfilado del Art. 6(3):** hoy "perfila personas" es una opción más del single-select de
-  excepciones; debería ser una pregunta binaria previa que fuerce alto riesgo. MEDIA (defendibilidad del clasificador).
-- [ ] **RiskWizard — cul-de-sac:** tras guardar solo ofrece "evaluar otro"/"volver"; añadir CTA "Detectar brechas con un
-  policy pack" → `/dashboard/packs?system=<id>` para coser el flujo sin depender del checklist efímero. MEDIA.
+- [x] ~~**RiskWizard — gate de perfilado del Art. 6(3):**~~ ✅ HECHO (2026-07-22, validado por el experto). "Perfila
+  personas" dejó de ser una opción del single-select de excepciones; ahora es una **pregunta binaria previa**
+  (`profiling_gate`, solo si candidato a alto riesgo) que, si es "sí", fuerza alto riesgo con rationale dedicado
+  (`high_profiling`) citando el Art. 6(3) párr. 2 — el perfilado anula toda excepción. La pregunta de excepción se
+  omite cuando hay perfilado. ES+EN.
+- [x] ~~**RiskWizard — cul-de-sac:**~~ ✅ HECHO (2026-07-22). Tras guardar, el bloque de éxito añade el CTA "Detectar
+  brechas con un policy pack" → `/dashboard/packs?system=<id>`; la página de packs ahora honra `?system=` y
+  preselecciona ese sistema en el formulario de aplicar pack.
 - [ ] **Sign-off jurídico antes de GA:** el propio `LegalNote` admite "pendiente revisión por abogado UE". Revisar
   disclaimers + reglas del clasificador + los 5 packs con un abogado de IA UE antes de producción. (Fundador.)
 - [ ] **Diseño (diferidos BAJA del crítico):** paleta de riesgo poco diferenciable en daltonismo (3 cálidos vecinos);

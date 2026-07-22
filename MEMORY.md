@@ -127,6 +127,28 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **RiskWizard: gate binario de perfilado (Art. 6(3)) + CTA anti-cul-de-sac; y sign-off del experto del EN de vigilancia.**
+  El fundador eligió dos frentes: mejorar el RiskWizard y cerrar la i18n EN de vigilancia. Ambos tocan contenido
+  regulatorio → validados por el `compliance-domain-expert`.
+  - **Gate del Art. 6(3) (defendibilidad del clasificador).** Antes, "perfila personas" era una opción más del
+    single-select de excepciones → un sistema que hacía una tarea procedimental estrecha **y además** perfilaba podía
+    escapar a "limitado". El experto confirmó (texto literal del **Art. 6(3), párr. 2**: "se considerará siempre de alto
+    riesgo cuando efectúe la elaboración de perfiles de personas físicas") que el perfilado es un **override absoluto**.
+    Implementado en `risk-assessment.ts`: nueva pregunta binaria `profiling_gate` (valores `yes`/`no`, `onlyIfHighCandidate`,
+    antes de la de excepción, con `help` basado en la def. de perfilado del RGPD Art. 4(4)); si `yes` → alto riesgo directo
+    con rationale dedicado `high_profiling` (ES+EN, cita Art. 6(3) párr. 2); `classify()` chequea el gate ANTES de leer la
+    excepción (una excepción obsoleta se ignora); `visibleQuestions` oculta la excepción cuando hay perfilado; se **quitó**
+    la opción `profiling` de la pregunta de excepción (redundante y reabría el hueco). ES+EN, wording del experto.
+  - **CTA anti-cul-de-sac.** Tras guardar la autoevaluación, el bloque de éxito ofrece "Detectar brechas con un policy
+    pack" → `/dashboard/packs?system=<id>`; `packs/page.tsx` ahora lee `?system=` y **preselecciona** ese sistema en el
+    form de aplicar pack (cose el flujo riesgo→packs sin depender del checklist efímero).
+  - **Sign-off EN de vigilancia (i18n).** Hallazgo: el EN de `regulatory-watch.ts` (labels + `REGULATORY_EVENTS_EN`) YA
+    estaba traducido por la "INGLÉS TOTAL"; el archivo solo arrastraba un comentario obsoleto marcando los statute-tokens
+    como "pendientes de sign-off". El experto revisó línea a línea contra EUR-Lex → **APROBADO** (Annex I/III, Directive
+    2011/93/EU, Regulation (EU) 2024/1689 correctos; sin copy prohibido; framing deployer intacto). Se retiró el flag y se
+    aplicó el único pulido sugerido (Ch.→Chapter en el evento GPAI, para consistencia con la prosa). `PENDIENTES §2.3.1` cerrado.
+  - Verificado: tsc + eslint + build (exit 0). En la rama; pendiente decisión de publicar a `main`.
+
 - **2026-07-22** · **Gating Enterprise por-organización: Multi-organización y SSO como funciones exclusivas.**
   El fundador pidió que la suscripción Enterprise se aplique **a todos los miembros** de la organización que la tiene,
   **solo en esa organización**, y que al **cambiar a otra org sin Enterprise** se **bloqueen** las funciones exclusivas.

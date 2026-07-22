@@ -1316,6 +1316,7 @@ export const en: Dictionary = {
             ". The system was updated and recorded in the audit-trail",
           savedAttestedPrefix: ", attested by ",
           viewDossier: "View system dossier →",
+          detectGaps: "Detect gaps with a policy pack →",
           saveTitle: "Save as self-assessment",
           systemLabel: "System",
           systemPlaceholder: "Select a system…",
