@@ -124,32 +124,53 @@ export default async function InformeEjecutivoPage() {
       s.compliance < AUDIT_READY_THRESHOLD,
   ).length;
 
-  const org = orgName ?? "La organización";
+  const org =
+    orgName ?? (locale === "en" ? "The organization" : "La organización");
   const nearest = deadlines[0];
   const nearestDays = nearest ? daysUntil(nearest.date, now) : 0;
   // Ensamblado determinista (cero LLM) del resumen ejecutivo a partir de los
-  // datos ya declarados por la organización. Copy revisado por compliance.
+  // datos ya declarados por la organización. Copy revisado por compliance (ES/EN).
   const pl = (n: number, one: string, many: string) => (n === 1 ? one : many);
   const summaryParagraph =
     total === 0
-      ? `A fecha de ${fecha}, ${org} aún no ha inventariado sistemas de IA. El primer paso de la preparación es registrar los sistemas en uso y clasificar su riesgo.`
-      : [
-          `A fecha de ${fecha}, ${org} mantiene ${total} ${pl(total, "sistema de IA inventariado", "sistemas de IA inventariados")}, de ${pl(total, "el cual", "los cuales")} ${
-            highRisk === 0
-              ? "ninguno está clasificado"
-              : `${highRisk} ${pl(highRisk, "está clasificado", "están clasificados")}`
-          } como de alto riesgo según la autoevaluación orientativa de la organización.`,
-          `La preparación media declarada es del ${avg}%, y un ${backedPct}% de los sistemas cuenta con evidencia declarada de respaldo.`,
-          `Hay ${openGaps.length} ${pl(openGaps.length, "brecha abierta", "brechas abiertas")} (${criticalGaps.length} de severidad alta) ${pl(openGaps.length, "pendiente", "pendientes")} de resolución.`,
-          belowReady > 0
-            ? `${belowReady} ${pl(belowReady, "sistema de alto riesgo está", "sistemas de alto riesgo están")} por debajo del umbral orientativo de preparación (${AUDIT_READY_THRESHOLD}% listo) y se ${pl(belowReady, "señala", "señalan")} para atención prioritaria.`
-            : null,
-          nearest
-            ? `El próximo hito regulatorio en el radar de la organización es «${nearest.title}», dentro de ${nearestDays} ${pl(nearestDays, "día", "días")}.`
-            : null,
-        ]
-          .filter(Boolean)
-          .join(" ");
+      ? locale === "en"
+        ? `As of ${fecha}, ${org} has not yet inventoried any AI systems. The first step of readiness is to register the systems in use and classify their risk.`
+        : `A fecha de ${fecha}, ${org} aún no ha inventariado sistemas de IA. El primer paso de la preparación es registrar los sistemas en uso y clasificar su riesgo.`
+      : locale === "en"
+        ? [
+            `As of ${fecha}, ${org} maintains ${total} ${pl(total, "inventoried AI system", "inventoried AI systems")}, of which ${
+              highRisk === 0
+                ? "none are classified"
+                : `${highRisk} ${pl(highRisk, "is classified", "are classified")}`
+            } as high-risk according to the organization's indicative self-assessment.`,
+            `The average declared readiness is ${avg}%, and ${backedPct}% of the systems have declared supporting evidence.`,
+            `There ${pl(openGaps.length, "is", "are")} ${openGaps.length} open ${pl(openGaps.length, "gap", "gaps")} (${criticalGaps.length} of high severity) pending resolution.`,
+            belowReady > 0
+              ? `${belowReady} high-risk ${pl(belowReady, "system is", "systems are")} below the indicative readiness threshold (${AUDIT_READY_THRESHOLD}% ready) and ${pl(belowReady, "is", "are")} flagged for priority attention.`
+              : null,
+            nearest
+              ? `The next regulatory milestone on the organization's radar is "${nearest.title}", in ${nearestDays} ${pl(nearestDays, "day", "days")}.`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" ")
+        : [
+            `A fecha de ${fecha}, ${org} mantiene ${total} ${pl(total, "sistema de IA inventariado", "sistemas de IA inventariados")}, de ${pl(total, "el cual", "los cuales")} ${
+              highRisk === 0
+                ? "ninguno está clasificado"
+                : `${highRisk} ${pl(highRisk, "está clasificado", "están clasificados")}`
+            } como de alto riesgo según la autoevaluación orientativa de la organización.`,
+            `La preparación media declarada es del ${avg}%, y un ${backedPct}% de los sistemas cuenta con evidencia declarada de respaldo.`,
+            `Hay ${openGaps.length} ${pl(openGaps.length, "brecha abierta", "brechas abiertas")} (${criticalGaps.length} de severidad alta) ${pl(openGaps.length, "pendiente", "pendientes")} de resolución.`,
+            belowReady > 0
+              ? `${belowReady} ${pl(belowReady, "sistema de alto riesgo está", "sistemas de alto riesgo están")} por debajo del umbral orientativo de preparación (${AUDIT_READY_THRESHOLD}% listo) y se ${pl(belowReady, "señala", "señalan")} para atención prioritaria.`
+              : null,
+            nearest
+              ? `El próximo hito regulatorio en el radar de la organización es «${nearest.title}», dentro de ${nearestDays} ${pl(nearestDays, "día", "días")}.`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" ");
 
   const kpis = [
     { k: tr.kpiSystems, v: String(total) },

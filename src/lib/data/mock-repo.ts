@@ -1,15 +1,23 @@
 import {
   aiSystems,
   GAP_ITEMS,
+  GAP_ITEMS_EN,
   SAMPLE_ASSESSMENTS,
+  SAMPLE_ASSESSMENTS_EN,
   SAMPLE_BIAS_AUDITS,
+  SAMPLE_BIAS_AUDITS_EN,
   SAMPLE_AUDIT,
+  SAMPLE_AUDIT_EN,
   SAMPLE_INVITATIONS,
   SAMPLE_MEMBERS,
   SAMPLE_ACTION_TASKS,
+  SAMPLE_ACTION_TASKS_EN,
   SAMPLE_REG_ACKS,
+  SAMPLE_REG_ACKS_EN,
   SAMPLE_REG_CANDIDATES,
+  SAMPLE_REG_CANDIDATES_EN,
   SAMPLE_REG_SOURCES,
+  SAMPLE_REG_SOURCES_EN,
   type ActionTask,
   type AiSystem,
   type AssessmentRecord,
@@ -45,7 +53,8 @@ export async function getAiSystems(): Promise<AiSystem[]> {
 }
 
 export async function getGapItems(): Promise<GapItem[]> {
-  return GAP_ITEMS;
+  const locale = await resolveLocale();
+  return locale === "en" ? GAP_ITEMS_EN : GAP_ITEMS;
 }
 
 export async function getSystemsForSelect(): Promise<
@@ -79,7 +88,9 @@ export async function getSystemById(_id: string): Promise<null> {
 export async function getSystemAssessments(
   id: string,
 ): Promise<AssessmentRecord[]> {
-  return SAMPLE_ASSESSMENTS[id] ?? [];
+  const locale = await resolveLocale();
+  const src = locale === "en" ? SAMPLE_ASSESSMENTS_EN : SAMPLE_ASSESSMENTS;
+  return src[id] ?? [];
 }
 
 export async function getOrgMembers(): Promise<OrgMember[]> {
@@ -96,7 +107,8 @@ export async function getCurrentMemberRole(): Promise<MemberRole | null> {
 }
 
 export async function getAuditLog(): Promise<AuditEntry[]> {
-  return SAMPLE_AUDIT;
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_AUDIT_EN : SAMPLE_AUDIT;
 }
 
 export async function verifyAuditChain(): Promise<AuditChainStatus | null> {
@@ -111,10 +123,13 @@ export async function verifyAuditChain(): Promise<AuditChainStatus | null> {
 
 export async function getExportBundle(): Promise<ExportBundle | null> {
   const locale = await resolveLocale();
+  const en = locale === "en";
+  const assessments = en ? SAMPLE_ASSESSMENTS_EN : SAMPLE_ASSESSMENTS;
+  const biasAudits = en ? SAMPLE_BIAS_AUDITS_EN : SAMPLE_BIAS_AUDITS;
   const systems: ExportedSystem[] = aiSystems(locale).map((system) => ({
     system,
-    assessments: SAMPLE_ASSESSMENTS[system.id] ?? [],
-    biasAudit: SAMPLE_BIAS_AUDITS[system.id] ?? null,
+    assessments: assessments[system.id] ?? [],
+    biasAudit: biasAudits[system.id] ?? null,
   }));
   return {
     meta: {
@@ -130,16 +145,17 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
       checkedAt: new Date().toISOString(),
     },
     systems,
-    gapItems: GAP_ITEMS,
-    actionTasks: SAMPLE_ACTION_TASKS,
+    gapItems: en ? GAP_ITEMS_EN : GAP_ITEMS,
+    actionTasks: en ? SAMPLE_ACTION_TASKS_EN : SAMPLE_ACTION_TASKS,
     members: SAMPLE_MEMBERS,
-    regulatoryAcks: SAMPLE_REG_ACKS,
-    auditLog: SAMPLE_AUDIT,
+    regulatoryAcks: en ? SAMPLE_REG_ACKS_EN : SAMPLE_REG_ACKS,
+    auditLog: en ? SAMPLE_AUDIT_EN : SAMPLE_AUDIT,
   };
 }
 
 export async function getRegulatoryAcks(): Promise<Record<string, RegAck>> {
-  return SAMPLE_REG_ACKS;
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_REG_ACKS_EN : SAMPLE_REG_ACKS;
 }
 
 export async function getRegulatoryEvents(): Promise<RegulatoryEvent[]> {
@@ -150,11 +166,13 @@ export async function getRegulatoryEvents(): Promise<RegulatoryEvent[]> {
 }
 
 export async function getRegCandidates(): Promise<RegCandidate[]> {
-  return SAMPLE_REG_CANDIDATES;
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_REG_CANDIDATES_EN : SAMPLE_REG_CANDIDATES;
 }
 
 export async function getRegSources(): Promise<RegSource[]> {
-  return SAMPLE_REG_SOURCES;
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_REG_SOURCES_EN : SAMPLE_REG_SOURCES;
 }
 
 export async function getIsPlatformAdmin(): Promise<boolean> {
@@ -168,7 +186,8 @@ export async function getOrgJurisdictions(): Promise<string[]> {
 }
 
 export async function getActionTasks(): Promise<ActionTask[]> {
-  return SAMPLE_ACTION_TASKS;
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_ACTION_TASKS_EN : SAMPLE_ACTION_TASKS;
 }
 
 /**
@@ -179,12 +198,13 @@ export async function getSystemDossier(
   id: string,
 ): Promise<DossierData | null> {
   const locale = await resolveLocale();
+  const en = locale === "en";
   const system = aiSystems(locale).find((s) => s.id === id);
   if (!system) return null;
   return {
     system: { ...system, actorRole: "deployer" },
-    gaps: GAP_ITEMS.filter((g) => g.system === system.id),
-    assessments: SAMPLE_ASSESSMENTS[system.id] ?? [],
-    biasAudit: SAMPLE_BIAS_AUDITS[system.id] ?? null,
+    gaps: (en ? GAP_ITEMS_EN : GAP_ITEMS).filter((g) => g.system === system.id),
+    assessments: (en ? SAMPLE_ASSESSMENTS_EN : SAMPLE_ASSESSMENTS)[system.id] ?? [],
+    biasAudit: (en ? SAMPLE_BIAS_AUDITS_EN : SAMPLE_BIAS_AUDITS)[system.id] ?? null,
   };
 }

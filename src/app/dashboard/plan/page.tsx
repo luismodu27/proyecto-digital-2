@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { PageHeader } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
-import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
+import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import {
   TaskStatusControl,
   TaskAssigneeControl,
@@ -386,7 +386,11 @@ export default async function PlanPage() {
       )}
 
       <LegalNote
-        text={`Recomendaciones orientativas generadas a partir de tus brechas abiertas y niveles de riesgo declarados. ${LEGAL_FOOTER}`}
+        text={
+          locale === "en"
+            ? `Indicative recommendations generated from your open gaps and declared risk levels. ${LEGAL_FOOTER_BY_LOCALE.en}`
+            : `Recomendaciones orientativas generadas a partir de tus brechas abiertas y niveles de riesgo declarados. ${LEGAL_FOOTER_BY_LOCALE.es}`
+        }
         className="mt-8"
       />
     </>

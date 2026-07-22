@@ -100,7 +100,8 @@ export default async function InformeGapPage() {
       (a, b) => b.gAlta - a.gAlta || b.gOpen - a.gOpen || a.name.localeCompare(b.name),
     );
 
-  const org = orgName ?? "La organización";
+  const org =
+    orgName ?? (locale === "en" ? "The organization" : "La organización");
   const fecha = new Date().toLocaleDateString(locale === "en" ? "en-GB" : "es-ES", {
     day: "2-digit",
     month: "long",
@@ -108,24 +109,39 @@ export default async function InformeGapPage() {
   });
 
   // Resumen ejecutivo ensamblado de forma determinista (cero LLM) a partir de los
-  // controles ya evaluados por la organización. Copy revisado por compliance: el
-  // universo son "controles evaluados"; solo los abiertos son "brechas".
+  // controles ya evaluados por la organización. Copy revisado por compliance (ES/EN):
+  // el universo son "controles evaluados"; solo los abiertos son "brechas".
   const pl = (n: number, one: string, many: string) => (n === 1 ? one : many);
   const openPart =
-    open === 0
-      ? "ninguno presenta brechas abiertas"
-      : `${open} ${pl(open, "presenta una brecha abierta", "presentan brechas abiertas")} (${openAlta} de severidad alta)`;
+    locale === "en"
+      ? open === 0
+        ? "none have open gaps"
+        : `${open} ${pl(open, "has an open gap", "have open gaps")} (${openAlta} of high severity)`
+      : open === 0
+        ? "ninguno presenta brechas abiertas"
+        : `${open} ${pl(open, "presenta una brecha abierta", "presentan brechas abiertas")} (${openAlta} de severidad alta)`;
   const summaryParagraph =
     total === 0
-      ? `A fecha de ${fecha}, la autoevaluación de ${org} aún no ha evaluado controles frente a los sistemas declarados. Aplica un policy pack a los sistemas de tu organización para evaluar su preparación.`
-      : [
-          `A fecha de ${fecha}, la autoevaluación de ${org} ha evaluado ${total} ${pl(total, "control", "controles")} frente a los sistemas declarados, de ${pl(total, "el cual", "los cuales")} ${openPart} y ${done} ${pl(done, "consta como cubierto", "constan como cubiertos")} con evidencia declarada, pendiente de verificación independiente.`,
-          `La preparación declarada cubre el ${coveragePct}% de los controles evaluados.`,
-          "Cubrir un control refleja evidencia autodeclarada, no verificada por Attesta ni por un tercero, y no constituye un juicio de cumplimiento.",
-          open > 0
-            ? "Las brechas abiertas de severidad alta son la prioridad de resolución; cada una indica el artículo de referencia y el sistema afectado."
-            : "Todos los controles evaluados constan como cubiertos con evidencia declarada, pendiente de verificación independiente; esto no equivale a un juicio de cumplimiento y no descarta la existencia de controles o sistemas aún no evaluados.",
-        ].join(" ");
+      ? locale === "en"
+        ? `As of ${fecha}, ${org}'s self-assessment has not yet evaluated any controls against the declared systems. Apply a policy pack to your organization's systems to assess their readiness.`
+        : `A fecha de ${fecha}, la autoevaluación de ${org} aún no ha evaluado controles frente a los sistemas declarados. Aplica un policy pack a los sistemas de tu organización para evaluar su preparación.`
+      : locale === "en"
+        ? [
+            `As of ${fecha}, ${org}'s self-assessment has evaluated ${total} ${pl(total, "control", "controls")} against the declared systems, of which ${openPart} and ${done} ${pl(done, "is recorded as covered", "are recorded as covered")} with declared evidence, pending independent verification.`,
+            `The declared readiness covers ${coveragePct}% of the controls evaluated.`,
+            "Covering a control reflects self-declared evidence, not verified by Attesta or a third party, and does not constitute a judgment of compliance.",
+            open > 0
+              ? "Open gaps of high severity are the resolution priority; each one indicates the reference article and the affected system."
+              : "All controls evaluated are recorded as covered with declared evidence, pending independent verification; this does not amount to a judgment of compliance and does not rule out the existence of controls or systems not yet evaluated.",
+          ].join(" ")
+        : [
+            `A fecha de ${fecha}, la autoevaluación de ${org} ha evaluado ${total} ${pl(total, "control", "controles")} frente a los sistemas declarados, de ${pl(total, "el cual", "los cuales")} ${openPart} y ${done} ${pl(done, "consta como cubierto", "constan como cubiertos")} con evidencia declarada, pendiente de verificación independiente.`,
+            `La preparación declarada cubre el ${coveragePct}% de los controles evaluados.`,
+            "Cubrir un control refleja evidencia autodeclarada, no verificada por Attesta ni por un tercero, y no constituye un juicio de cumplimiento.",
+            open > 0
+              ? "Las brechas abiertas de severidad alta son la prioridad de resolución; cada una indica el artículo de referencia y el sistema afectado."
+              : "Todos los controles evaluados constan como cubiertos con evidencia declarada, pendiente de verificación independiente; esto no equivale a un juicio de cumplimiento y no descarta la existencia de controles o sistemas aún no evaluados.",
+          ].join(" ");
 
   const kpis = [
     { k: tg.kpiEvaluated, v: total },

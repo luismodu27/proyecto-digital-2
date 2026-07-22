@@ -200,6 +200,39 @@ function EuReadinessBriefing({
 }) {
   const art50Days = daysUntil(art50.date, now);
   const hrDays = daysUntil(highRisk.date, now);
+  // Prosa estática del briefing. Validada por el experto (ES/EN). Fidelidad
+  // exacta: fechas/artículos/Anexo idénticos; "Digital Omnibus"/"deployer"
+  // intactos; el matiz "el 2-ago-2026 no es el plazo de alto riesgo" se conserva.
+  // Las etiquetas relativas/fechas incrustadas ya son locale-aware.
+  const bp =
+    locale === "en"
+      ? {
+          kicker: "Deadline clarification · EU AI Act",
+          heading: "2 August 2026 is not the deadline for high-risk systems",
+          p1a: "It is a widespread misconception in the market. The ",
+          p1b: " moved the high-risk obligations of Annex III (employment) to ",
+          p1c: ". What your organization does need to have ready soon as a ",
+          p1d: ":",
+          aiLiteracy: "AI literacy",
+          inForceNow: "already in force",
+          transparency: "Transparency",
+          inForce: "in force",
+          applyPack: "Apply the HR pack to get the evidence ready →",
+        }
+      : {
+          kicker: "Aclaración de plazos · EU AI Act",
+          heading:
+            "El 2 de agosto de 2026 no es el plazo de los sistemas de alto riesgo",
+          p1a: "Es un error extendido en el mercado. El ",
+          p1b: " movió las obligaciones de alto riesgo del Anexo III (empleo) al ",
+          p1c: ". Lo que tu organización sí debe tener listo pronto como ",
+          p1d: ":",
+          aiLiteracy: "Alfabetización en IA",
+          inForceNow: "ya vigente",
+          transparency: "Transparencia",
+          inForce: "en vigor",
+          applyPack: "Aplicar el pack de RRHH para dejar la evidencia lista →",
+        };
   return (
     <section className="mb-8 rounded-2xl border border-brand/30 bg-brand-soft/40 p-6">
       <div className="flex items-start gap-3">
@@ -225,35 +258,36 @@ function EuReadinessBriefing({
         </svg>
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-strong">
-            Aclaración de plazos · EU AI Act
+            {bp.kicker}
           </p>
           <h2 className="mt-1 font-display text-lg font-semibold text-ink">
-            El 2 de agosto de 2026 no es el plazo de los sistemas de alto riesgo
+            {bp.heading}
           </h2>
           <p className="mt-1.5 text-sm text-ink-soft">
-            Es un error extendido en el mercado. El{" "}
-            <span className="font-medium text-ink">Digital Omnibus</span> movió las
-            obligaciones de alto riesgo del Anexo III (empleo) al{" "}
+            {bp.p1a}
+            <span className="font-medium text-ink">Digital Omnibus</span>
+            {bp.p1b}
             <span className="font-medium text-ink">
               {formatDate(highRisk.date, locale)}
             </span>
-            {hrDays > 0 && ` (${relativeLabel(hrDays, t)})`}. Lo que tu organización sí
-            debe tener listo pronto como{" "}
-            <span className="font-medium text-ink">deployer</span>:
+            {hrDays > 0 && ` (${relativeLabel(hrDays, t)})`}
+            {bp.p1c}
+            <span className="font-medium text-ink">deployer</span>
+            {bp.p1d}
           </p>
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
             <li className="flex items-center justify-between gap-3 rounded-xl border border-line bg-paper-raised px-3.5 py-2.5">
               <span className="text-sm text-ink">
-                Alfabetización en IA <span className="text-muted">· Art. 4</span>
+                {bp.aiLiteracy} <span className="text-muted">· Art. 4</span>
               </span>
-              <Pill tone="good">ya vigente</Pill>
+              <Pill tone="good">{bp.inForceNow}</Pill>
             </li>
             <li className="flex items-center justify-between gap-3 rounded-xl border border-line bg-paper-raised px-3.5 py-2.5">
               <span className="text-sm text-ink">
-                Transparencia <span className="text-muted">· Art. 50.3/50.4</span>
+                {bp.transparency} <span className="text-muted">· Art. 50.3/50.4</span>
               </span>
               <Pill tone={countdownTone(art50Days)}>
-                {art50Days >= 0 ? relativeLabel(art50Days, t) : "en vigor"}
+                {art50Days >= 0 ? relativeLabel(art50Days, t) : bp.inForce}
               </Pill>
             </li>
           </ul>
@@ -261,7 +295,7 @@ function EuReadinessBriefing({
             href="/dashboard/packs"
             className="mt-3 inline-flex text-xs font-medium text-brand hover:text-brand-strong"
           >
-            Aplicar el pack de RRHH para dejar la evidencia lista →
+            {bp.applyPack}
           </Link>
         </div>
       </div>

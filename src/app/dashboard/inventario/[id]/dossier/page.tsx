@@ -64,6 +64,13 @@ const ROLE_LABEL: Record<string, string> = {
   provider: "Proveedor (provider)",
 };
 
+// Etiqueta de rol para la narrativa EN del resumen ejecutivo (s1). Terminología
+// del EU AI Act: los términos oficiales son "deployer" y "provider".
+const ROLE_LABEL_EN: Record<string, string> = {
+  deployer: "deployer",
+  provider: "provider",
+};
+
 const RATIONALE_FALLBACK: Record<RiskLevel, string> = {
   unacceptable:
     "El sistema incurre en una o más prácticas prohibidas por el Art. 5 del EU AI Act; no puede comercializarse ni usarse en la UE.",
@@ -72,6 +79,18 @@ const RATIONALE_FALLBACK: Record<RiskLevel, string> = {
     "El sistema no es de alto riesgo, pero está sujeto a obligaciones de transparencia del Art. 50.",
   minimal:
     "El sistema no encaja en prácticas prohibidas, áreas de alto riesgo ni obligaciones de transparencia. Se recomiendan códigos de conducta voluntarios (Art. 95).",
+};
+
+// Versión EN validada por el experto de compliance. Números de artículo/Anexo
+// idénticos; encuadre deployer; negaciones intactas.
+const RATIONALE_FALLBACK_EN: Record<RiskLevel, string> = {
+  unacceptable:
+    "The system engages in one or more practices prohibited by Art. 5 of the EU AI Act; it cannot be placed on the market or used in the EU.",
+  high: "The system operates in a high-risk area of Annex III of the EU AI Act and is subject to the requirements of Arts. 9–15 and the obligations of the deployer (Art. 26).",
+  limited:
+    "The system is not high-risk, but it is subject to the transparency obligations of Art. 50.",
+  minimal:
+    "The system does not fall under prohibited practices, high-risk areas, or transparency obligations. Voluntary codes of conduct are recommended (Art. 95).",
 };
 
 function formatDateTime(iso: string, locale: Locale): string {
@@ -171,7 +190,9 @@ export default async function DossierPage({
   const biasDays = daysUntilDate(biasDue, now);
   const level = system.risk;
   const latest = assessments[0];
-  const rationale = latest?.rationale ?? RATIONALE_FALLBACK[level];
+  const rationale =
+    latest?.rationale ??
+    (locale === "en" ? RATIONALE_FALLBACK_EN : RATIONALE_FALLBACK)[level];
   const evidenceState: EvidenceState = system.evidenceState ?? "declared";
   const obligations = (
     locale === "en" ? OBLIGATIONS_BY_LEVEL_EN : OBLIGATIONS_BY_LEVEL
@@ -183,40 +204,68 @@ export default async function DossierPage({
   ).length;
   const isUnacceptable = level === "unacceptable";
 
-  const org = orgName ?? "La organización";
-  const rol = ROLE_LABEL[system.actorRole] ?? system.actorRole;
-  // Etiqueta de rol para el chrome (locale-aware); `rol` (ES) se reserva para
-  // la narrativa del resumen ejecutivo (s1), que permanece en español.
+  const org =
+    orgName ?? (locale === "en" ? "The organization" : "La organización");
+  const rol =
+    (locale === "en" ? ROLE_LABEL_EN : ROLE_LABEL)[system.actorRole] ??
+    system.actorRole;
+  // Etiqueta de rol para el chrome (locale-aware); `rol` (arriba) alimenta la
+  // narrativa del resumen ejecutivo (s1) en el idioma resuelto.
   const roleChrome =
     system.actorRole === "deployer"
       ? rc.roleDeployer
       : system.actorRole === "provider"
         ? rc.roleProvider
         : system.actorRole;
-  const vendorPart = system.vendor ? `, proveedor: ${system.vendor}` : "";
+  const vendorPart = system.vendor
+    ? locale === "en"
+      ? `, vendor: ${system.vendor}`
+      : `, proveedor: ${system.vendor}`
+    : "";
 
   // Resumen ejecutivo ensamblado de forma determinista (cero LLM) a partir de los
-  // datos ya declarados. Copy revisado por compliance. Para nivel "Inaceptable"
-  // (Art. 5) se enuncia la prohibición, no una "preparación": una práctica
-  // prohibida no se prepara para auditoría.
-  const s1 = `Este dossier documenta «${system.name}», un sistema de IA que ${org} utiliza en el dominio de ${system.domain}${vendorPart}. El rol que la organización declara frente a este sistema es «${rol}».`;
+  // datos ya declarados. Copy revisado por compliance (ES y EN). Para nivel
+  // "Inaceptable" (Art. 5) se enuncia la prohibición, no una "preparación": una
+  // práctica prohibida no se prepara para auditoría.
+  const s1 =
+    locale === "en"
+      ? `This dossier documents "${system.name}", an AI system that ${org} uses in the domain of ${system.domain}${vendorPart}. The role the organization declares in relation to this system is "${rol}".`
+      : `Este dossier documenta «${system.name}», un sistema de IA que ${org} utiliza en el dominio de ${system.domain}${vendorPart}. El rol que la organización declara frente a este sistema es «${rol}».`;
   const s2s3 = isUnacceptable
-    ? "La autoevaluación orientativa de la organización sitúa este sistema entre las prácticas prohibidas del Art. 5 del EU AI Act. Las prácticas prohibidas no son una cuestión de «preparación para auditoría»: no pueden ponerse en el mercado ni utilizarse en la UE una vez en vigor su prohibición (la mayoría desde el 2 de febrero de 2025; las dos añadidas por el Digital Omnibus —imágenes íntimas realistas no consentidas y CSAM— desde el 2 de diciembre de 2026), con independencia del nivel de evidencia o de preparación declarado. Por tanto, la prioridad no es cubrir controles, sino revisar de inmediato el uso del sistema y validar esta clasificación con asesoría jurídica cualificada antes de tomar cualquier decisión. Esta conclusión es orientativa y se basa únicamente en la información declarada por la organización."
-    : `Según la autoevaluación orientativa de la organización, este sistema se clasifica como ${RISK_LABEL[level]}, con una preparación declarada del ${system.compliance}% y un nivel de respaldo «${EVIDENCE_LABEL[evidenceState]}». ${
-        openGaps === 1
-          ? `Frente a los controles evaluados queda 1 brecha abierta (${criticalOpen} de severidad alta), detallada más abajo.`
-          : openGaps > 1
-            ? `Frente a los controles evaluados quedan ${openGaps} brechas abiertas (${criticalOpen} de severidad alta), detalladas más abajo.`
-            : "Frente a los controles evaluados no quedan brechas abiertas; el respaldo es autodeclarado, no verificado por Attesta ni por un tercero, y queda pendiente de verificación independiente. Esto no equivale a un juicio de cumplimiento ni descarta controles aún no evaluados."
-      }`;
+    ? locale === "en"
+      ? `The organization's indicative self-assessment places this system among the practices prohibited by Art. 5 of the EU AI Act. Prohibited practices are not a matter of "audit readiness": they cannot be placed on the market or used in the EU once their prohibition takes effect (most since 2 February 2025; the two added by the Digital Omnibus —non-consensual realistic intimate images and CSAM— since 2 December 2026), regardless of the declared level of evidence or readiness. The priority is therefore not to cover controls, but to immediately review the system's use and validate this classification with qualified legal counsel before making any decision. This conclusion is indicative and is based solely on the information declared by the organization.`
+      : "La autoevaluación orientativa de la organización sitúa este sistema entre las prácticas prohibidas del Art. 5 del EU AI Act. Las prácticas prohibidas no son una cuestión de «preparación para auditoría»: no pueden ponerse en el mercado ni utilizarse en la UE una vez en vigor su prohibición (la mayoría desde el 2 de febrero de 2025; las dos añadidas por el Digital Omnibus —imágenes íntimas realistas no consentidas y CSAM— desde el 2 de diciembre de 2026), con independencia del nivel de evidencia o de preparación declarado. Por tanto, la prioridad no es cubrir controles, sino revisar de inmediato el uso del sistema y validar esta clasificación con asesoría jurídica cualificada antes de tomar cualquier decisión. Esta conclusión es orientativa y se basa únicamente en la información declarada por la organización."
+    : locale === "en"
+      ? `According to the organization's indicative self-assessment, this system is classified as ${riskLabel(level, locale)}, with a declared readiness of ${system.compliance}% and a backing level of "${evidenceLabel(evidenceState, locale)}". ${
+          openGaps === 1
+            ? `Against the controls evaluated, 1 open gap remains (${criticalOpen} of high severity), detailed below.`
+            : openGaps > 1
+              ? `Against the controls evaluated, ${openGaps} open gaps remain (${criticalOpen} of high severity), detailed below.`
+              : "Against the controls evaluated, no open gaps remain; the backing is self-declared, not verified by Attesta or a third party, and remains pending independent verification. This does not amount to a judgment of compliance and does not rule out controls not yet evaluated."
+        }`
+      : `Según la autoevaluación orientativa de la organización, este sistema se clasifica como ${RISK_LABEL[level]}, con una preparación declarada del ${system.compliance}% y un nivel de respaldo «${EVIDENCE_LABEL[evidenceState]}». ${
+          openGaps === 1
+            ? `Frente a los controles evaluados queda 1 brecha abierta (${criticalOpen} de severidad alta), detallada más abajo.`
+            : openGaps > 1
+              ? `Frente a los controles evaluados quedan ${openGaps} brechas abiertas (${criticalOpen} de severidad alta), detalladas más abajo.`
+              : "Frente a los controles evaluados no quedan brechas abiertas; el respaldo es autodeclarado, no verificado por Attesta ni por un tercero, y queda pendiente de verificación independiente. Esto no equivale a un juicio de cumplimiento ni descarta controles aún no evaluados."
+        }`;
   const s4 = latest
     ? latest.attestedByName
-      ? `La evaluación de riesgo vigente fue atestada por ${latest.attestedByName} el ${formatDateTime(latest.assessedAt, locale)}.`
-      : "La evaluación de riesgo vigente no está atestada nominalmente."
-    : "El nivel de riesgo se asignó en la ficha del sistema, sin una evaluación guardada con el asistente de riesgo.";
+      ? locale === "en"
+        ? `The current risk assessment was attested by ${latest.attestedByName} on ${formatDateTime(latest.assessedAt, locale)}.`
+        : `La evaluación de riesgo vigente fue atestada por ${latest.attestedByName} el ${formatDateTime(latest.assessedAt, locale)}.`
+      : locale === "en"
+        ? "The current risk assessment is not nominally attested."
+        : "La evaluación de riesgo vigente no está atestada nominalmente."
+    : locale === "en"
+      ? "The risk level was assigned in the system's record, without an assessment saved through the risk wizard."
+      : "El nivel de riesgo se asignó en la ficha del sistema, sin una evaluación guardada con el asistente de riesgo.";
   const s5 =
     biasAudit && biasAudit.isAedt
-      ? `En la medida en que la organización utiliza «${system.name}» para tomar decisiones de empleo sobre candidatos o personal en la ciudad de Nueva York, esta herramienta queda sujeta a la auditoría de sesgo anual por un auditor independiente que exige la Local Law 144; su estado, de forma orientativa, se detalla en el anexo correspondiente.`
+      ? locale === "en"
+        ? `To the extent that the organization uses "${system.name}" to make employment decisions about candidates or staff in the City of New York, this tool is subject to the annual bias audit by an independent auditor required by Local Law 144; its status, on an indicative basis, is detailed in the corresponding annex.`
+        : `En la medida en que la organización utiliza «${system.name}» para tomar decisiones de empleo sobre candidatos o personal en la ciudad de Nueva York, esta herramienta queda sujeta a la auditoría de sesgo anual por un auditor independiente que exige la Local Law 144; su estado, de forma orientativa, se detalla en el anexo correspondiente.`
       : null;
   const summaryParagraph = [s1, s2s3, s4, s5].filter(Boolean).join(" ");
 
@@ -416,10 +465,9 @@ export default async function DossierPage({
               <Field label={td.biasFieldUrl} value={biasAudit.summaryUrl ?? "—"} />
             </div>
             <p className="mt-4 text-xs leading-relaxed text-muted">
-              La auditoría de sesgo la realiza un auditor independiente; Attesta
-              registra esta evidencia declarada por la organización y no la realiza,
-              valida ni certifica. La vigencia (12 meses desde la última auditoría) y
-              este estado son orientativos, no un juicio de cumplimiento.
+              {locale === "en"
+                ? "The bias audit is performed by an independent auditor; Attesta records this evidence declared by the organization and does not perform, validate, or certify it. The validity period (12 months from the last audit) and this status are indicative, not a judgment of compliance."
+                : "La auditoría de sesgo la realiza un auditor independiente; Attesta registra esta evidencia declarada por la organización y no la realiza, valida ni certifica. La vigencia (12 meses desde la última auditoría) y este estado son orientativos, no un juicio de cumplimiento."}
             </p>
           </section>
         )}
@@ -479,9 +527,9 @@ export default async function DossierPage({
           <SectionTitle n={5}>{td.sec5}</SectionTitle>
           {recs.length === 0 ? (
             <p className="text-sm text-ink-soft">
-              Sin acciones obligatorias bajo el EU AI Act para este nivel de
-              riesgo. Se recomiendan buenas prácticas y códigos de conducta
-              voluntarios (Art. 95).
+              {locale === "en"
+                ? "No mandatory actions under the EU AI Act for this risk level. Good practices and voluntary codes of conduct are recommended (Art. 95)."
+                : "Sin acciones obligatorias bajo el EU AI Act para este nivel de riesgo. Se recomiendan buenas prácticas y códigos de conducta voluntarios (Art. 95)."}
             </p>
           ) : (
             <ol className="space-y-3">
@@ -576,11 +624,19 @@ export default async function DossierPage({
           <SectionTitle n={7}>{td.sec7}</SectionTitle>
           <div className="rounded-xl border border-line p-5 text-sm text-ink-soft">
             <p>
-              Los datos de este dossier han sido{" "}
-              <span className="font-medium text-ink">autodeclarados</span> por la
-              organización{" "}
-              <span className="font-medium text-ink">{orgName ?? "—"}</span> y
-              reflejan el estado y la evidencia declarados por sus responsables.
+              {locale === "en"
+                ? "The data in this dossier has been "
+                : "Los datos de este dossier han sido "}
+              <span className="font-medium text-ink">
+                {locale === "en" ? "self-declared" : "autodeclarados"}
+              </span>
+              {locale === "en"
+                ? " by the organization "
+                : " por la organización "}
+              <span className="font-medium text-ink">{orgName ?? "—"}</span>
+              {locale === "en"
+                ? " and reflects the status and evidence declared by its own staff."
+                : " y reflejan el estado y la evidencia declarados por sus responsables."}
             </p>
             <dl className="mt-4 grid gap-x-8 sm:grid-cols-2">
               <Field

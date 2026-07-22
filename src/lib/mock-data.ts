@@ -331,6 +331,56 @@ export const GAP_ITEMS: GapItem[] = [
   },
 ];
 
+/*
+ * Variante EN de las brechas de ejemplo (modo demo). Se traduce SOLO el texto
+ * humano (`requirement`); `id`/`article`/`status`/`severity`/`system` idénticos.
+ * Terminología oficial del EU AI Act en inglés (Art. 10 Data and Data Governance,
+ * Art. 11 Technical Documentation, Art. 12 Record-Keeping, Art. 13 Transparency
+ * and Provision of Information to Deployers, Art. 14 Human Oversight; Anexo→Annex).
+ */
+export const GAP_ITEMS_EN: GapItem[] = [
+  {
+    id: "GAP-01",
+    requirement: "System technical documentation (Annex IV)",
+    article: "Art. 11",
+    status: "missing",
+    severity: "alta",
+    system: "SYS-001",
+  },
+  {
+    id: "GAP-02",
+    requirement: "Event logging and traceability (record-keeping)",
+    article: "Art. 12",
+    status: "partial",
+    severity: "alta",
+    system: "SYS-001",
+  },
+  {
+    id: "GAP-03",
+    requirement: "Effective human oversight",
+    article: "Art. 14",
+    status: "missing",
+    severity: "alta",
+    system: "SYS-003",
+  },
+  {
+    id: "GAP-04",
+    requirement: "Bias control in candidate selection",
+    article: "Art. 10",
+    status: "partial",
+    severity: "media",
+    system: "SYS-002",
+  },
+  {
+    id: "GAP-05",
+    requirement: "Information and transparency to the user",
+    article: "Art. 13",
+    status: "done",
+    severity: "media",
+    system: "SYS-004",
+  },
+];
+
 /**
  * Historial de evaluaciones de ejemplo (modo demo), indexado por código de
  * sistema. Da vida al dossier y a la ficha del sistema sin backend.
@@ -351,6 +401,30 @@ export const SAMPLE_BIAS_AUDITS: Record<string, import("./bias-audit").BiasAudit
     isAedt: true,
     lastAuditDate: "2026-05-15",
     auditorName: "Fairwatch Audits LLP (auditor independiente)",
+    auditorIndependenceConfirmed: true,
+    summaryUrl: "https://talenta-rh.example.com/ley144/ranking-resumen",
+    summaryPublishedDate: "2026-05-20",
+  },
+};
+
+/*
+ * Variante EN de las auditorías de sesgo de ejemplo (NYC LL144). Se traduce SOLO
+ * el descriptivo de `auditorName` ("(auditor independiente)"→"(independent
+ * auditor)"); nombre propio del despacho, fechas, flags y URLs idénticos.
+ */
+export const SAMPLE_BIAS_AUDITS_EN: Record<string, import("./bias-audit").BiasAudit> = {
+  "SYS-001": {
+    isAedt: true,
+    lastAuditDate: "2025-08-01",
+    auditorName: "Fairwatch Audits LLP (independent auditor)",
+    auditorIndependenceConfirmed: true,
+    summaryUrl: "https://talenta-rh.example.com/ley144/resumen-auditoria",
+    summaryPublishedDate: "2025-08-12",
+  },
+  "SYS-002": {
+    isAedt: true,
+    lastAuditDate: "2026-05-15",
+    auditorName: "Fairwatch Audits LLP (independent auditor)",
     auditorIndependenceConfirmed: true,
     summaryUrl: "https://talenta-rh.example.com/ley144/ranking-resumen",
     summaryPublishedDate: "2026-05-20",
@@ -399,6 +473,64 @@ export const SAMPLE_ASSESSMENTS: Record<string, AssessmentRecord[]> = {
       level: "high",
       rationale:
         "Cribado de CVs en el ámbito de empleo (Anexo III); pendiente de reunir evidencia del proveedor.",
+      evidenceState: "declared",
+      attestedByName: null,
+      assessedAt: "2026-06-28T08:30:00Z",
+    },
+  ],
+};
+
+/*
+ * Variante EN del historial de evaluaciones de ejemplo. Se traduce SOLO el texto
+ * humano: `rationale` (razonamiento de clasificación), `evidenceNote` y el ROL
+ * dentro de `attestedByName` ("· Responsable de RRHH"→"· HR Lead"; "Comité de
+ * Gobernanza de IA"→"AI Governance Committee"). Claves de sistema, `id`, `level`,
+ * `evidenceState`, `evidenceUrl` y `assessedAt` idénticos. Framing deployer:
+ * "provider's DPIA/bias test" (evidencia que el deployer exige/conserva).
+ * Terminología oficial: Annex III, Art. 6(3).
+ */
+export const SAMPLE_ASSESSMENTS_EN: Record<string, AssessmentRecord[]> = {
+  "SYS-002": [
+    {
+      id: "AS-002-2",
+      level: "high",
+      rationale:
+        "The system operates in a high-risk area of Annex III (employment and worker management) and none of the exceptions in Art. 6(3) apply to it.",
+      evidenceState: "evidenced",
+      attestedByName: "Ana López · HR Lead",
+      evidenceNote: "Provider's DPIA and bias test filed in the record.",
+      evidenceUrl: "https://drive.example.com/ranking/dpia-2026.pdf",
+      assessedAt: "2026-07-02T09:20:00Z",
+    },
+    {
+      id: "AS-002-1",
+      level: "high",
+      rationale:
+        "Initial classification: candidate ranking in the employment domain (Annex III).",
+      evidenceState: "declared",
+      attestedByName: null,
+      assessedAt: "2026-05-14T16:05:00Z",
+    },
+  ],
+  "SYS-005": [
+    {
+      id: "AS-005-1",
+      level: "high",
+      rationale:
+        "Automated psychometric test used in personnel selection: high risk under Annex III (employment).",
+      evidenceState: "reviewed",
+      attestedByName: "AI Governance Committee",
+      evidenceNote:
+        "Reviewed by Legal and HR; human oversight and DPIA documented.",
+      assessedAt: "2026-07-10T11:00:00Z",
+    },
+  ],
+  "SYS-001": [
+    {
+      id: "AS-001-1",
+      level: "high",
+      rationale:
+        "CV screening in the employment domain (Annex III); provider evidence still to be gathered.",
       evidenceState: "declared",
       attestedByName: null,
       assessedAt: "2026-06-28T08:30:00Z",
@@ -610,6 +742,75 @@ export const SAMPLE_AUDIT: AuditEntry[] = [
   },
 ];
 
+/*
+ * Variante EN del registro de actividad de ejemplo. Se traduce SOLO el texto
+ * humano de muestra: `label` (nombre/resumen de la fila) y `changed[]` (nombres
+ * de campo legibles). `id`, `actorEmail`, `table`, `rowId`, `action` y `at`
+ * idénticos. "nivel Alto riesgo"→"level High risk"; "rol Miembro"→"role Member".
+ */
+export const SAMPLE_AUDIT_EN: AuditEntry[] = [
+  {
+    id: 8,
+    actorEmail: "legal@empresa-demo.com",
+    table: "gap_items",
+    rowId: "GAP-03",
+    action: "update",
+    label: "Effective human oversight",
+    changed: ["status"],
+    at: "2026-07-16T15:42:00Z",
+  },
+  {
+    id: 7,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "risk_assessments",
+    rowId: "AS-005-1",
+    action: "insert",
+    label: "level High risk",
+    changed: [],
+    at: "2026-07-10T11:00:00Z",
+  },
+  {
+    id: 6,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "ai_systems",
+    rowId: "SYS-005",
+    action: "update",
+    label: "Automated psychometric test",
+    changed: ["risk", "evidence backing", "last review"],
+    at: "2026-07-10T11:00:05Z",
+  },
+  {
+    id: 5,
+    actorEmail: "talent@empresa-demo.com",
+    table: "gap_items",
+    rowId: "GAP-04",
+    action: "insert",
+    label: "Bias control in candidate selection",
+    changed: [],
+    at: "2026-07-05T09:12:00Z",
+  },
+  {
+    id: 4,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "memberships",
+    rowId: "mem-3",
+    action: "insert",
+    label: "role Member",
+    changed: [],
+    at: "2026-06-01T14:15:00Z",
+  },
+  {
+    id: 3,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "ai_systems",
+    rowId: "SYS-001",
+    action: "insert",
+    label: "CV screening — ATS",
+    changed: [],
+    at: "2026-05-28T08:30:00Z",
+  },
+];
+
 /* -------------------------------------------------------------------------- */
 /* Acuse de vigilancia regulatoria ("marcar como revisado")                   */
 /* -------------------------------------------------------------------------- */
@@ -649,6 +850,24 @@ export const SAMPLE_REG_ACKS: Record<string, RegAck> = {
   "eu-omnibus-highrisk-delay": {
     status: "reviewed",
     note: "Revisado por Legal; plan de preparación de alto riesgo en marcha.",
+    at: "2026-07-15T10:00:00Z",
+  },
+  "eu-gpai-governance": {
+    status: "not_applicable",
+    note: null,
+    at: "2026-07-12T09:00:00Z",
+  },
+};
+
+/*
+ * Variante EN de los acuses de ejemplo. Se traduce SOLO `note` (texto humano);
+ * claves de evento (`eu-omnibus-highrisk-delay`, `eu-gpai-governance`), `status`
+ * y `at` idénticos.
+ */
+export const SAMPLE_REG_ACKS_EN: Record<string, RegAck> = {
+  "eu-omnibus-highrisk-delay": {
+    status: "reviewed",
+    note: "Reviewed by Legal; high-risk readiness plan under way.",
     at: "2026-07-15T10:00:00Z",
   },
   "eu-gpai-governance": {
@@ -800,6 +1019,85 @@ export const SAMPLE_REG_CANDIDATES: RegCandidate[] = [
   },
 ];
 
+/*
+ * Variante EN de los candidatos de ejemplo (bandeja del Validador). Se traduce
+ * SOLO el texto humano: `title`, `summary`, `impact`, `action`, `source.label`,
+ * `sourceLabel` y `provenance.excerpt`. NOTA: los `excerpt` ya vienen en inglés
+ * (son citas literales de la fuente vigilada) → se conservan idénticos. Todo lo
+ * demás (`id`, `proposedEventId`, `date`, `kind`, `framework`, `articles`,
+ * `scope`, `status`, url de la fuente, resto de `provenance`, timestamps) es
+ * idéntico. El array `articles` se mantiene BYTE-idéntico al ES (dato
+ * estructurado / posible clave de scope) — ver banderas del entregable.
+ * Framing deployer; sin copy prohibido.
+ */
+export const SAMPLE_REG_CANDIDATES_EN: RegCandidate[] = [
+  {
+    id: "cand-demo-1",
+    proposedEventId: "eu-ai-office-hiring-guidelines",
+    date: "2026-09-15",
+    kind: "guidance",
+    framework: "eu-ai-act",
+    title: "The AI Office publishes guidelines on AI in personnel selection",
+    summary:
+      "Draft detected: the European AI Office is reported to have published interpretive guidelines on the use of high-risk AI systems in hiring (Annex III, employment), with criteria on human oversight and information to candidates.",
+    impact:
+      "It would refine how an HR deployer approaches its Art. 26 obligations in CV screening and interviews: concrete expectations for human oversight and transparency toward the candidate.",
+    action:
+      "Review the HR policy pack against the new guidelines and adjust the human-oversight evidence.",
+    articles: ["Art. 26", "Anexo III"],
+    source: {
+      label: "European AI Office — guidelines (source to verify)",
+      url: "https://digital-strategy.ec.europa.eu/en/policies/ai-office",
+    },
+    scope: { riskLevels: ["high"] },
+    status: "draft",
+    sourceLabel: "AI Office — library",
+    provenance: {
+      agent: "Analista",
+      model: null,
+      confidence: 0.62,
+      excerpt:
+        "…guidelines on the use of high-risk AI systems in recruitment and worker management…",
+      detected_at: "2026-07-16T08:00:00Z",
+    },
+    createdAt: "2026-07-16T08:05:00Z",
+    reviewedAt: null,
+    reviewNote: null,
+  },
+  {
+    id: "cand-demo-2",
+    proposedEventId: null,
+    date: "2026-10-01",
+    kind: "standard",
+    framework: "eu-ai-act",
+    title: "CEN-CENELEC advances the harmonized standard on AI risk management",
+    summary:
+      "Draft detected: publication of a harmonized standard (presumption of conformity) on risk management for high-risk AI systems.",
+    impact:
+      "It could provide a route to presumption of conformity; useful for requiring providers to supply evidence aligned with the standard.",
+    action:
+      "Assess whether the standard applies to the high-risk systems in the inventory and ask providers to align with it.",
+    articles: ["Art. 40"],
+    source: {
+      label: "CEN-CENELEC JTC 21 (source to verify)",
+      url: "https://www.cencenelec.eu/",
+    },
+    scope: { riskLevels: ["high"] },
+    status: "draft",
+    sourceLabel: "CEN-CENELEC JTC 21",
+    provenance: {
+      agent: "Vigía",
+      model: null,
+      confidence: 0.48,
+      excerpt: "…harmonised standard on AI risk management…",
+      detected_at: "2026-07-15T07:30:00Z",
+    },
+    createdAt: "2026-07-15T07:35:00Z",
+    reviewedAt: null,
+    reviewNote: null,
+  },
+];
+
 /* -------------------------------------------------------------------------- */
 /* Vigía — fuentes vigiladas (watchlist del foso, Capa 7)                      */
 /* -------------------------------------------------------------------------- */
@@ -862,6 +1160,55 @@ export const SAMPLE_REG_SOURCES: RegSource[] = [
     id: "src-demo-1",
     framework: "eu-ai-act",
     label: "EUR-Lex — Reglamento (UE) 2024/1689",
+    url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    sourceKind: "page",
+    lastHash: "a1b2c3",
+    lastCheckedAt: "2026-07-17T06:00:00Z",
+    lastChangeAt: null,
+    lastStatus: "ok",
+    failCount: 0,
+    active: true,
+  },
+  {
+    id: "src-demo-2",
+    framework: "eu-ai-act",
+    label: "AI Act Service Desk — Art. 50",
+    url: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50",
+    sourceKind: "page",
+    lastHash: "d4e5f6",
+    lastCheckedAt: "2026-07-17T06:00:00Z",
+    lastChangeAt: "2026-07-15T06:00:00Z",
+    lastStatus: "changed",
+    failCount: 0,
+    active: true,
+  },
+  {
+    id: "src-demo-3",
+    framework: "us-nyc-ll144",
+    label: "NYC DCWP — Automated Employment Decision Tools",
+    url: "https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page",
+    sourceKind: "page",
+    lastHash: null,
+    lastCheckedAt: null,
+    lastChangeAt: null,
+    lastStatus: null,
+    failCount: 0,
+    active: true,
+  },
+];
+
+/*
+ * Variante EN de la watchlist de ejemplo (panel del Vigía). Se traduce SOLO lo
+ * traducible de `label`: "Reglamento (UE)"→"Regulation (EU)". Los nombres propios
+ * de fuente se mantienen ("AI Act Service Desk — Art. 50", "NYC DCWP — Automated
+ * Employment Decision Tools" ya están en inglés). `id`, `framework`, `url`,
+ * `sourceKind`, hashes, timestamps, `lastStatus`, `failCount` y `active` idénticos.
+ */
+export const SAMPLE_REG_SOURCES_EN: RegSource[] = [
+  {
+    id: "src-demo-1",
+    framework: "eu-ai-act",
+    label: "EUR-Lex — Regulation (EU) 2024/1689",
     url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
     sourceKind: "page",
     lastHash: "a1b2c3",
@@ -1017,6 +1364,67 @@ export const SAMPLE_ACTION_TASKS: ActionTask[] = [
     id: "task-demo-3",
     title: "Informar a los trabajadores del uso de IA en selección",
     detail: "Aviso a las personas afectadas antes del despliegue en el puesto.",
+    article: "Art. 26",
+    priority: "alta",
+    status: "todo",
+    assigneeId: null,
+    assigneeEmail: null,
+    dueDate: null,
+    systemId: null,
+    systemName: null,
+    source: "manual",
+    sourceKey: null,
+    createdAt: "2026-07-12T08:30:00Z",
+  },
+];
+
+/*
+ * Variante EN de las tareas de ejemplo (plan editable). Se traduce SOLO el texto
+ * humano: `title`, `detail`, y la parte traducible de `systemName` ("Cribado de
+ * CVs"→"CV screening"; el nombre de proveedor "TalentFilter" se conserva). `id`,
+ * `article`, `priority`, `status`, `assigneeId/Email`, `dueDate`, `systemId`,
+ * `source`, `sourceKey` y `createdAt` idénticos. Framing deployer (exigir al
+ * proveedor / designar supervisión / informar); sin copy prohibido.
+ */
+export const SAMPLE_ACTION_TASKS_EN: ActionTask[] = [
+  {
+    id: "task-demo-1",
+    title: "Assign human oversight for CV screening",
+    detail:
+      "Assign oversight to a person with the competence and authority to intervene in or stop the system (Art. 26.2).",
+    article: "Art. 14",
+    priority: "critica",
+    status: "in_progress",
+    assigneeId: "demo-2",
+    assigneeEmail: "legal@empresa-demo.com",
+    dueDate: "2026-07-31",
+    systemId: "SYS-001",
+    systemName: "CV screening — TalentFilter",
+    source: "recommendation",
+    sourceKey: "art-14",
+    createdAt: "2026-07-10T09:00:00Z",
+  },
+  {
+    id: "task-demo-2",
+    title: "Require technical documentation from the provider (Annex IV)",
+    detail:
+      "Ask the provider for the technical documentation and instructions for use, and keep it as audit evidence.",
+    article: "Art. 11",
+    priority: "media",
+    status: "todo",
+    assigneeId: "demo-3",
+    assigneeEmail: "talent@empresa-demo.com",
+    dueDate: "2026-07-14",
+    systemId: null,
+    systemName: null,
+    source: "recommendation",
+    sourceKey: "art-11",
+    createdAt: "2026-07-11T11:00:00Z",
+  },
+  {
+    id: "task-demo-3",
+    title: "Inform workers about the use of AI in hiring",
+    detail: "Notice to affected persons before deployment in the workplace.",
     article: "Art. 26",
     priority: "alta",
     status: "todo",
