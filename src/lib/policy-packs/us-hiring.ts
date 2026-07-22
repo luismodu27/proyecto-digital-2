@@ -160,7 +160,7 @@ export const US_HIRING_PACK_EN: PolicyPack = {
       id: "identificar-aedt",
       title: "Identify which selection tools are an AEDT (indicative)",
       description:
-        "Review each recruiting tool (CV screening, ranking, scoring, certain video interviews) and determine whether it fits the definition of an «automated employment decision tool»: a computational process using machine learning, statistical modeling, AI or data analytics that issues a score, classification or recommendation that substitutes for or substantially weighs in the decision about a candidate or employee. That classification determines which LL144 obligations fall on you as an employer. Keep the reasoning for why a tool is or is not an AEDT.",
+        "Review each recruiting tool (CV screening, ranking, scoring, certain video interviews) and determine whether it fits the definition of an \"automated employment decision tool\": a computational process using machine learning, statistical modeling, AI or data analytics that issues a score, classification or recommendation that substitutes for or substantially weighs in the decision about a candidate or employee. That classification determines which LL144 obligations fall on you as an employer. Keep the reasoning for why a tool is or is not an AEDT.",
       article: "NYC LL144 · 6 RCNY §5-300",
       severity: "alta",
       conditional:
@@ -171,7 +171,7 @@ export const US_HIRING_PACK_EN: PolicyPack = {
       title:
         "Record an independent bias audit less than 12 months old (indicative)",
       description:
-        "Before using an AEDT, your organization must ensure that the tool passed a bias audit performed by an independent auditor (not involved in developing or operating the tool and with no financial interest) no more than one year old. Attesta does NOT perform or validate the audit: it records the date, the name of the independent auditor and the URL of the summary as declared evidence. Key note: the law requires conducting and publishing the audit, not «passing» it; an audit that shows adverse impact does not by itself prevent use under LL144, but it raises your anti-discrimination exposure (Title VII).",
+        "Before using an AEDT, your organization must ensure that the tool passed a bias audit performed by an independent auditor (not involved in developing or operating the tool and with no financial interest) no more than one year old. Attesta does NOT perform or validate the audit: it records the date, the name of the independent auditor and the URL of the summary as declared evidence. Key note: the law requires conducting and publishing the audit, not \"passing\" it; an audit that shows adverse impact does not by itself prevent use under LL144, but it raises your anti-discrimination exposure (Title VII).",
       article: "NYC LL144 · 6 RCNY §5-301",
       severity: "alta",
       conditional: "Only if the tool is an AEDT used for positions in NYC.",
@@ -264,11 +264,11 @@ export const US_HIRING_PACK_EN: PolicyPack = {
       title:
         "Maintain federal anti-discrimination good practices (indicative)",
       description:
-        "Regardless of the state, federal anti-discrimination laws still apply to AI selection tools: adverse-impact testing (Title VII), reasonable accommodations and avoiding «screening out» people with disabilities (ADA), and age (ADEA). The EEOC withdrew its specific AI guidance in 2025, but the underlying laws did not change: do not assume that «there is no longer a federal rule».",
+        "Regardless of the state, federal anti-discrimination laws still apply to AI selection tools: adverse-impact testing (Title VII), reasonable accommodations and avoiding \"screening out\" people with disabilities (ADA), and age (ADEA). The EEOC withdrew its specific AI guidance in 2025, but the underlying laws did not change: do not assume that \"there is no longer a federal rule\".",
       article: "Federal · Title VII, ADA, ADEA",
       severity: "media",
       conditional:
-        "Applies always in the US (underlying legal risk, not a duty to «audit the AI»).",
+        "Applies always in the US (underlying legal risk, not a duty to \"audit the AI\").",
     },
   ],
 };

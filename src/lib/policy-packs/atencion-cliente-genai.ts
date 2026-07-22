@@ -212,7 +212,7 @@ export const ATENCION_CLIENTE_GENAI_PACK_EN: PolicyPack = {
         "Classification triage — confirm it is limited risk, not high-risk (triage)",
       description:
         "Before applying the rest of the pack, confirm that the system is LIMITED risk (transparency). A support chatbot or generative AI for content are, as a general rule, limited risk. It ESCALATES to HIGH-RISK under Annex III (and requires the high-risk pack/controls, not this one) if the system decides or co-decides on: eligibility for essential public benefits or services (Annex III.5.a), creditworthiness or credit scoring (III.5.b), price or risk assessment in life/health insurance (III.5.c), or emergency triage (III.5.d); or if it is an emotion-recognition or biometric-categorization system (Annex III.1). Evidence = triage note declaring the system's actual purpose and why it remains limited risk (or its reclassification if it escalates).",
-      article: "Art. 6(2) + Anexo III (1 and 5)",
+      article: "Art. 6(2) + Annex III (1 and 5)",
       severity: "alta",
     },
     {
@@ -268,7 +268,7 @@ export const ATENCION_CLIENTE_GENAI_PACK_EN: PolicyPack = {
       id: "etiquetado-texto-publico",
       title: "Labelling of AI text on matters of public interest",
       description:
-        "The deployer's OWN duty (applicable from 2 Aug 2026): if you publish text generated or manipulated by AI for the purpose of informing the public on matters of PUBLIC INTEREST, you must disclose that it is artificial (Art. 50.4). EXCEPTION: this does not apply if the content has undergone SUBSTANTIVE human editorial review and a natural or legal person assumes editorial responsibility for the publication. Note: the Commission has clarified that a mere human «check» is not enough; it must be genuine editorial control with clear responsibility. Most ordinary commercial/marketing content is not «public interest», but assess it case by case. Evidence = documented criteria for when you apply the label and when you invoke the editorial exception (who assumes responsibility).",
+        "The deployer's OWN duty (applicable from 2 Aug 2026): if you publish text generated or manipulated by AI for the purpose of informing the public on matters of PUBLIC INTEREST, you must disclose that it is artificial (Art. 50.4). EXCEPTION: this does not apply if the content has undergone SUBSTANTIVE human editorial review and a natural or legal person assumes editorial responsibility for the publication. Note: the Commission has clarified that a mere human \"check\" is not enough; it must be genuine editorial control with clear responsibility. Most ordinary commercial/marketing content is not \"public interest\", but assess it case by case. Evidence = documented criteria for when you apply the label and when you invoke the editorial exception (who assumes responsibility).",
       article: "Art. 50.4 (deployer)",
       severity: "media",
       conditional:
@@ -324,7 +324,7 @@ export const ATENCION_CLIENTE_GENAI_PACK_EN: PolicyPack = {
       title:
         "Do not train the model on customer conversations without a legal basis",
       description:
-        "Reusing customer conversations to train or fine-tune models is a new processing: it needs its own legal basis and respects purpose limitation (GDPR Arts. 5.1.b and 6); using data collected to «provide support» for the different purpose of «training AI» without a basis or information is a real risk. Also, require and keep from the provider its policy on whether it uses your data/prompts to train (many offer «zero-retention»/opt-out). Evidence = documented decision on whether or not conversations are used for training, its legal basis and information, and the provider's clause on training with your data.",
+        "Reusing customer conversations to train or fine-tune models is a new processing: it needs its own legal basis and respects purpose limitation (GDPR Arts. 5.1.b and 6); using data collected to \"provide support\" for the different purpose of \"training AI\" without a basis or information is a real risk. Also, require and keep from the provider its policy on whether it uses your data/prompts to train (many offer \"zero-retention\"/opt-out). Evidence = documented decision on whether or not conversations are used for training, its legal basis and information, and the provider's clause on training with your data.",
       article: "GDPR Arts. 5.1.b and 6 (purpose limitation)",
       severity: "alta",
     },
@@ -342,7 +342,7 @@ export const ATENCION_CLIENTE_GENAI_PACK_EN: PolicyPack = {
       id: "gpai-evidencia-proveedor",
       title: "GPAI model documentation (require and keep from the provider)",
       description:
-        "If you only USE a general-purpose model (e.g. GPT or Claude) via API or a SaaS product, you are a deployer/end user, NOT a GPAI provider: the Chapter V obligations (technical documentation Art. 53, public summary of the training data Art. 53.1.d, copyright policy, systemic risk Art. 55) fall on the model PROVIDER. Your control = require and keep from the provider: model documentation, acceptable-use policy, training-data summary and the content-marking mechanism. LINE to watch: if you do substantial fine-tuning that changes the model's capabilities and publish it under your brand, you may become a provider (Art. 25 / GPAI guidance) and take on those obligations. Evidence = archived provider documentation + confirmation that your use is «deployment only», not substantial modification under your brand.",
+        "If you only USE a general-purpose model (e.g. GPT or Claude) via API or a SaaS product, you are a deployer/end user, NOT a GPAI provider: the Chapter V obligations (technical documentation Art. 53, public summary of the training data Art. 53.1.d, copyright policy, systemic risk Art. 55) fall on the model PROVIDER. Your control = require and keep from the provider: model documentation, acceptable-use policy, training-data summary and the content-marking mechanism. LINE to watch: if you do substantial fine-tuning that changes the model's capabilities and publish it under your brand, you may become a provider (Art. 25 / GPAI guidance) and take on those obligations. Evidence = archived provider documentation + confirmation that your use is \"deployment only\", not substantial modification under your brand.",
       article: "Ch. V (provider) + Art. 25 (deployer→provider line)",
       severity: "media",
     },

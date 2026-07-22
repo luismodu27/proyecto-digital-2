@@ -1128,6 +1128,40 @@ export const en: Dictionary = {
       evaluateCta: "+ Evaluate a system",
     },
 
+    overview: {
+      title: "Governance overview",
+      subtitleStart: "Your starting point for governing AI with evidence.",
+      subtitle: "Readiness status of your AI systems at a glance.",
+      executiveReport: "Executive report",
+      stat: {
+        systems: "AI systems",
+        systemsHint: "view inventory",
+        highRisk: "High risk",
+        highRiskHint: "require strict obligations",
+        avgReadiness: "Average readiness",
+        avgReadinessHintBefore: "target ≥ ",
+        avgReadinessHintAfter: "% to be ready",
+        openGaps: "Open gaps",
+        openGapsHint: "view gap assessment",
+      },
+      meterNoteBefore: "The mark on the bars indicates the indicative target of ",
+      meterNoteReady: "% ready",
+      meterNoteAfter:
+        " to consider a system audit-ready. It is not a judgment of compliance.",
+      nextMilestone: "Next regulatory milestone",
+      today: "today",
+      inDaysPrefix: "in ",
+      riskDistribution: "Risk distribution",
+      needAttention: "Need attention",
+      viewAll: "View all →",
+      emptyAttentionTitle: "Nothing needs attention",
+      emptyAttentionBody:
+        "Once you register AI systems, the ones that need review or have lower readiness will show here.",
+      registerSystem: "+ Register system",
+      legalNote:
+        'The "% ready" reflects self-declared evidence, not a judgment of compliance.',
+    },
+
     controls: {
       gapStatus: { missing: "Missing", partial: "Partial", done: "Covered" },
       taskStatus: {

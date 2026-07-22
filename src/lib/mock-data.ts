@@ -1044,7 +1044,7 @@ export const SAMPLE_REG_CANDIDATES_EN: RegCandidate[] = [
       "It would refine how an HR deployer approaches its Art. 26 obligations in CV screening and interviews: concrete expectations for human oversight and transparency toward the candidate.",
     action:
       "Review the HR policy pack against the new guidelines and adjust the human-oversight evidence.",
-    articles: ["Art. 26", "Anexo III"],
+    articles: ["Art. 26", "Annex III"],
     source: {
       label: "European AI Office — guidelines (source to verify)",
       url: "https://digital-strategy.ec.europa.eu/en/policies/ai-office",

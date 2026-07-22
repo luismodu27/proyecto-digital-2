@@ -174,7 +174,7 @@ function CandidateCard({
         </div>
         {c.provenance.excerpt && (
           <p className="mt-2 border-l-2 border-line-strong pl-3 text-xs italic text-muted">
-            «{c.provenance.excerpt}»
+            {locale === "en" ? `"${c.provenance.excerpt}"` : `«${c.provenance.excerpt}»`}
           </p>
         )}
         {c.source?.url && (

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PageHeader, StatCard, Meter } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
-import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
+import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
 import { DeadlineReminders } from "@/components/dashboard/DeadlineReminders";
 import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
@@ -54,6 +54,7 @@ export default async function DashboardOverview() {
 
   const locale = await resolveLocale();
   const d = getDictionary(locale).dashboard;
+  const o = d.overview;
 
   // Nombre de pila para el saludo (solo si hay un nombre real en el perfil; no
   // usamos el prefijo del email para no mostrar algo poco natural).
@@ -120,10 +121,7 @@ export default async function DashboardOverview() {
   if (systems.length === 0) {
     return (
       <>
-        <PageHeader
-          title="Resumen de gobernanza"
-          subtitle="Tu punto de partida para gobernar la IA con evidencia."
-        />
+        <PageHeader title={o.title} subtitle={o.subtitleStart} />
         <DashboardWelcome
           name={firstName}
           orgName={orgName}
@@ -141,8 +139,8 @@ export default async function DashboardOverview() {
   return (
     <>
       <PageHeader
-        title="Resumen de gobernanza"
-        subtitle="Estado de preparación de tus sistemas de IA en un vistazo."
+        title={o.title}
+        subtitle={o.subtitle}
         action={
           <ButtonLink href="/dashboard/informe" variant="outline">
             <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden>
@@ -154,7 +152,7 @@ export default async function DashboardOverview() {
                 strokeLinejoin="round"
               />
             </svg>
-            Informe ejecutivo
+            {o.executiveReport}
           </ButtonLink>
         }
       />
@@ -163,27 +161,27 @@ export default async function DashboardOverview() {
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
-          label="Sistemas de IA"
+          label={o.stat.systems}
           value={systems.length}
-          hint="ver inventario"
+          hint={o.stat.systemsHint}
           href="/dashboard/inventario"
         />
         <StatCard
-          label="Alto riesgo"
+          label={o.stat.highRisk}
           value={highRisk}
-          hint="requieren obligaciones estrictas"
+          hint={o.stat.highRiskHint}
           accent="warn"
         />
         <StatCard
-          label="Preparación media"
+          label={o.stat.avgReadiness}
           value={`${avg}%`}
-          hint={`objetivo ≥ ${AUDIT_READY_THRESHOLD}% para estar listo`}
+          hint={`${o.stat.avgReadinessHintBefore}${AUDIT_READY_THRESHOLD}${o.stat.avgReadinessHintAfter}`}
           accent={isAuditReady(avg) ? "brand" : "warn"}
         />
         <StatCard
-          label="Brechas abiertas"
+          label={o.stat.openGaps}
           value={openGaps}
-          hint="ver gap assessment"
+          hint={o.stat.openGapsHint}
           accent="warn"
           href="/dashboard/gap"
         />
@@ -191,10 +189,12 @@ export default async function DashboardOverview() {
 
       <p className="mt-3 flex items-center gap-2 text-xs text-muted">
         <span className="inline-block h-3 w-0.5 rounded-full bg-ink/45" aria-hidden />
-        La marca en las barras señala el objetivo orientativo de{" "}
-        <span className="font-medium text-ink-soft">{AUDIT_READY_THRESHOLD}% listo</span>{" "}
-        para considerar un sistema preparado para auditoría. No es un juicio de
-        cumplimiento.
+        {o.meterNoteBefore}
+        <span className="font-medium text-ink-soft">
+          {AUDIT_READY_THRESHOLD}
+          {o.meterNoteReady}
+        </span>
+        {o.meterNoteAfter}
       </p>
 
       {nextDeadline && (
@@ -216,7 +216,7 @@ export default async function DashboardOverview() {
             </span>
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-muted">
-                Próximo hito regulatorio ·{" "}
+                {o.nextMilestone} ·{" "}
                 {frameworkMeta(nextDeadline.framework, locale)?.short ??
                   nextDeadline.framework}
               </p>
@@ -229,11 +229,12 @@ export default async function DashboardOverview() {
             <div className="text-right">
               <p className="text-sm font-semibold tabular-nums text-ink">
                 {nextDays === 0
-                  ? "hoy"
-                  : `en ${nextDays} ${nextDays === 1 ? "día" : "días"}`}
+                  ? o.today
+                  : `${o.inDaysPrefix}${nextDays} ${nextDays === 1 ? d.units.dayOne : d.units.dayOther}`}
               </p>
               <p className="text-xs text-muted">
-                {nextAffected} {nextAffected === 1 ? "sistema" : "sistemas"}
+                {nextAffected}{" "}
+                {nextAffected === 1 ? d.units.systemOne : d.units.systemOther}
               </p>
             </div>
             <span className="text-brand transition-transform group-hover:translate-x-0.5">
@@ -248,7 +249,7 @@ export default async function DashboardOverview() {
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">
           <h2 className="font-display text-lg font-semibold text-ink">
-            Distribución de riesgo
+            {o.riskDistribution}
           </h2>
           <div className="mt-6">
             <RiskDonut
@@ -262,29 +263,28 @@ export default async function DashboardOverview() {
         <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-semibold text-ink">
-              Requieren atención
+              {o.needAttention}
             </h2>
             <Link
               href="/dashboard/inventario"
               className="text-sm font-medium text-brand hover:text-brand-strong"
             >
-              Ver todos →
+              {o.viewAll}
             </Link>
           </div>
           {recent.length === 0 ? (
             <div className="mt-4 rounded-xl border border-dashed border-line-strong px-4 py-8 text-center">
               <p className="text-sm font-medium text-ink">
-                Nada que requiera atención
+                {o.emptyAttentionTitle}
               </p>
               <p className="mx-auto mt-1 max-w-xs text-xs text-ink-soft">
-                Cuando registres sistemas de IA, aquí verás los que necesitan
-                revisión o tienen menor preparación.
+                {o.emptyAttentionBody}
               </p>
               <Link
                 href="/dashboard/inventario/nuevo"
                 className="mt-3 inline-block text-xs font-semibold text-brand hover:text-brand-strong"
               >
-                + Registrar sistema
+                {o.registerSystem}
               </Link>
             </div>
           ) : (
@@ -309,7 +309,7 @@ export default async function DashboardOverview() {
       </section>
 
       <LegalNote
-        text={`El "% listo" refleja evidencia autodeclarada, no un juicio de cumplimiento. ${LEGAL_FOOTER}`}
+        text={`${o.legalNote} ${LEGAL_FOOTER_BY_LOCALE[locale]}`}
         className="mt-6"
       />
     </>

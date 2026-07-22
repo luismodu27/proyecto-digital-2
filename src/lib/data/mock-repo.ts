@@ -65,7 +65,8 @@ export async function getSystemsForSelect(): Promise<
 }
 
 export async function getOrganizationName(): Promise<string | null> {
-  return "Organización demo";
+  const locale = await resolveLocale();
+  return locale === "en" ? "Demo organization" : "Organización demo";
 }
 
 export async function getSystemBiasAudit(_id: string): Promise<null> {
@@ -134,7 +135,7 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
   return {
     meta: {
       application: "Attesta",
-      organization: "Organización demo",
+      organization: en ? "Demo organization" : "Organización demo",
       exportedAt: new Date().toISOString(),
       schemaVersion: 1,
     },

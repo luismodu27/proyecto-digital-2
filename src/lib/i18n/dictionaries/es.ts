@@ -1131,6 +1131,40 @@ export const es = {
       evaluateCta: "+ Evaluar un sistema",
     },
 
+    overview: {
+      title: "Resumen de gobernanza",
+      subtitleStart: "Tu punto de partida para gobernar la IA con evidencia.",
+      subtitle: "Estado de preparación de tus sistemas de IA en un vistazo.",
+      executiveReport: "Informe ejecutivo",
+      stat: {
+        systems: "Sistemas de IA",
+        systemsHint: "ver inventario",
+        highRisk: "Alto riesgo",
+        highRiskHint: "requieren obligaciones estrictas",
+        avgReadiness: "Preparación media",
+        avgReadinessHintBefore: "objetivo ≥ ",
+        avgReadinessHintAfter: "% para estar listo",
+        openGaps: "Brechas abiertas",
+        openGapsHint: "ver gap assessment",
+      },
+      meterNoteBefore: "La marca en las barras señala el objetivo orientativo de ",
+      meterNoteReady: "% listo",
+      meterNoteAfter:
+        " para considerar un sistema preparado para auditoría. No es un juicio de cumplimiento.",
+      nextMilestone: "Próximo hito regulatorio",
+      today: "hoy",
+      inDaysPrefix: "en ",
+      riskDistribution: "Distribución de riesgo",
+      needAttention: "Requieren atención",
+      viewAll: "Ver todos →",
+      emptyAttentionTitle: "Nada que requiera atención",
+      emptyAttentionBody:
+        "Cuando registres sistemas de IA, aquí verás los que necesitan revisión o tienen menor preparación.",
+      registerSystem: "+ Registrar sistema",
+      legalNote:
+        'El "% listo" refleja evidencia autodeclarada, no un juicio de cumplimiento.',
+    },
+
     controls: {
       gapStatus: { missing: "Falta", partial: "Parcial", done: "Cubierto" },
       taskStatus: {

@@ -743,7 +743,7 @@ export const REGULATORY_EVENTS_EN: RegulatoryEvent[] = [
       "Good news with a caveat: you have more time to prepare your high-risk systems, but the obligation is unavoidable. It is a window to get ready, not a cancellation.",
     action:
       "Use the window: close the gap assessment for your high-risk systems and gather the evidence calmly before December 2027.",
-    articles: ["Art. 113", "Anexo III"],
+    articles: ["Art. 113", "Annex III"],
     source: {
       label: "Council of the EU — final green light to the Digital Omnibus (29 Jun 2026)",
       url: "https://www.consilium.europa.eu/en/press/press-releases/2026/06/29/artificial-intelligence-council-gives-final-green-light-to-simplify-and-streamline-rules/",
@@ -781,7 +781,7 @@ export const REGULATORY_EVENTS_EN: RegulatoryEvent[] = [
       "A cross-cutting prohibition, not HR-specific: in practice it does NOT affect hiring tools (CV screening, ranking, interviews, chatbots), unless your organization generates or manipulates images or video of people with AI. It is worth knowing because it is an unacceptable practice, subject to the highest penalties in the Regulation (up to €35M or 7% of worldwide turnover).",
     action:
       "Confirm that no system in your inventory generates or manipulates images or video of people (deepfakes) without safeguards. If you later add generative image/video AI, require the provider to give evidence of technical measures that prevent these uses. For CV screening and interviews, it is usually enough to record that this does not apply.",
-    articles: ["Art. 5", "Directiva 2011/93/UE"],
+    articles: ["Art. 5", "Directive 2011/93/EU"],
     source: {
       label: "Council of the EU — final green light to the Digital Omnibus (29 Jun 2026)",
       url: "https://www.consilium.europa.eu/en/press/press-releases/2026/06/29/artificial-intelligence-council-gives-final-green-light-to-simplify-and-streamline-rules/",
@@ -800,7 +800,7 @@ export const REGULATORY_EVENTS_EN: RegulatoryEvent[] = [
       "The central deadline for HR: your hiring systems (CV screening, ranking, tests) are high-risk under Annex III (employment). As a deployer, the obligations of Art. 26 apply to you: human oversight, informing workers, keeping logs and use in accordance with instructions. You must also require the provider's documentation (Arts. 9–15) and the CE marking.",
     action:
       "Run the gap assessment and apply the HR policy pack to each high-risk system. Assign human oversight, inform workers and require the technical documentation from the provider.",
-    articles: ["Art. 6", "Anexo III", "Art. 26", "Arts. 9–15"],
+    articles: ["Art. 6", "Annex III", "Art. 26", "Arts. 9–15"],
     source: {
       label: "Regulation (EU) 2024/1689, Annex III — EUR-Lex",
       url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
@@ -819,7 +819,7 @@ export const REGULATORY_EVENTS_EN: RegulatoryEvent[] = [
       "Uncommon in a pure HR SaaS; it is more relevant if your AI is embedded in machinery, medical devices or other regulated products.",
     action:
       "If any system is a safety component of a regulated product, plan its conformity for this later deadline.",
-    articles: ["Art. 6.1", "Anexo I"],
+    articles: ["Art. 6.1", "Annex I"],
     source: {
       label: "AI Act application timeline — European Commission",
       url: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",

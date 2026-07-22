@@ -253,7 +253,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
         "Scope of high-risk: only natural persons, only life and health (triage)",
       description:
         "Before applying the rest of the controls, confirm that the system falls under Annex III: 5.b covers assessing the creditworthiness or establishing the credit score of NATURAL PERSONS —scoring of companies/legal persons is out of scope—; 5.c covers risk assessment and pricing for NATURAL PERSONS in LIFE and HEALTH insurance —motor, home and other non-life lines are out of scope of 5.c (although they may be subject to the GDPR and sectoral rules)—. Borderline cases flagged by the Commission that do fall in: mortgage-linked life insurance, private long-term care and personal pension products with an impact on livelihood. Evidence = scope note identifying the specific use, the type of person assessed and the line of business, with the classification conclusion.",
-      article: "Anexo III.5.b / 5.c",
+      article: "Annex III.5.b / 5.c",
       severity: "alta",
       conditional:
         "Classification triage. If the system does not assess natural persons, or the insurance is not life/health, check whether it falls outside 5.b/5.c before treating it as high-risk.",
@@ -263,20 +263,20 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
       title: "Financial-fraud detection exception (triage)",
       description:
         "Annex III.5.b expressly excludes systems used to detect financial fraud: an engine whose actual purpose is to detect fraud (transactional, money-laundering, impersonation) is NOT high-risk on this ground. Check the purpose honestly: if the same system also scores creditworthiness, the exception covers ONLY the fraud function, not the scoring function, which remains high-risk. Evidence = description of the system's purpose and documented confirmation of whether it operates as fraud detection, as creditworthiness scoring, or both (delimiting each function).",
-      article: "Anexo III.5.b (fraud exception)",
+      article: "Annex III.5.b (fraud exception)",
       severity: "media",
       conditional:
         "Triage. Applies only if the provider/your organization invoke the fraud-detection exception to avoid classifying the system as high-risk.",
     },
     {
       id: "no-alto-riesgo-6-3",
-      title: "The «not high-risk» filter (Art. 6.3) does not apply to profiling",
+      title: "The \"not high-risk\" filter (Art. 6.3) does not apply to profiling",
       description:
         "Do not assume that scoring or pricing escapes high-risk via Art. 6(3) (limited procedural task, improving a prior human activity, etc.). Art. 6(3) itself closes with an absolute exception: an Annex III system is ALWAYS considered high-risk when it performs profiling of natural persons —and assessing creditworthiness or setting premiums by individual risk is profiling. Evidence = note confirming that the system profiles natural persons and, therefore, that it cannot rely on the Art. 6(3) exception.",
       article: "Art. 6.3 (profiling exception)",
       severity: "media",
       conditional:
-        "Triage. Document this conclusion if anyone proposes treating the system as «not high-risk».",
+        "Triage. Document this conclusion if anyone proposes treating the system as \"not high-risk\".",
     },
     {
       id: "fria",
@@ -309,7 +309,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
       id: "no-discriminacion-credito",
       title: "Non-discrimination and proxy bias in credit",
       description:
-        "The direct duty arises from anti-discrimination law (EU Directives 2000/43/EC on racial equality, 2004/113/EC on gender in goods and services, and national law): monitor that the scoring does not produce disparate impact on protected characteristics or through PROXIES (postcode as a proxy for origin or «redlining», name, device type, etc.). Also require from the provider evidence of its bias testing (a provider obligation, Art. 10, not yours as deployer). Evidence = your own disparate-impact analysis of the decisions + identification of possible proxies + bias documentation required from the provider.",
+        "The direct duty arises from anti-discrimination law (EU Directives 2000/43/EC on racial equality, 2004/113/EC on gender in goods and services, and national law): monitor that the scoring does not produce disparate impact on protected characteristics or through PROXIES (postcode as a proxy for origin or \"redlining\", name, device type, etc.). Also require from the provider evidence of its bias testing (a provider obligation, Art. 10, not yours as deployer). Evidence = your own disparate-impact analysis of the decisions + identification of possible proxies + bias documentation required from the provider.",
       article: "Anti-discrimination law (Art. 10 = provider)",
       severity: "alta",
       conditional: "Applies as a priority to credit scoring.",
@@ -319,7 +319,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
       title: "Sex-neutral pricing in insurance (Test-Achats)",
       description:
         "In life and health insurance, AI pricing may not use sex as a risk factor that generates different premiums or benefits: the CJEU in Test-Achats (C-236/09) invalidated the exception in Art. 5.2 of Directive 2004/113/EC, imposing unisex pricing for new contracts from 21 Dec 2012. Verify that neither sex nor proxies for sex enter the pricing model with a differentiating effect. Evidence = confirmation of the pricing model's variables and that they do not produce premium differences by sex, directly or indirectly.",
-      article: "Directiva 2004/113/CE (Test-Achats C-236/09)",
+      article: "Directive 2004/113/EC (Test-Achats C-236/09)",
       severity: "alta",
       conditional: "Applies to insurance pricing (Annex III.5.c).",
     },
@@ -431,7 +431,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
       title:
         "Provider vs deployer role (own model or substantial modification)",
       description:
-        "If you use a third party's scoring/pricing model you are a DEPLOYER (you require and keep the provider's evidence). You become a PROVIDER —with all the design obligations (Arts. 9-15)— if you put your brand on the system, substantially modify it or change its intended purpose (Art. 25), or if you train your own model. Delimit and document your role, because it radically changes your obligations. Evidence = note determining the role (deployer/provider) for each system, with the justification (use «as is», retraining, own brand, change of purpose).",
+        "If you use a third party's scoring/pricing model you are a DEPLOYER (you require and keep the provider's evidence). You become a PROVIDER —with all the design obligations (Arts. 9-15)— if you put your brand on the system, substantially modify it or change its intended purpose (Art. 25), or if you train your own model. Delimit and document your role, because it radically changes your obligations. Evidence = note determining the role (deployer/provider) for each system, with the justification (use \"as is\", retraining, own brand, change of purpose).",
       article: "Art. 25",
       severity: "media",
     },

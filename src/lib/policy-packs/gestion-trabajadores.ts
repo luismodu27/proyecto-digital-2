@@ -244,7 +244,7 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       title:
         "Emotion recognition in the workplace — PROHIBITED practice (triage)",
       description:
-        "Check, BEFORE using the system, whether it infers emotions, affect, mood, stress, attention or «engagement» of workers (e.g. sentiment analysis of messages, tone of voice in calls, facial expression or micro-expressions via webcam, engagement signals). Inferring the emotions of people in the workplace is a practice PROHIBITED by the AI Act, except for medical or safety purposes interpreted strictly; a prohibited practice is not prepared for audit, it is stopped. This makes the tool non-marketable and unusable in the EU (in force since 2 Feb 2025), not merely a high-risk system. Evidence = documented confirmation of whether or not the system infers emotions (functionality declared by the provider) and, where applicable, the medical/safety basis and the legal reasoning supporting it.",
+        "Check, BEFORE using the system, whether it infers emotions, affect, mood, stress, attention or \"engagement\" of workers (e.g. sentiment analysis of messages, tone of voice in calls, facial expression or micro-expressions via webcam, engagement signals). Inferring the emotions of people in the workplace is a practice PROHIBITED by the AI Act, except for medical or safety purposes interpreted strictly; a prohibited practice is not prepared for audit, it is stopped. This makes the tool non-marketable and unusable in the EU (in force since 2 Feb 2025), not merely a high-risk system. Evidence = documented confirmation of whether or not the system infers emotions (functionality declared by the provider) and, where applicable, the medical/safety basis and the legal reasoning supporting it.",
       article: "Art. 5.1.f",
       severity: "alta",
       conditional:
@@ -255,7 +255,7 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       title:
         "Scoring employees within limits (avoiding prohibited social scoring)",
       description:
-        "If the system scores or classifies workers over time, keep the score tied to relevant work-related data and within its own context (productivity, quality, targets). It approaches the prohibition on «social scoring» when it incorporates data unrelated to the work context (private life, social media, general social behavior) or produces disproportionate detrimental treatment or treatment in areas unrelated to the conduct being evaluated. Evidence = description of the score's variables and their origin, and confirmation that it does not cross-reference out-of-context data with unfavorable effects.",
+        "If the system scores or classifies workers over time, keep the score tied to relevant work-related data and within its own context (productivity, quality, targets). It approaches the prohibition on \"social scoring\" when it incorporates data unrelated to the work context (private life, social media, general social behavior) or produces disproportionate detrimental treatment or treatment in areas unrelated to the conduct being evaluated. Evidence = description of the score's variables and their origin, and confirmation that it does not cross-reference out-of-context data with unfavorable effects.",
       article: "Art. 5.1.c",
       severity: "media",
       conditional:

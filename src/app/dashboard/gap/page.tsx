@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
-import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
+import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { GapStatusControl } from "@/components/dashboard/GapStatusControl";
 import { DeleteGapButton } from "@/components/dashboard/DeleteGapButton";
 import { getAiSystems, getGapItems, isSupabaseConfigured } from "@/lib/data";
@@ -86,7 +86,7 @@ export default async function GapPage() {
         })}
       </div>
 
-      <LegalNote text={LEGAL_FOOTER} className="mt-6" />
+      <LegalNote text={LEGAL_FOOTER_BY_LOCALE[locale]} className="mt-6" />
     </>
   );
 }
