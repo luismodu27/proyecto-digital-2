@@ -1522,6 +1522,8 @@ export const en: Dictionary = {
         regulatoryTimeline: "Regulatory timeline",
         timelineMyJurisdictions: " · my jurisdictions",
         timelineInForceDivider: "In force",
+        timelineEmptyFiltered: "No events with this status.",
+        statusAll: "All",
         summaryUpcoming: "Upcoming deadlines",
         summaryNearest: "Nearest",
         summaryInForce: "In force",

@@ -1530,6 +1530,8 @@ export const es = {
         regulatoryTimeline: "Cronología regulatoria",
         timelineMyJurisdictions: " · mis jurisdicciones",
         timelineInForceDivider: "Ya en vigor",
+        timelineEmptyFiltered: "No hay eventos con este estado.",
+        statusAll: "Todos",
         summaryUpcoming: "Próximos plazos",
         summaryNearest: "El más cercano",
         summaryInForce: "Ya en vigor",
