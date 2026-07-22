@@ -4,6 +4,8 @@ import { OnboardingForm } from "@/components/auth/OnboardingForm";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function OnboardingPage() {
   if (!isSupabaseConfigured) redirect("/dashboard");
@@ -20,9 +22,12 @@ export default async function OnboardingPage() {
   const org = await getActiveOrg();
   if (org) redirect("/dashboard");
 
+  const locale = await resolveLocale();
+  const t = getDictionary(locale).auth;
+
   return (
-    <AuthShell>
-      <OnboardingForm />
+    <AuthShell locale={locale} t={t}>
+      <OnboardingForm t={t} />
     </AuthShell>
   );
 }

@@ -2,15 +2,20 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { SealMark } from "@/components/ui/SealMark";
-import { LEGAL_FOOTER } from "@/components/ui/LegalNote";
+import { LocaleToggleCookie } from "@/components/ui/LocaleToggleCookie";
+import { LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
+import type { Locale } from "@/lib/i18n/config";
+import type { Dictionary } from "@/lib/i18n";
 
-const points = [
-  "Inventario y clasificación de riesgo (EU AI Act)",
-  "Evidencia y audit-trail listos para auditoría",
-  "Preparación de nivel enterprise, sin equipo GRC",
-];
-
-export function AuthShell({ children }: { children: ReactNode }) {
+export function AuthShell({
+  children,
+  locale,
+  t,
+}: {
+  children: ReactNode;
+  locale: Locale;
+  t: Dictionary["auth"];
+}) {
   return (
     <main className="grid min-h-dvh lg:grid-cols-2">
       {/* Panel de marca (desktop) */}
@@ -29,10 +34,10 @@ export function AuthShell({ children }: { children: ReactNode }) {
 
         <div className="relative">
           <h2 className="max-w-md font-display text-3xl font-semibold leading-tight">
-            Gobierna tu IA antes que la auditoría.
+            {t.shell.heading}
           </h2>
           <ul className="mt-8 space-y-4">
-            {points.map((p) => (
+            {t.shell.points.map((p) => (
               <li key={p} className="flex items-start gap-3 text-paper/80">
                 <SealMark size={22} className="mt-0.5 shrink-0 text-brand-bright" />
                 <span className="text-sm leading-relaxed">{p}</span>
@@ -42,23 +47,29 @@ export function AuthShell({ children }: { children: ReactNode }) {
         </div>
 
         <p className="relative max-w-sm text-xs leading-relaxed text-paper/45">
-          {LEGAL_FOOTER}
+          {LEGAL_FOOTER_BY_LOCALE[locale]}
         </p>
       </aside>
 
       {/* Área de formulario */}
       <div className="flex flex-col bg-paper">
-        <div className="border-b border-line lg:hidden">
-          <div className="container-page flex h-16 items-center">
+        {/* Barra superior: logo en móvil, selector de idioma siempre a la derecha */}
+        <div className="flex h-16 items-center justify-between border-b border-line px-5 lg:justify-end lg:border-b-0">
+          <span className="lg:hidden">
             <Logo />
-          </div>
+          </span>
+          <LocaleToggleCookie
+            locale={locale}
+            labelToEn={t.shell.switchToEn}
+            labelToEs={t.shell.switchToEs}
+          />
         </div>
-        <div className="flex flex-1 items-center justify-center px-5 py-12">
+        <div className="flex flex-1 items-center justify-center px-5 pb-12 pt-4">
           <div className="w-full max-w-md">
             {children}
             <p className="mt-6 text-center text-sm text-muted">
               <Link href="/" className="transition-colors hover:text-ink">
-                ← Volver al sitio
+                {t.shell.backToSite}
               </Link>
             </p>
           </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
 import { createClient } from "@/lib/supabase/client";
+import type { Dictionary } from "@/lib/i18n";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -16,7 +17,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * Por seguridad NO revelamos si el correo existe: siempre mostramos el mismo
  * mensaje de "si existe una cuenta, te enviamos el enlace".
  */
-export function ResetRequestForm() {
+export function ResetRequestForm({ t }: { t: Dictionary["auth"] }) {
+  const r = t.resetRequest;
   const [email, setEmail] = useState("");
   // Honeypot anti-bots: un humano nunca rellena este campo oculto.
   const [company, setCompany] = useState("");
@@ -34,7 +36,7 @@ export function ResetRequestForm() {
       return;
     }
     if (!EMAIL_RE.test(email.trim())) {
-      setError("Introduce un correo válido (p. ej. tu@empresa.com).");
+      setError(r.emailInvalid);
       return;
     }
 
@@ -49,24 +51,20 @@ export function ResetRequestForm() {
       if (error) {
         // Límite de tasa: avisamos para que reintente más tarde.
         if (/rate limit|for security purposes/i.test(error.message)) {
-          setError(
-            "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
-          );
+          setError(r.rateLimit);
           return;
         }
         // Error de configuración (URL de redirección no permitida en Supabase):
         // no es enumeración de cuentas, conviene mostrarlo durante el setup.
         if (/redirect|not allowed|invalid.*url/i.test(error.message)) {
-          setError(
-            "No pudimos enviar el enlace (configuración de URLs de redirección pendiente). Contacta al administrador.",
-          );
+          setError(r.redirectConfig);
           return;
         }
         // Cualquier otro caso (p. ej. correo inexistente): NO lo revelamos.
       }
       setSent(true);
     } catch {
-      setError("No pudimos enviar el correo. Inténtalo de nuevo en un momento.");
+      setError(r.generic);
     } finally {
       setLoading(false);
     }
@@ -80,22 +78,19 @@ export function ResetRequestForm() {
       <div className="rounded-2xl border border-line bg-paper-raised p-8">
         <SealMark size={36} className="text-brand" />
         <h1 className="mt-4 font-display text-2xl font-semibold text-ink">
-          Revisa tu correo
+          {r.sentTitle}
         </h1>
         <p className="mt-3 text-sm text-ink-soft">
-          Si existe una cuenta asociada a{" "}
-          <span className="font-medium text-ink">{email.trim()}</span>, te
-          hemos enviado un enlace para restablecer tu contraseña. Caduca en una
-          hora.
+          {r.sentBodyBefore}
+          <span className="font-medium text-ink">{email.trim()}</span>
+          {r.sentBodyAfter}
         </p>
-        <p className="mt-3 text-xs text-muted">
-          ¿No lo ves? Revisa la carpeta de spam.
-        </p>
+        <p className="mt-3 text-xs text-muted">{r.spamHint}</p>
         <Link
           href="/login"
           className="mt-6 inline-flex items-center justify-center rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-strong"
         >
-          Volver a iniciar sesión
+          {r.backToLogin}
         </Link>
       </div>
     );
@@ -105,16 +100,14 @@ export function ResetRequestForm() {
     <div className="rounded-2xl border border-line bg-paper-raised p-8">
       <SealMark size={36} className="text-brand" />
       <h1 className="mt-4 font-display text-2xl font-semibold text-ink">
-        Recupera tu contraseña
+        {r.title}
       </h1>
-      <p className="mt-1 text-sm text-ink-soft">
-        Introduce tu correo y te enviaremos un enlace para crear una nueva.
-      </p>
+      <p className="mt-1 text-sm text-ink-soft">{r.subtitle}</p>
 
       <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
         {/* Honeypot: oculto para humanos, visible para bots. */}
         <div className="absolute -left-[9999px]" aria-hidden>
-          <label htmlFor="company">No rellenar</label>
+          <label htmlFor="company">{r.honeypotLabel}</label>
           <input
             id="company"
             name="company"
@@ -128,7 +121,7 @@ export function ResetRequestForm() {
 
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-ink">
-            Correo de trabajo
+            {r.emailLabel}
           </label>
           <input
             id="email"
@@ -141,7 +134,7 @@ export function ResetRequestForm() {
             }}
             aria-invalid={!!error}
             className={inputBase}
-            placeholder="tu@empresa.com"
+            placeholder={r.emailPlaceholder}
           />
         </div>
 
@@ -155,7 +148,7 @@ export function ResetRequestForm() {
         )}
 
         <Button type="submit" disabled={loading} className="w-full py-2.5">
-          {loading ? "Enviando…" : "Enviar enlace"}
+          {loading ? r.sending : r.submit}
         </Button>
       </form>
 
@@ -164,7 +157,7 @@ export function ResetRequestForm() {
           href="/login"
           className="font-medium text-brand transition-colors hover:text-brand-strong"
         >
-          ← Volver a iniciar sesión
+          {r.backToLoginLink}
         </Link>
       </p>
     </div>

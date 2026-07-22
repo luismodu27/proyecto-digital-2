@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
 import { friendlyError } from "@/lib/friendly-error";
+import type { Dictionary } from "@/lib/i18n";
 
 function slugify(name: string) {
   const base = name
@@ -17,7 +18,8 @@ function slugify(name: string) {
   return `${base || "org"}-${suffix}`;
 }
 
-export function OnboardingForm() {
+export function OnboardingForm({ t }: { t: Dictionary["auth"] }) {
+  const o = t.onboarding;
   const router = useRouter();
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,9 @@ export function OnboardingForm() {
       router.push("/dashboard");
       router.refresh();
     } catch (err) {
-      setError(friendlyError(err instanceof Error ? err.message : ""));
+      setError(
+        friendlyError(err instanceof Error ? err.message : "", t.friendlyErrors),
+      );
     } finally {
       setLoading(false);
     }
@@ -47,16 +51,14 @@ export function OnboardingForm() {
   return (
     <div className="rounded-2xl border border-line bg-paper-raised p-8">
       <h1 className="font-display text-2xl font-semibold text-ink">
-        Crea tu organización
+        {o.title}
       </h1>
-      <p className="mt-1 text-sm text-ink-soft">
-        Es tu espacio de trabajo en Attesta. Podrás invitar a tu equipo después.
-      </p>
+      <p className="mt-1 text-sm text-ink-soft">{o.subtitle}</p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
           <label htmlFor="org" className="block text-sm font-medium text-ink">
-            Nombre de la organización
+            {o.nameLabel}
           </label>
           <input
             id="org"
@@ -65,7 +67,7 @@ export function OnboardingForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand"
-            placeholder="Acme, S.A."
+            placeholder={o.namePlaceholder}
           />
         </div>
 
@@ -79,7 +81,7 @@ export function OnboardingForm() {
         )}
 
         <Button type="submit" disabled={loading} className="w-full py-2.5">
-          {loading ? "Creando…" : "Crear y continuar"}
+          {loading ? o.creating : o.cta}
         </Button>
       </form>
     </div>

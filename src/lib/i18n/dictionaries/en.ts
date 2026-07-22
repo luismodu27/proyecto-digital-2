@@ -447,4 +447,182 @@ export const en: Dictionary = {
       rights: "© 2026 Attesta. All rights reserved.",
     },
   },
+
+  auth: {
+    shell: {
+      heading: "Govern your AI before the audit does.",
+      points: [
+        "Inventory and risk classification (EU AI Act)",
+        "Audit-ready evidence and audit trail",
+        "Enterprise-grade readiness, without a GRC team",
+      ],
+      backToSite: "← Back to site",
+      switchToEn: "View in English",
+      switchToEs: "View in Spanish",
+    },
+
+    demo: {
+      title: "Demo mode",
+      body: "Account sign-in requires connecting Supabase. Meanwhile, you can explore the product with sample data.",
+      cta: "Explore the demo",
+    },
+
+    resetDemo: {
+      title: "Demo mode",
+      body: "Password recovery requires connecting Supabase.",
+      cta: "Back to log in",
+    },
+
+    meta: {
+      resetTitle: "Reset password · Attesta",
+      resetUpdateTitle: "New password · Attesta",
+    },
+
+    pageErrors: {
+      authLink: "The link is invalid or expired. Log in or request a new one.",
+      sso: "Sign-in with the provider didn't complete. Try again or use your email.",
+    },
+
+    friendlyErrors: {
+      invalidCredentials: "Incorrect email or password.",
+      emailNotConfirmed: "Confirm your email before logging in.",
+      alreadyRegistered: "An account with this email already exists. Log in.",
+      passwordShould: "The password must be at least 6 characters.",
+      invalidEmailFormat: "The email format isn't valid.",
+      signupsDisabled: "Email sign-up is disabled. Contact the administrator.",
+      rateLimit: "Too many attempts. Wait a moment and try again.",
+      duplicateOrg: "That organization name is already taken. Try another.",
+      invalidToken: "The code is incorrect or expired. Check your email or resend it.",
+      network: "We couldn't connect. Check your connection and try again.",
+      generic: "Something went wrong. Please try again.",
+    },
+
+    login: {
+      loginTitle: "Log in",
+      signupTitle: "Create your account",
+      loginSubtitle: "Access your AI governance dashboard.",
+      signupSubtitle: "Start inventorying and classifying your AI.",
+
+      nombreLabel: "First name",
+      nombrePlaceholder: "Your name",
+      apellido1Label: "Last name",
+      apellido1Placeholder: "Last name",
+      apellido2Label: "Second surname",
+      apellido2Optional: "(optional)",
+      apellido2Placeholder: "Surname",
+      emailLabel: "Work email",
+      emailPlaceholder: "you@company.com",
+      passwordLabel: "Password",
+      forgotPassword: "Forgot your password?",
+      confirmLabel: "Confirm password",
+      passwordHint: "At least 6 characters.",
+
+      show: "Show",
+      hide: "Hide",
+      showPassword: "Show password",
+      hidePassword: "Hide password",
+
+      submitLoading: "One moment…",
+      loginCta: "Log in",
+      signupCta: "Create account",
+
+      noAccount: "Don't have an account?",
+      haveAccount: "Already have an account?",
+      switchToSignup: "Sign up",
+      switchToLogin: "Log in",
+
+      // Local (per-field) validation
+      nombreRequired: "Enter your first name.",
+      apellido1Required: "Enter your last name.",
+      emailRequired: "Enter your work email.",
+      emailInvalid: "Enter a valid email (e.g. you@company.com).",
+      passwordRequired: "Enter your password.",
+      passwordMin: "The password must be at least 6 characters.",
+      confirmRequired: "Repeat the password.",
+      confirmMismatch: "The passwords don't match.",
+
+      // Code verification (after sign-up)
+      verifyTitle: "Verify your email",
+      verifyDescBefore: "We sent a verification code to ",
+      verifyDescAfter: ". Enter it to activate your account.",
+      codeLabel: "Verification code",
+      codeRequired: "Enter the code we emailed you.",
+      codeVerifyFailed: "We couldn't verify the code. Please try again.",
+      verifying: "Verifying…",
+      verifyCta: "Verify and continue",
+      resend: "Resend code",
+      resending: "Resending…",
+      resentNotice: "We resent the code. Check your email (and the spam folder).",
+      changeEmail: "← Change email",
+      linkHint: "Got a link instead of a code? Open it from the email to confirm your account.",
+    },
+
+    sso: {
+      connecting: "Connecting…",
+      continueGoogle: "Continue with Google",
+      continueMicrosoft: "Continue with Microsoft",
+      error: "We couldn't connect with that provider. Please try again.",
+      divider: "or with your email",
+    },
+
+    onboarding: {
+      title: "Create your organization",
+      subtitle: "It's your workspace in Attesta. You can invite your team later.",
+      nameLabel: "Organization name",
+      namePlaceholder: "Acme, Inc.",
+      creating: "Creating…",
+      cta: "Create and continue",
+    },
+
+    resetRequest: {
+      title: "Recover your password",
+      subtitle: "Enter your email and we'll send you a link to create a new one.",
+      honeypotLabel: "Do not fill",
+      emailLabel: "Work email",
+      emailPlaceholder: "you@company.com",
+      sending: "Sending…",
+      submit: "Send link",
+      backToLoginLink: "← Back to log in",
+
+      emailInvalid: "Enter a valid email (e.g. you@company.com).",
+      rateLimit: "Too many attempts. Wait a moment and try again.",
+      redirectConfig: "We couldn't send the link (redirect URL configuration pending). Contact the administrator.",
+      generic: "We couldn't send the email. Please try again in a moment.",
+
+      sentTitle: "Check your email",
+      sentBodyBefore: "If an account is associated with ",
+      sentBodyAfter: ", we've sent you a link to reset your password. It expires in one hour.",
+      spamHint: "Don't see it? Check your spam folder.",
+      backToLogin: "Back to log in",
+    },
+
+    resetUpdate: {
+      checking: "Checking the link…",
+
+      invalidTitle: "Invalid link",
+      invalidBody: "This recovery link has expired or was already used. Request a new one to continue.",
+      requestAnother: "Request another link",
+
+      doneTitle: "Password updated",
+      doneBody: "Done. Taking you to your dashboard…",
+
+      title: "Create a new password",
+      subtitle: "Choose a strong password for your account.",
+      newPasswordLabel: "New password",
+      passwordHint: "At least 6 characters.",
+      confirmLabel: "Repeat the password",
+      saving: "Saving…",
+      submit: "Save password",
+      show: "Show",
+      hide: "Hide",
+      showPassword: "Show password",
+      hidePassword: "Hide password",
+
+      passwordMin: "The password must be at least 6 characters.",
+      mismatch: "The passwords don't match.",
+      shouldDiffer: "The new password must be different from the previous one.",
+      expired: "The link expired. Request a new one.",
+      generic: "We couldn't update the password. Please try again.",
+    },
+  },
 };

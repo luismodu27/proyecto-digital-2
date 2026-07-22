@@ -447,4 +447,182 @@ export const es = {
       rights: "© 2026 Attesta. Todos los derechos reservados.",
     },
   },
+
+  auth: {
+    shell: {
+      heading: "Gobierna tu IA antes que la auditoría.",
+      points: [
+        "Inventario y clasificación de riesgo (EU AI Act)",
+        "Evidencia y audit-trail listos para auditoría",
+        "Preparación de nivel enterprise, sin equipo GRC",
+      ],
+      backToSite: "← Volver al sitio",
+      switchToEn: "Ver en inglés",
+      switchToEs: "Ver en español",
+    },
+
+    demo: {
+      title: "Modo demo",
+      body: "El acceso con cuentas requiere conectar Supabase. Mientras tanto, puedes explorar el producto con datos de ejemplo.",
+      cta: "Explorar la demo",
+    },
+
+    resetDemo: {
+      title: "Modo demo",
+      body: "La recuperación de contraseña requiere conectar Supabase.",
+      cta: "Volver a iniciar sesión",
+    },
+
+    meta: {
+      resetTitle: "Recuperar contraseña · Attesta",
+      resetUpdateTitle: "Nueva contraseña · Attesta",
+    },
+
+    pageErrors: {
+      authLink: "El enlace no es válido o caducó. Inicia sesión o solicita uno nuevo.",
+      sso: "No se completó el acceso con el proveedor. Inténtalo de nuevo o usa tu correo.",
+    },
+
+    friendlyErrors: {
+      invalidCredentials: "Correo o contraseña incorrectos.",
+      emailNotConfirmed: "Confirma tu correo antes de iniciar sesión.",
+      alreadyRegistered: "Ya existe una cuenta con este correo. Inicia sesión.",
+      passwordShould: "La contraseña debe tener al menos 6 caracteres.",
+      invalidEmailFormat: "El correo no tiene un formato válido.",
+      signupsDisabled: "El registro por correo está deshabilitado. Contacta al administrador.",
+      rateLimit: "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+      duplicateOrg: "Ese nombre de organización ya está en uso. Prueba con otro.",
+      invalidToken: "El código es incorrecto o expiró. Revisa el correo o reenvíalo.",
+      network: "No pudimos conectar. Revisa tu conexión e inténtalo de nuevo.",
+      generic: "Algo salió mal. Inténtalo de nuevo.",
+    },
+
+    login: {
+      loginTitle: "Inicia sesión",
+      signupTitle: "Crea tu cuenta",
+      loginSubtitle: "Accede a tu panel de gobernanza de IA.",
+      signupSubtitle: "Empieza a inventariar y clasificar tu IA.",
+
+      nombreLabel: "Nombre",
+      nombrePlaceholder: "Tu nombre",
+      apellido1Label: "Primer apellido",
+      apellido1Placeholder: "Apellido",
+      apellido2Label: "Segundo apellido",
+      apellido2Optional: "(opcional)",
+      apellido2Placeholder: "Apellido",
+      emailLabel: "Correo de trabajo",
+      emailPlaceholder: "tu@empresa.com",
+      passwordLabel: "Contraseña",
+      forgotPassword: "¿Olvidaste tu contraseña?",
+      confirmLabel: "Confirmar contraseña",
+      passwordHint: "Mínimo 6 caracteres.",
+
+      show: "Mostrar",
+      hide: "Ocultar",
+      showPassword: "Mostrar contraseña",
+      hidePassword: "Ocultar contraseña",
+
+      submitLoading: "Un momento…",
+      loginCta: "Entrar",
+      signupCta: "Crear cuenta",
+
+      noAccount: "¿No tienes cuenta?",
+      haveAccount: "¿Ya tienes cuenta?",
+      switchToSignup: "Regístrate",
+      switchToLogin: "Inicia sesión",
+
+      // Validación local (por campo)
+      nombreRequired: "Introduce tu nombre.",
+      apellido1Required: "Introduce tu primer apellido.",
+      emailRequired: "Introduce tu correo de trabajo.",
+      emailInvalid: "Introduce un correo válido (p. ej. tu@empresa.com).",
+      passwordRequired: "Introduce tu contraseña.",
+      passwordMin: "La contraseña debe tener al menos 6 caracteres.",
+      confirmRequired: "Repite la contraseña.",
+      confirmMismatch: "Las contraseñas no coinciden.",
+
+      // Verificación por código (tras registrarse)
+      verifyTitle: "Verifica tu correo",
+      verifyDescBefore: "Te enviamos un código de verificación a ",
+      verifyDescAfter: ". Introdúcelo para activar tu cuenta.",
+      codeLabel: "Código de verificación",
+      codeRequired: "Introduce el código que te enviamos por correo.",
+      codeVerifyFailed: "No pudimos verificar el código. Inténtalo de nuevo.",
+      verifying: "Verificando…",
+      verifyCta: "Verificar y continuar",
+      resend: "Reenviar código",
+      resending: "Reenviando…",
+      resentNotice: "Te reenviamos el código. Revisa tu correo (y la carpeta de spam).",
+      changeEmail: "← Cambiar correo",
+      linkHint: "¿Recibiste un enlace en lugar de un código? Ábrelo desde el correo para confirmar tu cuenta.",
+    },
+
+    sso: {
+      connecting: "Conectando…",
+      continueGoogle: "Continuar con Google",
+      continueMicrosoft: "Continuar con Microsoft",
+      error: "No pudimos conectar con ese proveedor. Inténtalo de nuevo.",
+      divider: "o con tu correo",
+    },
+
+    onboarding: {
+      title: "Crea tu organización",
+      subtitle: "Es tu espacio de trabajo en Attesta. Podrás invitar a tu equipo después.",
+      nameLabel: "Nombre de la organización",
+      namePlaceholder: "Acme, S.A.",
+      creating: "Creando…",
+      cta: "Crear y continuar",
+    },
+
+    resetRequest: {
+      title: "Recupera tu contraseña",
+      subtitle: "Introduce tu correo y te enviaremos un enlace para crear una nueva.",
+      honeypotLabel: "No rellenar",
+      emailLabel: "Correo de trabajo",
+      emailPlaceholder: "tu@empresa.com",
+      sending: "Enviando…",
+      submit: "Enviar enlace",
+      backToLoginLink: "← Volver a iniciar sesión",
+
+      emailInvalid: "Introduce un correo válido (p. ej. tu@empresa.com).",
+      rateLimit: "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+      redirectConfig: "No pudimos enviar el enlace (configuración de URLs de redirección pendiente). Contacta al administrador.",
+      generic: "No pudimos enviar el correo. Inténtalo de nuevo en un momento.",
+
+      sentTitle: "Revisa tu correo",
+      sentBodyBefore: "Si existe una cuenta asociada a ",
+      sentBodyAfter: ", te hemos enviado un enlace para restablecer tu contraseña. Caduca en una hora.",
+      spamHint: "¿No lo ves? Revisa la carpeta de spam.",
+      backToLogin: "Volver a iniciar sesión",
+    },
+
+    resetUpdate: {
+      checking: "Comprobando el enlace…",
+
+      invalidTitle: "Enlace no válido",
+      invalidBody: "Este enlace de recuperación caducó o ya se usó. Solicita uno nuevo para continuar.",
+      requestAnother: "Solicitar otro enlace",
+
+      doneTitle: "Contraseña actualizada",
+      doneBody: "Listo. Te estamos llevando a tu panel…",
+
+      title: "Crea una nueva contraseña",
+      subtitle: "Elige una contraseña segura para tu cuenta.",
+      newPasswordLabel: "Nueva contraseña",
+      passwordHint: "Mínimo 6 caracteres.",
+      confirmLabel: "Repite la contraseña",
+      saving: "Guardando…",
+      submit: "Guardar contraseña",
+      show: "Mostrar",
+      hide: "Ocultar",
+      showPassword: "Mostrar contraseña",
+      hidePassword: "Ocultar contraseña",
+
+      passwordMin: "La contraseña debe tener al menos 6 caracteres.",
+      mismatch: "Las contraseñas no coinciden.",
+      shouldDiffer: "La nueva contraseña debe ser distinta a la anterior.",
+      expired: "El enlace caducó. Solicita uno nuevo.",
+      generic: "No pudimos actualizar la contraseña. Inténtalo de nuevo.",
+    },
+  },
 };

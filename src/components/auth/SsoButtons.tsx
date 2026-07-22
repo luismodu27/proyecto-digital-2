@@ -7,6 +7,7 @@ import {
   SSO_MICROSOFT,
   isAnySsoEnabled,
 } from "@/lib/supabase/config";
+import type { Dictionary } from "@/lib/i18n";
 
 /** Proveedores de identidad soportados (nombre de Supabase). */
 type Provider = "google" | "azure";
@@ -52,7 +53,13 @@ function MicrosoftLogo() {
  * activados por variable de entorno (`NEXT_PUBLIC_SSO_*`). Usa el flujo OAuth de
  * Supabase; el retorno lo maneja `/auth/callback` (intercambio PKCE ya soportado).
  */
-export function SsoButtons({ next = "/dashboard" }: { next?: string }) {
+export function SsoButtons({
+  t,
+  next = "/dashboard",
+}: {
+  t: Dictionary["auth"]["sso"];
+  next?: string;
+}) {
   const [loading, setLoading] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,7 +78,7 @@ export function SsoButtons({ next = "/dashboard" }: { next?: string }) {
       },
     });
     if (error) {
-      setError("No pudimos conectar con ese proveedor. Inténtalo de nuevo.");
+      setError(t.error);
       setLoading(null);
     }
     // En éxito el navegador ya está redirigiendo al proveedor: dejamos el loading.
@@ -90,11 +97,11 @@ export function SsoButtons({ next = "/dashboard" }: { next?: string }) {
           className={btn}
         >
           {loading === "google" ? (
-            "Conectando…"
+            t.connecting
           ) : (
             <>
               <GoogleLogo />
-              Continuar con Google
+              {t.continueGoogle}
             </>
           )}
         </button>
@@ -107,11 +114,11 @@ export function SsoButtons({ next = "/dashboard" }: { next?: string }) {
           className={btn}
         >
           {loading === "azure" ? (
-            "Conectando…"
+            t.connecting
           ) : (
             <>
               <MicrosoftLogo />
-              Continuar con Microsoft
+              {t.continueMicrosoft}
             </>
           )}
         </button>
@@ -128,7 +135,7 @@ export function SsoButtons({ next = "/dashboard" }: { next?: string }) {
 
       <div className="flex items-center gap-3 pt-1">
         <span className="h-px flex-1 bg-line" />
-        <span className="text-xs text-muted">o con tu correo</span>
+        <span className="text-xs text-muted">{t.divider}</span>
         <span className="h-px flex-1 bg-line" />
       </div>
     </div>

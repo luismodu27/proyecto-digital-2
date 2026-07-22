@@ -9,6 +9,7 @@ import { SsoButtons } from "@/components/auth/SsoButtons";
 import { createClient } from "@/lib/supabase/client";
 import { isAnySsoEnabled } from "@/lib/supabase/config";
 import { friendlyError } from "@/lib/friendly-error";
+import type { Dictionary } from "@/lib/i18n";
 
 type Mode = "login" | "signup";
 
@@ -22,7 +23,14 @@ type FieldErrors = {
   confirm?: string;
 };
 
-export function AuthForm({ initialError }: { initialError?: string } = {}) {
+export function AuthForm({
+  t,
+  initialError,
+}: {
+  t: Dictionary["auth"];
+  initialError?: string;
+}) {
+  const l = t.login;
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
   const [nombre, setNombre] = useState("");
@@ -44,18 +52,17 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
   function validate(): boolean {
     const errs: FieldErrors = {};
     if (mode === "signup") {
-      if (!nombre.trim()) errs.nombre = "Introduce tu nombre.";
-      if (!apellido1.trim()) errs.apellido1 = "Introduce tu primer apellido.";
+      if (!nombre.trim()) errs.nombre = l.nombreRequired;
+      if (!apellido1.trim()) errs.apellido1 = l.apellido1Required;
     }
-    if (!email.trim()) errs.email = "Introduce tu correo de trabajo.";
-    else if (!EMAIL_RE.test(email.trim()))
-      errs.email = "Introduce un correo válido (p. ej. tu@empresa.com).";
-    if (!password) errs.password = "Introduce tu contraseña.";
+    if (!email.trim()) errs.email = l.emailRequired;
+    else if (!EMAIL_RE.test(email.trim())) errs.email = l.emailInvalid;
+    if (!password) errs.password = l.passwordRequired;
     else if (mode === "signup" && password.length < 6)
-      errs.password = "La contraseña debe tener al menos 6 caracteres.";
+      errs.password = l.passwordMin;
     if (mode === "signup") {
-      if (!confirm) errs.confirm = "Repite la contraseña.";
-      else if (confirm !== password) errs.confirm = "Las contraseñas no coinciden.";
+      if (!confirm) errs.confirm = l.confirmRequired;
+      else if (confirm !== password) errs.confirm = l.confirmMismatch;
     }
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
@@ -106,7 +113,9 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
         }
       }
     } catch (err) {
-      setError(friendlyError(err instanceof Error ? err.message : ""));
+      setError(
+        friendlyError(err instanceof Error ? err.message : "", t.friendlyErrors),
+      );
     } finally {
       setLoading(false);
     }
@@ -117,7 +126,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
     setError(null);
     const token = code.trim();
     if (!/^\d{4,8}$/.test(token)) {
-      setError("Introduce el código que te enviamos por correo.");
+      setError(l.codeRequired);
       return;
     }
     setLoading(true);
@@ -133,10 +142,12 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
         router.push("/onboarding");
         router.refresh();
       } else {
-        setError("No pudimos verificar el código. Inténtalo de nuevo.");
+        setError(l.codeVerifyFailed);
       }
     } catch (err) {
-      setError(friendlyError(err instanceof Error ? err.message : ""));
+      setError(
+        friendlyError(err instanceof Error ? err.message : "", t.friendlyErrors),
+      );
     } finally {
       setLoading(false);
     }
@@ -154,9 +165,11 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
         email: pendingEmail,
       });
       if (error) throw error;
-      setNotice("Te reenviamos el código. Revisa tu correo (y la carpeta de spam).");
+      setNotice(l.resentNotice);
     } catch (err) {
-      setError(friendlyError(err instanceof Error ? err.message : ""));
+      setError(
+        friendlyError(err instanceof Error ? err.message : "", t.friendlyErrors),
+      );
     } finally {
       setResending(false);
     }
@@ -190,18 +203,18 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
       <div className="rounded-2xl border border-line bg-paper-raised p-8">
         <SealMark size={36} className="text-brand" />
         <h1 className="mt-4 font-display text-2xl font-semibold text-ink">
-          Verifica tu correo
+          {l.verifyTitle}
         </h1>
         <p className="mt-1 text-sm text-ink-soft">
-          Te enviamos un código de verificación a{" "}
-          <span className="font-medium text-ink">{pendingEmail}</span>. Introdúcelo
-          para activar tu cuenta.
+          {l.verifyDescBefore}
+          <span className="font-medium text-ink">{pendingEmail}</span>
+          {l.verifyDescAfter}
         </p>
 
         <form onSubmit={handleVerify} noValidate className="mt-6 space-y-4">
           <div>
             <label htmlFor="code" className="block text-sm font-medium text-ink">
-              Código de verificación
+              {l.codeLabel}
             </label>
             <input
               id="code"
@@ -235,7 +248,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
           )}
 
           <Button type="submit" disabled={loading} className="w-full py-2.5">
-            {loading ? "Verificando…" : "Verificar y continuar"}
+            {loading ? l.verifying : l.verifyCta}
           </Button>
         </form>
 
@@ -246,21 +259,18 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
             disabled={resending}
             className="font-medium text-brand transition-colors hover:text-brand-strong disabled:opacity-50"
           >
-            {resending ? "Reenviando…" : "Reenviar código"}
+            {resending ? l.resending : l.resend}
           </button>
           <button
             type="button"
             onClick={backToSignup}
             className="font-medium text-muted transition-colors hover:text-ink"
           >
-            ← Cambiar correo
+            {l.changeEmail}
           </button>
         </div>
 
-        <p className="mt-4 text-xs text-muted">
-          ¿Recibiste un enlace en lugar de un código? Ábrelo desde el correo para
-          confirmar tu cuenta.
-        </p>
+        <p className="mt-4 text-xs text-muted">{l.linkHint}</p>
       </div>
     );
   }
@@ -269,19 +279,17 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
     <div className="rounded-2xl border border-line bg-paper-raised p-8">
       <SealMark size={36} className="text-brand" />
       <h1 className="mt-4 font-display text-2xl font-semibold text-ink">
-        {mode === "login" ? "Inicia sesión" : "Crea tu cuenta"}
+        {mode === "login" ? l.loginTitle : l.signupTitle}
       </h1>
       <p className="mt-1 text-sm text-ink-soft">
-        {mode === "login"
-          ? "Accede a tu panel de gobernanza de IA."
-          : "Empieza a inventariar y clasificar tu IA."}
+        {mode === "login" ? l.loginSubtitle : l.signupSubtitle}
       </p>
 
       {isAnySsoEnabled && (
         <div className="mt-6">
           {/* Un único destino: el layout del dashboard envía a /onboarding si aún
               no hay organización (usuario nuevo por OAuth). */}
-          <SsoButtons next="/dashboard" />
+          <SsoButtons t={t.sso} next="/dashboard" />
         </div>
       )}
 
@@ -294,7 +302,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
           <>
             <div>
               <label htmlFor="nombre" className="block text-sm font-medium text-ink">
-                Nombre
+                {l.nombreLabel}
               </label>
               <input
                 id="nombre"
@@ -308,7 +316,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
                 aria-invalid={!!fieldErrors.nombre}
                 aria-describedby={fieldErrors.nombre ? "err-nombre" : undefined}
                 className={`${inputBase} ${fieldErrors.nombre ? errBorder : okBorder}`}
-                placeholder="Tu nombre"
+                placeholder={l.nombrePlaceholder}
               />
               {fieldErrors.nombre && (
                 <p id="err-nombre" role="alert" className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.nombre}</p>
@@ -318,7 +326,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="apellido1" className="block text-sm font-medium text-ink">
-                  Primer apellido
+                  {l.apellido1Label}
                 </label>
                 <input
                   id="apellido1"
@@ -332,7 +340,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
                   aria-invalid={!!fieldErrors.apellido1}
                   aria-describedby={fieldErrors.apellido1 ? "err-apellido1" : undefined}
                   className={`${inputBase} ${fieldErrors.apellido1 ? errBorder : okBorder}`}
-                  placeholder="Apellido"
+                  placeholder={l.apellido1Placeholder}
                 />
                 {fieldErrors.apellido1 && (
                   <p id="err-apellido1" role="alert" className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.apellido1}</p>
@@ -340,8 +348,8 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
               </div>
               <div>
                 <label htmlFor="apellido2" className="block text-sm font-medium text-ink">
-                  Segundo apellido{" "}
-                  <span className="font-normal text-muted">(opcional)</span>
+                  {l.apellido2Label}{" "}
+                  <span className="font-normal text-muted">{l.apellido2Optional}</span>
                 </label>
                 <input
                   id="apellido2"
@@ -350,7 +358,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
                   value={apellido2}
                   onChange={(e) => setApellido2(e.target.value)}
                   className={`${inputBase} ${okBorder}`}
-                  placeholder="Apellido"
+                  placeholder={l.apellido2Placeholder}
                 />
               </div>
             </div>
@@ -359,7 +367,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
 
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-ink">
-            Correo de trabajo
+            {l.emailLabel}
           </label>
           <input
             id="email"
@@ -373,7 +381,7 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
             aria-invalid={!!fieldErrors.email}
             aria-describedby={fieldErrors.email ? "err-email" : undefined}
             className={`${inputBase} ${fieldErrors.email ? errBorder : okBorder}`}
-            placeholder="tu@empresa.com"
+            placeholder={l.emailPlaceholder}
           />
           {fieldErrors.email && (
             <p id="err-email" role="alert" className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.email}</p>
@@ -383,14 +391,14 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
         <div>
           <div className="flex items-center justify-between">
             <label htmlFor="password" className="block text-sm font-medium text-ink">
-              Contraseña
+              {l.passwordLabel}
             </label>
             {mode === "login" && (
               <Link
                 href="/reset-password"
                 className="text-xs font-medium text-brand transition-colors hover:text-brand-strong"
               >
-                ¿Olvidaste tu contraseña?
+                {l.forgotPassword}
               </Link>
             )}
           </div>
@@ -413,23 +421,23 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
               type="button"
               onClick={() => setShowPass((s) => !s)}
               className="absolute inset-y-0 right-0 px-3 text-xs font-medium text-muted hover:text-ink"
-              aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+              aria-label={showPass ? l.hidePassword : l.showPassword}
             >
-              {showPass ? "Ocultar" : "Mostrar"}
+              {showPass ? l.hide : l.show}
             </button>
           </div>
           {fieldErrors.password && (
             <p id="err-password" role="alert" className="mt-1.5 text-xs text-[var(--tone-danger-fg)]">{fieldErrors.password}</p>
           )}
           {mode === "signup" && !fieldErrors.password && (
-            <p className="mt-1.5 text-xs text-muted">Mínimo 6 caracteres.</p>
+            <p className="mt-1.5 text-xs text-muted">{l.passwordHint}</p>
           )}
         </div>
 
         {mode === "signup" && (
           <div>
             <label htmlFor="confirm" className="block text-sm font-medium text-ink">
-              Confirmar contraseña
+              {l.confirmLabel}
             </label>
             <input
               id="confirm"
@@ -467,21 +475,21 @@ export function AuthForm({ initialError }: { initialError?: string } = {}) {
 
         <Button type="submit" disabled={loading} className="w-full py-2.5">
           {loading
-            ? "Un momento…"
+            ? l.submitLoading
             : mode === "login"
-              ? "Entrar"
-              : "Crear cuenta"}
+              ? l.loginCta
+              : l.signupCta}
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-ink-soft">
-        {mode === "login" ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"}{" "}
+        {mode === "login" ? l.noAccount : l.haveAccount}{" "}
         <button
           type="button"
           onClick={switchMode}
           className="font-medium text-brand transition-colors hover:text-brand-strong"
         >
-          {mode === "login" ? "Regístrate" : "Inicia sesión"}
+          {mode === "login" ? l.switchToSignup : l.switchToLogin}
         </button>
       </p>
     </div>
