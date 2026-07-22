@@ -127,6 +127,17 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Vigilancia (dashboard): pulido + banda de orientación.** Revisión de la vista de vigilancia
+  (`src/app/dashboard/vigilancia/page.tsx`) a petición del fundador. Tres mejoras (sin tocar contenido legal): (1)
+  **arreglo de bug visual** en el hero — el marco aparecía duplicado ("EU AI Act · EU AI Act") cuando el nombre corto y el
+  largo coinciden; ahora la etiqueta larga solo se muestra si aporta sobre el pill. (2) **Banda de orientación** nueva bajo
+  el filtro de jurisdicción: 4 stats deterministas (próximos plazos · el más cercano · ya en vigor · marcos vigilados),
+  lectura "de un vistazo" estilo Vanta/Drata. (3) **Divisor "Ya en vigor"** en la cronología, separando visualmente los
+  plazos futuros de los ya vigentes/pasados. Claves nuevas en el diccionario `monitoring` (ES/EN). **Decisión del fundador:**
+  los números de artículo (Art. 26, Anexo III) del dashboard **se mantienen en `font-mono`** — el rechazo del mono era
+  **solo para el landing**; en la app interna el aire monospace es deseable. lint+tsc+build verdes; verificado en demo
+  (claro/oscuro).
+
 - **2026-07-22** · **Landing: card de California + chip de Colorado actualizado en la rejilla de cobertura.** Cierra dos
   pendientes anotados del estudio del landing. (1) Se añadió **California (IA en empleo)** como 6ª card de "Cobertura de
   marcos" (va en la rejilla de "en vigor" porque FEHA/ADS rige desde 2025-10-01 y CPPA/ADMT desde 2026-01-01): tag
