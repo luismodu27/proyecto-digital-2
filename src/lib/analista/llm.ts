@@ -17,6 +17,7 @@ import {
   isLlmConfigured,
 } from "./config";
 import { EU_AI_ACT_FRAMING_NOTES } from "./corpus/eu-ai-act";
+import { RISK_ORDER } from "@/lib/mock-data";
 
 /** Copy PROHIBIDO en textos de Attesta (CLAUDE.md). Nunca debe aparecer. */
 const PROHIBITED_COPY = [
@@ -74,7 +75,6 @@ export type AnalistaSignal = {
   content: string;
 };
 
-const RISK_LEVELS = ["unacceptable", "high", "limited", "minimal"] as const;
 const KINDS = ["deadline", "guidance", "standard", "amendment", "enforcement"] as const;
 
 /**
@@ -97,7 +97,7 @@ const PROPOSE_FN = {
         action: { type: "string", description: "Acción concreta (español)." },
         articles: { type: "array", items: { type: "string" }, description: "Referencias LIMPIAS de artículo (p. ej. 'Art. 26.11', 'Anexo III.4'). SIN corchetes, números de lista ni títulos." },
         scope_all: { type: "boolean", description: "true si afecta a toda la organización." },
-        scope_risk_levels: { type: "array", items: { type: "string", enum: [...RISK_LEVELS] }, description: "Niveles de riesgo afectados." },
+        scope_risk_levels: { type: "array", items: { type: "string", enum: [...RISK_ORDER] }, description: "Niveles de riesgo afectados." },
         proposed_event_id: { type: "string", description: "Id sugerido (kebab-case) o vacío." },
         confidence: { type: "number", description: "Confianza 0..1." },
         citations: {

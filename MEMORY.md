@@ -127,6 +127,15 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Limpieza técnica (P4): fuente única de días-restantes y del orden de riesgo.** Sin impacto de
+  usuario. (1) `daysUntil` (regulatory-watch) y `daysUntilDate` (bias-audit) duplicaban el mismo cálculo de días
+  restantes → se extrajo a `src/lib/date.ts` (`parseIsoDateUTC` + `daysUntilDate`); ambos módulos delegan, firmas
+  públicas intactas (probado equivalente). (2) Cuatro redeclaraciones locales de `RISK_LEVELS = [...]` (en
+  `data/actions.ts`, `data/reg-pipeline-actions.ts`, `analista/llm.ts`, `CandidateReviewControls.tsx`) ahora usan
+  `RISK_ORDER` de mock-data como fuente única del orden de niveles. **Diferidos a propósito:** los formateadores de
+  fecha/cuenta-atrás en `es-ES` fijo — con la app ya bilingüe, unificarlos en un helper es-ES cementaría un hueco de
+  i18n; el helper correcto es locale-aware (cambio de comportamiento), así que es decisión de producto, no dedup.
+
 - **2026-07-22** · **Práctica prohibida (Art. 5) fuera del "% listo": nuevo flag `prohibited` en los policy packs.**
   Problema de integridad de marca: un control cuyo objeto ES una práctica PROHIBIDA del Art. 5 (riesgo inaceptable —
   p. ej. reconocimiento de emociones en el trabajo, Art. 5.1.f) se insertaba como `gap_item` "missing" que computaba en

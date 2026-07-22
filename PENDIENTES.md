@@ -346,13 +346,22 @@ Mantenibilidad, **sin impacto de usuario**; no urgente. Del escaneo completo:
 
 - [ ] Unificar los **3 formateadores de cuenta-atrás** en español (`task-reminders.ts:dueLabel`,
   `BiasAuditBadge.tsx:countdownText`, `reminders/email.ts:countdown`) en un helper único en `lib/`.
-- [ ] Fusionar **`daysUntil`** (`regulatory-watch.ts`) y **`daysUntilDate`** (`bias-audit.ts`) en una sola
-  función que acepte `string | null`.
+  **DIFERIDO a propósito (2026-07-22):** son strings en español ("vence en N días"); con la app ya bilingüe, un
+  helper es-ES fijo *cementaría* un hueco de i18n en vez de resolverlo. Hacerlo bien implica decidir si esos
+  textos deben ser locale-aware → decisión de producto, no simple dedup. Se deja para esa tanda.
+- [x] ~~Fusionar **`daysUntil`** (`regulatory-watch.ts`) y **`daysUntilDate`** (`bias-audit.ts`)~~ ✅ HECHO
+  (2026-07-22). Nueva `src/lib/date.ts` con la implementación única (`parseIsoDateUTC` + `daysUntilDate(string|null)`);
+  ambos módulos delegan (se probó que el cálculo era idéntico: medianoche UTC − medianoche UTC de hoy; `NaN`/`null`
+  en fecha inválida). Firmas públicas intactas (`daysUntil` sigue devolviendo `number`). Verificado tsc+lint+build.
 - [ ] Centralizar los **~7 formateadores de fecha** `toLocaleDateString("es-ES", …)` repartidos por páginas
   (facturación, informes, vigilancia, equipo, dossier) en 2-3 helpers nombrados (`fmtFechaLarga`/`fmtFechaCorta`).
-- [ ] Reutilizar **`RISK_ORDER`** en los sitios que aún re-declaran el orden de niveles
-  (`CandidateReviewControls.tsx`, `analista/llm.ts`, `reg-pipeline-actions.ts`).
-- [ ] Feature-flag explícito / nota del módulo **`analista/`** (RAG con Voyage+LLM, a medio cablear; `TODO(B.1)`
+  **DIFERIDO a propósito (2026-07-22):** mismo motivo que la cuenta-atrás — el `es-ES` fijo es un latente de i18n; el
+  helper correcto es locale-aware (cambia el render en EN), que es cambio de comportamiento, no "sin impacto de usuario".
+- [x] ~~Reutilizar **`RISK_ORDER`** en los sitios que aún re-declaran el orden de niveles
+  (`CandidateReviewControls.tsx`, `analista/llm.ts`, `reg-pipeline-actions.ts`)~~ ✅ HECHO (2026-07-22). Las 4
+  redeclaraciones locales de `RISK_LEVELS` (incluida la de `data/actions.ts`) ahora importan `RISK_ORDER` de
+  `mock-data` (fuente única del orden de niveles). Verificado tsc+lint+build.
+- [x] ~~Feature-flag explícito / nota del módulo **`analista/`**~~ ✅ Ya estaba (nota B.0/B.1 + `TODO(B.1)`
   en `voyage.ts`) para que no quede como código semi-muerto.
 
 ### Seguridad — ítems BAJA documentados (auditoría 2026-07-21)

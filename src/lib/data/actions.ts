@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
 import type { Answers, ClassificationResult } from "@/lib/risk-assessment";
-import { AI_SYSTEMS, GAP_ITEMS } from "@/lib/mock-data";
+import { AI_SYSTEMS, GAP_ITEMS, RISK_ORDER } from "@/lib/mock-data";
 import { policyPackById } from "@/lib/policy-packs";
 import { resolveLocale } from "@/lib/i18n/resolve";
 
@@ -18,8 +18,6 @@ const SEVERITY_EN: Record<string, string> = {
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-const RISK_LEVELS = ["unacceptable", "high", "limited", "minimal"] as const;
 
 /**
  * Verifica que un `ai_system` existe y pertenece a la organización activa.
@@ -484,7 +482,7 @@ export async function saveRiskAssessment(
 
   // El nivel llega calculado en cliente: validarlo contra el enum antes de
   // persistirlo (no confiar en la clasificación enviada sin comprobar).
-  if (!RISK_LEVELS.includes(result.level as (typeof RISK_LEVELS)[number])) {
+  if (!RISK_ORDER.includes(result.level)) {
     return { ok: false as const, error: "nivel de riesgo no válido" };
   }
   // El sistema debe pertenecer a la org activa.

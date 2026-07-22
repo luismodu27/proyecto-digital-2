@@ -16,6 +16,7 @@
 
 import type { AiSystem, RiskLevel } from "./mock-data";
 import type { Locale } from "./i18n/config";
+import { daysUntilDate } from "./date";
 
 export type RegFramework =
   | "eu-ai-act"
@@ -1240,12 +1241,9 @@ export function affectedSystems(
  * `now` se inyecta para permitir un cálculo estable por request.
  */
 export function daysUntil(dateIso: string, now: Date): number {
-  const MS_DAY = 86_400_000;
-  const target = new Date(`${dateIso}T00:00:00Z`).getTime();
-  const today = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-  ).getTime();
-  return Math.round((target - today) / MS_DAY);
+  // Delega en la implementación única de `./date`. Las fechas de eventos siempre
+  // son válidas; `?? NaN` conserva el comportamiento previo para una fecha inválida.
+  return daysUntilDate(dateIso, now) ?? NaN;
 }
 
 /** ¿El evento está en el futuro (o es hoy)? */

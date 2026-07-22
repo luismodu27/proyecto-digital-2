@@ -8,10 +8,9 @@ import {
   type RegKind,
   type RegFramework,
 } from "@/lib/regulatory-watch";
-import { riskLabel, type RegCandidate, type RiskLevel } from "@/lib/mock-data";
+import { riskLabel, RISK_ORDER, type RegCandidate } from "@/lib/mock-data";
 import { useT, useLocale } from "@/lib/i18n/provider";
 
-const RISK_LEVELS = ["unacceptable", "high", "limited", "minimal"] as const;
 
 const inputCls =
   "w-full rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand";
@@ -313,7 +312,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
                   />
                   {tcc.scopeAll}
                 </label>
-                {RISK_LEVELS.map((lvl) => (
+                {RISK_ORDER.map((lvl) => (
                   <label
                     key={lvl}
                     className="flex items-center gap-1.5 text-sm text-ink-soft"
@@ -324,7 +323,7 @@ export function CandidateReviewControls({ c }: { c: RegCandidate }) {
                       defaultChecked={c.scope.riskLevels?.includes(lvl) ?? false}
                       className="accent-[var(--color-brand)]"
                     />
-                    {riskLabel(lvl as RiskLevel, locale)}
+                    {riskLabel(lvl, locale)}
                   </label>
                 ))}
               </div>

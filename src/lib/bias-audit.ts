@@ -9,6 +9,11 @@
  * "Auditoría realizada" ≠ "aprobada" ≠ "sin discriminación".
  */
 import type { Locale } from "./i18n/config";
+import { parseIsoDateUTC, daysUntilDate } from "./date";
+
+// `daysUntilDate` se define una sola vez en `./date`; se re-exporta aquí para no
+// romper los imports existentes (`@/lib/bias-audit`).
+export { daysUntilDate };
 
 /** Umbral (días) para avisar de que una auditoría está por vencer. Un solo sitio. */
 export const BIAS_AUDIT_WARN_DAYS = 60;
@@ -62,26 +67,12 @@ export const BIAS_STATUS_TONE: Record<BiasAuditStatus, "danger" | "warn" | "good
   vigente: "good",
 };
 
-function parseDate(iso: string | null): Date | null {
-  if (!iso) return null;
-  const d = new Date(`${iso.slice(0, 10)}T00:00:00Z`);
-  return isNaN(d.getTime()) ? null : d;
-}
-
 /** Fecha en que caduca la auditoría = última auditoría + 12 meses calendario. */
 export function nextBiasAuditDue(lastAuditDate: string | null): string | null {
-  const d = parseDate(lastAuditDate);
+  const d = parseIsoDateUTC(lastAuditDate);
   if (!d) return null;
   d.setUTCMonth(d.getUTCMonth() + 12);
   return d.toISOString().slice(0, 10);
-}
-
-/** Días que faltan (negativo = ya vencida) hasta la fecha ISO dada. */
-export function daysUntilDate(dateIso: string | null, now: Date): number | null {
-  const d = parseDate(dateIso);
-  if (!d) return null;
-  const ms = d.getTime() - Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  return Math.round(ms / 86_400_000);
 }
 
 /** Estado de la auditoría de sesgo de una herramienta. */

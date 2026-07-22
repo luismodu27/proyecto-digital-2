@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { RISK_ORDER } from "@/lib/mock-data";
 
 const QUEUE = "/dashboard/vigilancia/candidatos";
 
@@ -32,7 +33,6 @@ export async function approveCandidate(formData: FormData) {
   redirect(`${QUEUE}?toast=cand-approved`);
 }
 
-const RISK_LEVELS = ["unacceptable", "high", "limited", "minimal"] as const;
 
 /**
  * Enriquece un candidato en borrador (rellena fecha, tipo, textos, artículos y
@@ -70,7 +70,7 @@ export async function enrichCandidate(formData: FormData) {
   if (formData.get("scope_all")) {
     scope = { all: true };
   } else {
-    const levels = RISK_LEVELS.filter((l) => formData.get(`risk_${l}`));
+    const levels = RISK_ORDER.filter((l) => formData.get(`risk_${l}`));
     if (levels.length > 0) scope = { riskLevels: levels };
   }
 
