@@ -127,6 +127,19 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Radar de vigilancia de California (4 eventos ES+EN) — complemento de los 2 packs de CA.**
+  A petición del fundador, se añadieron los eventos de radar de California a `regulatory-watch.ts` (validados por el
+  `compliance-domain-expert` contra Civil Rights Council y CPPA): FEHA ADS en vigor (1-oct-2025), reglamento CCPA/CPPA
+  ADMT vigente (1-ene-2026), cumplimiento del empleador ADMT (1-ene-2027) y entrega de attestation de risk assessment a la
+  CPPA (1-abr-2028, redactado conservador). Se añadieron 2 marcos (`us-ca-feha`, `us-ca-admt`) y la jurisdicción `us-ca`
+  a los tipos `RegFramework`/`RegJurisdiction` y a TODOS los `Record<…>` acoplados (FRAMEWORK_META/_EN, FRAMEWORK_LABEL/_EN,
+  JURISDICTION_ORDER, JURISDICTION_LABEL/_EN). California aparece sola en el toggle de jurisdicciones y los chips porque
+  ambos derivan de `JURISDICTION_ORDER`. **Corrección de paso:** `jurisdiction-actions.ts` tenía una lista blanca
+  hardcodeada (`ALLOWED`) que NO incluía `us-ca` → una org real no podría guardar California; ahora deriva de
+  `JURISDICTION_ORDER` (fuente única, no vuelve a desincronizarse). Default demo de `getOrgJurisdictions` ahora incluye
+  `us-ca` para que se vea en la demo. Copy de marca respetado ("attestation" = nombre propio de la entrega a la CPPA §7157,
+  no afirmación de Attesta). tsc+lint+build exit 0.
+
 - **2026-07-22** · **Foso EE. UU. ampliado: 2 packs nuevos de California (FEHA/ADS + CCPA/CPPA ADMT). Ahora 7 packs.**
   El fundador pidió ampliar el foso de EE. UU. El experto verificó (fuentes de despachos + agencias, snapshot jul-2026) que el
   alcance que proponía `PENDIENTES §2.2` (NYC LL144 + Illinois) **ya estaba construido** (pack `us-hiring`) y que **Colorado

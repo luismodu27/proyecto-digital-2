@@ -23,10 +23,18 @@ export type RegFramework =
   | "us-co-aiact"
   | "us-il-aivia"
   | "us-il-hra"
+  | "us-ca-feha"
+  | "us-ca-admt"
   | "us-eeoc";
 
 /** Jurisdicción a la que pertenece un marco (para agrupar y filtrar el radar). */
-export type RegJurisdiction = "eu" | "us-ny" | "us-co" | "us-il" | "us-federal";
+export type RegJurisdiction =
+  | "eu"
+  | "us-ny"
+  | "us-co"
+  | "us-il"
+  | "us-ca"
+  | "us-federal";
 
 export type FrameworkMeta = {
   /** Nombre completo de la ley/marco. */
@@ -133,6 +141,20 @@ export const FRAMEWORK_META: Record<RegFramework, FrameworkMeta> = {
     jurisdiction: "us-il",
     jurisdictionLabel: "EE. UU. — Illinois",
   },
+  "us-ca-feha": {
+    label:
+      "California — FEHA: reglamento sobre sistemas de decisión automatizada (ADS) en empleo (California Civil Rights Council)",
+    short: "CA FEHA ADS",
+    jurisdiction: "us-ca",
+    jurisdictionLabel: "EE. UU. — California",
+  },
+  "us-ca-admt": {
+    label:
+      "California — CCPA/CPPA: reglamento sobre tecnología de decisión automatizada (ADMT)",
+    short: "CA CPPA ADMT",
+    jurisdiction: "us-ca",
+    jurisdictionLabel: "EE. UU. — California",
+  },
   "us-eeoc": {
     label: "EEOC — orientación federal",
     short: "EEOC",
@@ -181,6 +203,20 @@ export const FRAMEWORK_META_EN: Record<RegFramework, FrameworkMeta> = {
     short: "IL HRA",
     jurisdiction: "us-il",
     jurisdictionLabel: "US — Illinois",
+  },
+  "us-ca-feha": {
+    label:
+      "California — FEHA: Employment Regulations Regarding Automated-Decision Systems (California Civil Rights Council)",
+    short: "CA FEHA ADS",
+    jurisdiction: "us-ca",
+    jurisdictionLabel: "US — California",
+  },
+  "us-ca-admt": {
+    label:
+      "California — CCPA/CPPA: Automated Decisionmaking Technology (ADMT) regulations",
+    short: "CA CPPA ADMT",
+    jurisdiction: "us-ca",
+    jurisdictionLabel: "US — California",
   },
   "us-eeoc": {
     label: "EEOC — federal guidance",
@@ -236,6 +272,7 @@ export const JURISDICTION_ORDER: RegJurisdiction[] = [
   "us-ny",
   "us-co",
   "us-il",
+  "us-ca",
   "us-federal",
 ];
 
@@ -245,6 +282,7 @@ export const JURISDICTION_LABEL: Record<RegJurisdiction, string> = {
   "us-ny": "EE. UU. — Nueva York",
   "us-co": "EE. UU. — Colorado",
   "us-il": "EE. UU. — Illinois",
+  "us-ca": "EE. UU. — California",
   "us-federal": "EE. UU. — Federal",
 };
 
@@ -259,6 +297,7 @@ export const JURISDICTION_LABEL_EN: Record<RegJurisdiction, string> = {
   "us-ny": "US — New York",
   "us-co": "US — Colorado",
   "us-il": "US — Illinois",
+  "us-ca": "US — California",
   "us-federal": "US — Federal",
 };
 
@@ -284,6 +323,8 @@ export const FRAMEWORK_LABEL: Record<RegFramework, string> = {
   "us-co-aiact": FRAMEWORK_META["us-co-aiact"].label,
   "us-il-aivia": FRAMEWORK_META["us-il-aivia"].label,
   "us-il-hra": FRAMEWORK_META["us-il-hra"].label,
+  "us-ca-feha": FRAMEWORK_META["us-ca-feha"].label,
+  "us-ca-admt": FRAMEWORK_META["us-ca-admt"].label,
   "us-eeoc": FRAMEWORK_META["us-eeoc"].label,
 };
 
@@ -299,6 +340,8 @@ export const FRAMEWORK_LABEL_EN: Record<RegFramework, string> = {
   "us-co-aiact": FRAMEWORK_META_EN["us-co-aiact"].label,
   "us-il-aivia": FRAMEWORK_META_EN["us-il-aivia"].label,
   "us-il-hra": FRAMEWORK_META_EN["us-il-hra"].label,
+  "us-ca-feha": FRAMEWORK_META_EN["us-ca-feha"].label,
+  "us-ca-admt": FRAMEWORK_META_EN["us-ca-admt"].label,
   "us-eeoc": FRAMEWORK_META_EN["us-eeoc"].label,
 };
 
@@ -641,6 +684,96 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     source: {
       label: "EEOC — Artificial Intelligence and the ADA (página oficial)",
       url: "https://www.eeoc.gov/eeoc-disability-related-resources/artificial-intelligence-and-ada",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── California — FEHA (ADS en empleo) y CCPA/CPPA (ADMT) ──
+  {
+    id: "us-ca-feha-ads-effective",
+    date: "2025-10-01",
+    kind: "deadline",
+    framework: "us-ca-feha",
+    title:
+      "Regs de FEHA sobre sistemas de decisión automatizada (ADS) en empleo — en vigor",
+    summary:
+      "El California Civil Rights Council adoptó reglas que aclaran cómo la ley antidiscriminación de California (FEHA) se aplica al uso de sistemas de decisión automatizada (ADS) e IA en decisiones de empleo. En vigor desde el 1 de octubre de 2025.",
+    impact:
+      "Si empleas a 5 o más personas en California y usas ADS/IA en selección, promoción u otras decisiones de empleo, eres obligado directo. Un ADS que genere impacto dispar por una característica protegida puede infringir la ley; además debes conservar registros de criterios de selección, datos del ADS y flujo de solicitantes durante al menos 4 años, y respondes por lo que hagan los agentes/vendedores que actúan por ti.",
+    action:
+      "Inventaría qué ADS/IA intervienen en tus decisiones de empleo, reúne evidencia declarada de pruebas anti-sesgo (impacto dispar) y de que el ADS no sustituye la evaluación individualizada, activa la retención de registros ≥4 años y revisa los contratos con vendedores que operan como tus agentes.",
+    articles: ["2 CCR §11008.1", "2 CCR §11009", "2 CCR §11013"],
+    source: {
+      label:
+        "California Civil Rights Council — Texto final, Employment Regulations Regarding Automated-Decision Systems",
+      url: "https://calcivilrights.ca.gov/wp-content/uploads/sites/32/2025/06/Final-Text-regulations-automated-employment-decision-systems.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-regs-effective",
+    date: "2026-01-01",
+    kind: "amendment",
+    framework: "us-ca-admt",
+    title:
+      "Reglamento CCPA/CPPA (ADMT, evaluaciones de riesgo y auditorías de ciberseguridad) — vigente",
+    summary:
+      "El reglamento del California Privacy Protection Agency (CPPA) sobre tecnología de decisión automatizada (ADMT), evaluaciones de riesgo y auditorías de ciberseguridad entró en vigor el 1 de enero de 2026 (aprobado por la Office of Administrative Law el 22 de septiembre de 2025). Arranca el reloj de un cumplimiento escalonado.",
+    impact:
+      "El empleo cuenta como \"significant decision\" bajo el reglamento: si usas ADMT para decidir sobre contratación, salario, disciplina o terminación sin intervención humana significativa, quedarás sujeto a aviso previo, opt-out, acceso a la lógica y evaluación de riesgo documentada. La vigencia inicia la obligación de conducir evaluaciones de riesgo; las obligaciones del empleador frente a la persona trabajadora tienen fechas posteriores.",
+    action:
+      "Mapea si algún sistema tuyo constituye ADMT para decisiones significativas de empleo y valora la excepción de \"meaningful human involvement\"; empieza a documentar evaluaciones de riesgo y prepara el calendario de aviso previo/opt-out/acceso para las fechas exigibles.",
+    articles: [
+      "Cal. Code Regs. tit. 11 §7120 (auditorías de ciberseguridad)",
+      "§7150 (evaluaciones de riesgo)",
+      "§7200 (ADMT)",
+    ],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — Texto del reglamento CCPA vigente 1-ene-2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-employer-compliance",
+    date: "2027-01-01",
+    kind: "deadline",
+    framework: "us-ca-admt",
+    title:
+      "Cumplimiento del empleador: ADMT en decisiones significativas de empleo",
+    summary:
+      "Fecha en que las empresas que usan ADMT para tomar decisiones significativas —el empleo entre ellas— deben cumplir las obligaciones de aviso previo (§7220), opt-out (§7221) y acceso a la lógica (§7222). Rige para el ADMT ya en uso; el ADMT desplegado después debe cumplir antes de su primer uso.",
+    impact:
+      "Si a esta fecha ya usas ADMT para decisiones significativas de empleo sin intervención humana significativa, debes tener operativos el aviso previo, los métodos de opt-out y la respuesta de acceso, además de la evaluación de riesgo documentada. Cualquier ADMT que despliegues después tiene que cumplir antes de usarse por primera vez.",
+    action:
+      "Antes de esta fecha: publica el aviso previo, habilita al menos dos métodos de opt-out (con sus excepciones), prepara respuestas de acceso comprensibles y ten cerradas y documentadas las evaluaciones de riesgo de cada ADMT de empleo.",
+    articles: ["Cal. Code Regs. tit. 11 §7220", "§7221", "§7222"],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — Texto del reglamento CCPA vigente 1-ene-2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-risk-assessment-attestation",
+    date: "2028-04-01",
+    kind: "deadline",
+    framework: "us-ca-admt",
+    title:
+      "Entrega a la CPPA: attestation y resumen de evaluaciones de riesgo",
+    summary:
+      "Primera fecha en que las empresas obligadas a realizar evaluaciones de riesgo —incluye usar ADMT para decisiones significativas de empleo— deben presentar a la CPPA una attestation de que se completaron y un resumen de la información. Cubre las evaluaciones realizadas desde el inicio del cumplimiento (2026 en adelante).",
+    impact:
+      "No basta con conducir la evaluación de riesgo de puertas adentro: hay una entrega formal ante el regulador. Si usas ADMT en empleo, esta es la primera fecha de presentación ante la CPPA; las evaluaciones deben revisarse al menos cada tres años o ante cambios materiales.",
+    action:
+      "Ten las evaluaciones de riesgo documentadas y firmadas con antelación, designa quién presenta la attestation y el resumen ante la CPPA, y programa la revisión periódica (≥ cada 3 años o ante cambios materiales).",
+    articles: ["Cal. Code Regs. tit. 11 §7150", "§7157"],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — Texto del reglamento CCPA vigente 1-ene-2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
     },
     scope: { riskLevels: ["high"] },
   },
@@ -994,6 +1127,94 @@ export const REGULATORY_EVENTS_EN: RegulatoryEvent[] = [
     source: {
       label: "EEOC — Artificial Intelligence and the ADA (official page)",
       url: "https://www.eeoc.gov/eeoc-disability-related-resources/artificial-intelligence-and-ada",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── California — FEHA (ADS in employment) and CCPA/CPPA (ADMT) ──
+  {
+    id: "us-ca-feha-ads-effective",
+    date: "2025-10-01",
+    kind: "deadline",
+    framework: "us-ca-feha",
+    title:
+      "FEHA regulations on automated-decision systems (ADS) in employment — in effect",
+    summary:
+      "The California Civil Rights Council adopted rules clarifying how California's anti-discrimination law (FEHA) applies to the use of automated-decision systems (ADS) and AI in employment decisions. In effect since October 1, 2025.",
+    impact:
+      "If you employ five or more people in California and use ADS/AI in hiring, promotion, or other employment decisions, you are a directly regulated party. An ADS that produces a disparate impact on a protected characteristic can violate the law; you also must retain records of selection criteria, ADS data, and applicant-flow logs for at least 4 years, and you remain responsible for agents/vendors acting on your behalf.",
+    action:
+      "Inventory which ADS/AI touch your employment decisions, gather declared evidence of anti-bias (disparate-impact) testing and of the ADS not replacing individualized assessment, turn on ≥4-year record retention, and review contracts with vendors that act as your agents.",
+    articles: ["2 CCR §11008.1", "2 CCR §11009", "2 CCR §11013"],
+    source: {
+      label:
+        "California Civil Rights Council — Final Text, Employment Regulations Regarding Automated-Decision Systems",
+      url: "https://calcivilrights.ca.gov/wp-content/uploads/sites/32/2025/06/Final-Text-regulations-automated-employment-decision-systems.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-regs-effective",
+    date: "2026-01-01",
+    kind: "amendment",
+    framework: "us-ca-admt",
+    title:
+      "CCPA/CPPA regulations (ADMT, risk assessments, cybersecurity audits) — effective",
+    summary:
+      "The California Privacy Protection Agency (CPPA) regulations on automated decisionmaking technology (ADMT), risk assessments, and cybersecurity audits took effect on January 1, 2026 (approved by the Office of Administrative Law on September 22, 2025). This starts the clock on a phased compliance timeline.",
+    impact:
+      "Employment counts as a \"significant decision\" under the regulations: if you use ADMT to decide on hiring, pay, discipline, or termination without meaningful human involvement, you will be subject to pre-use notice, opt-out, access to the logic, and a documented risk assessment. The effective date triggers the duty to conduct risk assessments; the employer's obligations toward the worker have later dates.",
+    action:
+      "Map whether any of your systems constitute ADMT for significant employment decisions and assess the \"meaningful human involvement\" exception; begin documenting risk assessments and prepare the pre-use-notice/opt-out/access timeline for the enforceable dates.",
+    articles: [
+      "Cal. Code Regs. tit. 11 §7120 (cybersecurity audits)",
+      "§7150 (risk assessments)",
+      "§7200 (ADMT)",
+    ],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — CCPA regulation text effective Jan 1, 2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-employer-compliance",
+    date: "2027-01-01",
+    kind: "deadline",
+    framework: "us-ca-admt",
+    title: "Employer compliance: ADMT in significant employment decisions",
+    summary:
+      "Date by which businesses using ADMT to make significant decisions — employment among them — must meet the pre-use notice (§7220), opt-out (§7221), and access-to-the-logic (§7222) obligations. It applies to ADMT already in use; ADMT deployed later must comply before its first use.",
+    impact:
+      "If by this date you already use ADMT for significant employment decisions without meaningful human involvement, you must have the pre-use notice, opt-out methods, and access responses operational, plus the documented risk assessment. Any ADMT you deploy afterward must comply before it is used for the first time.",
+    action:
+      "Before this date: publish the pre-use notice, enable at least two opt-out methods (with their exceptions), prepare plain-language access responses, and have the risk assessment for each employment ADMT closed and documented.",
+    articles: ["Cal. Code Regs. tit. 11 §7220", "§7221", "§7222"],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — CCPA regulation text effective Jan 1, 2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-risk-assessment-attestation",
+    date: "2028-04-01",
+    kind: "deadline",
+    framework: "us-ca-admt",
+    title: "Submission to the CPPA: risk-assessment attestation and summary",
+    summary:
+      "First date by which businesses required to conduct risk assessments — including those using ADMT for significant employment decisions — must submit to the CPPA an attestation that the assessments were completed plus a summary of the information. It covers assessments conducted since compliance began (2026 onward).",
+    impact:
+      "Conducting the risk assessment in-house is not enough: there is a formal filing with the regulator. If you use ADMT in employment, this is the first submission date before the CPPA; assessments must be reviewed at least every three years or upon material changes.",
+    action:
+      "Have your risk assessments documented and signed off ahead of time, designate who files the attestation and summary with the CPPA, and schedule the periodic review (at least every 3 years or upon material changes).",
+    articles: ["Cal. Code Regs. tit. 11 §7150", "§7157"],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — CCPA regulation text effective Jan 1, 2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
     },
     scope: { riskLevels: ["high"] },
   },

@@ -274,10 +274,13 @@ regulatorias, enums de dominio).
 - ✅ **Colorado**: el radar ya refleja **SB 26-189** (no la derogada SB 24-205) — no requirió corrección.
 - **Pendiente antes de GA:** validación por **abogado de empleo/privacidad de California** de los 2 packs de CA (el experto
   dejó citas conservadoras en algunos números de sección por no poder parsear el PDF oficial; conviene confirmarlos).
-- **Follow-ups OPCIONALES (no pedidos):** (a) **Texas TRAIGA** (HB 149, ene-2026) solo como **radar** — deberes finos al
-  empleador privado, no da para pack; (b) **eventos de vigilancia (radar) para California** (FEHA en vigor, ADMT 2027) +
-  su `FRAMEWORK_META`/`JURISDICTION` (`us-ca`) — hoy los packs de CA funcionan sin entrada de radar (patrón ya usado por
-  otros packs). NO construir aún: bias-testing propio, ISO/NIST, shadow-AI.
+- ✅ **Eventos de vigilancia (radar) de California — HECHO (2026-07-22).** 4 eventos validados por el experto (ES+EN) en
+  `regulatory-watch.ts`: FEHA ADS en vigor (1-oct-2025), reglamento CCPA/CPPA ADMT vigente (1-ene-2026), cumplimiento del
+  empleador ADMT (1-ene-2027), entrega de attestation de risk assessment a la CPPA (1-abr-2028). Nuevos marcos `us-ca-feha`
+  y `us-ca-admt` + jurisdicción `us-ca` (aparecen solos en el toggle/chips porque derivan de `JURISDICTION_ORDER`; se corrigió
+  además la lista blanca de `jurisdiction-actions.ts` para derivarla de `JURISDICTION_ORDER`). Default demo ahora incluye `us-ca`.
+- **Follow-up OPCIONAL restante (no pedido):** **Texas TRAIGA** (HB 149, ene-2026) solo como **radar** — deberes finos al
+  empleador privado, no da para pack. NO construir aún: bias-testing propio, ISO/NIST, shadow-AI.
 
 ---
 

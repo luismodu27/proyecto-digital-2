@@ -5,9 +5,12 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
+import { JURISDICTION_ORDER } from "@/lib/regulatory-watch";
 
 const VIGILANCIA = "/dashboard/vigilancia";
-const ALLOWED = ["eu", "us-ny", "us-co", "us-il", "us-federal"];
+// Fuente única de códigos válidos: el catálogo de jurisdicciones del radar. Así,
+// al añadir una jurisdicción nueva (p. ej. us-ca) no hay que tocar esta lista.
+const ALLOWED = new Set<string>(JURISDICTION_ORDER);
 
 /**
  * Guarda las jurisdicciones donde la organización tiene nexo (dónde contrata).
@@ -23,7 +26,7 @@ export async function setOrgJurisdictions(formData: FormData) {
   const jur = formData
     .getAll("jurisdiction")
     .map((v) => String(v))
-    .filter((v) => ALLOWED.includes(v));
+    .filter((v) => ALLOWED.has(v));
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_org_jurisdictions", {

@@ -182,8 +182,8 @@ export async function getIsPlatformAdmin(): Promise<boolean> {
 }
 
 export async function getOrgJurisdictions(): Promise<string[]> {
-  // Demo: organización europea que además contrata en Nueva York.
-  return ["eu", "us-ny"];
+  // Demo: organización europea que además contrata en Nueva York y California.
+  return ["eu", "us-ny", "us-ca"];
 }
 
 export async function getActionTasks(): Promise<ActionTask[]> {
