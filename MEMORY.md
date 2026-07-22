@@ -127,6 +127,20 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Documento maestro regenerado y actualizado + versión en inglés (artifacts).** A petición del
+  fundador se actualizó la guía maestra (recorrido por cada pantalla con capturas reales anotadas) al estado actual del
+  producto y se creó una versión paralela en inglés. Como las fuentes del artifact original eran efímeras (scratchpad),
+  se regeneró: se recuperó el esqueleto de texto del artifact viejo (WebFetch + strip de data-URIs), se reusó su CSS/diseño
+  verbatim, se reescribió el contenido (facturación $120, bilingüe ES/EN, gating Enterprise por-org con Organizaciones +
+  Seguridad/SSO, 7 policy packs, foso EE. UU. con California FEHA/ADMT, práctica prohibida Art. 5 fuera del "% listo",
+  gate de perfilado Art. 6(3), Vigía/Analista/Validador, hash-chain del audit-trail), y se tomaron **capturas nuevas en
+  modo demo** (Playwright + headless_shell de /opt/pw-browsers; ES por defecto y EN con cookie NEXT_LOCALE=en) que se
+  incrustaron como data-URIs vía script (sin cargar base64 en contexto). **URLs:**
+  - ES (actualizado en su URL existente): `https://claude.ai/code/artifact/1911e70d-ca58-4424-b4b2-b9e720e5d544`
+  - EN (nuevo): `https://claude.ai/code/artifact/7ecd0c31-642f-4a48-8eee-d2c8bd26b947`
+  Pipeline de regeneración (body-es/en.html + build.mjs + capture*.mjs + shots/) quedó en el scratchpad **efímero**; si
+  hay que rehacerlo, repetir capturas + embed. Ambos artifacts privados en claude.ai.
+
 - **2026-07-22** · **Limpieza técnica (P4): fuente única de días-restantes y del orden de riesgo.** Sin impacto de
   usuario. (1) `daysUntil` (regulatory-watch) y `daysUntilDate` (bias-audit) duplicaban el mismo cálculo de días
   restantes → se extrajo a `src/lib/date.ts` (`parseIsoDateUTC` + `daysUntilDate`); ambos módulos delegan, firmas
