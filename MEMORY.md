@@ -127,6 +127,29 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-22** · **Foso EE. UU. ampliado: 2 packs nuevos de California (FEHA/ADS + CCPA/CPPA ADMT). Ahora 7 packs.**
+  El fundador pidió ampliar el foso de EE. UU. El experto verificó (fuentes de despachos + agencias, snapshot jul-2026) que el
+  alcance que proponía `PENDIENTES §2.2` (NYC LL144 + Illinois) **ya estaba construido** (pack `us-hiring`) y que **Colorado
+  ya está al día** (radar en SB 26-189, no SB 24-205 — la "corrección" del experto se basaba en MEMORY, no en el código real).
+  Recomendación del experto para lo NUEVO: **California**, la jurisdicción de empleo más grande de EE. UU. y lo único **ya
+  exigible**. Se construyeron 2 packs, cada uno redactado y validado por el `compliance-domain-expert` (regla dura):
+  - **`us-ca-feha`** (11 controles) — California Civil Rights Council, regs de **Automated-Decision Systems en empleo** bajo
+    **FEHA** (2 CCR §11008 y ss.), **en vigor desde 1-oct-2025**. Empleador = obligado directo (sin reencuadre provider/
+    deployer, salvo el control de agentes/vendedores). Ejes: identificar ADS, impacto dispar (anti-bias testing como
+    evidencia declarada — Attesta NO lo ejecuta), retención ≥4 años (§11013), el ADS no sustituye la evaluación
+    individualizada, triaje de indagación médica/discapacidad, responsabilidad por agentes.
+  - **`us-ca-admt`** (10 controles) — **CCPA/CPPA Automated Decisionmaking Technology (ADMT)** en decisiones significativas
+    de empleo (Cal. Code Regs. tít. 11), vigente 1-ene-2026, **cumplimiento del empleador exigible 1-ene-2027**. Ejes:
+    alcance ADMT + excepción "meaningful human involvement", aviso previo (§7220), risk assessment documentado (§7150 ss.,
+    Attesta NO lo ejecuta/valida), opt-out (§7221, con sus excepciones asimétricas), acceso a la lógica (§7222), contrato
+    con el vendedor (§7051), política de privacidad, auditoría de ciberseguridad (§7120, solo por umbral).
+  - Cableados en `policy-packs/index.ts` (ES + `_EN`, mismo patrón). Copy de marca respetado (suavizado un "CCPA-compliant
+    contract" → "contract that conforms to the CCPA" en EN; el resto eran negaciones/hechos sobre la norma). tsc+lint+build
+    exit 0. **Estado del foso: 7 packs** (RRHH UE, gestión trabajadores, atención cliente/GenAI, crédito/seguros, EE.UU.
+    contratación [NYC+IL], **California FEHA/ADS**, **California ADMT**).
+  - **Pendiente antes de GA (en PENDIENTES):** validación por abogado de empleo/privacidad de California de ambos packs
+    (igual que el resto). Follow-ups opcionales: Texas TRAIGA solo como radar; eventos de vigilancia (radar) para California.
+
 - **2026-07-22** · **RiskWizard: gate binario de perfilado (Art. 6(3)) + CTA anti-cul-de-sac; y sign-off del experto del EN de vigilancia.**
   El fundador eligió dos frentes: mejorar el RiskWizard y cerrar la i18n EN de vigilancia. Ambos tocan contenido
   regulatorio → validados por el `compliance-domain-expert`.

@@ -266,11 +266,18 @@ regulatorias, enums de dominio).
   English" fuera de MVP); (c) el toast `pack-applied` dice "policy pack RRHH" fijo aunque se aplique otro pack
   (preexistente, menor).
 
-### 2.2 · Ampliar el foso — leyes de EE. UU. de contratación con IA (esperando visto bueno)
-Recomendación del experto lista (ver MEMORY §10, 2026-07-18). **2º marco** = NYC LL144 + Illinois HB 3773 (en vigor),
-con Attesta **registrando evidencia** de la auditoría independiente (NO auditando ni certificando). Colorado/EEOC
-solo como radar. **Falta que el fundador apruebe el alcance**; luego se construye por incrementos reutilizando
-`regulatory-watch.ts` + nuevo policy pack + modelo de evidencia. NO construir aún: bias-testing propio, ISO/NIST, shadow-AI.
+### 2.2 · Ampliar el foso — leyes de EE. UU. de contratación con IA — ✅ AMPLIADO (2026-07-22)
+- ✅ **NYC LL144 + Illinois (HB 3773 + AIVIA)**: ya estaban en el pack `us-hiring` (11 controles, validado 2026-07-18).
+- ✅ **California (2 packs nuevos, validados por el experto, 2026-07-22)**: `us-ca-feha` (FEHA/ADS en empleo, en vigor
+  oct-2025, 11 controles) y `us-ca-admt` (CCPA/CPPA ADMT en empleo, empleador exigible ene-2027, 10 controles). Cableados
+  en `index.ts` (ES+EN). Ver MEMORY §10 (2026-07-22).
+- ✅ **Colorado**: el radar ya refleja **SB 26-189** (no la derogada SB 24-205) — no requirió corrección.
+- **Pendiente antes de GA:** validación por **abogado de empleo/privacidad de California** de los 2 packs de CA (el experto
+  dejó citas conservadoras en algunos números de sección por no poder parsear el PDF oficial; conviene confirmarlos).
+- **Follow-ups OPCIONALES (no pedidos):** (a) **Texas TRAIGA** (HB 149, ene-2026) solo como **radar** — deberes finos al
+  empleador privado, no da para pack; (b) **eventos de vigilancia (radar) para California** (FEHA en vigor, ADMT 2027) +
+  su `FRAMEWORK_META`/`JURISDICTION` (`us-ca`) — hoy los packs de CA funcionan sin entrada de radar (patrón ya usado por
+  otros packs). NO construir aún: bias-testing propio, ISO/NIST, shadow-AI.
 
 ---
 
