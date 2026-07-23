@@ -127,6 +127,16 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-23** · **Vigilancia: exportar el radar a PDF.** A petición del fundador. Nueva ruta imprimible
+  `src/app/dashboard/vigilancia/informe/page.tsx` (Server Component) siguiendo el patrón existente de PDFs
+  (`window.print()` vía `PrintButton` + clases `print:`, como `informe/dossier`). Documento determinista: portada con sello
+  + fecha, alcance (respeta `?j=`: nexo / una jurisdicción / todas), `ScopeNote` legal, "Resumen del radar" (4 KPIs:
+  próximos · en vigor · marcos vigilados · próximo hito), tabla "Próximos plazos" (Fecha·Marco·Evento·Faltan·Sistemas·
+  **Estado interno**) y tabla "Ya en vigor". El estado interno reutiliza los acks (Plan en marcha/Revisado/No aplica/Sin
+  marcar) con color. Botón **"⬇ Descargar radar (PDF)"** en la cabecera de la vista de vigilancia (para todos, preservando
+  el filtro de jurisdicción activo). Bloque de diccionario `reportRadar` (ES/EN); reutiliza `ScopeNote`/`LEGAL_PDF_BY_LOCALE`
+  /`reportChrome`. Cero LLM, cero copy prohibido. lint+tsc+build verdes; verificado en demo con emulación de impresión.
+
 - **2026-07-23** · **Home del dashboard: mejora del widget de próximo hito regulatorio.** El widget ya existía
   (`src/app/dashboard/page.tsx`, tarjeta clicable → `/dashboard/vigilancia` con "Próximo hito · marco", título y "en N
   días"). En vez de duplicarlo se **mejoró** para ligarlo al trabajo de vigilancia: (1) **chip de estado interno**
