@@ -127,6 +127,20 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-23** · **Red team (Fase 2): 2 fallas HIGH encontradas y corregidas (migración 0024).** Workflow adversarial
+  (48 agentes, 6 ángulos, verificación por refutación). **El aislamiento entre organizaciones AGUANTÓ** (nadie llega a
+  datos de otra org). Pero encontró 2 fallas intra-org explotables **saltándose la app** (PostgREST + anon key + JWT
+  propio) — RLS es la única barrera ante acceso directo, y tenía dos huecos con la misma causa raíz ("comprueba QUIÉN
+  eres, no QUÉ valor escribes"; "guards vigilan UPDATE/DELETE, no INSERT"): **(1)** un **admin** podía escalar a **owner**
+  insertando directo una fila `role='owner'` en `memberships` (o una invitación owner en `invitations` → `claim` la
+  convertía) → toma de la organización; el guard 0021 solo cubría UPDATE/DELETE. **(2)** cualquier **owner** podía subir su
+  `plan` a `enterprise` gratis con un UPDATE directo (la policy `organizations_update` no restringía columnas) → bypass de
+  Stripe. **Fix (0024):** `with check` en `memberships_write_admin` e `invitations_write` que exige ser owner para escribir
+  role='owner'; `revoke update (plan) on organizations from authenticated`. Los RPCs legítimos son security definer
+  (bypasean RLS) y el webhook usa service_role → nada se rompe; verificado que onboarding/invite/`updateMemberRole`
+  (owner→owner) siguen funcionando. **⚠️ 0024 es migración MANUAL: pegar `supabase/setup.sql` en el SQL Editor.**
+  Lección: repetir el patrón "restringe el VALOR, no solo el actor" y "guardas también en INSERT" en toda policy futura.
+
 - **2026-07-23** · **Blindaje de seguridad (Fase 1, 4 PRs) + red team.** A petición del fundador ("que un hacker no pueda
   robar datos nuestros ni de usuarios"). Primero una **auditoría** (subagente): veredicto sólido — aislamiento multi-tenant
   con doble candado (RLS en 16/16 tablas + validación en Server Actions), audit log inmutable y *tamper-evident* (cadena
