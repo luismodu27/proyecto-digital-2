@@ -12,10 +12,13 @@ import {
 } from "@/lib/data";
 import { getCurrentUser } from "@/lib/data/context";
 import { inviteMember } from "@/lib/data/team-actions";
-import { ROLE_LABEL, ROLE_HINT, type MemberRole } from "@/lib/mock-data";
+import { type MemberRole } from "@/lib/mock-data";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("es-ES", {
+function formatDate(iso: string, locale: Locale): string {
+  return new Date(iso).toLocaleDateString(locale === "en" ? "en-US" : "es-ES", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -23,7 +26,7 @@ function formatDate(iso: string): string {
 }
 
 const field =
-  "mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
+  "mt-1.5 w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand";
 
 export default async function EquipoPage() {
   const connected = isSupabaseConfigured;
@@ -34,22 +37,22 @@ export default async function EquipoPage() {
     connected ? getCurrentUser() : Promise.resolve(null),
   ]);
 
+  const locale = await resolveLocale();
+  const t = getDictionary(locale).dashboard.team;
+
   const isOwner = connected && role === "owner";
   const canManage = connected && (role === "owner" || role === "admin");
   const currentUserId = user?.id;
 
   return (
     <>
-      <PageHeader
-        title="Equipo"
-        subtitle="Invita a tu equipo (RRHH, Legal, auditoría) y gestiona sus roles."
-      />
+      <PageHeader title={t.title} subtitle={t.subtitle} />
 
       {!connected && (
         <div className="mb-6 rounded-2xl border border-[var(--tone-info-bd)] bg-[var(--tone-info-bg)] px-5 py-4 text-sm text-[var(--tone-info-fg)]">
-          Estás en <span className="font-medium">modo demo</span>: se muestra un
-          equipo de ejemplo. Conecta tu organización para invitar personas y
-          gestionar roles de verdad.
+          {t.demoBefore}
+          <span className="font-medium">{t.demoMode}</span>
+          {t.demoAfter}
         </div>
       )}
 
@@ -57,12 +60,10 @@ export default async function EquipoPage() {
       {canManage && (
         <section className="mb-8 rounded-2xl border border-line bg-paper-raised p-6">
           <h2 className="font-display text-base font-semibold text-ink">
-            Invitar a alguien
+            {t.inviteTitle}
           </h2>
           <p className="mt-1 text-sm text-ink-soft">
-            Si ya tiene cuenta en Attesta se añade al instante. Si no, la
-            invitación queda pendiente y se activa cuando se registre con ese
-            correo.
+            {t.inviteBody}
           </p>
           <form
             action={inviteMember}
@@ -70,29 +71,29 @@ export default async function EquipoPage() {
           >
             <div className="flex-1">
               <label htmlFor="email" className="block text-sm font-medium text-ink">
-                Correo
+                {t.emailLabel}
               </label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 required
-                placeholder="persona@empresa.com"
+                placeholder={t.emailPlaceholder}
                 className={field}
               />
             </div>
             <div className="sm:w-52">
               <label htmlFor="role" className="block text-sm font-medium text-ink">
-                Rol
+                {t.roleLabel}
               </label>
               <select id="role" name="role" defaultValue="member" className={field}>
-                <option value="member">Miembro</option>
-                <option value="admin">Administrador</option>
-                {isOwner && <option value="owner">Propietario</option>}
+                <option value="member">{t.roleLabels.member}</option>
+                <option value="admin">{t.roleLabels.admin}</option>
+                {isOwner && <option value="owner">{t.roleLabels.owner}</option>}
               </select>
             </div>
             <Button type="submit" className="shrink-0">
-              Invitar
+              {t.inviteCta}
             </Button>
           </form>
         </section>
@@ -102,7 +103,7 @@ export default async function EquipoPage() {
       <section className="overflow-hidden rounded-2xl border border-line bg-paper-raised">
         <div className="border-b border-line px-6 py-4">
           <h2 className="font-display text-base font-semibold text-ink">
-            Miembros{" "}
+            {t.membersTitle}{" "}
             <span className="text-sm font-normal text-muted">({members.length})</span>
           </h2>
         </div>
@@ -126,12 +127,12 @@ export default async function EquipoPage() {
                       {m.email}
                       {isSelf && (
                         <span className="ml-2 text-xs font-normal text-muted">
-                          (tú)
+                          {t.you}
                         </span>
                       )}
                     </p>
                     <p className="text-xs text-muted">
-                      Se unió el {formatDate(m.joinedAt)}
+                      {t.joinedPrefix}{formatDate(m.joinedAt, locale)}
                     </p>
                   </div>
                 </div>
@@ -143,7 +144,7 @@ export default async function EquipoPage() {
                       canSetOwner={isOwner}
                     />
                   ) : (
-                    <RoleBadge role={m.role} />
+                    <RoleBadge role={m.role} label={t.roleLabels[m.role]} />
                   )}
                   {removable && (
                     <RemoveMemberButton userId={m.userId} email={m.email} />
@@ -160,7 +161,7 @@ export default async function EquipoPage() {
         <section className="mt-6 overflow-hidden rounded-2xl border border-line bg-paper-raised">
           <div className="border-b border-line px-6 py-4">
             <h2 className="font-display text-base font-semibold text-ink">
-              Invitaciones pendientes{" "}
+              {t.pendingTitle}{" "}
               <span className="text-sm font-normal text-muted">
                 ({invitations.length})
               </span>
@@ -177,13 +178,13 @@ export default async function EquipoPage() {
                     {inv.email}
                   </p>
                   <p className="text-xs text-muted">
-                    Invitado como {ROLE_LABEL[inv.role as MemberRole]} ·{" "}
-                    {formatDate(inv.createdAt)}
+                    {t.invitedAsPrefix}{t.roleLabels[inv.role as MemberRole]} ·{" "}
+                    {formatDate(inv.createdAt, locale)}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <span className="rounded-full border border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--tone-warn-fg)]">
-                    Pendiente
+                    {t.pending}
                   </span>
                   <RevokeInviteButton id={inv.id} />
                 </div>
@@ -196,15 +197,15 @@ export default async function EquipoPage() {
       {/* Leyenda de roles */}
       <section className="mt-6 rounded-2xl border border-line bg-paper-raised p-6">
         <h2 className="font-display text-sm font-semibold text-ink">
-          Qué puede hacer cada rol
+          {t.rolesLegendTitle}
         </h2>
         <dl className="mt-3 space-y-2.5">
           {(["owner", "admin", "member"] as MemberRole[]).map((r) => (
             <div key={r} className="flex flex-col gap-1 sm:flex-row sm:gap-3">
               <dt className="shrink-0 sm:w-32">
-                <RoleBadge role={r} />
+                <RoleBadge role={r} label={t.roleLabels[r]} />
               </dt>
-              <dd className="text-sm text-ink-soft">{ROLE_HINT[r]}</dd>
+              <dd className="text-sm text-ink-soft">{t.roleHints[r]}</dd>
             </div>
           ))}
         </dl>

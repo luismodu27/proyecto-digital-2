@@ -1,19 +1,31 @@
 import {
-  AI_SYSTEMS,
+  aiSystems,
   GAP_ITEMS,
+  GAP_ITEMS_EN,
   SAMPLE_ASSESSMENTS,
+  SAMPLE_ASSESSMENTS_EN,
+  SAMPLE_BIAS_AUDITS,
+  SAMPLE_BIAS_AUDITS_EN,
   SAMPLE_AUDIT,
+  SAMPLE_AUDIT_EN,
   SAMPLE_INVITATIONS,
   SAMPLE_MEMBERS,
   SAMPLE_ACTION_TASKS,
+  SAMPLE_ACTION_TASKS_EN,
   SAMPLE_REG_ACKS,
+  SAMPLE_REG_ACKS_EN,
   SAMPLE_REG_CANDIDATES,
+  SAMPLE_REG_CANDIDATES_EN,
   SAMPLE_REG_SOURCES,
+  SAMPLE_REG_SOURCES_EN,
   type ActionTask,
   type AiSystem,
   type AssessmentRecord,
+  type AuditChainStatus,
   type AuditEntry,
   type DossierData,
+  type ExportBundle,
+  type ExportedSystem,
   type GapItem,
   type MemberRole,
   type OrgMember,
@@ -23,24 +35,49 @@ import {
   type RegSource,
 } from "@/lib/mock-data";
 import { mergeCatalog, type RegulatoryEvent } from "@/lib/regulatory-watch";
+import { resolveLocale } from "@/lib/i18n/resolve";
 
-/** Repositorio de datos de ejemplo (modo demo). */
+/**
+ * Repositorio de datos de ejemplo (modo demo).
+ *
+ * La METADATA de producto de los sistemas (nombre/área/dominio/proveedor) es
+ * locale-aware: en `en` se sirve `AI_SYSTEMS_EN` resolviendo el locale por
+ * cookie con `resolveLocale()`, igual que la fachada hace para los eventos
+ * regulatorios. El resto de muestras (brechas, evaluaciones, tareas, audit,
+ * candidatos, fuentes) contiene texto REGULATORIO y permanece en ES a la espera
+ * de la validación del experto — ver informe de entrega.
+ */
 export async function getAiSystems(): Promise<AiSystem[]> {
-  return AI_SYSTEMS;
+  const locale = await resolveLocale();
+  return aiSystems(locale);
 }
 
 export async function getGapItems(): Promise<GapItem[]> {
-  return GAP_ITEMS;
+  const locale = await resolveLocale();
+  return locale === "en" ? GAP_ITEMS_EN : GAP_ITEMS;
 }
 
 export async function getSystemsForSelect(): Promise<
   { id: string; name: string }[]
 > {
-  return AI_SYSTEMS.map((s) => ({ id: s.id, name: s.name }));
+  const locale = await resolveLocale();
+  return aiSystems(locale).map((s) => ({ id: s.id, name: s.name }));
 }
 
 export async function getOrganizationName(): Promise<string | null> {
-  return "Organización demo";
+  const locale = await resolveLocale();
+  return locale === "en" ? "Demo organization" : "Organización demo";
+}
+
+export async function getSystemBiasAudit(_id: string): Promise<null> {
+  // En modo demo no hay registro editable de auditoría de sesgo.
+  void _id;
+  return null;
+}
+
+export async function getUserOrgs(): Promise<[]> {
+  // En modo demo no hay sesión ni múltiples organizaciones.
+  return [];
 }
 
 export async function getSystemById(_id: string): Promise<null> {
@@ -52,7 +89,9 @@ export async function getSystemById(_id: string): Promise<null> {
 export async function getSystemAssessments(
   id: string,
 ): Promise<AssessmentRecord[]> {
-  return SAMPLE_ASSESSMENTS[id] ?? [];
+  const locale = await resolveLocale();
+  const src = locale === "en" ? SAMPLE_ASSESSMENTS_EN : SAMPLE_ASSESSMENTS;
+  return src[id] ?? [];
 }
 
 export async function getOrgMembers(): Promise<OrgMember[]> {
@@ -69,20 +108,72 @@ export async function getCurrentMemberRole(): Promise<MemberRole | null> {
 }
 
 export async function getAuditLog(): Promise<AuditEntry[]> {
-  return SAMPLE_AUDIT;
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_AUDIT_EN : SAMPLE_AUDIT;
+}
+
+export async function verifyAuditChain(): Promise<AuditChainStatus | null> {
+  // En demo la cadena se muestra íntegra a modo ilustrativo (no hay backend).
+  return {
+    total: SAMPLE_AUDIT.length,
+    ok: true,
+    brokenId: null,
+    checkedAt: new Date().toISOString(),
+  };
+}
+
+export async function getExportBundle(): Promise<ExportBundle | null> {
+  const locale = await resolveLocale();
+  const en = locale === "en";
+  const assessments = en ? SAMPLE_ASSESSMENTS_EN : SAMPLE_ASSESSMENTS;
+  const biasAudits = en ? SAMPLE_BIAS_AUDITS_EN : SAMPLE_BIAS_AUDITS;
+  const systems: ExportedSystem[] = aiSystems(locale).map((system) => ({
+    system,
+    assessments: assessments[system.id] ?? [],
+    biasAudit: biasAudits[system.id] ?? null,
+  }));
+  return {
+    meta: {
+      application: "Attesta",
+      organization: en ? "Demo organization" : "Organización demo",
+      exportedAt: new Date().toISOString(),
+      schemaVersion: 1,
+    },
+    integrity: {
+      total: SAMPLE_AUDIT.length,
+      ok: true,
+      brokenId: null,
+      checkedAt: new Date().toISOString(),
+    },
+    systems,
+    gapItems: en ? GAP_ITEMS_EN : GAP_ITEMS,
+    actionTasks: en ? SAMPLE_ACTION_TASKS_EN : SAMPLE_ACTION_TASKS,
+    members: SAMPLE_MEMBERS,
+    regulatoryAcks: en ? SAMPLE_REG_ACKS_EN : SAMPLE_REG_ACKS,
+    auditLog: en ? SAMPLE_AUDIT_EN : SAMPLE_AUDIT,
+  };
 }
 
 export async function getRegulatoryAcks(): Promise<Record<string, RegAck>> {
-  return SAMPLE_REG_ACKS;
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_REG_ACKS_EN : SAMPLE_REG_ACKS;
 }
 
 export async function getRegulatoryEvents(): Promise<RegulatoryEvent[]> {
-  // En demo el catálogo es solo la base curada (sin eventos de pipeline).
-  return mergeCatalog([]);
+  // En demo el catálogo es solo la base curada (sin eventos de pipeline). La
+  // fachada resuelve el locale: en EN sirve la base curada en inglés.
+  const locale = await resolveLocale();
+  return mergeCatalog([], undefined, locale);
 }
 
 export async function getRegCandidates(): Promise<RegCandidate[]> {
-  return SAMPLE_REG_CANDIDATES;
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_REG_CANDIDATES_EN : SAMPLE_REG_CANDIDATES;
+}
+
+export async function getRegSources(): Promise<RegSource[]> {
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_REG_SOURCES_EN : SAMPLE_REG_SOURCES;
 }
 
 export async function getIsPlatformAdmin(): Promise<boolean> {
@@ -90,17 +181,14 @@ export async function getIsPlatformAdmin(): Promise<boolean> {
   return true;
 }
 
-export async function getRegSources(): Promise<RegSource[]> {
-  return SAMPLE_REG_SOURCES;
-}
-
 export async function getOrgJurisdictions(): Promise<string[]> {
-  // Demo: organización europea que además contrata en Nueva York.
-  return ["eu", "us-ny"];
+  // Demo: organización europea que además contrata en Nueva York y California.
+  return ["eu", "us-ny", "us-ca"];
 }
 
 export async function getActionTasks(): Promise<ActionTask[]> {
-  return SAMPLE_ACTION_TASKS;
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_ACTION_TASKS_EN : SAMPLE_ACTION_TASKS;
 }
 
 /**
@@ -110,11 +198,14 @@ export async function getActionTasks(): Promise<ActionTask[]> {
 export async function getSystemDossier(
   id: string,
 ): Promise<DossierData | null> {
-  const system = AI_SYSTEMS.find((s) => s.id === id);
+  const locale = await resolveLocale();
+  const en = locale === "en";
+  const system = aiSystems(locale).find((s) => s.id === id);
   if (!system) return null;
   return {
     system: { ...system, actorRole: "deployer" },
-    gaps: GAP_ITEMS.filter((g) => g.system === system.id),
-    assessments: SAMPLE_ASSESSMENTS[system.id] ?? [],
+    gaps: (en ? GAP_ITEMS_EN : GAP_ITEMS).filter((g) => g.system === system.id),
+    assessments: (en ? SAMPLE_ASSESSMENTS_EN : SAMPLE_ASSESSMENTS)[system.id] ?? [],
+    biasAudit: (en ? SAMPLE_BIAS_AUDITS_EN : SAMPLE_BIAS_AUDITS)[system.id] ?? null,
   };
 }

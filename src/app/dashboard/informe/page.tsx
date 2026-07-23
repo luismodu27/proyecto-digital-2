@@ -1,16 +1,24 @@
 import Link from "next/link";
 import { SealMark } from "@/components/ui/SealMark";
 import { PrintButton } from "@/components/dashboard/PrintButton";
-import { LEGAL_PDF } from "@/components/ui/LegalNote";
+import { LEGAL_PDF_BY_LOCALE, ScopeNote } from "@/components/ui/LegalNote";
 import {
   getAiSystems,
   getGapItems,
   getOrganizationName,
   getOrgJurisdictions,
+  getRegulatoryEvents,
 } from "@/lib/data";
+import { getActiveOrg } from "@/lib/data/context";
+import { orgHasTier } from "@/lib/billing/plan";
+import { Paywall } from "@/components/dashboard/Paywall";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 import {
-  RISK_LABEL,
+  riskLabel,
+  severityLabel,
   RISK_ORDER,
+  AUDIT_READY_THRESHOLD,
   avgCompliance,
   riskCounts,
   type RiskLevel,
@@ -20,30 +28,49 @@ import {
   affectedSystems,
   daysUntil,
   FRAMEWORK_META,
-  type RegulatoryEvent,
+  frameworkMeta,
 } from "@/lib/regulatory-watch";
 
 export const dynamic = "force-dynamic";
 
+// Colores por tono semántico (theme-aware: adaptan a claro/oscuro y a impresión).
 const RISK_COLOR: Record<RiskLevel, string> = {
-  unacceptable: "#8f271f",
-  high: "#a4610f",
-  limited: "#7c5a2e",
-  minimal: "#1f7a54",
+  unacceptable: "var(--tone-danger-fg)",
+  high: "var(--tone-warn-fg)",
+  limited: "var(--tone-gold-fg)",
+  minimal: "var(--tone-good-fg)",
 };
 
 const SEVERITY_COLOR = {
-  alta: "#8f271f",
-  media: "#8a4f14",
-  baja: "#5b6b62",
+  alta: "var(--tone-danger-fg)",
+  media: "var(--tone-warn-fg)",
+  baja: "var(--tone-neutral-fg)",
 } as const;
 
 export default async function InformeEjecutivoPage() {
-  const [systems, gaps, orgName, orgJur] = await Promise.all([
+  const locale = await resolveLocale();
+  const dict = getDictionary(locale).dashboard;
+  const tp = dict.pages;
+  const tr = tp.reportExec;
+  const rc = tp.reportChrome;
+  const u = dict.units;
+  const gateOrg = await getActiveOrg();
+  if (gateOrg && !(await orgHasTier(gateOrg, "preparacion"))) {
+    return (
+      <Paywall
+        feature={tp.reportExec.paywallFeature}
+        description={tp.reportExec.paywallDesc}
+        t={dict.paywall}
+      />
+    );
+  }
+
+  const [systems, gaps, orgName, orgJur, regEvents] = await Promise.all([
     getAiSystems(),
     getGapItems(),
     getOrganizationName(),
     getOrgJurisdictions(),
+    getRegulatoryEvents(),
   ]);
 
   const now = new Date();
@@ -73,7 +100,7 @@ export default async function InformeEjecutivoPage() {
     })
     .slice(0, 5);
 
-  const deadlines = upcomingDeadlines(now)
+  const deadlines = upcomingDeadlines(now, regEvents)
     .filter(
       (e) =>
         orgJur.length === 0 ||
@@ -81,18 +108,76 @@ export default async function InformeEjecutivoPage() {
     )
     .slice(0, 3);
 
-  const fecha = now.toLocaleDateString("es-ES", {
+  const fecha = now.toLocaleDateString(locale === "en" ? "en-GB" : "es-ES", {
     day: "2-digit",
     month: "long",
     year: "numeric",
   });
 
+  // Sistemas de alto riesgo por debajo del umbral ORIENTATIVO de preparación
+  // (80%). Es un corte distinto —y más amplio— que `priority` (<60%, "los más
+  // urgentes"); la narrativa se apoya en este para que el % coincida con la
+  // marca del Meter y con el resto del producto (una sola fuente: la constante).
+  const belowReady = systems.filter(
+    (s) =>
+      (s.risk === "high" || s.risk === "unacceptable") &&
+      s.compliance < AUDIT_READY_THRESHOLD,
+  ).length;
+
+  const org =
+    orgName ?? (locale === "en" ? "The organization" : "La organización");
+  const nearest = deadlines[0];
+  const nearestDays = nearest ? daysUntil(nearest.date, now) : 0;
+  // Ensamblado determinista (cero LLM) del resumen ejecutivo a partir de los
+  // datos ya declarados por la organización. Copy revisado por compliance (ES/EN).
+  const pl = (n: number, one: string, many: string) => (n === 1 ? one : many);
+  const summaryParagraph =
+    total === 0
+      ? locale === "en"
+        ? `As of ${fecha}, ${org} has not yet inventoried any AI systems. The first step of readiness is to register the systems in use and classify their risk.`
+        : `A fecha de ${fecha}, ${org} aún no ha inventariado sistemas de IA. El primer paso de la preparación es registrar los sistemas en uso y clasificar su riesgo.`
+      : locale === "en"
+        ? [
+            `As of ${fecha}, ${org} maintains ${total} ${pl(total, "inventoried AI system", "inventoried AI systems")}, of which ${
+              highRisk === 0
+                ? "none are classified"
+                : `${highRisk} ${pl(highRisk, "is classified", "are classified")}`
+            } as high-risk according to the organization's indicative self-assessment.`,
+            `The average declared readiness is ${avg}%, and ${backedPct}% of the systems have declared supporting evidence.`,
+            `There ${pl(openGaps.length, "is", "are")} ${openGaps.length} open ${pl(openGaps.length, "gap", "gaps")} (${criticalGaps.length} of high severity) pending resolution.`,
+            belowReady > 0
+              ? `${belowReady} high-risk ${pl(belowReady, "system is", "systems are")} below the indicative readiness threshold (${AUDIT_READY_THRESHOLD}% ready) and ${pl(belowReady, "is", "are")} flagged for priority attention.`
+              : null,
+            nearest
+              ? `The next regulatory milestone on the organization's radar is "${nearest.title}", in ${nearestDays} ${pl(nearestDays, "day", "days")}.`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" ")
+        : [
+            `A fecha de ${fecha}, ${org} mantiene ${total} ${pl(total, "sistema de IA inventariado", "sistemas de IA inventariados")}, de ${pl(total, "el cual", "los cuales")} ${
+              highRisk === 0
+                ? "ninguno está clasificado"
+                : `${highRisk} ${pl(highRisk, "está clasificado", "están clasificados")}`
+            } como de alto riesgo según la autoevaluación orientativa de la organización.`,
+            `La preparación media declarada es del ${avg}%, y un ${backedPct}% de los sistemas cuenta con evidencia declarada de respaldo.`,
+            `Hay ${openGaps.length} ${pl(openGaps.length, "brecha abierta", "brechas abiertas")} (${criticalGaps.length} de severidad alta) ${pl(openGaps.length, "pendiente", "pendientes")} de resolución.`,
+            belowReady > 0
+              ? `${belowReady} ${pl(belowReady, "sistema de alto riesgo está", "sistemas de alto riesgo están")} por debajo del umbral orientativo de preparación (${AUDIT_READY_THRESHOLD}% listo) y se ${pl(belowReady, "señala", "señalan")} para atención prioritaria.`
+              : null,
+            nearest
+              ? `El próximo hito regulatorio en el radar de la organización es «${nearest.title}», dentro de ${nearestDays} ${pl(nearestDays, "día", "días")}.`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" ");
+
   const kpis = [
-    { k: "Sistemas de IA", v: String(total) },
-    { k: "Alto riesgo", v: String(highRisk), color: highRisk > 0 ? RISK_COLOR.high : undefined },
-    { k: "Preparación media", v: `${avg}%` },
-    { k: "Brechas abiertas", v: String(openGaps.length) },
-    { k: "Con respaldo", v: `${backedPct}%` },
+    { k: tr.kpiSystems, v: String(total) },
+    { k: tr.kpiHighRisk, v: String(highRisk), color: highRisk > 0 ? RISK_COLOR.high : undefined },
+    { k: tr.kpiAvgReadiness, v: `${avg}%` },
+    { k: tr.kpiOpenGaps, v: String(openGaps.length) },
+    { k: tr.kpiBacked, v: `${backedPct}%` },
   ];
 
   return (
@@ -102,12 +187,12 @@ export default async function InformeEjecutivoPage() {
           href="/dashboard"
           className="text-sm font-medium text-brand hover:text-brand-strong"
         >
-          ← Volver al resumen
+          {tp.backToOverview}
         </Link>
-        <PrintButton label="Descargar informe (PDF)" />
+        <PrintButton label={tp.reportExec.downloadPdf} />
       </div>
 
-      <article className="rounded-2xl border border-line bg-white p-8 text-ink print:rounded-none print:border-0 print:p-0">
+      <article className="rounded-2xl border border-line bg-paper-raised p-8 text-ink print:rounded-none print:border-0 print:p-0">
         {/* Portada */}
         <header className="flex items-start justify-between border-b border-line pb-6">
           <div className="flex items-center gap-2">
@@ -115,24 +200,35 @@ export default async function InformeEjecutivoPage() {
             <span className="font-display text-2xl font-semibold">Attesta</span>
           </div>
           <div className="text-right text-xs text-muted">
-            <p>Informe ejecutivo</p>
+            <p>{tr.coverTag}</p>
             <p>{fecha}</p>
           </div>
         </header>
 
         <div className="mt-6">
           <p className="text-xs uppercase tracking-[0.2em] text-muted">
-            Gobernanza de IA · Estado de la organización · EU AI Act
+            {tr.coverKicker}
           </p>
           <h1 className="mt-2 font-display text-2xl font-semibold">
-            Informe ejecutivo de gobernanza de IA
+            {tr.coverTitle}
           </h1>
           <p className="mt-1 text-sm text-ink-soft">
-            Organización:{" "}
-            <span className="font-medium text-ink">{orgName ?? "—"}</span> · datos
-            autodeclarados
+            {rc.organizationLabel}{" "}
+            <span className="font-medium text-ink">{orgName ?? "—"}</span> ·{" "}
+            {rc.selfDeclaredData}
           </p>
         </div>
+
+        {/* Resumen ejecutivo (narrativa determinista, ES → experto) */}
+        <section className="mt-6 break-inside-avoid">
+          <h2 className="font-display text-base font-semibold">{rc.execSummary}</h2>
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+            {summaryParagraph}
+          </p>
+        </section>
+
+        {/* Alcance y método */}
+        <ScopeNote fecha={fecha} locale={locale} className="mt-5" />
 
         {/* KPIs */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -155,7 +251,7 @@ export default async function InformeEjecutivoPage() {
         {/* Distribución de riesgo */}
         <section className="mt-8 break-inside-avoid">
           <h2 className="font-display text-base font-semibold">
-            Distribución de riesgo
+            {tr.riskDistribution}
           </h2>
           <div className="mt-3 space-y-2">
             {RISK_ORDER.map((level) => {
@@ -164,9 +260,9 @@ export default async function InformeEjecutivoPage() {
               return (
                 <div key={level} className="flex items-center gap-3">
                   <span className="w-28 shrink-0 text-sm text-ink-soft">
-                    {RISK_LABEL[level]}
+                    {riskLabel(level, locale)}
                   </span>
-                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-[#eee7d8]">
+                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-paper-sunken">
                     <div
                       className="h-full rounded-full"
                       style={{
@@ -187,22 +283,23 @@ export default async function InformeEjecutivoPage() {
         {/* Sistemas prioritarios */}
         <section className="mt-8 break-inside-avoid">
           <h2 className="font-display text-base font-semibold">
-            Sistemas que requieren atención
+            {tr.needAttention}
           </h2>
           <p className="mt-0.5 text-xs text-muted">
-            Alto riesgo con preparación por debajo del 60%.
+            {tr.needAttentionHintPrefix}
+            {AUDIT_READY_THRESHOLD}
+            {tr.needAttentionHintSuffix}
           </p>
           {priority.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-soft">
-              Ningún sistema de alto riesgo está por debajo del umbral. 👍
-            </p>
+            <p className="mt-3 text-sm text-ink-soft">{tr.allAboveThreshold}</p>
           ) : (
-            <table className="mt-3 w-full border-collapse text-left text-sm">
+            <div className="mt-3 overflow-x-auto print:overflow-visible">
+            <table className="w-full border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-line-strong text-xs uppercase tracking-wide text-muted">
-                  <th className="py-2 pr-3 font-medium">Sistema</th>
-                  <th className="py-2 pr-3 font-medium">Riesgo</th>
-                  <th className="py-2 font-medium">Preparación</th>
+                  <th className="py-2 pr-3 font-medium">{tr.colSystem}</th>
+                  <th className="py-2 pr-3 font-medium">{tr.colRisk}</th>
+                  <th className="py-2 font-medium">{tr.colReadiness}</th>
                 </tr>
               </thead>
               <tbody>
@@ -214,7 +311,7 @@ export default async function InformeEjecutivoPage() {
                     </td>
                     <td className="py-2.5 pr-3">
                       <span style={{ color: RISK_COLOR[s.risk] }}>
-                        {RISK_LABEL[s.risk]}
+                        {riskLabel(s.risk, locale)}
                       </span>
                     </td>
                     <td className="py-2.5 font-medium tabular-nums">
@@ -224,21 +321,23 @@ export default async function InformeEjecutivoPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </section>
 
         {/* Brechas abiertas */}
         <section className="mt-8 break-inside-avoid">
           <h2 className="font-display text-base font-semibold">
-            Brechas abiertas prioritarias
+            {tr.openGapsTitle}
           </h2>
           <p className="mt-0.5 text-xs text-muted">
-            {openGaps.length} abiertas · {criticalGaps.length} de severidad alta.
+            {openGaps.length}
+            {tr.openGapsHintMid}
+            {criticalGaps.length}
+            {tr.openGapsHintSuffix}
           </p>
           {topGaps.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-soft">
-              No hay brechas abiertas registradas.
-            </p>
+            <p className="mt-3 text-sm text-ink-soft">{tr.noOpenGaps}</p>
           ) : (
             <ul className="mt-3 space-y-2">
               {topGaps.map((g) => (
@@ -257,7 +356,7 @@ export default async function InformeEjecutivoPage() {
                     className="shrink-0 text-xs font-medium uppercase"
                     style={{ color: SEVERITY_COLOR[g.severity] }}
                   >
-                    {g.severity}
+                    {severityLabel(g.severity, locale)}
                   </span>
                 </li>
               ))}
@@ -268,12 +367,10 @@ export default async function InformeEjecutivoPage() {
         {/* Próximos plazos regulatorios */}
         <section className="mt-8 break-inside-avoid">
           <h2 className="font-display text-base font-semibold">
-            Próximos plazos regulatorios
+            {tr.deadlinesTitle}
           </h2>
           {deadlines.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-soft">
-              No hay plazos futuros en el radar.
-            </p>
+            <p className="mt-3 text-sm text-ink-soft">{tr.noFutureDeadlines}</p>
           ) : (
             <ul className="mt-3 space-y-2">
               {deadlines.map((e) => {
@@ -288,14 +385,15 @@ export default async function InformeEjecutivoPage() {
                       {e.title}
                       <span className="ml-1 text-xs text-muted">
                         ·{" "}
-                        {FRAMEWORK_META[
-                          e.framework as RegulatoryEvent["framework"]
-                        ]?.short ?? e.framework}{" "}
-                        · afecta a {n} {n === 1 ? "sistema" : "sistemas"}
+                        {frameworkMeta(e.framework, locale)?.short ??
+                          e.framework}
+                        {tr.affectsMid}
+                        {n} {n === 1 ? u.systemOne : u.systemOther}
                       </span>
                     </span>
                     <span className="shrink-0 text-xs font-medium tabular-nums text-ink-soft">
-                      en {d} días
+                      {tr.inDaysPrefix}
+                      {d} {d === 1 ? u.dayOne : u.dayOther}
                     </span>
                   </li>
                 );
@@ -306,10 +404,12 @@ export default async function InformeEjecutivoPage() {
 
         <footer className="mt-10 border-t border-line pt-5 text-xs text-muted">
           <p>
-            Generado por <span className="font-medium text-ink">Attesta</span> el{" "}
-            {fecha}. Resumen de dirección para preparación de auditoría.
+            {rc.generatedByPrefix}
+            <span className="font-medium text-ink">Attesta</span>
+            {rc.generatedByOn}
+            {fecha}. {tr.footerNote}
           </p>
-          <p className="mt-1">{LEGAL_PDF}</p>
+          <p className="mt-1">{LEGAL_PDF_BY_LOCALE[locale]}</p>
         </footer>
       </article>
     </div>

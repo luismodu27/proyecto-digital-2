@@ -2,17 +2,34 @@ import { PageHeader } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { getAiSystems } from "@/lib/data";
-import { RISK_LABEL, RISK_ORDER, type RiskLevel } from "@/lib/mock-data";
+import { riskLabel, RISK_ORDER, type RiskLevel } from "@/lib/mock-data";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
 
-const guidance: Record<RiskLevel, string> = {
-  unacceptable: "Prohibido bajo el EU AI Act. Debe retirarse de uso.",
-  high: "Obligaciones estrictas: documentación técnica, supervisión humana, logging, gestión de datos.",
-  limited: "Obligaciones de transparencia: informar al usuario de que interactúa con IA.",
-  minimal: "Sin obligaciones específicas. Buenas prácticas recomendadas.",
+// Resumen breve de obligaciones por nivel de riesgo (terminología ya validada del
+// repo — ver OBLIGATIONS_BY_LEVEL_EN en risk-assessment.ts). Framing deployer.
+const GUIDANCE: Record<Locale, Record<RiskLevel, string>> = {
+  es: {
+    unacceptable: "Prohibido bajo el EU AI Act. Debe retirarse de uso.",
+    high: "Obligaciones estrictas: documentación técnica, supervisión humana, logging, gestión de datos.",
+    limited: "Obligaciones de transparencia: informar al usuario de que interactúa con IA.",
+    minimal: "Sin obligaciones específicas. Buenas prácticas recomendadas.",
+  },
+  en: {
+    unacceptable: "Prohibited under the EU AI Act. It must be withdrawn from use.",
+    high: "Strict obligations: technical documentation, human oversight, logging, data governance.",
+    limited: "Transparency obligations: inform users that they are interacting with AI.",
+    minimal: "No specific obligations. Good practices recommended.",
+  },
 };
 
 export default async function RiesgoPage() {
   const allSystems = await getAiSystems();
+  const locale = await resolveLocale();
+  const d = getDictionary(locale).dashboard;
+  const t = d.riskPage;
+  const guidance = GUIDANCE[locale];
   const grouped = RISK_ORDER.map((level) => ({
     level,
     systems: allSystems.filter((s) => s.risk === level),
@@ -21,11 +38,11 @@ export default async function RiesgoPage() {
   return (
     <>
       <PageHeader
-        title="Clasificación de riesgo"
-        subtitle="Cada sistema mapeado a su nivel de riesgo del EU AI Act y sus obligaciones."
+        title={t.title}
+        subtitle={t.subtitle}
         action={
           <ButtonLink href="/dashboard/riesgo/evaluar" variant="primary">
-            + Evaluar un sistema
+            {t.evaluateCta}
           </ButtonLink>
         }
       />
@@ -38,13 +55,14 @@ export default async function RiesgoPage() {
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
-                <RiskBadge level={level} />
+                <RiskBadge level={level} label={riskLabel(level, locale)} />
                 <span className="text-sm text-muted">
-                  {systems.length} sistema{systems.length === 1 ? "" : "s"}
+                  {systems.length}{" "}
+                  {systems.length === 1 ? d.units.systemOne : d.units.systemOther}
                 </span>
               </div>
               <span className="font-display text-sm font-medium text-ink">
-                {RISK_LABEL[level]}
+                {riskLabel(level, locale)}
               </span>
             </div>
             <p className="mt-3 border-l-2 border-line-strong pl-3 text-sm text-ink-soft">

@@ -6,13 +6,15 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
 import { createClient } from "@/lib/supabase/client";
+import type { Dictionary } from "@/lib/i18n";
 
 /**
  * Fija una nueva contraseña. Solo funciona con la sesión de recuperación que
  * establece `/auth/callback` tras abrir el enlace del correo. Si no hay sesión
  * (enlace caducado o abierto en otro navegador), guiamos a pedir otro enlace.
  */
-export function ResetUpdateForm() {
+export function ResetUpdateForm({ t }: { t: Dictionary["auth"] }) {
+  const u = t.resetUpdate;
   const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [ready, setReady] = useState(false);
@@ -37,11 +39,11 @@ export function ResetUpdateForm() {
     e.preventDefault();
     setError(null);
     if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
+      setError(u.passwordMin);
       return;
     }
     if (password !== confirm) {
-      setError("Las contraseñas no coinciden.");
+      setError(u.mismatch);
       return;
     }
 
@@ -58,23 +60,22 @@ export function ResetUpdateForm() {
       }, 1200);
     } catch (err) {
       const msg = (err instanceof Error ? err.message : "").toLowerCase();
-      if (msg.includes("should be different"))
-        setError("La nueva contraseña debe ser distinta a la anterior.");
+      if (msg.includes("should be different")) setError(u.shouldDiffer);
       else if (msg.includes("session") || msg.includes("jwt"))
-        setError("El enlace caducó. Solicita uno nuevo.");
-      else setError("No pudimos actualizar la contraseña. Inténtalo de nuevo.");
+        setError(u.expired);
+      else setError(u.generic);
     } finally {
       setLoading(false);
     }
   }
 
   const inputBase =
-    "mt-1.5 w-full rounded-lg border bg-paper px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:ring-2 focus:ring-brand/30 border-line-strong focus:border-brand";
+    "mt-1.5 w-full rounded-lg border bg-paper px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:ring-2 focus:ring-brand border-line-strong focus:border-brand";
 
   if (checking) {
     return (
       <div className="rounded-2xl border border-line bg-paper-raised p-8">
-        <p className="text-sm text-muted">Comprobando el enlace…</p>
+        <p className="text-sm text-muted">{u.checking}</p>
       </div>
     );
   }
@@ -84,17 +85,14 @@ export function ResetUpdateForm() {
       <div className="rounded-2xl border border-line bg-paper-raised p-8">
         <SealMark size={36} className="text-brand" />
         <h1 className="mt-4 font-display text-2xl font-semibold text-ink">
-          Enlace no válido
+          {u.invalidTitle}
         </h1>
-        <p className="mt-3 text-sm text-ink-soft">
-          Este enlace de recuperación caducó o ya se usó. Solicita uno nuevo
-          para continuar.
-        </p>
+        <p className="mt-3 text-sm text-ink-soft">{u.invalidBody}</p>
         <Link
           href="/reset-password"
           className="mt-6 inline-flex items-center justify-center rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-strong"
         >
-          Solicitar otro enlace
+          {u.requestAnother}
         </Link>
       </div>
     );
@@ -105,11 +103,9 @@ export function ResetUpdateForm() {
       <div className="rounded-2xl border border-line bg-paper-raised p-8">
         <SealMark size={36} className="text-brand" />
         <h1 className="mt-4 font-display text-2xl font-semibold text-ink">
-          Contraseña actualizada
+          {u.doneTitle}
         </h1>
-        <p className="mt-3 text-sm text-ink-soft">
-          Listo. Te estamos llevando a tu panel…
-        </p>
+        <p className="mt-3 text-sm text-ink-soft">{u.doneBody}</p>
       </div>
     );
   }
@@ -118,11 +114,9 @@ export function ResetUpdateForm() {
     <div className="rounded-2xl border border-line bg-paper-raised p-8">
       <SealMark size={36} className="text-brand" />
       <h1 className="mt-4 font-display text-2xl font-semibold text-ink">
-        Crea una nueva contraseña
+        {u.title}
       </h1>
-      <p className="mt-1 text-sm text-ink-soft">
-        Elige una contraseña segura para tu cuenta.
-      </p>
+      <p className="mt-1 text-sm text-ink-soft">{u.subtitle}</p>
 
       <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
         <div>
@@ -130,7 +124,7 @@ export function ResetUpdateForm() {
             htmlFor="password"
             className="block text-sm font-medium text-ink"
           >
-            Nueva contraseña
+            {u.newPasswordLabel}
           </label>
           <div className="relative">
             <input
@@ -149,12 +143,12 @@ export function ResetUpdateForm() {
               type="button"
               onClick={() => setShowPass((s) => !s)}
               className="absolute inset-y-0 right-0 px-3 text-xs font-medium text-muted hover:text-ink"
-              aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+              aria-label={showPass ? u.hidePassword : u.showPassword}
             >
-              {showPass ? "Ocultar" : "Mostrar"}
+              {showPass ? u.hide : u.show}
             </button>
           </div>
-          <p className="mt-1.5 text-xs text-muted">Mínimo 6 caracteres.</p>
+          <p className="mt-1.5 text-xs text-muted">{u.passwordHint}</p>
         </div>
 
         <div>
@@ -162,7 +156,7 @@ export function ResetUpdateForm() {
             htmlFor="confirm"
             className="block text-sm font-medium text-ink"
           >
-            Repite la contraseña
+            {u.confirmLabel}
           </label>
           <input
             id="confirm"
@@ -188,7 +182,7 @@ export function ResetUpdateForm() {
         )}
 
         <Button type="submit" disabled={loading} className="w-full py-2.5">
-          {loading ? "Guardando…" : "Guardar contraseña"}
+          {loading ? u.saving : u.submit}
         </Button>
       </form>
     </div>

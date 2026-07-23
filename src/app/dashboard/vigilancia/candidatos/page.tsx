@@ -1,27 +1,22 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
-import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
+import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { CandidateReviewControls } from "@/components/dashboard/CandidateReviewControls";
-import { runVigiaNow } from "@/lib/data/vigia-actions";
 import {
   getRegCandidates,
-  getRegSources,
   getIsPlatformAdmin,
   isSupabaseConfigured,
 } from "@/lib/data";
 import {
-  REG_CANDIDATE_STATUS_LABEL,
+  regCandidateStatusLabel,
   type RegCandidate,
-  type RegSource,
   type RegCandidateStatus,
 } from "@/lib/mock-data";
-import {
-  REG_KIND_LABEL,
-  FRAMEWORK_LABEL,
-  type RegKind,
-  type RegFramework,
-} from "@/lib/regulatory-watch";
+import { regKindLabel, frameworkLabel, type RegKind } from "@/lib/regulatory-watch";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
 
 export const dynamic = "force-dynamic";
 
@@ -52,16 +47,26 @@ function Pill({
   );
 }
 
-function formatDate(iso: string | null): string {
-  if (!iso) return "sin fecha";
-  return new Date(iso).toLocaleDateString("es-ES", {
+type CandidatesDict = ReturnType<
+  typeof getDictionary
+>["dashboard"]["pages"]["candidates"];
+
+function formatDate(iso: string | null, locale: Locale, noDate: string): string {
+  if (!iso) return noDate;
+  return new Date(iso).toLocaleDateString(locale === "en" ? "en-GB" : "es-ES", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
 }
 
-function Confidence({ value }: { value?: number | null }) {
+function Confidence({
+  value,
+  prefix,
+}: {
+  value?: number | null;
+  prefix: string;
+}) {
   if (value == null) return null;
   const pct = Math.round(value * 100);
   const tone = pct >= 75 ? "good" : pct >= 50 ? "gold" : "neutral";
@@ -73,7 +78,8 @@ function Confidence({ value }: { value?: number | null }) {
         : "text-muted";
   return (
     <span className={`text-xs font-medium tabular-nums ${cls}`}>
-      confianza {pct}%
+      {prefix}
+      {pct}%
     </span>
   );
 }
@@ -81,24 +87,29 @@ function Confidence({ value }: { value?: number | null }) {
 function CandidateCard({
   c,
   reviewable,
+  locale,
+  tc,
 }: {
   c: RegCandidate;
   reviewable: boolean;
+  locale: Locale;
+  tc: CandidatesDict;
 }) {
-  const kindLabel = c.kind
-    ? REG_KIND_LABEL[c.kind as RegKind] ?? c.kind
-    : "—";
+  const kindLabel = c.kind ? regKindLabel(c.kind as RegKind, locale) : "—";
   return (
     <article className="rounded-2xl border border-line bg-paper-raised p-6">
       <div className="flex flex-wrap items-center gap-2">
         <Pill className={STATUS_TONE[c.status]}>
-          {REG_CANDIDATE_STATUS_LABEL[c.status]}
+          {regCandidateStatusLabel(c.status, locale)}
         </Pill>
         <Pill>{kindLabel}</Pill>
         <span className="text-xs text-muted">
-          {FRAMEWORK_LABEL[c.framework as RegFramework] ?? c.framework}
+          {frameworkLabel(c.framework, locale)}
         </span>
-        <span className="text-xs text-muted">· fecha del evento {formatDate(c.date)}</span>
+        <span className="text-xs text-muted">
+          {tc.eventDatePrefix}
+          {formatDate(c.date, locale, tc.noDate)}
+        </span>
       </div>
 
       <h2 className="mt-2 font-display text-lg font-semibold text-ink">
@@ -113,7 +124,7 @@ function CandidateCard({
         {c.impact && (
           <div>
             <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-              Impacto para el deployer
+              {tc.impactLabel}
             </dt>
             <dd className="mt-0.5 text-sm text-ink-soft">{c.impact}</dd>
           </div>
@@ -121,7 +132,7 @@ function CandidateCard({
         {c.action && (
           <div>
             <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-              Acción propuesta
+              {tc.actionLabel}
             </dt>
             <dd className="mt-0.5 text-sm text-ink-soft">{c.action}</dd>
           </div>
@@ -140,24 +151,30 @@ function CandidateCard({
       <div className="mt-4 rounded-xl border border-line bg-paper-sunken/50 p-4">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-            Procedencia
+            {tc.provenanceLabel}
           </span>
           {c.provenance.agent && (
             <span className="text-xs text-ink-soft">
-              agente <span className="font-medium text-ink">{c.provenance.agent}</span>
+              {tc.agentPrefix}
+              <span className="font-medium text-ink">{c.provenance.agent}</span>
             </span>
           )}
           <span className="text-xs text-muted">
-            {c.provenance.model ? `modelo ${c.provenance.model}` : "sin LLM (determinista)"}
+            {c.provenance.model
+              ? `${tc.modelPrefix}${c.provenance.model}`
+              : tc.noLlm}
           </span>
-          <Confidence value={c.provenance.confidence} />
+          <Confidence value={c.provenance.confidence} prefix={tc.confidencePrefix} />
           {c.sourceLabel && (
-            <span className="text-xs text-muted">· fuente {c.sourceLabel}</span>
+            <span className="text-xs text-muted">
+              {tc.sourcePrefix}
+              {c.sourceLabel}
+            </span>
           )}
         </div>
         {c.provenance.excerpt && (
           <p className="mt-2 border-l-2 border-line-strong pl-3 text-xs italic text-muted">
-            «{c.provenance.excerpt}»
+            {locale === "en" ? `"${c.provenance.excerpt}"` : `«${c.provenance.excerpt}»`}
           </p>
         )}
         {c.source?.url && (
@@ -174,20 +191,15 @@ function CandidateCard({
 
       {reviewable && c.status === "draft" ? (
         <div className="mt-5 border-t border-line pt-4">
-          <CandidateReviewControls
-            id={c.id}
-            proposedEventId={c.proposedEventId}
-            title={c.title}
-            canPublish={c.kind != null && c.date != null}
-          />
+          <CandidateReviewControls c={c} />
         </div>
       ) : (
         c.status !== "draft" && (
           <p className="mt-4 border-t border-line pt-3 text-xs text-muted">
             {c.status === "approved"
-              ? `Publicado como «${c.proposedEventId}» · ${formatDate(c.reviewedAt)}`
-              : `Descartado · ${formatDate(c.reviewedAt)}`}
-            {c.reviewNote ? ` — ${c.reviewNote}` : ""}
+              ? `${tc.publishedAsPrefix}${c.proposedEventId}${tc.publishedAsMid}${formatDate(c.reviewedAt, locale, tc.noDate)}`
+              : `${tc.discardedPrefix}${formatDate(c.reviewedAt, locale, tc.noDate)}`}
+            {c.reviewNote ? `${tc.reviewNoteSep}${c.reviewNote}` : ""}
           </p>
         )
       )}
@@ -195,122 +207,27 @@ function CandidateCard({
   );
 }
 
-function formatChecked(iso: string | null): string {
-  if (!iso) return "nunca";
-  return new Date(iso).toLocaleString("es-ES", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function SourcesPanel({
-  sources,
-  canRun,
-}: {
-  sources: RegSource[];
-  canRun: boolean;
-}) {
-  const activeCount = sources.filter((s) => s.active).length;
-  return (
-    <section className="mb-8 rounded-2xl border border-line bg-paper-raised p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="font-display text-lg font-semibold text-ink">
-            Fuentes vigiladas
-          </h2>
-          <p className="mt-0.5 text-sm text-muted">
-            El Vigía compara la huella de cada fuente y deja un candidato cuando
-            algo cambia. {activeCount} activa{activeCount === 1 ? "" : "s"}.
-          </p>
-        </div>
-        {canRun && (
-          <form action={runVigiaNow}>
-            <button
-              type="submit"
-              className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            >
-              Ejecutar Vigía ahora
-            </button>
-          </form>
-        )}
-      </div>
-
-      {sources.length === 0 ? (
-        <p className="mt-4 text-sm text-ink-soft">
-          Aún no hay fuentes en la watchlist. Se cargan en{" "}
-          <code className="rounded bg-paper-sunken px-1 py-0.5 text-xs">
-            reg_sources
-          </code>{" "}
-          (panel de Supabase).
-        </p>
-      ) : (
-        <ul className="mt-4 divide-y divide-line">
-          {sources.map((s) => (
-            <li
-              key={s.id}
-              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2.5"
-            >
-              <div className="min-w-0">
-                <a
-                  href={s.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="truncate text-sm font-medium text-ink hover:text-brand"
-                >
-                  {s.label} ↗
-                </a>
-                <p className="text-xs text-muted">
-                  {FRAMEWORK_LABEL[s.framework as RegFramework] ?? s.framework}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-2 text-xs text-muted">
-                {!s.hasBaseline && (
-                  <span className="rounded-full border border-[var(--tone-gold-bd)] bg-[var(--tone-gold-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--tone-gold-fg)]">
-                    sin línea base
-                  </span>
-                )}
-                {!s.active && (
-                  <span className="rounded-full border border-line px-2 py-0.5 text-[10px]">
-                    inactiva
-                  </span>
-                )}
-                <span>revisada {formatChecked(s.lastCheckedAt)}</span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  );
-}
-
 export default async function CandidatosPage() {
-  const [isAdmin, candidates, sources] = await Promise.all([
+  const [isAdmin, candidates] = await Promise.all([
     getIsPlatformAdmin(),
     getRegCandidates(),
-    getRegSources(),
   ]);
+  const locale = await resolveLocale();
+  const d = getDictionary(locale).dashboard.pages;
+  const tc = d.candidates;
 
   // En modo conectado, la bandeja es solo para el equipo de Attesta.
   if (isSupabaseConfigured && !isAdmin) {
     return (
       <>
-        <PageHeader
-          title="Bandeja de validación"
-          subtitle="Cola de candidatos regulatorios propuestos por el pipeline."
-        />
+        <PageHeader title={tc.title} subtitle={tc.subtitleNonAdmin} />
         <div className="rounded-2xl border border-line bg-paper-raised p-8 text-center">
-          <p className="text-sm text-ink-soft">
-            Esta área es para el equipo de compliance de Attesta, que valida los
-            cambios normativos antes de publicarlos en el radar.
-          </p>
+          <p className="text-sm text-ink-soft">{tc.nonAdminNotice}</p>
           <Link
             href="/dashboard/vigilancia"
             className="mt-4 inline-block text-sm font-medium text-brand hover:text-brand-strong"
           >
-            ← Volver a Vigilancia
+            {d.backToMonitoring}
           </Link>
         </div>
       </>
@@ -323,40 +240,36 @@ export default async function CandidatosPage() {
   return (
     <>
       <PageHeader
-        title="Bandeja de validación"
-        subtitle="Borradores propuestos por el pipeline. Nada llega al radar de los clientes sin tu validación."
+        title={tc.title}
+        subtitle={tc.subtitle}
         action={
           <Link
             href="/dashboard/vigilancia"
             className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
           >
-            ← Radar
+            {d.radarBack}
           </Link>
         }
       />
-
-      <SourcesPanel sources={sources} canRun={isAdmin} />
 
       <div className="mb-6 flex items-center gap-3">
         <span className="font-display text-2xl font-semibold tabular-nums text-ink">
           {drafts.length}
         </span>
         <span className="text-sm text-muted">
-          {drafts.length === 1 ? "candidato pendiente" : "candidatos pendientes"} de revisión
+          {drafts.length === 1 ? tc.pendingOne : tc.pendingOther}
+          {tc.pendingSuffix}
         </span>
       </div>
 
       {drafts.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-line-strong bg-paper-raised p-8 text-center">
-          <p className="text-sm text-ink-soft">
-            No hay candidatos pendientes. El pipeline dejará aquí cada cambio
-            normativo detectado para tu revisión.
-          </p>
+          <p className="text-sm text-ink-soft">{tc.empty}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-5">
           {drafts.map((c) => (
-            <CandidateCard key={c.id} c={c} reviewable />
+            <CandidateCard key={c.id} c={c} reviewable locale={locale} tc={tc} />
           ))}
         </div>
       )}
@@ -364,17 +277,23 @@ export default async function CandidatosPage() {
       {reviewed.length > 0 && (
         <section className="mt-10">
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
-            Ya revisados
+            {tc.reviewed}
           </h3>
           <div className="flex flex-col gap-5">
             {reviewed.map((c) => (
-              <CandidateCard key={c.id} c={c} reviewable={false} />
+              <CandidateCard
+                key={c.id}
+                c={c}
+                reviewable={false}
+                locale={locale}
+                tc={tc}
+              />
             ))}
           </div>
         </section>
       )}
 
-      <LegalNote className="mt-10" text={LEGAL_FOOTER} />
+      <LegalNote className="mt-10" text={LEGAL_FOOTER_BY_LOCALE[locale]} />
     </>
   );
 }

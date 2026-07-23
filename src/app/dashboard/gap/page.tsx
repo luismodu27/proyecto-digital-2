@@ -1,24 +1,12 @@
 import { PageHeader } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
-import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
+import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { GapStatusControl } from "@/components/dashboard/GapStatusControl";
 import { DeleteGapButton } from "@/components/dashboard/DeleteGapButton";
-import { getGapItems, isSupabaseConfigured } from "@/lib/data";
-
-const statusMeta = {
-  missing: {
-    label: "Falta",
-    cls: "bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)] border-[var(--tone-danger-bd)]",
-  },
-  partial: {
-    label: "Parcial",
-    cls: "bg-[var(--tone-warn-bg)] text-[var(--tone-warn-fg)] border-[var(--tone-warn-bd)]",
-  },
-  done: {
-    label: "Cubierto",
-    cls: "bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)] border-[var(--tone-good-bd)]",
-  },
-} as const;
+import { getAiSystems, getGapItems, isSupabaseConfigured } from "@/lib/data";
+import { severityLabel } from "@/lib/mock-data";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 const severityMeta = {
   alta: "text-[var(--tone-danger-fg)]",
@@ -26,24 +14,39 @@ const severityMeta = {
   baja: "text-muted",
 } as const;
 
+const statusCls = {
+  missing:
+    "bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)] border-[var(--tone-danger-bd)]",
+  partial:
+    "bg-[var(--tone-warn-bg)] text-[var(--tone-warn-fg)] border-[var(--tone-warn-bd)]",
+  done: "bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)] border-[var(--tone-good-bd)]",
+} as const;
+
 export default async function GapPage() {
-  const gapItems = await getGapItems();
-  const open = gapItems.filter((g) => g.status !== "done").length;
+  const [gapItems, systems] = await Promise.all([getGapItems(), getAiSystems()]);
+  const locale = await resolveLocale();
+  const t = getDictionary(locale).dashboard.gap;
+  // Las prácticas prohibidas (Art. 5) no son "brechas abiertas": no se preparan,
+  // se cesan. No cuentan en el subtítulo de brechas frente a los requisitos.
+  const open = gapItems.filter((g) => !g.prohibited && g.status !== "done").length;
+  // El nombre real del sistema (getGapItems deja el uuid si el sistema no tiene
+  // `code`, p. ej. los creados por el usuario). Misma resolución que el PDF.
+  const nameById = new Map(systems.map((s) => [s.id, s.name]));
 
   return (
     <>
       <PageHeader
-        title="Gap assessment"
-        subtitle={`${open} brechas abiertas frente a los requisitos del EU AI Act.`}
+        title={t.title}
+        subtitle={open === 1 ? t.subtitleOne : `${open}${t.subtitleOtherAfter}`}
         action={
           <div className="flex flex-wrap gap-2">
             {isSupabaseConfigured && (
               <ButtonLink href="/dashboard/gap/nuevo" variant="primary">
-                + Añadir brecha
+                {t.addGap}
               </ButtonLink>
             )}
             <ButtonLink href="/dashboard/gap/informe" variant="outline">
-              ⬇ Exportar evidencia (PDF)
+              {t.exportEvidence}
             </ButtonLink>
           </div>
         }
@@ -51,7 +54,40 @@ export default async function GapPage() {
 
       <div className="space-y-3">
         {gapItems.map((g) => {
-          const st = statusMeta[g.status];
+          // Práctica prohibida (Art. 5): no es una brecha a cerrar. Se renderiza
+          // como Inaceptable / revisión jurídica, sin control de estado (no se
+          // "prepara"), y con la nota de por qué no cuenta en el "% listo".
+          if (g.prohibited) {
+            return (
+              <article
+                key={g.id}
+                className="flex flex-col gap-3 rounded-2xl border border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)] p-5 sm:flex-row sm:items-start sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-xs text-muted">{g.article}</span>
+                    <span className="inline-flex items-center rounded-full border border-[var(--tone-danger-bd)] px-2 py-0.5 text-xs font-semibold uppercase text-[var(--tone-danger-fg)]">
+                      {t.prohibited.badge} · {t.prohibited.level}
+                    </span>
+                  </div>
+                  <p className="mt-1 font-medium text-ink">{g.requirement}</p>
+                  <p className="text-xs text-muted">
+                    {t.affectedSystemPrefix}{nameById.get(g.system) ?? g.system}
+                  </p>
+                  <p className="mt-2 text-sm text-[var(--tone-danger-fg)]">
+                    {t.prohibited.action}
+                  </p>
+                  <p className="mt-1 text-xs text-muted">{t.prohibited.note}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  <span className="inline-flex items-center rounded-full border border-[var(--tone-danger-bd)] px-3 py-1 text-xs font-medium text-[var(--tone-danger-fg)]">
+                    {t.prohibited.actionShort}
+                  </span>
+                  {isSupabaseConfigured && <DeleteGapButton id={g.id} />}
+                </div>
+              </article>
+            );
+          }
           return (
             <article
               key={g.id}
@@ -61,11 +97,13 @@ export default async function GapPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-xs text-muted">{g.article}</span>
                   <span className={`text-xs font-medium uppercase ${severityMeta[g.severity]}`}>
-                    · severidad {g.severity}
+                    {t.severityPrefix}{severityLabel(g.severity, locale)}
                   </span>
                 </div>
                 <p className="mt-1 font-medium text-ink">{g.requirement}</p>
-                <p className="text-xs text-muted">Sistema afectado: {g.system}</p>
+                <p className="text-xs text-muted">
+                  {t.affectedSystemPrefix}{nameById.get(g.system) ?? g.system}
+                </p>
               </div>
               {isSupabaseConfigured ? (
                 <div className="flex shrink-0 items-center gap-1">
@@ -74,9 +112,9 @@ export default async function GapPage() {
                 </div>
               ) : (
                 <span
-                  className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium ${st.cls}`}
+                  className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium ${statusCls[g.status]}`}
                 >
-                  {st.label}
+                  {t.status[g.status]}
                 </span>
               )}
             </article>
@@ -84,7 +122,7 @@ export default async function GapPage() {
         })}
       </div>
 
-      <LegalNote text={LEGAL_FOOTER} className="mt-6" />
+      <LegalNote text={LEGAL_FOOTER_BY_LOCALE[locale]} className="mt-6" />
     </>
   );
 }

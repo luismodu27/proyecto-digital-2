@@ -15,6 +15,8 @@
  */
 
 import type { AiSystem, RiskLevel } from "./mock-data";
+import type { Locale } from "./i18n/config";
+import { daysUntilDate } from "./date";
 
 export type RegFramework =
   | "eu-ai-act"
@@ -22,10 +24,18 @@ export type RegFramework =
   | "us-co-aiact"
   | "us-il-aivia"
   | "us-il-hra"
+  | "us-ca-feha"
+  | "us-ca-admt"
   | "us-eeoc";
 
 /** Jurisdicción a la que pertenece un marco (para agrupar y filtrar el radar). */
-export type RegJurisdiction = "eu" | "us-ny" | "us-co" | "us-il" | "us-federal";
+export type RegJurisdiction =
+  | "eu"
+  | "us-ny"
+  | "us-co"
+  | "us-il"
+  | "us-ca"
+  | "us-federal";
 
 export type FrameworkMeta = {
   /** Nombre completo de la ley/marco. */
@@ -78,6 +88,29 @@ export const REG_KIND_LABEL: Record<RegKind, string> = {
   enforcement: "Sanción",
 };
 
+/**
+ * EN — event-kind labels (parallel to REG_KIND_LABEL, same keys/enum values).
+ * Consumers (ES today): vigilancia/page.tsx (kind pill), candidatos/page.tsx
+ * (candidate kind), CandidateReviewControls.tsx (kind selector). To surface EN,
+ * pick this map when locale === "en"; logic/enum values are unchanged.
+ */
+export const REG_KIND_LABEL_EN: Record<RegKind, string> = {
+  deadline: "Deadline",
+  guidance: "Guidance",
+  standard: "Standard",
+  amendment: "Amendment",
+  enforcement: "Enforcement",
+};
+
+/** Selector locale-aware de las etiquetas de tipo de evento (default ES). */
+export const REG_KIND_LABEL_BY_LOCALE: Record<Locale, Record<RegKind, string>> = {
+  es: REG_KIND_LABEL,
+  en: REG_KIND_LABEL_EN,
+};
+export function regKindLabel(kind: RegKind, locale: Locale = "es"): string {
+  return REG_KIND_LABEL_BY_LOCALE[locale][kind];
+}
+
 export const FRAMEWORK_META: Record<RegFramework, FrameworkMeta> = {
   "eu-ai-act": {
     label: "EU AI Act",
@@ -109,6 +142,20 @@ export const FRAMEWORK_META: Record<RegFramework, FrameworkMeta> = {
     jurisdiction: "us-il",
     jurisdictionLabel: "EE. UU. — Illinois",
   },
+  "us-ca-feha": {
+    label:
+      "California — FEHA: reglamento sobre sistemas de decisión automatizada (ADS) en empleo (California Civil Rights Council)",
+    short: "CA FEHA ADS",
+    jurisdiction: "us-ca",
+    jurisdictionLabel: "EE. UU. — California",
+  },
+  "us-ca-admt": {
+    label:
+      "California — CCPA/CPPA: reglamento sobre tecnología de decisión automatizada (ADMT)",
+    short: "CA CPPA ADMT",
+    jurisdiction: "us-ca",
+    jurisdictionLabel: "EE. UU. — California",
+  },
   "us-eeoc": {
     label: "EEOC — orientación federal",
     short: "EEOC",
@@ -117,14 +164,107 @@ export const FRAMEWORK_META: Record<RegFramework, FrameworkMeta> = {
   },
 };
 
-/** Nombre del marco (con reserva segura para valores no conocidos de BD). */
-export function frameworkLabel(framework: string): string {
-  return FRAMEWORK_META[framework as RegFramework]?.label ?? framework;
+/**
+ * EN — framework metadata (parallel to FRAMEWORK_META). Same keys, same
+ * `jurisdiction` codes; only human-facing `label`, `short`, `jurisdictionLabel`
+ * are translated. Proper names of laws/frameworks are kept (EU AI Act, NYC Local
+ * Law 144, Colorado AI Act, Illinois AI Video Interview Act, Illinois Human
+ * Rights Act, EEOC). Consumers (ES today): vigilancia/page.tsx (framework meta +
+ * jurisdiction), CandidateReviewControls.tsx (framework selector), dashboard/
+ * page.tsx & informe/page.tsx (read `.jurisdiction` only — code, no translation
+ * needed there). Wire by choosing this map when locale === "en".
+ */
+export const FRAMEWORK_META_EN: Record<RegFramework, FrameworkMeta> = {
+  "eu-ai-act": {
+    label: "EU AI Act",
+    short: "EU AI Act",
+    jurisdiction: "eu",
+    jurisdictionLabel: "European Union",
+  },
+  "us-nyc-ll144": {
+    label: "NYC Local Law 144 (AEDT)",
+    short: "NYC LL144",
+    jurisdiction: "us-ny",
+    jurisdictionLabel: "US — New York",
+  },
+  "us-co-aiact": {
+    label: "Colorado AI Act (SB 26-189)",
+    short: "Colorado AI Act",
+    jurisdiction: "us-co",
+    jurisdictionLabel: "US — Colorado",
+  },
+  "us-il-aivia": {
+    label: "Illinois AI Video Interview Act",
+    short: "IL AIVIA",
+    jurisdiction: "us-il",
+    jurisdictionLabel: "US — Illinois",
+  },
+  "us-il-hra": {
+    label: "Illinois Human Rights Act (HB 3773)",
+    short: "IL HRA",
+    jurisdiction: "us-il",
+    jurisdictionLabel: "US — Illinois",
+  },
+  "us-ca-feha": {
+    label:
+      "California — FEHA: Employment Regulations Regarding Automated-Decision Systems (California Civil Rights Council)",
+    short: "CA FEHA ADS",
+    jurisdiction: "us-ca",
+    jurisdictionLabel: "US — California",
+  },
+  "us-ca-admt": {
+    label:
+      "California — CCPA/CPPA: Automated Decisionmaking Technology (ADMT) regulations",
+    short: "CA CPPA ADMT",
+    jurisdiction: "us-ca",
+    jurisdictionLabel: "US — California",
+  },
+  "us-eeoc": {
+    label: "EEOC — federal guidance",
+    short: "EEOC",
+    jurisdiction: "us-federal",
+    jurisdictionLabel: "US — Federal",
+  },
+};
+
+/** Selector locale-aware de los metadatos de marco (default ES). */
+export const FRAMEWORK_META_BY_LOCALE: Record<
+  Locale,
+  Record<RegFramework, FrameworkMeta>
+> = {
+  es: FRAMEWORK_META,
+  en: FRAMEWORK_META_EN,
+};
+
+/**
+ * Metadatos del marco por locale (con reserva `undefined` para valores no
+ * conocidos de BD). Retrocompatible: `locale` default ES.
+ */
+export function frameworkMeta(
+  framework: string,
+  locale: Locale = "es",
+): FrameworkMeta | undefined {
+  return FRAMEWORK_META_BY_LOCALE[locale][framework as RegFramework];
 }
 
-/** Jurisdicción legible del marco (reserva: "Otras"). */
-export function jurisdictionLabel(framework: string): string {
-  return FRAMEWORK_META[framework as RegFramework]?.jurisdictionLabel ?? "Otras";
+/**
+ * Nombre del marco (con reserva segura para valores no conocidos de BD).
+ * Retrocompatible: `locale` opcional con default ES.
+ */
+export function frameworkLabel(framework: string, locale: Locale = "es"): string {
+  return FRAMEWORK_META_BY_LOCALE[locale][framework as RegFramework]?.label ?? framework;
+}
+
+/**
+ * Jurisdicción legible del marco (reserva: "Otras"/"Other").
+ * Retrocompatible: `locale` opcional con default ES.
+ */
+export function jurisdictionLabel(framework: string, locale: Locale = "es"): string {
+  const fallback = locale === "en" ? "Other" : "Otras";
+  return (
+    FRAMEWORK_META_BY_LOCALE[locale][framework as RegFramework]?.jurisdictionLabel ??
+    fallback
+  );
 }
 
 /** Orden de jurisdicciones en la UI (UE primero, luego EE. UU.). */
@@ -133,6 +273,7 @@ export const JURISDICTION_ORDER: RegJurisdiction[] = [
   "us-ny",
   "us-co",
   "us-il",
+  "us-ca",
   "us-federal",
 ];
 
@@ -142,7 +283,38 @@ export const JURISDICTION_LABEL: Record<RegJurisdiction, string> = {
   "us-ny": "EE. UU. — Nueva York",
   "us-co": "EE. UU. — Colorado",
   "us-il": "EE. UU. — Illinois",
+  "us-ca": "EE. UU. — California",
   "us-federal": "EE. UU. — Federal",
+};
+
+/**
+ * EN — jurisdiction labels for filter chips (parallel to JURISDICTION_LABEL,
+ * same keys). Consumers (ES today): vigilancia/page.tsx (filter chips + single-
+ * jurisdiction suffix), JurisdictionSettings.tsx (toggle labels). Wire by
+ * choosing this map when locale === "en".
+ */
+export const JURISDICTION_LABEL_EN: Record<RegJurisdiction, string> = {
+  eu: "European Union",
+  "us-ny": "US — New York",
+  "us-co": "US — Colorado",
+  "us-il": "US — Illinois",
+  "us-ca": "US — California",
+  "us-federal": "US — Federal",
+};
+
+/**
+ * Selector locale-aware de las etiquetas de jurisdicción, indexado por código de
+ * jurisdicción (para los chips de filtro que hoy indexan `JURISDICTION_LABEL`
+ * directamente). Default seguro: `JURISDICTION_LABEL` (ES). Fase 2: los chips
+ * de `vigilancia/page.tsx` y `JurisdictionSettings.tsx` deben indexar este mapa
+ * con el locale resuelto.
+ */
+export const JURISDICTION_LABEL_BY_LOCALE: Record<
+  Locale,
+  Record<RegJurisdiction, string>
+> = {
+  es: JURISDICTION_LABEL,
+  en: JURISDICTION_LABEL_EN,
 };
 
 /** Compatibilidad: mapa simple id de marco → nombre. */
@@ -152,7 +324,35 @@ export const FRAMEWORK_LABEL: Record<RegFramework, string> = {
   "us-co-aiact": FRAMEWORK_META["us-co-aiact"].label,
   "us-il-aivia": FRAMEWORK_META["us-il-aivia"].label,
   "us-il-hra": FRAMEWORK_META["us-il-hra"].label,
+  "us-ca-feha": FRAMEWORK_META["us-ca-feha"].label,
+  "us-ca-admt": FRAMEWORK_META["us-ca-admt"].label,
   "us-eeoc": FRAMEWORK_META["us-eeoc"].label,
+};
+
+/**
+ * EN — simple framework-id → name map (parallel to FRAMEWORK_LABEL). Names are
+ * identical to the ES map (proper names, not translated); provided for symmetry
+ * so EN consumers can index one shape. Consumers (ES today): fuentes/page.tsx
+ * (source framework pill), candidatos/page.tsx (candidate framework pill).
+ */
+export const FRAMEWORK_LABEL_EN: Record<RegFramework, string> = {
+  "eu-ai-act": FRAMEWORK_META_EN["eu-ai-act"].label,
+  "us-nyc-ll144": FRAMEWORK_META_EN["us-nyc-ll144"].label,
+  "us-co-aiact": FRAMEWORK_META_EN["us-co-aiact"].label,
+  "us-il-aivia": FRAMEWORK_META_EN["us-il-aivia"].label,
+  "us-il-hra": FRAMEWORK_META_EN["us-il-hra"].label,
+  "us-ca-feha": FRAMEWORK_META_EN["us-ca-feha"].label,
+  "us-ca-admt": FRAMEWORK_META_EN["us-ca-admt"].label,
+  "us-eeoc": FRAMEWORK_META_EN["us-eeoc"].label,
+};
+
+/** Selector locale-aware del mapa simple id→nombre de marco (default ES). */
+export const FRAMEWORK_LABEL_BY_LOCALE: Record<
+  Locale,
+  Record<RegFramework, string>
+> = {
+  es: FRAMEWORK_LABEL,
+  en: FRAMEWORK_LABEL_EN,
 };
 
 /* -------------------------------------------------------------------------- */
@@ -356,8 +556,8 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     action:
       "Lleva un registro de la fecha de la última auditoría de sesgo por cada AEDT y agenda su renovación antes de cumplir 12 meses. Ata en el inventario de Attesta la fecha de auditoría a cada sistema de selección y trátala como evidencia con caducidad.",
     articles: [
-      "6 RCNY § 5-301 (definición de bias audit)",
-      "6 RCNY § 5-303 (publicación del resumen de resultados)",
+      "6 RCNY § 5-301 (bias audit)",
+      "6 RCNY § 5-302 (publicación del resumen de resultados)",
     ],
     source: {
       label: "DCWP — AEDT FAQ (PDF oficial de la Ciudad de Nueva York)",
@@ -427,12 +627,13 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
       "Antes de cada video-entrevista analizada por IA: entrega el aviso y la explicación de qué evalúa el sistema, recoge consentimiento y ofrece alternativa a quien no consienta. Habilita el borrado del vídeo en 30 días a petición. Guarda el consentimiento como evidencia.",
     articles: [
       "820 ILCS 42/5 (consentimiento e información)",
-      "820 ILCS 42/10 (límite de compartición y borrado en 30 días)",
+      "820 ILCS 42/10 (límite de con quién se comparte el vídeo)",
+      "820 ILCS 42/15 (borrado en 30 días a petición)",
       "820 ILCS 42/20 (reporte demográfico si solo se usa IA para cribar a entrevista presencial)",
     ],
     source: {
       label: "Illinois General Assembly — 820 ILCS 42 (texto legal oficial)",
-      url: "https://www.ilga.gov/legislation/ilcs/ilcs3.asp?ActID=4015&ChapterID=68",
+      url: "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=4015&ChapterID=68",
     },
     scope: { riskLevels: ["high"] },
   },
@@ -453,12 +654,12 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     articles: [
       "775 ILCS 5/2-102 (prácticas de empleo, enmendado)",
       "775 ILCS 5/1-103 (definiciones, IA y ZIP como proxy)",
-      "HB 3773 (103ª Asamblea General; nº de ley pública a reconfirmar)",
+      "HB 3773 (Public Act 103-0804)",
     ],
     source: {
       label:
         "Illinois General Assembly — Illinois Human Rights Act (775 ILCS 5)",
-      url: "https://www.ilga.gov/legislation/ilcs/ilcs3.asp?ActID=2266&ChapterID=64",
+      url: "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=2266&ChapterID=64",
     },
     scope: { riskLevels: ["high"] },
   },
@@ -487,6 +688,537 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     },
     scope: { riskLevels: ["high"] },
   },
+
+  // ── California — FEHA (ADS en empleo) y CCPA/CPPA (ADMT) ──
+  {
+    id: "us-ca-feha-ads-effective",
+    date: "2025-10-01",
+    kind: "deadline",
+    framework: "us-ca-feha",
+    title:
+      "Regs de FEHA sobre sistemas de decisión automatizada (ADS) en empleo — en vigor",
+    summary:
+      "El California Civil Rights Council adoptó reglas que aclaran cómo la ley antidiscriminación de California (FEHA) se aplica al uso de sistemas de decisión automatizada (ADS) e IA en decisiones de empleo. En vigor desde el 1 de octubre de 2025.",
+    impact:
+      "Si empleas a 5 o más personas en California y usas ADS/IA en selección, promoción u otras decisiones de empleo, eres obligado directo. Un ADS que genere impacto dispar por una característica protegida puede infringir la ley; además debes conservar registros de criterios de selección, datos del ADS y flujo de solicitantes durante al menos 4 años, y respondes por lo que hagan los agentes/vendedores que actúan por ti.",
+    action:
+      "Inventaría qué ADS/IA intervienen en tus decisiones de empleo, reúne evidencia declarada de pruebas anti-sesgo (impacto dispar) y de que el ADS no sustituye la evaluación individualizada, activa la retención de registros ≥4 años y revisa los contratos con vendedores que operan como tus agentes.",
+    articles: ["2 CCR §11008.1", "2 CCR §11009", "2 CCR §11013"],
+    source: {
+      label:
+        "California Civil Rights Council — Texto final, Employment Regulations Regarding Automated-Decision Systems",
+      url: "https://calcivilrights.ca.gov/wp-content/uploads/sites/32/2025/06/Final-Text-regulations-automated-employment-decision-systems.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-regs-effective",
+    date: "2026-01-01",
+    kind: "amendment",
+    framework: "us-ca-admt",
+    title:
+      "Reglamento CCPA/CPPA (ADMT, evaluaciones de riesgo y auditorías de ciberseguridad) — vigente",
+    summary:
+      "El reglamento del California Privacy Protection Agency (CPPA) sobre tecnología de decisión automatizada (ADMT), evaluaciones de riesgo y auditorías de ciberseguridad entró en vigor el 1 de enero de 2026 (aprobado por la Office of Administrative Law el 22 de septiembre de 2025). Arranca el reloj de un cumplimiento escalonado.",
+    impact:
+      "El empleo cuenta como \"significant decision\" bajo el reglamento: si usas ADMT para decidir sobre contratación, salario, disciplina o terminación sin intervención humana significativa, quedarás sujeto a aviso previo, opt-out, acceso a la lógica y evaluación de riesgo documentada. La vigencia inicia la obligación de conducir evaluaciones de riesgo; las obligaciones del empleador frente a la persona trabajadora tienen fechas posteriores.",
+    action:
+      "Mapea si algún sistema tuyo constituye ADMT para decisiones significativas de empleo y valora la excepción de \"meaningful human involvement\"; empieza a documentar evaluaciones de riesgo y prepara el calendario de aviso previo/opt-out/acceso para las fechas exigibles.",
+    articles: [
+      "Cal. Code Regs. tit. 11 §7120 (auditorías de ciberseguridad)",
+      "§7150 (evaluaciones de riesgo)",
+      "§7200 (ADMT)",
+    ],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — Texto del reglamento CCPA vigente 1-ene-2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-employer-compliance",
+    date: "2027-01-01",
+    kind: "deadline",
+    framework: "us-ca-admt",
+    title:
+      "Cumplimiento del empleador: ADMT en decisiones significativas de empleo",
+    summary:
+      "Fecha en que las empresas que usan ADMT para tomar decisiones significativas —el empleo entre ellas— deben cumplir las obligaciones de aviso previo (§7220), opt-out (§7221) y acceso a la lógica (§7222). Rige para el ADMT ya en uso; el ADMT desplegado después debe cumplir antes de su primer uso.",
+    impact:
+      "Si a esta fecha ya usas ADMT para decisiones significativas de empleo sin intervención humana significativa, debes tener operativos el aviso previo, los métodos de opt-out y la respuesta de acceso, además de la evaluación de riesgo documentada. Cualquier ADMT que despliegues después tiene que cumplir antes de usarse por primera vez.",
+    action:
+      "Antes de esta fecha: publica el aviso previo, habilita al menos dos métodos de opt-out (con sus excepciones), prepara respuestas de acceso comprensibles y ten cerradas y documentadas las evaluaciones de riesgo de cada ADMT de empleo.",
+    articles: ["Cal. Code Regs. tit. 11 §7220", "§7221", "§7222"],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — Texto del reglamento CCPA vigente 1-ene-2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-risk-assessment-attestation",
+    date: "2028-04-01",
+    kind: "deadline",
+    framework: "us-ca-admt",
+    title:
+      "Entrega a la CPPA: attestation y resumen de evaluaciones de riesgo",
+    summary:
+      "Primera fecha en que las empresas obligadas a realizar evaluaciones de riesgo —incluye usar ADMT para decisiones significativas de empleo— deben presentar a la CPPA una attestation de que se completaron y un resumen de la información. Cubre las evaluaciones realizadas desde el inicio del cumplimiento (2026 en adelante).",
+    impact:
+      "No basta con conducir la evaluación de riesgo de puertas adentro: hay una entrega formal ante el regulador. Si usas ADMT en empleo, esta es la primera fecha de presentación ante la CPPA; las evaluaciones deben revisarse al menos cada tres años o ante cambios materiales.",
+    action:
+      "Ten las evaluaciones de riesgo documentadas y firmadas con antelación, designa quién presenta la attestation y el resumen ante la CPPA, y programa la revisión periódica (≥ cada 3 años o ante cambios materiales).",
+    articles: ["Cal. Code Regs. tit. 11 §7150", "§7157"],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — Texto del reglamento CCPA vigente 1-ene-2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Catálogo curado — versión EN VALIDADA (paralela a REGULATORY_EVENTS)        */
+/* -------------------------------------------------------------------------- */
+/**
+ * EN parallel of REGULATORY_EVENTS. IDENTICAL to the ES array in: `id`, `date`,
+ * `kind`, `framework`, `scope`, and `source.url`. User-facing prose is
+ * translated: `title`, `summary`, `impact`, `action`, and the descriptive part
+ * of `source.label` (official document/body names kept, e.g. "Regulation (EU)
+ * 2024/1689", "Council of the EU", "DCWP").
+ *
+ * `articles`: the numeric citation identifiers are kept byte-identical (a
+ * mistranslated cite is a liability), but the Spanish DESCRIPTIVE text that some
+ * carried has been translated to English (e.g. "Cap. VII (gobernanza)" →
+ * "Chapter VII (governance)"; "(publicación del resumen de resultados)" →
+ * "(publication of the summary of results)"; range connector "a" → "to"; dates
+ * "6-abr-2023" → "6 Apr 2023"). Language-suffixed statute tokens are also
+ * translated to the official EUR-Lex English forms: "Anexo I/III" → "Annex I/III",
+ * "Directiva 2011/93/UE" → "Directive 2011/93/EU", "Reglamento (UE)" →
+ * "Regulation (EU)". Signed off by the compliance-domain-expert (2026-07-22).
+ *
+ * Consumers read title/summary/impact/action (and scope/date via the relevance
+ * engine below) through `regulatoryEventsBase(locale)`/`mergeCatalog(...,locale)`,
+ * which select REGULATORY_EVENTS_EN when locale === "en"; the engine + merge
+ * helpers are locale-agnostic and unchanged.
+ *
+ * Deployer framing preserved; no prohibited copy (no certified/compliant/
+ * guarantees). Legal fidelity: dates/articles not strengthened or softened.
+ */
+export const REGULATORY_EVENTS_EN: RegulatoryEvent[] = [
+  {
+    id: "eu-entry-into-force",
+    date: "2024-08-01",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "The EU AI Act enters into force",
+    summary:
+      "Regulation (EU) 2024/1689 was published on 12 July 2024 and entered into force on 1 August 2024, starting the staggered application timeline.",
+    impact:
+      "Marks the starting point: from here on, every deadline runs. No substantive obligation is enforceable yet, but it is already wise to inventory and classify your systems.",
+    action:
+      "Keep your AI system inventory up to date and classify its risk level to get ahead of the upcoming deadlines.",
+    articles: ["Art. 113"],
+    source: {
+      label: "Regulation (EU) 2024/1689 — EUR-Lex",
+      url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    },
+    scope: { all: true },
+  },
+  {
+    id: "eu-prohibited-practices",
+    date: "2025-02-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "Prohibited AI practices (Art. 5) become applicable",
+    summary:
+      "Since 2 February 2025, the prohibitions in Art. 5 are enforceable, together with the AI literacy obligation (Art. 4).",
+    impact:
+      "Critical for HR: inferring a person's emotions in the workplace (e.g. affect analysis or micro-expressions in video interviews) is a PROHIBITED practice except for medical or safety purposes. If a hiring tool does this, it cannot be used.",
+    action:
+      "Check whether any tool (especially video interviewing) infers emotions; if so, discard it or disable that feature. Ensure basic AI literacy for your team (Art. 4).",
+    articles: ["Art. 5", "Art. 4", "Art. 5.1.f"],
+    source: {
+      label: "Commission Guidelines on prohibited AI practices (Feb 2025)",
+      url: "https://digital-strategy.ec.europa.eu/en/library/commission-publishes-guidelines-prohibited-artificial-intelligence-ai-practices-defined-ai-act",
+    },
+    scope: { all: true },
+  },
+  {
+    id: "eu-gpai-governance",
+    date: "2025-08-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "General-purpose AI (GPAI) models, governance and penalties",
+    summary:
+      "Since 2 August 2025, the obligations for providers of general-purpose AI models (Chapter V), the governance framework (authorities) and the penalties regime apply.",
+    impact:
+      "Affects mainly providers of foundation models, not directly a deployer. But it establishes the penalties framework and the competent authorities: non-compliance now has consequences.",
+    action:
+      "If you use general-purpose models (e.g. a chatbot built on a commercial LLM), ask your provider for the GPAI compliance documentation and keep it as evidence.",
+    articles: ["Chapter V (Arts. 51–56)", "Chapter VII (governance)", "Arts. 99–100"],
+    source: {
+      label: "AI Act application timeline — European Commission",
+      url: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+    },
+    scope: { all: true },
+  },
+  {
+    id: "eu-omnibus-highrisk-delay",
+    date: "2026-06-29",
+    kind: "amendment",
+    framework: "eu-ai-act",
+    title: "Digital Omnibus: the high-risk deadline is postponed",
+    summary:
+      "The Digital Omnibus package (adopted in 2026) reschedules the application of the high-risk obligations in Annex III: from 2 August 2026 to 2 December 2027 (and to 2 August 2028 for AI embedded in Annex I products).",
+    impact:
+      "Good news with a caveat: you have more time to prepare your high-risk systems, but the obligation is unavoidable. It is a window to get ready, not a cancellation.",
+    action:
+      "Use the window: close the gap assessment for your high-risk systems and gather the evidence calmly before December 2027.",
+    articles: ["Art. 113", "Annex III"],
+    source: {
+      label: "Council of the EU — final green light to the Digital Omnibus (29 Jun 2026)",
+      url: "https://www.consilium.europa.eu/en/press/press-releases/2026/06/29/artificial-intelligence-council-gives-final-green-light-to-simplify-and-streamline-rules/",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "eu-transparency-art50",
+    date: "2026-08-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "General application of the Regulation and transparency (Art. 50)",
+    summary:
+      "Since 2 August 2026 the Regulation applies in general, including the transparency obligations of Art. 50. The Digital Omnibus did NOT postpone this date for the deployer: the only relief is a grace period until 2 December 2026 for the PROVIDER's machine-readable marking mechanism (Art. 50.2), and only for generative AI already on the market before 2 August 2026.",
+    impact:
+      "Relevant for HR: if you use a conversational chatbot with candidates, you must inform them that they are interacting with an AI. AI-generated content must also be labeled. Note: the Art. 50.2 marking extension belongs to the provider, not to you — your duty as a deployer to warn the candidate that they are talking to an AI still applies on 2 August 2026, with no extension.",
+    action:
+      "Check that your recruitment chatbot clearly discloses that it is an AI. Review where you generate or manipulate content with AI so you can label it.",
+    articles: ["Art. 50", "Art. 50.2"],
+    source: {
+      label: "Art. 50 — AI Act Service Desk (European Commission)",
+      url: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50",
+    },
+    scope: { riskLevels: ["limited", "high"] },
+  },
+  {
+    id: "eu-omnibus-art5-intimate",
+    date: "2026-12-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "New prohibited practice (Art. 5): non-consensual intimate images and CSAM",
+    summary:
+      "The Digital Omnibus added two new prohibited practices to Art. 5: AI systems that generate or manipulate realistic intimate images of an identifiable person without their freely given, specific, informed and unambiguous consent, and those that generate or manipulate child sexual abuse material (CSAM, within the meaning of Directive 2011/93/EU). The prohibition applies from 2 December 2026 (transitional period set by the Omnibus).",
+    impact:
+      "A cross-cutting prohibition, not HR-specific: in practice it does NOT affect hiring tools (CV screening, ranking, interviews, chatbots), unless your organization generates or manipulates images or video of people with AI. It is worth knowing because it is an unacceptable practice, subject to the highest penalties in the Regulation (up to €35M or 7% of worldwide turnover).",
+    action:
+      "Confirm that no system in your inventory generates or manipulates images or video of people (deepfakes) without safeguards. If you later add generative image/video AI, require the provider to give evidence of technical measures that prevent these uses. For CV screening and interviews, it is usually enough to record that this does not apply.",
+    articles: ["Art. 5", "Directive 2011/93/EU"],
+    source: {
+      label: "Council of the EU — final green light to the Digital Omnibus (29 Jun 2026)",
+      url: "https://www.consilium.europa.eu/en/press/press-releases/2026/06/29/artificial-intelligence-council-gives-final-green-light-to-simplify-and-streamline-rules/",
+    },
+    scope: { all: true },
+  },
+  {
+    id: "eu-highrisk-annex-iii",
+    date: "2027-12-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "High-risk obligations under Annex III become applicable",
+    summary:
+      "Since 2 December 2027 (deadline postponed by the Digital Omnibus) the obligations for high-risk systems under Annex III are enforceable, including the area of employment and worker management.",
+    impact:
+      "The central deadline for HR: your hiring systems (CV screening, ranking, tests) are high-risk under Annex III (employment). As a deployer, the obligations of Art. 26 apply to you: human oversight, informing workers, keeping logs and use in accordance with instructions. You must also require the provider's documentation (Arts. 9–15) and the CE marking.",
+    action:
+      "Run the gap assessment and apply the HR policy pack to each high-risk system. Assign human oversight, inform workers and require the technical documentation from the provider.",
+    articles: ["Art. 6", "Annex III", "Art. 26", "Arts. 9–15"],
+    source: {
+      label: "Regulation (EU) 2024/1689, Annex III — EUR-Lex",
+      url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "eu-highrisk-annex-i",
+    date: "2028-08-02",
+    kind: "deadline",
+    framework: "eu-ai-act",
+    title: "High-risk embedded in regulated products (Annex I)",
+    summary:
+      "Since 2 August 2028, the obligations apply for high-risk systems that are safety components of products already regulated by EU harmonisation legislation (Annex I).",
+    impact:
+      "Uncommon in a pure HR SaaS; it is more relevant if your AI is embedded in machinery, medical devices or other regulated products.",
+    action:
+      "If any system is a safety component of a regulated product, plan its conformity for this later deadline.",
+    articles: ["Art. 6.1", "Annex I"],
+    source: {
+      label: "AI Act application timeline — European Commission",
+      url: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── NYC Local Law 144 (AEDT) ──
+  {
+    id: "us-nyc-ll144-enforcement",
+    date: "2023-07-05",
+    kind: "enforcement",
+    framework: "us-nyc-ll144",
+    title: "NYC LL144 in force: bias audit, notice and publication (AEDT)",
+    summary:
+      "New York City's Local Law 144 of 2021 prohibits employers and employment agencies from using an automated employment decision tool (AEDT) unless three requirements are met: (1) the tool passed a bias audit within the past year, (2) a summary of that audit's results is publicly available, and (3) candidates/employees were notified. Enforcement by the DCWP began on 5 July 2023.",
+    impact:
+      "Applies directly to our ICP: if you use CV screening, candidate ranking or video interviews with people applying for a job in NYC (or NYC residents), the OBLIGATION falls on YOU as the employer-deployer, not on the vendor. Key nuance: although an independent auditor runs the bias audit, it is the employer who must ensure it exists, is recent (<12 months) and is published. It is not enough for the provider to say its tool is 'fair'.",
+    action:
+      "Identify which hiring tools fall within the AEDT definition. Commission (or require evidence of) an independent bias audit less than 1 year old, publish the summary of results on your website, and give the candidate notice at least 10 business days in advance (stating that an AEDT will be used, how, and what data is collected). Keep the evidence.",
+    articles: [
+      "NYC Admin. Code §§ 20-870 to 20-874 (Local Law 144 of 2021)",
+      "6 RCNY §§ 5-300 to 5-304 (DCWP final rule, 6 Apr 2023)",
+    ],
+    source: {
+      label:
+        "DCWP — Automated Employment Decision Tools (New York City)",
+      url: "https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-nyc-ll144-annual-audit",
+    date: "2023-07-05",
+    kind: "deadline",
+    framework: "us-nyc-ll144",
+    title: "NYC LL144: the bias audit expires every 12 months (renewal)",
+    summary:
+      "The rule requires the AEDT bias audit to be no more than one year old relative to its use. In practice it is a RECURRING obligation: each tool must be re-audited within its own 12-month cycle to keep being used lawfully in NYC.",
+    impact:
+      "It is not a fixed calendar deadline for everyone, but a ROLLING expiry per tool from the date of its last audit. For a deployer it means a continuous currency check: an expired audit turns use of the tool into non-compliance, with civil penalties of 500 to 1,500 USD per day and per violation (DCWP).",
+    action:
+      "Keep a record of the last bias-audit date for each AEDT and schedule its renewal before it turns 12 months old. In the Attesta inventory, tie the audit date to each hiring system and treat it as evidence with an expiry.",
+    articles: [
+      "6 RCNY § 5-301 (bias audit)",
+      "6 RCNY § 5-302 (publication of the summary of results)",
+    ],
+    source: {
+      label: "DCWP — AEDT FAQ (official New York City PDF)",
+      url: "https://www.nyc.gov/assets/dca/downloads/pdf/about/DCWP-AEDT-FAQ.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── Colorado AI Act (repealed and rewritten by SB 26-189) ──
+  {
+    id: "us-co-aiact-effective",
+    date: "2027-01-01",
+    kind: "deadline",
+    framework: "us-co-aiact",
+    title: "Colorado: effectiveness of the rewritten AI law (SB 26-189, ADMT)",
+    summary:
+      "The original Colorado AI Act (SB 24-205, C.R.S. §§ 6-1-1701 to 6-1-1707) was postponed and then REPEALED AND REWRITTEN by SB 26-189 (signed 14 May 2026). The new version abandons the European-style 'high-risk' framework (it removes the duty of care, the mandatory risk-management programs and the annual impact assessments) and regulates 'automated decision technology' (ADMT) used in consequential decisions, with developer documentation obligations, consumer notice, data access and a request for human review. Effective: 1 January 2027.",
+    impact:
+      "Employment is a 'consequential decision', so if you operate in Colorado and use AI in hiring, this law reaches you as a deployer/user. BUT beware of outdated material: much of what is published describes SB 24-205 (duty of care + impact assessments), which is NO LONGER the law in force. The regime applicable in 2027 is SB 26-189, lighter on risk burdens but focused on transparency, notice and human review. It is a window, not urgency.",
+    action:
+      "Do not yet invest in heavy documentation assuming the old Colorado model. Keep this event under watch and reconfirm the final content of SB 26-189 (consumer notice, right to human review, documentation required from the provider) as the consolidated text and the Attorney General's rules are published. Flag your hiring systems used in Colorado for review before 2027.",
+    articles: [
+      "SB 26-189 (repeals and rewrites C.R.S. § 6-1-1701 et seq.) — consolidated numbering to be reconfirmed",
+    ],
+    source: {
+      label: "Colorado General Assembly — SB 26-189 (official legislative source)",
+      url: "https://leg.colorado.gov/bills/sb26-189",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-co-aiact-repeal-reenact",
+    date: "2026-05-14",
+    kind: "amendment",
+    framework: "us-co-aiact",
+    title: "Colorado repeals the original 'high-risk' model and rewrites it",
+    summary:
+      "SB 24-205 (signed 17 May 2024) was to take effect on 1 Feb 2026; it was postponed to 30 Jun 2026 (SB 25B-004, 28 Aug 2025) and finally SB 26-189 (14 May 2026) repealed and rewrote the framework, removing the 'high-risk' classification, the duty of care against algorithmic discrimination, the risk-management programs and the annual impact assessments, and postponing the effective date to 1 Jan 2027.",
+    impact:
+      "A context record to avoid confusing versions. If a consultant or document cites 'Colorado's high-risk deployer obligations' (duty of care, annual impact assessment, report to the AG within 90 days), it is describing the REPEALED law. Attesta must reflect the current state so as not to give outdated guidance.",
+    action:
+      "Treat SB 24-205 as historical. Any mapping of Attesta controls to 'Colorado' must point to the SB 26-189 regime (ADMT), not to the original high-risk model.",
+    articles: [
+      "SB 24-205 (2024, repealed)",
+      "SB 25B-004 (2025, postponement to 30 Jun 2026)",
+      "SB 26-189 (2026, repeal and rewrite; effective 1 Jan 2027)",
+    ],
+    source: {
+      label: "Colorado General Assembly — SB 24-205 (official history and status)",
+      url: "https://leg.colorado.gov/bills/sb24-205",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── Illinois — AI Video Interview Act (820 ILCS 42) ──
+  {
+    id: "us-il-aivia-inforce",
+    date: "2020-01-01",
+    kind: "enforcement",
+    framework: "us-il-aivia",
+    title: "Illinois AI Video Interview Act: consent and information",
+    summary:
+      "The Artificial Intelligence Video Interview Act (820 ILCS 42) has been in force since 1 Jan 2020. An employer that uses AI to analyze candidates' video interviews must, BEFORE the interview: (1) notify the candidate that AI may be used to analyze the video, (2) explain how the AI works and what types of characteristics it evaluates, and (3) obtain their consent. It cannot use AI to evaluate someone who did not consent and must delete the videos within 30 days if the candidate so requests.",
+    impact:
+      "Applies squarely to AI-analyzed video interviewing, one of our core use cases. The obligation is the employer-deployer's. It is low operational burden (notice + explanation + consent + deletion on request) but a silent violation that is easy to commit if the video-interview provider does not give you the explanatory text.",
+    action:
+      "Before each AI-analyzed video interview: deliver the notice and the explanation of what the system evaluates, collect consent and offer an alternative to those who do not consent. Enable video deletion within 30 days on request. Keep the consent as evidence.",
+    articles: [
+      "820 ILCS 42/5 (consent and notice)",
+      "820 ILCS 42/10 (limit on whom the video may be shared with)",
+      "820 ILCS 42/15 (deletion within 30 days on request)",
+      "820 ILCS 42/20 (demographic report where AI alone is used to screen applicants for an in-person interview)",
+    ],
+    source: {
+      label: "Illinois General Assembly — 820 ILCS 42 (official legal text)",
+      url: "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=4015&ChapterID=68",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── Illinois — Human Rights Act amended (HB 3773) ──
+  {
+    id: "us-il-hra-ai-amendment",
+    date: "2026-01-01",
+    kind: "amendment",
+    framework: "us-il-hra",
+    title: "Illinois HRA (HB 3773): discriminatory AI in employment + notice",
+    summary:
+      "HB 3773 amends the Illinois Human Rights Act (775 ILCS 5) and, since 1 Jan 2026, expressly prohibits an employer from using AI that has the effect of discriminating by protected class in recruitment, hiring, promotion, training, dismissal, discipline and other conditions of employment. It also prohibits using ZIP code as a proxy for protected class and requires NOTIFYING candidates and employees when AI is used in those decisions. The IDHR's detailed regulations were temporarily withdrawn, but the statutory obligations remain in force.",
+    impact:
+      "It is an anti-discrimination law applied to employment AI, not an audit regime. It fits our European framing: bias in hiring tools is tackled via anti-discrimination law (here the IHRA), not as a 'provider' obligation. The deployer's burden: understand how its tool decides, avoid discriminatory effects (including the ZIP proxy) and notify the use of AI. The uncertainty is in the exact FORM of the notice, because the detailed rules were withdrawn.",
+    action:
+      "If you hire in Illinois: inventory where AI intervenes in employment decisions, require the provider to give evidence of bias/adverse-impact testing, avoid proxy variables (e.g. ZIP code), and prepare a clear notice of AI use for candidates and employees. Watch for the IDHR regulations to reappear so you can adjust the notice format.",
+    articles: [
+      "775 ILCS 5/2-102 (employment practices, amended)",
+      "775 ILCS 5/1-103 (definitions, AI and ZIP as a proxy)",
+      "HB 3773 (Public Act 103-0804)",
+    ],
+    source: {
+      label:
+        "Illinois General Assembly — Illinois Human Rights Act (775 ILCS 5)",
+      url: "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=2266&ChapterID=64",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── EEOC (federal) — context: guidance withdrawn, not law ──
+  {
+    id: "us-eeoc-ai-guidance-withdrawn",
+    date: "2025-01-01",
+    kind: "guidance",
+    framework: "us-eeoc",
+    title: "EEOC: AI guidance (Title VII/ADA) WITHDRAWN (not law)",
+    summary:
+      "The EEOC had published technical assistance on the use of AI in employment: May 2022 on the ADA ('screen out' of people with disabilities) and May 2023 on Title VII (adverse impact). In January 2025 the EEOC WITHDREW that material from eeoc.gov; the detailed ADA document returns 404 and the surviving page is a shell. Important: it was GUIDANCE, not law, and its withdrawal does NOT change the underlying laws.",
+    impact:
+      "For the deployer, the honest message is: the federal anti-discrimination laws (Title VII, ADA, ADEA) STILL apply to AI hiring tools; what disappeared is the AI-specific interpretive guidance. There is no new federal obligation to 'audit AI', but a tool that produces adverse impact or screens out people with disabilities is still a federal legal risk. Do not over-state that 'there is no longer a federal rule'.",
+    action:
+      "Do not rely on the withdrawn guidance as a source. Keep the good practices it required (adverse-impact testing, reasonable accommodations for candidates with disabilities, accessible alternatives) because the underlying laws did not change. Watch for possible re-issues of the guidance.",
+    articles: [
+      "Title VII (42 U.S.C. § 2000e et seq.)",
+      "ADA (42 U.S.C. § 12101 et seq.)",
+      "ADEA (29 U.S.C. § 621 et seq.)",
+    ],
+    source: {
+      label: "EEOC — Artificial Intelligence and the ADA (official page)",
+      url: "https://www.eeoc.gov/eeoc-disability-related-resources/artificial-intelligence-and-ada",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+
+  // ── California — FEHA (ADS in employment) and CCPA/CPPA (ADMT) ──
+  {
+    id: "us-ca-feha-ads-effective",
+    date: "2025-10-01",
+    kind: "deadline",
+    framework: "us-ca-feha",
+    title:
+      "FEHA regulations on automated-decision systems (ADS) in employment — in effect",
+    summary:
+      "The California Civil Rights Council adopted rules clarifying how California's anti-discrimination law (FEHA) applies to the use of automated-decision systems (ADS) and AI in employment decisions. In effect since October 1, 2025.",
+    impact:
+      "If you employ five or more people in California and use ADS/AI in hiring, promotion, or other employment decisions, you are a directly regulated party. An ADS that produces a disparate impact on a protected characteristic can violate the law; you also must retain records of selection criteria, ADS data, and applicant-flow logs for at least 4 years, and you remain responsible for agents/vendors acting on your behalf.",
+    action:
+      "Inventory which ADS/AI touch your employment decisions, gather declared evidence of anti-bias (disparate-impact) testing and of the ADS not replacing individualized assessment, turn on ≥4-year record retention, and review contracts with vendors that act as your agents.",
+    articles: ["2 CCR §11008.1", "2 CCR §11009", "2 CCR §11013"],
+    source: {
+      label:
+        "California Civil Rights Council — Final Text, Employment Regulations Regarding Automated-Decision Systems",
+      url: "https://calcivilrights.ca.gov/wp-content/uploads/sites/32/2025/06/Final-Text-regulations-automated-employment-decision-systems.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-regs-effective",
+    date: "2026-01-01",
+    kind: "amendment",
+    framework: "us-ca-admt",
+    title:
+      "CCPA/CPPA regulations (ADMT, risk assessments, cybersecurity audits) — effective",
+    summary:
+      "The California Privacy Protection Agency (CPPA) regulations on automated decisionmaking technology (ADMT), risk assessments, and cybersecurity audits took effect on January 1, 2026 (approved by the Office of Administrative Law on September 22, 2025). This starts the clock on a phased compliance timeline.",
+    impact:
+      "Employment counts as a \"significant decision\" under the regulations: if you use ADMT to decide on hiring, pay, discipline, or termination without meaningful human involvement, you will be subject to pre-use notice, opt-out, access to the logic, and a documented risk assessment. The effective date triggers the duty to conduct risk assessments; the employer's obligations toward the worker have later dates.",
+    action:
+      "Map whether any of your systems constitute ADMT for significant employment decisions and assess the \"meaningful human involvement\" exception; begin documenting risk assessments and prepare the pre-use-notice/opt-out/access timeline for the enforceable dates.",
+    articles: [
+      "Cal. Code Regs. tit. 11 §7120 (cybersecurity audits)",
+      "§7150 (risk assessments)",
+      "§7200 (ADMT)",
+    ],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — CCPA regulation text effective Jan 1, 2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-employer-compliance",
+    date: "2027-01-01",
+    kind: "deadline",
+    framework: "us-ca-admt",
+    title: "Employer compliance: ADMT in significant employment decisions",
+    summary:
+      "Date by which businesses using ADMT to make significant decisions — employment among them — must meet the pre-use notice (§7220), opt-out (§7221), and access-to-the-logic (§7222) obligations. It applies to ADMT already in use; ADMT deployed later must comply before its first use.",
+    impact:
+      "If by this date you already use ADMT for significant employment decisions without meaningful human involvement, you must have the pre-use notice, opt-out methods, and access responses operational, plus the documented risk assessment. Any ADMT you deploy afterward must comply before it is used for the first time.",
+    action:
+      "Before this date: publish the pre-use notice, enable at least two opt-out methods (with their exceptions), prepare plain-language access responses, and have the risk assessment for each employment ADMT closed and documented.",
+    articles: ["Cal. Code Regs. tit. 11 §7220", "§7221", "§7222"],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — CCPA regulation text effective Jan 1, 2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
+  {
+    id: "us-ca-admt-risk-assessment-attestation",
+    date: "2028-04-01",
+    kind: "deadline",
+    framework: "us-ca-admt",
+    title: "Submission to the CPPA: risk-assessment attestation and summary",
+    summary:
+      "First date by which businesses required to conduct risk assessments — including those using ADMT for significant employment decisions — must submit to the CPPA an attestation that the assessments were completed plus a summary of the information. It covers assessments conducted since compliance began (2026 onward).",
+    impact:
+      "Conducting the risk assessment in-house is not enough: there is a formal filing with the regulator. If you use ADMT in employment, this is the first submission date before the CPPA; assessments must be reviewed at least every three years or upon material changes.",
+    action:
+      "Have your risk assessments documented and signed off ahead of time, designate who files the attestation and summary with the CPPA, and schedule the periodic review (at least every 3 years or upon material changes).",
+    articles: ["Cal. Code Regs. tit. 11 §7150", "§7157"],
+    source: {
+      label:
+        "California Privacy Protection Agency (CPPA) — CCPA regulation text effective Jan 1, 2026",
+      url: "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
+    },
+    scope: { riskLevels: ["high"] },
+  },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -509,12 +1241,9 @@ export function affectedSystems(
  * `now` se inyecta para permitir un cálculo estable por request.
  */
 export function daysUntil(dateIso: string, now: Date): number {
-  const MS_DAY = 86_400_000;
-  const target = new Date(`${dateIso}T00:00:00Z`).getTime();
-  const today = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-  ).getTime();
-  return Math.round((target - today) / MS_DAY);
+  // Delega en la implementación única de `./date`. Las fechas de eventos siempre
+  // son válidas; `?? NaN` conserva el comportamiento previo para una fecha inválida.
+  return daysUntilDate(dateIso, now) ?? NaN;
 }
 
 /** ¿El evento está en el futuro (o es hoy)? */
@@ -543,15 +1272,33 @@ export function upcomingDeadlines(
 }
 
 /**
+ * Catálogo curado base según locale (default ES). Fuente única para elegir
+ * `REGULATORY_EVENTS_EN` como línea base cuando la UI está en inglés.
+ */
+export function regulatoryEventsBase(locale: Locale = "es"): RegulatoryEvent[] {
+  return locale === "en" ? REGULATORY_EVENTS_EN : REGULATORY_EVENTS;
+}
+
+/**
  * Fusiona el catálogo curado (línea base de confianza) con los eventos que el
  * pipeline haya publicado. El código SIEMPRE gana ante un choque de `id`: un
  * evento publicado por el pipeline solo se añade si su id no existe ya curado.
+ *
+ * Retrocompatible: `curated` sigue admitiendo un array explícito; si se omite,
+ * la base curada se resuelve por `locale` (default ES → `REGULATORY_EVENTS`).
+ *
+ * NOTA Fase 2: la fusión real vive en la fachada de datos
+ * (`src/lib/data/{mock,supabase}-repo.ts` → `getRegulatoryEvents`), que hoy
+ * llama `mergeCatalog([...])` sin locale. Para servir EN, esos getters deben
+ * pasar el `locale` resuelto (o `regulatoryEventsBase(locale)` como `curated`).
  */
 export function mergeCatalog(
   published: RegulatoryEvent[],
-  curated: RegulatoryEvent[] = REGULATORY_EVENTS,
+  curated?: RegulatoryEvent[],
+  locale: Locale = "es",
 ): RegulatoryEvent[] {
-  const seen = new Set(curated.map((e) => e.id));
+  const base = curated ?? regulatoryEventsBase(locale);
+  const seen = new Set(base.map((e) => e.id));
   const extra = published.filter((e) => !seen.has(e.id));
-  return [...curated, ...extra];
+  return [...base, ...extra];
 }

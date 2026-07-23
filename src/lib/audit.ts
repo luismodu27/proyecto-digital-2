@@ -6,16 +6,22 @@
  * español y sin ruido técnico.
  */
 import {
-  RISK_LABEL,
-  ROLE_LABEL,
+  riskLabel,
+  roleLabel,
   type AuditEntry,
   type AuditAction,
   type MemberRole,
   type RiskLevel,
 } from "./mock-data";
-import { REGULATORY_EVENTS } from "./regulatory-watch";
+import { REGULATORY_EVENTS, REGULATORY_EVENTS_EN } from "./regulatory-watch";
+import type { Locale } from "./i18n/config";
 
 const EVENT_TITLE = new Map(REGULATORY_EVENTS.map((e) => [e.id, e.title]));
+const EVENT_TITLE_EN = new Map(REGULATORY_EVENTS_EN.map((e) => [e.id, e.title]));
+const EVENT_TITLE_BY_LOCALE: Record<Locale, Map<string, string>> = {
+  es: EVENT_TITLE,
+  en: EVENT_TITLE_EN,
+};
 
 /** Metadatos por tabla de negocio. */
 export const ENTITY_META: Record<
@@ -30,6 +36,27 @@ export const ENTITY_META: Record<
   action_tasks: { label: "tarea del plan", article: "la", tone: "gold" },
 };
 
+/**
+ * Versión INGLESA (validada) de ENTITY_META. Misma forma y claves; `tone`
+ * idéntico (es un token de color, no texto). NOTA GRAMATICAL: el campo
+ * `article` es un artículo con género ("el"/"la") que solo existe en español;
+ * en inglés no hay artículo con género, así que se fija en "the" para todas
+ * las entidades y conservar la forma del tipo. El ensamblado en inglés puede
+ * incluso omitir el artículo (ver DERIVE_LABEL_PREFIX / nota de plantilla más
+ * abajo). Consumidor: la fila del feed de auditoría en `dashboard/actividad`.
+ */
+export const ENTITY_META_EN: Record<
+  string,
+  { label: string; article: string; tone: string }
+> = {
+  ai_systems: { label: "system", article: "the", tone: "info" },
+  risk_assessments: { label: "assessment", article: "the", tone: "gold" },
+  gap_items: { label: "gap", article: "the", tone: "warn" },
+  memberships: { label: "member", article: "the", tone: "good" },
+  regulatory_acks: { label: "regulatory review", article: "the", tone: "info" },
+  action_tasks: { label: "plan task", article: "the", tone: "gold" },
+};
+
 export const ACTION_META: Record<
   AuditAction,
   { verb: string; tone: string }
@@ -37,6 +64,21 @@ export const ACTION_META: Record<
   insert: { verb: "creó", tone: "good" },
   update: { verb: "actualizó", tone: "info" },
   delete: { verb: "eliminó", tone: "danger" },
+};
+
+/**
+ * Versión INGLESA (validada) de ACTION_META. Verbos neutros y factuales,
+ * coherentes con el marco tamper-evident del audit-trail (nunca
+ * "certified/compliant"). `tone` idéntico. Consumidor: el píldora de tono y la
+ * frase de la fila en `dashboard/actividad`.
+ */
+export const ACTION_META_EN: Record<
+  AuditAction,
+  { verb: string; tone: string }
+> = {
+  insert: { verb: "created", tone: "good" },
+  update: { verb: "updated", tone: "info" },
+  delete: { verb: "deleted", tone: "danger" },
 };
 
 /** Nombres humanos de las columnas por tabla. */
@@ -71,6 +113,45 @@ const FIELD_LABELS: Record<string, Record<string, string>> = {
   },
 };
 
+/**
+ * Versión INGLESA (validada) de FIELD_LABELS. Mismas claves de tabla y de
+ * columna (idénticas como código); solo se traduce el texto humano.
+ * Terminología alineada con el copy seguro del producto: `compliance_pct` =
+ * "readiness" (nunca "compliance"), `evidence_state` = "evidence" (evidencia
+ * declarada). Consumidor futuro: una `deriveChanged` locale-aware (ver nota de
+ * plantilla más abajo); hoy `deriveChanged` sigue usando FIELD_LABELS (ES).
+ */
+export const FIELD_LABELS_EN: Record<string, Record<string, string>> = {
+  ai_systems: {
+    name: "name",
+    owner: "responsible area",
+    domain: "domain",
+    vendor: "vendor",
+    risk_level: "risk",
+    compliance_pct: "readiness",
+    evidence_state: "evidence",
+    last_reviewed_at: "last review",
+    actor_role: "system role",
+  },
+  gap_items: {
+    status: "status",
+    severity: "severity",
+    requirement: "requirement",
+    article: "article",
+    remediation_note: "note",
+  },
+  memberships: { role: "role" },
+  regulatory_acks: { status: "status", note: "note" },
+  action_tasks: {
+    status: "status",
+    priority: "priority",
+    assignee_id: "assignee",
+    due_date: "due date",
+    title: "title",
+    detail: "detail",
+  },
+};
+
 /** Columnas técnicas que no aportan al usuario. */
 const NOISE = new Set([
   "id",
@@ -91,9 +172,54 @@ const NOISE = new Set([
 
 type Json = Record<string, unknown> | null;
 
+/**
+ * Palabras-prefijo que `deriveLabel` antepone al valor para dos entidades
+ * (hoy en español, inline en la función): un nivel de riesgo → "nivel Alto
+ * riesgo" y un rol → "rol Admin". Se exponen aquí como datos para que una
+ * `deriveLabel` locale-aware pueda ensamblarlos por idioma sin reescribir la
+ * lógica. Los valores (RISK_LABEL/ROLE_LABEL) ya son locale-aware vía
+ * `riskLabel(level, locale)` / `roleLabel(role, locale)` en mock-data.
+ *
+ * NOTA DE PLANTILLA POR LOCALE (para el ensamblado del feed, sin refactor aquí):
+ * la frase de la fila se compone en `dashboard/actividad` como
+ *   {actor} {ACTION.verb} {ENTITY.article} {ENTITY.label} {entry.label}
+ * En español el `article` ("el"/"la") es gramatical; en inglés no hay artículo
+ * con género y el orden sujeto-verbo-objeto coincide, así que basta con cambiar
+ * los tres mapas a su variante `_EN`. Para hacerlo bien conviene parametrizar
+ * por `Locale`: pasar `locale` al consumidor y elegir ENTITY_META(_EN),
+ * ACTION_META(_EN), FIELD_LABELS(_EN) y DERIVE_LABEL_PREFIX[locale]. Las
+ * comillas «» pueden mantenerse o cambiarse a "…" según convención EN
+ * (decisión cosmética, no de contenido).
+ */
+export const DERIVE_LABEL_PREFIX: Record<"es" | "en", { level: string; role: string }> = {
+  es: { level: "nivel", role: "rol" },
+  en: { level: "level", role: "role" },
+};
+
+/* -------------------------------------------------------------------------- */
+/* Selectores locale-aware (default ES, retrocompatibles)                     */
+/* -------------------------------------------------------------------------- */
+
+/** Metadatos por entidad, por locale (para el ensamblado del feed en Fase 2). */
+export const ENTITY_META_BY_LOCALE: Record<Locale, typeof ENTITY_META> = {
+  es: ENTITY_META,
+  en: ENTITY_META_EN,
+};
+/** Metadatos por acción, por locale. */
+export const ACTION_META_BY_LOCALE: Record<Locale, typeof ACTION_META> = {
+  es: ACTION_META,
+  en: ACTION_META_EN,
+};
+/** Nombres de columnas, por locale. */
+export const FIELD_LABELS_BY_LOCALE: Record<Locale, typeof FIELD_LABELS> = {
+  es: FIELD_LABELS,
+  en: FIELD_LABELS_EN,
+};
+
 /** Resumen legible de la fila afectada (nombre del sistema, requisito, etc.). */
-export function deriveLabel(table: string, data: Json): string {
+export function deriveLabel(table: string, data: Json, locale: Locale = "es"): string {
   if (!data) return "";
+  const prefix = DERIVE_LABEL_PREFIX[locale];
   switch (table) {
     case "ai_systems":
       return String(data.name ?? data.code ?? "");
@@ -101,15 +227,15 @@ export function deriveLabel(table: string, data: Json): string {
       return String(data.requirement ?? "");
     case "risk_assessments": {
       const lvl = data.level as RiskLevel | undefined;
-      return lvl ? `nivel ${RISK_LABEL[lvl]}` : "";
+      return lvl ? `${prefix.level} ${riskLabel(lvl, locale)}` : "";
     }
     case "memberships": {
       const role = data.role as MemberRole | undefined;
-      return role ? `rol ${ROLE_LABEL[role]}` : "";
+      return role ? `${prefix.role} ${roleLabel(role, locale)}` : "";
     }
     case "regulatory_acks": {
       const eid = data.event_id as string | undefined;
-      const title = eid ? EVENT_TITLE.get(eid) : undefined;
+      const title = eid ? EVENT_TITLE_BY_LOCALE[locale].get(eid) : undefined;
       return title ? `«${title}»` : (eid ?? "");
     }
     case "action_tasks":
@@ -120,9 +246,9 @@ export function deriveLabel(table: string, data: Json): string {
 }
 
 /** Campos (humanos) cambiados en un update, sin ruido técnico. */
-export function deriveChanged(table: string, diff: Json): string[] {
+export function deriveChanged(table: string, diff: Json, locale: Locale = "es"): string[] {
   if (!diff) return [];
-  const labels = FIELD_LABELS[table] ?? {};
+  const labels = FIELD_LABELS_BY_LOCALE[locale][table] ?? {};
   return Object.keys(diff)
     .filter((k) => !NOISE.has(k))
     .map((k) => labels[k] ?? k);
@@ -142,15 +268,16 @@ export type RawAudit = {
 };
 
 /** Convierte una fila cruda del RPC en una entrada legible. */
-export function toAuditEntry(r: RawAudit): AuditEntry {
+export function toAuditEntry(r: RawAudit, locale: Locale = "es"): AuditEntry {
   return {
     id: r.id,
     actorEmail: r.actor_email ?? null,
     table: r.table_name,
     rowId: r.row_id,
     action: r.action,
-    label: deriveLabel(r.table_name, r.new_data ?? r.old_data),
-    changed: r.action === "update" ? deriveChanged(r.table_name, r.diff) : [],
+    label: deriveLabel(r.table_name, r.new_data ?? r.old_data, locale),
+    changed:
+      r.action === "update" ? deriveChanged(r.table_name, r.diff, locale) : [],
     at: String(r.at),
   };
 }

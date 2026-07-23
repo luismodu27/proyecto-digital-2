@@ -2,23 +2,72 @@
  * Datos de ejemplo para el esqueleto del dashboard (app shell).
  * TODO(backend): reemplazar por datos reales cuando exista la capa de datos.
  */
+import type { BiasAudit } from "./bias-audit";
+import type { Locale } from "./i18n/config";
 
 export type RiskLevel = "unacceptable" | "high" | "limited" | "minimal";
 
 /** Nivel de respaldo de una autoevaluación. */
 export type EvidenceState = "declared" | "evidenced" | "reviewed";
 
+/*
+ * Etiquetas de enum LOCALE-AWARE (terminología de UI, no afirmaciones legales).
+ * Patrón: el mapa canónico ES conserva su nombre y valor (default seguro para
+ * llamadores no migrados); junto a él viven el mapa EN, un selector `*_BY_LOCALE`
+ * y una función `xLabel(value, locale)`. Estas etiquetas NO van al diccionario
+ * i18n: viven aquí, junto al enum de dominio que describen.
+ */
+
 export const EVIDENCE_LABEL: Record<EvidenceState, string> = {
   declared: "Declarado",
   evidenced: "Con evidencia",
   reviewed: "Revisado",
 };
+const EVIDENCE_LABEL_EN: Record<EvidenceState, string> = {
+  declared: "Declared",
+  evidenced: "With evidence",
+  reviewed: "Reviewed",
+};
+export const EVIDENCE_LABEL_BY_LOCALE: Record<Locale, Record<EvidenceState, string>> = {
+  es: EVIDENCE_LABEL,
+  en: EVIDENCE_LABEL_EN,
+};
+export function evidenceLabel(state: EvidenceState, locale: Locale): string {
+  return EVIDENCE_LABEL_BY_LOCALE[locale][state];
+}
 
 export const RISK_LABEL: Record<RiskLevel, string> = {
   unacceptable: "Inaceptable",
   high: "Alto riesgo",
   limited: "Riesgo limitado",
   minimal: "Riesgo mínimo",
+};
+// Términos oficiales del EU AI Act en inglés (no inventar otros).
+const RISK_LABEL_EN: Record<RiskLevel, string> = {
+  unacceptable: "Unacceptable risk",
+  high: "High risk",
+  limited: "Limited risk",
+  minimal: "Minimal risk",
+};
+export const RISK_LABEL_BY_LOCALE: Record<Locale, Record<RiskLevel, string>> = {
+  es: RISK_LABEL,
+  en: RISK_LABEL_EN,
+};
+export function riskLabel(level: RiskLevel, locale: Locale): string {
+  return RISK_LABEL_BY_LOCALE[locale][level];
+}
+
+/**
+ * Paleta de riesgo (hex saturado, igual en claro y oscuro) para SVG/gráficos
+ * donde el color inline no puede venir de una clase Tailwind. Fuente única:
+ * consúmela, no la re-declares por componente. Para texto/tono semántico usa
+ * los tokens `--tone-*` (que sí adaptan al tema).
+ */
+export const RISK_HEX: Record<RiskLevel, string> = {
+  unacceptable: "#b4322a",
+  high: "#c9761f",
+  limited: "#b0824a",
+  minimal: "#0b6b4e",
 };
 
 export type AiSystem = {
@@ -99,13 +148,130 @@ export const AI_SYSTEMS: AiSystem[] = [
   },
 ];
 
+/*
+ * Variante en inglés de los sistemas de ejemplo (modo demo).
+ * Solo METADATA de producto (nombre del sistema, propietario/área, dominio y
+ * proveedor) — NO hay contenido regulatorio en estos campos. Misma forma e
+ * `id`/`risk`/`compliance`/`lastReviewed` que `AI_SYSTEMS` (los valores no-texto
+ * son idénticos: sostienen KPIs y gráficos por igual en ambos idiomas). Los
+ * nombres de proveedor ficticios se mantienen; roles/áreas/dominios van en inglés.
+ */
+export const AI_SYSTEMS_EN: AiSystem[] = [
+  {
+    id: "SYS-001",
+    name: "CV screening — ATS",
+    owner: "HR",
+    domain: "Hiring",
+    vendor: "HireFlow",
+    risk: "high",
+    compliance: 42,
+    lastReviewed: "2026-06-28",
+  },
+  {
+    id: "SYS-002",
+    name: "Candidate ranking",
+    owner: "Talent Acquisition",
+    domain: "Selection",
+    vendor: "In-house",
+    risk: "high",
+    compliance: 61,
+    lastReviewed: "2026-07-02",
+    evidenceState: "evidenced",
+  },
+  {
+    id: "SYS-003",
+    name: "AI video interviews",
+    owner: "HR",
+    domain: "Assessment",
+    vendor: "VidAssess",
+    risk: "high",
+    compliance: 35,
+    lastReviewed: "2026-05-30",
+  },
+  {
+    id: "SYS-004",
+    name: "Recruitment chatbot",
+    owner: "Talent Acquisition",
+    domain: "Candidate support",
+    vendor: "OpenAI",
+    risk: "limited",
+    compliance: 70,
+    lastReviewed: "2026-07-05",
+  },
+  {
+    id: "SYS-005",
+    name: "Automated psychometric test",
+    owner: "HR",
+    domain: "Assessment",
+    vendor: "PsychMetric",
+    risk: "high",
+    compliance: 55,
+    lastReviewed: "2026-07-10",
+    evidenceState: "reviewed",
+  },
+  {
+    id: "SYS-006",
+    name: "Interview scheduling",
+    owner: "People Ops",
+    domain: "Logistics",
+    vendor: "In-house",
+    risk: "minimal",
+    compliance: 88,
+    lastReviewed: "2026-06-20",
+  },
+];
+
+/**
+ * Selector locale-aware del inventario de ejemplo. Retrocompatible: default ES
+ * (`AI_SYSTEMS`); en `en` sirve `AI_SYSTEMS_EN`. Consúmelo desde la fachada de
+ * datos (mock-repo) pasando el locale ya resuelto.
+ */
+export const AI_SYSTEMS_BY_LOCALE: Record<Locale, AiSystem[]> = {
+  es: AI_SYSTEMS,
+  en: AI_SYSTEMS_EN,
+};
+export function aiSystems(locale: Locale = "es"): AiSystem[] {
+  return AI_SYSTEMS_BY_LOCALE[locale];
+}
+
+/** Severidad de una brecha (gap item). */
+export type GapSeverity = "alta" | "media" | "baja";
+
+// Etiqueta natural de severidad. En ES se muestra el propio valor del enum
+// ("alta"/"media"/"baja"); en EN su equivalente ("high"/"medium"/"low"). El
+// consumidor aplica el casing por CSS (uppercase/capitalize), así que aquí van
+// en minúscula para no romper ese estilo.
+export const SEVERITY_LABEL: Record<GapSeverity, string> = {
+  alta: "alta",
+  media: "media",
+  baja: "baja",
+};
+const SEVERITY_LABEL_EN: Record<GapSeverity, string> = {
+  alta: "high",
+  media: "medium",
+  baja: "low",
+};
+export const SEVERITY_LABEL_BY_LOCALE: Record<Locale, Record<GapSeverity, string>> = {
+  es: SEVERITY_LABEL,
+  en: SEVERITY_LABEL_EN,
+};
+export function severityLabel(severity: GapSeverity, locale: Locale): string {
+  return SEVERITY_LABEL_BY_LOCALE[locale][severity];
+}
+
 export type GapItem = {
   id: string;
   requirement: string;
   article: string;
   status: "missing" | "partial" | "done";
-  severity: "alta" | "media" | "baja";
+  severity: GapSeverity;
   system: string;
+  /**
+   * `true` cuando el ítem corresponde a una práctica PROHIBIDA del Art. 5 (riesgo
+   * inaceptable). No es una brecha a cerrar: queda fuera del cómputo de "% listo"
+   * y se renderiza como Inaceptable / revisión jurídica (ver `PolicyControl`).
+   */
+  prohibited?: boolean;
 };
 
 /** Una evaluación de riesgo guardada (para el historial de un sistema). */
@@ -125,6 +291,7 @@ export type DossierData = {
   system: AiSystem & { actorRole: string };
   gaps: GapItem[];
   assessments: AssessmentRecord[];
+  biasAudit?: import("./bias-audit").BiasAudit | null;
 };
 
 export const GAP_ITEMS: GapItem[] = [
@@ -170,10 +337,106 @@ export const GAP_ITEMS: GapItem[] = [
   },
 ];
 
+/*
+ * Variante EN de las brechas de ejemplo (modo demo). Se traduce SOLO el texto
+ * humano (`requirement`); `id`/`article`/`status`/`severity`/`system` idénticos.
+ * Terminología oficial del EU AI Act en inglés (Art. 10 Data and Data Governance,
+ * Art. 11 Technical Documentation, Art. 12 Record-Keeping, Art. 13 Transparency
+ * and Provision of Information to Deployers, Art. 14 Human Oversight; Anexo→Annex).
+ */
+export const GAP_ITEMS_EN: GapItem[] = [
+  {
+    id: "GAP-01",
+    requirement: "System technical documentation (Annex IV)",
+    article: "Art. 11",
+    status: "missing",
+    severity: "alta",
+    system: "SYS-001",
+  },
+  {
+    id: "GAP-02",
+    requirement: "Event logging and traceability (record-keeping)",
+    article: "Art. 12",
+    status: "partial",
+    severity: "alta",
+    system: "SYS-001",
+  },
+  {
+    id: "GAP-03",
+    requirement: "Effective human oversight",
+    article: "Art. 14",
+    status: "missing",
+    severity: "alta",
+    system: "SYS-003",
+  },
+  {
+    id: "GAP-04",
+    requirement: "Bias control in candidate selection",
+    article: "Art. 10",
+    status: "partial",
+    severity: "media",
+    system: "SYS-002",
+  },
+  {
+    id: "GAP-05",
+    requirement: "Information and transparency to the user",
+    article: "Art. 13",
+    status: "done",
+    severity: "media",
+    system: "SYS-004",
+  },
+];
+
 /**
  * Historial de evaluaciones de ejemplo (modo demo), indexado por código de
  * sistema. Da vida al dossier y a la ficha del sistema sin backend.
  */
+/** Auditorías de sesgo de ejemplo (NYC LL144) para la demo/dossier. */
+export const SAMPLE_BIAS_AUDITS: Record<string, import("./bias-audit").BiasAudit> = {
+  // Cribado de CVs (AEDT) con auditoría antigua → estado "vencida/por vencer" en el radar.
+  "SYS-001": {
+    isAedt: true,
+    lastAuditDate: "2025-08-01",
+    auditorName: "Fairwatch Audits LLP (auditor independiente)",
+    auditorIndependenceConfirmed: true,
+    summaryUrl: "https://talenta-rh.example.com/ley144/resumen-auditoria",
+    summaryPublishedDate: "2025-08-12",
+  },
+  // Ranking de candidatos (AEDT) con auditoría reciente → "vigente".
+  "SYS-002": {
+    isAedt: true,
+    lastAuditDate: "2026-05-15",
+    auditorName: "Fairwatch Audits LLP (auditor independiente)",
+    auditorIndependenceConfirmed: true,
+    summaryUrl: "https://talenta-rh.example.com/ley144/ranking-resumen",
+    summaryPublishedDate: "2026-05-20",
+  },
+};
+
+/*
+ * Variante EN de las auditorías de sesgo de ejemplo (NYC LL144). Se traduce SOLO
+ * el descriptivo de `auditorName` ("(auditor independiente)"→"(independent
+ * auditor)"); nombre propio del despacho, fechas, flags y URLs idénticos.
+ */
+export const SAMPLE_BIAS_AUDITS_EN: Record<string, import("./bias-audit").BiasAudit> = {
+  "SYS-001": {
+    isAedt: true,
+    lastAuditDate: "2025-08-01",
+    auditorName: "Fairwatch Audits LLP (independent auditor)",
+    auditorIndependenceConfirmed: true,
+    summaryUrl: "https://talenta-rh.example.com/ley144/resumen-auditoria",
+    summaryPublishedDate: "2025-08-12",
+  },
+  "SYS-002": {
+    isAedt: true,
+    lastAuditDate: "2026-05-15",
+    auditorName: "Fairwatch Audits LLP (independent auditor)",
+    auditorIndependenceConfirmed: true,
+    summaryUrl: "https://talenta-rh.example.com/ley144/ranking-resumen",
+    summaryPublishedDate: "2026-05-20",
+  },
+};
+
 export const SAMPLE_ASSESSMENTS: Record<string, AssessmentRecord[]> = {
   "SYS-002": [
     {
@@ -223,6 +486,64 @@ export const SAMPLE_ASSESSMENTS: Record<string, AssessmentRecord[]> = {
   ],
 };
 
+/*
+ * Variante EN del historial de evaluaciones de ejemplo. Se traduce SOLO el texto
+ * humano: `rationale` (razonamiento de clasificación), `evidenceNote` y el ROL
+ * dentro de `attestedByName` ("· Responsable de RRHH"→"· HR Lead"; "Comité de
+ * Gobernanza de IA"→"AI Governance Committee"). Claves de sistema, `id`, `level`,
+ * `evidenceState`, `evidenceUrl` y `assessedAt` idénticos. Framing deployer:
+ * "provider's DPIA/bias test" (evidencia que el deployer exige/conserva).
+ * Terminología oficial: Annex III, Art. 6(3).
+ */
+export const SAMPLE_ASSESSMENTS_EN: Record<string, AssessmentRecord[]> = {
+  "SYS-002": [
+    {
+      id: "AS-002-2",
+      level: "high",
+      rationale:
+        "The system operates in a high-risk area of Annex III (employment and worker management) and none of the exceptions in Art. 6(3) apply to it.",
+      evidenceState: "evidenced",
+      attestedByName: "Ana López · HR Lead",
+      evidenceNote: "Provider's DPIA and bias test filed in the record.",
+      evidenceUrl: "https://drive.example.com/ranking/dpia-2026.pdf",
+      assessedAt: "2026-07-02T09:20:00Z",
+    },
+    {
+      id: "AS-002-1",
+      level: "high",
+      rationale:
+        "Initial classification: candidate ranking in the employment domain (Annex III).",
+      evidenceState: "declared",
+      attestedByName: null,
+      assessedAt: "2026-05-14T16:05:00Z",
+    },
+  ],
+  "SYS-005": [
+    {
+      id: "AS-005-1",
+      level: "high",
+      rationale:
+        "Automated psychometric test used in personnel selection: high risk under Annex III (employment).",
+      evidenceState: "reviewed",
+      attestedByName: "AI Governance Committee",
+      evidenceNote:
+        "Reviewed by Legal and HR; human oversight and DPIA documented.",
+      assessedAt: "2026-07-10T11:00:00Z",
+    },
+  ],
+  "SYS-001": [
+    {
+      id: "AS-001-1",
+      level: "high",
+      rationale:
+        "CV screening in the employment domain (Annex III); provider evidence still to be gathered.",
+      evidenceState: "declared",
+      attestedByName: null,
+      assessedAt: "2026-06-28T08:30:00Z",
+    },
+  ],
+};
+
 /* -------------------------------------------------------------------------- */
 /* Equipo / miembros                                                          */
 /* -------------------------------------------------------------------------- */
@@ -234,6 +555,18 @@ export const ROLE_LABEL: Record<MemberRole, string> = {
   admin: "Administrador",
   member: "Miembro",
 };
+const ROLE_LABEL_EN: Record<MemberRole, string> = {
+  owner: "Owner",
+  admin: "Admin",
+  member: "Member",
+};
+export const ROLE_LABEL_BY_LOCALE: Record<Locale, Record<MemberRole, string>> = {
+  es: ROLE_LABEL,
+  en: ROLE_LABEL_EN,
+};
+export function roleLabel(role: MemberRole, locale: Locale): string {
+  return ROLE_LABEL_BY_LOCALE[locale][role];
+}
 
 export const ROLE_HINT: Record<MemberRole, string> = {
   owner: "Control total: gestiona el equipo, la organización y puede borrar sistemas.",
@@ -246,6 +579,13 @@ export type OrgMember = {
   email: string;
   role: MemberRole;
   joinedAt: string; // ISO
+};
+
+/** Organización a la que pertenece el usuario (para el selector de org activa). */
+export type UserOrg = {
+  id: string;
+  name: string;
+  role: MemberRole;
 };
 
 export type PendingInvitation = {
@@ -302,6 +642,46 @@ export type AuditEntry = {
   label: string; // nombre/resumen de la fila afectada
   changed: string[]; // campos (humanos) cambiados en un update
   at: string; // ISO
+};
+
+/**
+ * Estado de la cadena de integridad del audit-trail (encadenado con SHA-256).
+ * `ok=false` indica que un evento fue alterado o borrado: `brokenId` es el
+ * primer eslabón donde la cadena deja de cuadrar.
+ */
+export type AuditChainStatus = {
+  total: number;
+  ok: boolean;
+  brokenId: number | null;
+  checkedAt: string; // ISO
+};
+
+/** Un sistema con toda su evidencia asociada, para la exportación de datos. */
+export type ExportedSystem = {
+  system: AiSystem;
+  assessments: AssessmentRecord[];
+  biasAudit: BiasAudit | null;
+};
+
+/**
+ * Paquete de exportación de datos de una organización: toda su evidencia
+ * declarada en formato portable (JSON). Es un volcado de los datos propios del
+ * cliente para respaldo/portabilidad, no un informe ni una certificación.
+ */
+export type ExportBundle = {
+  meta: {
+    application: "Attesta";
+    organization: string;
+    exportedAt: string; // ISO
+    schemaVersion: number;
+  };
+  integrity: AuditChainStatus | null;
+  systems: ExportedSystem[];
+  gapItems: GapItem[];
+  actionTasks: ActionTask[];
+  members: OrgMember[];
+  regulatoryAcks: Record<string, RegAck>;
+  auditLog: AuditEntry[];
 };
 
 /** Registro de actividad de ejemplo (modo demo). */
@@ -368,6 +748,75 @@ export const SAMPLE_AUDIT: AuditEntry[] = [
   },
 ];
 
+/*
+ * Variante EN del registro de actividad de ejemplo. Se traduce SOLO el texto
+ * humano de muestra: `label` (nombre/resumen de la fila) y `changed[]` (nombres
+ * de campo legibles). `id`, `actorEmail`, `table`, `rowId`, `action` y `at`
+ * idénticos. "nivel Alto riesgo"→"level High risk"; "rol Miembro"→"role Member".
+ */
+export const SAMPLE_AUDIT_EN: AuditEntry[] = [
+  {
+    id: 8,
+    actorEmail: "legal@empresa-demo.com",
+    table: "gap_items",
+    rowId: "GAP-03",
+    action: "update",
+    label: "Effective human oversight",
+    changed: ["status"],
+    at: "2026-07-16T15:42:00Z",
+  },
+  {
+    id: 7,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "risk_assessments",
+    rowId: "AS-005-1",
+    action: "insert",
+    label: "level High risk",
+    changed: [],
+    at: "2026-07-10T11:00:00Z",
+  },
+  {
+    id: 6,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "ai_systems",
+    rowId: "SYS-005",
+    action: "update",
+    label: "Automated psychometric test",
+    changed: ["risk", "evidence backing", "last review"],
+    at: "2026-07-10T11:00:05Z",
+  },
+  {
+    id: 5,
+    actorEmail: "talent@empresa-demo.com",
+    table: "gap_items",
+    rowId: "GAP-04",
+    action: "insert",
+    label: "Bias control in candidate selection",
+    changed: [],
+    at: "2026-07-05T09:12:00Z",
+  },
+  {
+    id: 4,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "memberships",
+    rowId: "mem-3",
+    action: "insert",
+    label: "role Member",
+    changed: [],
+    at: "2026-06-01T14:15:00Z",
+  },
+  {
+    id: 3,
+    actorEmail: "ana.lopez@empresa-demo.com",
+    table: "ai_systems",
+    rowId: "SYS-001",
+    action: "insert",
+    label: "CV screening — ATS",
+    changed: [],
+    at: "2026-05-28T08:30:00Z",
+  },
+];
+
 /* -------------------------------------------------------------------------- */
 /* Acuse de vigilancia regulatoria ("marcar como revisado")                   */
 /* -------------------------------------------------------------------------- */
@@ -380,6 +829,22 @@ export const REG_ACK_LABEL: Record<RegAckStatus, string> = {
   not_applicable: "No aplica",
 };
 
+/** EN — internal review status labels (parallel to REG_ACK_LABEL, same keys). */
+const REG_ACK_LABEL_EN: Record<RegAckStatus, string> = {
+  reviewed: "Reviewed",
+  planned: "Plan under way",
+  not_applicable: "Not applicable",
+};
+
+export const REG_ACK_LABEL_BY_LOCALE: Record<Locale, Record<RegAckStatus, string>> = {
+  es: REG_ACK_LABEL,
+  en: REG_ACK_LABEL_EN,
+};
+
+export function regAckLabel(status: RegAckStatus, locale: Locale = "es"): string {
+  return REG_ACK_LABEL_BY_LOCALE[locale][status];
+}
+
 export type RegAck = {
   status: RegAckStatus;
   note: string | null;
@@ -388,9 +853,47 @@ export type RegAck = {
 
 /** Acuses de ejemplo (modo demo), indexados por id de evento regulatorio. */
 export const SAMPLE_REG_ACKS: Record<string, RegAck> = {
+  "eu-transparency-art50": {
+    status: "planned",
+    note: "Aviso de IA a candidatos en revisión con RRHH.",
+    at: "2026-07-18T09:00:00Z",
+  },
+  "eu-highrisk-annex-iii": {
+    status: "planned",
+    note: "Gap assessment de alto riesgo agendado.",
+    at: "2026-07-10T09:00:00Z",
+  },
   "eu-omnibus-highrisk-delay": {
     status: "reviewed",
     note: "Revisado por Legal; plan de preparación de alto riesgo en marcha.",
+    at: "2026-07-15T10:00:00Z",
+  },
+  "eu-gpai-governance": {
+    status: "not_applicable",
+    note: null,
+    at: "2026-07-12T09:00:00Z",
+  },
+};
+
+/*
+ * Variante EN de los acuses de ejemplo. Se traduce SOLO `note` (texto humano);
+ * claves de evento (`eu-omnibus-highrisk-delay`, `eu-gpai-governance`), `status`
+ * y `at` idénticos.
+ */
+export const SAMPLE_REG_ACKS_EN: Record<string, RegAck> = {
+  "eu-transparency-art50": {
+    status: "planned",
+    note: "Candidate AI notice under review with HR.",
+    at: "2026-07-18T09:00:00Z",
+  },
+  "eu-highrisk-annex-iii": {
+    status: "planned",
+    note: "High-risk gap assessment scheduled.",
+    at: "2026-07-10T09:00:00Z",
+  },
+  "eu-omnibus-highrisk-delay": {
+    status: "reviewed",
+    note: "Reviewed by Legal; high-risk readiness plan under way.",
     at: "2026-07-15T10:00:00Z",
   },
   "eu-gpai-governance": {
@@ -413,62 +916,42 @@ export const REG_CANDIDATE_STATUS_LABEL: Record<RegCandidateStatus, string> = {
   superseded: "Reemplazado",
 };
 
+/** EN — candidate status labels (parallel to REG_CANDIDATE_STATUS_LABEL). */
+const REG_CANDIDATE_STATUS_LABEL_EN: Record<RegCandidateStatus, string> = {
+  draft: "Draft",
+  approved: "Published",
+  rejected: "Discarded",
+  superseded: "Superseded",
+};
+
+export const REG_CANDIDATE_STATUS_LABEL_BY_LOCALE: Record<
+  Locale,
+  Record<RegCandidateStatus, string>
+> = {
+  es: REG_CANDIDATE_STATUS_LABEL,
+  en: REG_CANDIDATE_STATUS_LABEL_EN,
+};
+
+export function regCandidateStatusLabel(
+  status: RegCandidateStatus,
+  locale: Locale = "es",
+): string {
+  return REG_CANDIDATE_STATUS_LABEL_BY_LOCALE[locale][status];
+}
+
 /** Procedencia del borrador: qué agente lo generó y con qué señal. */
 export type RegCandidateProvenance = {
-  agent?: string; // p. ej. "Analista" o "Vigía"
-  model?: string | null; // modelo LLM usado (null si aún determinista)
+  agent?: string; // p. ej. "Vigía" | "Analista"
+  model?: string | null; // modelo LLM usado (null si determinista)
+  embed_model?: string | null; // modelo de embeddings (Analista)
   confidence?: number | null; // 0..1
   excerpt?: string | null; // fragmento de la fuente que lo motivó
   detected_at?: string | null; // ISO
-  previous_hash?: string | null; // huella anterior (detección del Vigía)
-  new_hash?: string | null; // huella nueva (detección del Vigía)
+  /** Citas del Analista: qué fragmento de norma respalda cada afirmación. */
+  citations?: { chunk_id: string; doc_ref: string; quote: string }[] | null;
+  /** doc_refs de los fragmentos recuperados por RAG. */
+  retrieved_refs?: string[] | null;
 };
-
-/** Fuente vigilada por el Vigía (watchlist). */
-export type RegSource = {
-  id: string;
-  framework: string;
-  label: string;
-  url: string;
-  sourceKind: "page" | "feed" | "api";
-  active: boolean;
-  lastCheckedAt: string | null; // ISO
-  hasBaseline: boolean; // ya tiene huella registrada
-};
-
-/** Fuentes de ejemplo (modo demo) para el panel de fuentes vigiladas. */
-export const SAMPLE_REG_SOURCES: RegSource[] = [
-  {
-    id: "src-demo-1",
-    framework: "eu-ai-act",
-    label: "EUR-Lex — Reglamento de IA (texto consolidado)",
-    url: "https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX:32024R1689",
-    sourceKind: "page",
-    active: true,
-    lastCheckedAt: "2026-07-17T06:00:00Z",
-    hasBaseline: true,
-  },
-  {
-    id: "src-demo-2",
-    framework: "us-nyc-ll144",
-    label: "NYC DCWP — Automated Employment Decision Tools",
-    url: "https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page",
-    sourceKind: "page",
-    active: true,
-    lastCheckedAt: "2026-07-17T06:00:00Z",
-    hasBaseline: true,
-  },
-  {
-    id: "src-demo-3",
-    framework: "us-co-aiact",
-    label: "Colorado AG — Inteligencia Artificial",
-    url: "https://coag.gov/artificial-intelligence/",
-    sourceKind: "page",
-    active: true,
-    lastCheckedAt: null,
-    hasBaseline: false,
-  },
-];
 
 /** Borrador de evento regulatorio propuesto por el pipeline. */
 export type RegCandidate = {
@@ -505,7 +988,7 @@ export const SAMPLE_REG_CANDIDATES: RegCandidate[] = [
     summary:
       "Borrador detectado: la Oficina Europea de IA habría publicado directrices interpretativas sobre el uso de sistemas de IA de alto riesgo en contratación (Anexo III, empleo), con criterios de supervisión humana e información a los candidatos.",
     impact:
-      "Afinaría cómo un deployer de RRHH cumple el Art. 26 en cribado de CVs y entrevistas: expectativas concretas de supervisión humana y transparencia hacia el candidato.",
+      "Afinaría cómo un deployer de RRHH aborda las obligaciones del Art. 26 en cribado de CVs y entrevistas: expectativas concretas de supervisión humana y transparencia hacia el candidato.",
     action:
       "Revisar el policy pack de RRHH contra las nuevas directrices y ajustar la evidencia de supervisión humana.",
     articles: ["Art. 26", "Anexo III"],
@@ -562,6 +1045,233 @@ export const SAMPLE_REG_CANDIDATES: RegCandidate[] = [
   },
 ];
 
+/*
+ * Variante EN de los candidatos de ejemplo (bandeja del Validador). Se traduce
+ * SOLO el texto humano: `title`, `summary`, `impact`, `action`, `source.label`,
+ * `sourceLabel` y `provenance.excerpt`. NOTA: los `excerpt` ya vienen en inglés
+ * (son citas literales de la fuente vigilada) → se conservan idénticos. Todo lo
+ * demás (`id`, `proposedEventId`, `date`, `kind`, `framework`, `articles`,
+ * `scope`, `status`, url de la fuente, resto de `provenance`, timestamps) es
+ * idéntico. El array `articles` se mantiene BYTE-idéntico al ES (dato
+ * estructurado / posible clave de scope) — ver banderas del entregable.
+ * Framing deployer; sin copy prohibido.
+ */
+export const SAMPLE_REG_CANDIDATES_EN: RegCandidate[] = [
+  {
+    id: "cand-demo-1",
+    proposedEventId: "eu-ai-office-hiring-guidelines",
+    date: "2026-09-15",
+    kind: "guidance",
+    framework: "eu-ai-act",
+    title: "The AI Office publishes guidelines on AI in personnel selection",
+    summary:
+      "Draft detected: the European AI Office is reported to have published interpretive guidelines on the use of high-risk AI systems in hiring (Annex III, employment), with criteria on human oversight and information to candidates.",
+    impact:
+      "It would refine how an HR deployer approaches its Art. 26 obligations in CV screening and interviews: concrete expectations for human oversight and transparency toward the candidate.",
+    action:
+      "Review the HR policy pack against the new guidelines and adjust the human-oversight evidence.",
+    articles: ["Art. 26", "Annex III"],
+    source: {
+      label: "European AI Office — guidelines (source to verify)",
+      url: "https://digital-strategy.ec.europa.eu/en/policies/ai-office",
+    },
+    scope: { riskLevels: ["high"] },
+    status: "draft",
+    sourceLabel: "AI Office — library",
+    provenance: {
+      agent: "Analista",
+      model: null,
+      confidence: 0.62,
+      excerpt:
+        "…guidelines on the use of high-risk AI systems in recruitment and worker management…",
+      detected_at: "2026-07-16T08:00:00Z",
+    },
+    createdAt: "2026-07-16T08:05:00Z",
+    reviewedAt: null,
+    reviewNote: null,
+  },
+  {
+    id: "cand-demo-2",
+    proposedEventId: null,
+    date: "2026-10-01",
+    kind: "standard",
+    framework: "eu-ai-act",
+    title: "CEN-CENELEC advances the harmonized standard on AI risk management",
+    summary:
+      "Draft detected: publication of a harmonized standard (presumption of conformity) on risk management for high-risk AI systems.",
+    impact:
+      "It could provide a route to presumption of conformity; useful for requiring providers to supply evidence aligned with the standard.",
+    action:
+      "Assess whether the standard applies to the high-risk systems in the inventory and ask providers to align with it.",
+    articles: ["Art. 40"],
+    source: {
+      label: "CEN-CENELEC JTC 21 (source to verify)",
+      url: "https://www.cencenelec.eu/",
+    },
+    scope: { riskLevels: ["high"] },
+    status: "draft",
+    sourceLabel: "CEN-CENELEC JTC 21",
+    provenance: {
+      agent: "Vigía",
+      model: null,
+      confidence: 0.48,
+      excerpt: "…harmonised standard on AI risk management…",
+      detected_at: "2026-07-15T07:30:00Z",
+    },
+    createdAt: "2026-07-15T07:35:00Z",
+    reviewedAt: null,
+    reviewNote: null,
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Vigía — fuentes vigiladas (watchlist del foso, Capa 7)                      */
+/* -------------------------------------------------------------------------- */
+
+/** Resultado del último chequeo del Vigía sobre una fuente. */
+export type RegSourceStatus =
+  | "baseline" // primera vez que se ve (línea base fijada)
+  | "ok" // revisada, sin cambios
+  | "changed" // cambió → generó una señal
+  | "error"; // falló la descarga
+
+export const REG_SOURCE_STATUS_LABEL: Record<RegSourceStatus, string> = {
+  baseline: "Línea base",
+  ok: "Sin cambios",
+  changed: "Cambió",
+  error: "Error",
+};
+
+/** EN — source check status labels (parallel to REG_SOURCE_STATUS_LABEL). */
+const REG_SOURCE_STATUS_LABEL_EN: Record<RegSourceStatus, string> = {
+  baseline: "Baseline",
+  ok: "No changes",
+  changed: "Changed",
+  error: "Error",
+};
+
+export const REG_SOURCE_STATUS_LABEL_BY_LOCALE: Record<
+  Locale,
+  Record<RegSourceStatus, string>
+> = {
+  es: REG_SOURCE_STATUS_LABEL,
+  en: REG_SOURCE_STATUS_LABEL_EN,
+};
+
+export function regSourceStatusLabel(
+  status: RegSourceStatus,
+  locale: Locale = "es",
+): string {
+  return REG_SOURCE_STATUS_LABEL_BY_LOCALE[locale][status];
+}
+
+/** Fuente oficial que el Vigía monitorea por fetch+hash. */
+export type RegSource = {
+  id: string;
+  framework: string;
+  label: string;
+  url: string;
+  sourceKind: string; // page | feed | api
+  lastHash: string | null;
+  lastCheckedAt: string | null;
+  lastChangeAt: string | null;
+  lastStatus: RegSourceStatus | null;
+  failCount: number;
+  active: boolean;
+};
+
+/** Watchlist de ejemplo (modo demo) para enseñar el panel del Vigía. */
+export const SAMPLE_REG_SOURCES: RegSource[] = [
+  {
+    id: "src-demo-1",
+    framework: "eu-ai-act",
+    label: "EUR-Lex — Reglamento (UE) 2024/1689",
+    url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    sourceKind: "page",
+    lastHash: "a1b2c3",
+    lastCheckedAt: "2026-07-17T06:00:00Z",
+    lastChangeAt: null,
+    lastStatus: "ok",
+    failCount: 0,
+    active: true,
+  },
+  {
+    id: "src-demo-2",
+    framework: "eu-ai-act",
+    label: "AI Act Service Desk — Art. 50",
+    url: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50",
+    sourceKind: "page",
+    lastHash: "d4e5f6",
+    lastCheckedAt: "2026-07-17T06:00:00Z",
+    lastChangeAt: "2026-07-15T06:00:00Z",
+    lastStatus: "changed",
+    failCount: 0,
+    active: true,
+  },
+  {
+    id: "src-demo-3",
+    framework: "us-nyc-ll144",
+    label: "NYC DCWP — Automated Employment Decision Tools",
+    url: "https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page",
+    sourceKind: "page",
+    lastHash: null,
+    lastCheckedAt: null,
+    lastChangeAt: null,
+    lastStatus: null,
+    failCount: 0,
+    active: true,
+  },
+];
+
+/*
+ * Variante EN de la watchlist de ejemplo (panel del Vigía). Se traduce SOLO lo
+ * traducible de `label`: "Reglamento (UE)"→"Regulation (EU)". Los nombres propios
+ * de fuente se mantienen ("AI Act Service Desk — Art. 50", "NYC DCWP — Automated
+ * Employment Decision Tools" ya están en inglés). `id`, `framework`, `url`,
+ * `sourceKind`, hashes, timestamps, `lastStatus`, `failCount` y `active` idénticos.
+ */
+export const SAMPLE_REG_SOURCES_EN: RegSource[] = [
+  {
+    id: "src-demo-1",
+    framework: "eu-ai-act",
+    label: "EUR-Lex — Regulation (EU) 2024/1689",
+    url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    sourceKind: "page",
+    lastHash: "a1b2c3",
+    lastCheckedAt: "2026-07-17T06:00:00Z",
+    lastChangeAt: null,
+    lastStatus: "ok",
+    failCount: 0,
+    active: true,
+  },
+  {
+    id: "src-demo-2",
+    framework: "eu-ai-act",
+    label: "AI Act Service Desk — Art. 50",
+    url: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50",
+    sourceKind: "page",
+    lastHash: "d4e5f6",
+    lastCheckedAt: "2026-07-17T06:00:00Z",
+    lastChangeAt: "2026-07-15T06:00:00Z",
+    lastStatus: "changed",
+    failCount: 0,
+    active: true,
+  },
+  {
+    id: "src-demo-3",
+    framework: "us-nyc-ll144",
+    label: "NYC DCWP — Automated Employment Decision Tools",
+    url: "https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page",
+    sourceKind: "page",
+    lastHash: null,
+    lastCheckedAt: null,
+    lastChangeAt: null,
+    lastStatus: null,
+    failCount: 0,
+    active: true,
+  },
+];
+
 /* -------------------------------------------------------------------------- */
 /* Plan de acción editable (Capa 2) — tablero de tareas                        */
 /* -------------------------------------------------------------------------- */
@@ -575,6 +1285,19 @@ export const TASK_STATUS_LABEL: Record<TaskStatus, string> = {
   blocked: "Bloqueada",
   done: "Hecha",
 };
+const TASK_STATUS_LABEL_EN: Record<TaskStatus, string> = {
+  todo: "To do",
+  in_progress: "In progress",
+  blocked: "Blocked",
+  done: "Done",
+};
+export const TASK_STATUS_LABEL_BY_LOCALE: Record<Locale, Record<TaskStatus, string>> = {
+  es: TASK_STATUS_LABEL,
+  en: TASK_STATUS_LABEL_EN,
+};
+export function taskStatusLabel(status: TaskStatus, locale: Locale): string {
+  return TASK_STATUS_LABEL_BY_LOCALE[locale][status];
+}
 
 export const TASK_STATUS_ORDER: TaskStatus[] = [
   "todo",
@@ -589,6 +1312,19 @@ export const TASK_PRIORITY_LABEL: Record<TaskPriority, string> = {
   media: "Media",
   baja: "Baja",
 };
+const TASK_PRIORITY_LABEL_EN: Record<TaskPriority, string> = {
+  critica: "Critical",
+  alta: "High",
+  media: "Medium",
+  baja: "Low",
+};
+export const TASK_PRIORITY_LABEL_BY_LOCALE: Record<Locale, Record<TaskPriority, string>> = {
+  es: TASK_PRIORITY_LABEL,
+  en: TASK_PRIORITY_LABEL_EN,
+};
+export function taskPriorityLabel(priority: TaskPriority, locale: Locale): string {
+  return TASK_PRIORITY_LABEL_BY_LOCALE[locale][priority];
+}
 
 export const TASK_PRIORITY_ORDER: TaskPriority[] = [
   "critica",
@@ -668,6 +1404,67 @@ export const SAMPLE_ACTION_TASKS: ActionTask[] = [
   },
 ];
 
+/*
+ * Variante EN de las tareas de ejemplo (plan editable). Se traduce SOLO el texto
+ * humano: `title`, `detail`, y la parte traducible de `systemName` ("Cribado de
+ * CVs"→"CV screening"; el nombre de proveedor "TalentFilter" se conserva). `id`,
+ * `article`, `priority`, `status`, `assigneeId/Email`, `dueDate`, `systemId`,
+ * `source`, `sourceKey` y `createdAt` idénticos. Framing deployer (exigir al
+ * proveedor / designar supervisión / informar); sin copy prohibido.
+ */
+export const SAMPLE_ACTION_TASKS_EN: ActionTask[] = [
+  {
+    id: "task-demo-1",
+    title: "Assign human oversight for CV screening",
+    detail:
+      "Assign oversight to a person with the competence and authority to intervene in or stop the system (Art. 26.2).",
+    article: "Art. 14",
+    priority: "critica",
+    status: "in_progress",
+    assigneeId: "demo-2",
+    assigneeEmail: "legal@empresa-demo.com",
+    dueDate: "2026-07-31",
+    systemId: "SYS-001",
+    systemName: "CV screening — TalentFilter",
+    source: "recommendation",
+    sourceKey: "art-14",
+    createdAt: "2026-07-10T09:00:00Z",
+  },
+  {
+    id: "task-demo-2",
+    title: "Require technical documentation from the provider (Annex IV)",
+    detail:
+      "Ask the provider for the technical documentation and instructions for use, and keep it as audit evidence.",
+    article: "Art. 11",
+    priority: "media",
+    status: "todo",
+    assigneeId: "demo-3",
+    assigneeEmail: "talent@empresa-demo.com",
+    dueDate: "2026-07-14",
+    systemId: null,
+    systemName: null,
+    source: "recommendation",
+    sourceKey: "art-11",
+    createdAt: "2026-07-11T11:00:00Z",
+  },
+  {
+    id: "task-demo-3",
+    title: "Inform workers about the use of AI in hiring",
+    detail: "Notice to affected persons before deployment in the workplace.",
+    article: "Art. 26",
+    priority: "alta",
+    status: "todo",
+    assigneeId: null,
+    assigneeEmail: null,
+    dueDate: null,
+    systemId: null,
+    systemName: null,
+    source: "manual",
+    sourceKey: null,
+    createdAt: "2026-07-12T08:30:00Z",
+  },
+];
+
 export const RISK_ORDER: RiskLevel[] = [
   "unacceptable",
   "high",
@@ -693,4 +1490,16 @@ export function avgCompliance(systems: AiSystem[]): number {
   return Math.round(
     systems.reduce((sum, s) => sum + s.compliance, 0) / systems.length,
   );
+}
+
+/**
+ * Umbral ORIENTATIVO de preparación: a partir de este % consideramos un sistema
+ * "listo para auditoría" (nunca es una certificación ni un juicio de cumplimiento;
+ * es la meta de preparación de la organización). Ajustable en un único lugar.
+ */
+export const AUDIT_READY_THRESHOLD = 80;
+
+/** ¿La preparación declarada alcanza el umbral orientativo? */
+export function isAuditReady(pct: number): boolean {
+  return pct >= AUDIT_READY_THRESHOLD;
 }

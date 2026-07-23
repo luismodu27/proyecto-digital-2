@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { SealMark } from "@/components/ui/SealMark";
-import { createClient } from "@/lib/supabase/client";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { submitWaitlist } from "@/lib/landing/waitlist-actions";
+import type { Dictionary } from "@/lib/i18n";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function WaitlistCTA() {
+export function WaitlistCTA({ t }: { t: Dictionary["landing"]["waitlist"] }) {
   const [email, setEmail] = useState("");
   // Honeypot anti-bots: campo oculto que un humano nunca rellena.
   const [company, setCompany] = useState("");
@@ -26,21 +26,19 @@ export function WaitlistCTA() {
       return;
     }
     if (!EMAIL_RE.test(email.trim())) {
-      setError("Introduce un correo válido (p. ej. tu@empresa.com).");
+      setError(t.invalidEmail);
       return;
     }
     setLoading(true);
     try {
-      if (isSupabaseConfigured) {
-        const supabase = createClient();
-        const { error } = await supabase
-          .from("waitlist")
-          .insert({ email: email.trim(), source: "landing" });
-        if (error) throw error;
+      const res = await submitWaitlist(email.trim(), "landing");
+      if (!res.ok) {
+        setError(res.error ?? t.genericError);
+        return;
       }
       setSubmitted(true);
     } catch {
-      setError("No pudimos registrarte. Inténtalo de nuevo en un momento.");
+      setError(t.genericErrorRetry);
     } finally {
       setLoading(false);
     }
@@ -53,19 +51,20 @@ export function WaitlistCTA() {
         <div className="relative mx-auto max-w-xl">
           <SealMark size={48} className="mx-auto" />
           <h2 className="mt-5 font-display text-3xl font-semibold text-ink sm:text-4xl">
-            Ve por delante de la auditoría.
+            {t.title}
           </h2>
-          <p className="mt-4 text-lg text-ink-soft">
-            Estamos incorporando a un grupo reducido de empresas mid-market.
-            Solicita acceso anticipado y recibe un gap assessment inicial.
-          </p>
+          <p className="mt-4 text-lg text-ink-soft">{t.intro}</p>
 
           {submitted ? (
-            <div className="mt-8 rounded-2xl border border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] px-6 py-5 text-[var(--tone-good-fg)]">
-              <p className="font-display text-lg font-semibold">¡Gracias! 🎉</p>
+            <div
+              role="status"
+              className="mt-8 rounded-2xl border border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] px-6 py-5 text-[var(--tone-good-fg)]"
+            >
+              <p className="font-display text-lg font-semibold">{t.successTitle}</p>
               <p className="mt-1 text-sm">
-                Te avisaremos en <span className="font-medium">{email}</span>{" "}
-                cuando abramos tu acceso.
+                {t.successBodyBefore}
+                <span className="font-medium">{email}</span>
+                {t.successBodyAfter}
               </p>
             </div>
           ) : (
@@ -75,11 +74,11 @@ export function WaitlistCTA() {
               className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row"
             >
               <label htmlFor="waitlist-email" className="sr-only">
-                Correo de trabajo
+                {t.emailLabel}
               </label>
               {/* Honeypot: fuera de pantalla y accesiblemente oculto. */}
               <div className="absolute -left-[9999px]" aria-hidden>
-                <label htmlFor="waitlist-company">No rellenar</label>
+                <label htmlFor="waitlist-company">{t.honeypotLabel}</label>
                 <input
                   id="waitlist-company"
                   name="company"
@@ -99,23 +98,51 @@ export function WaitlistCTA() {
                   setEmail(e.target.value);
                   if (error) setError(null);
                 }}
-                placeholder="tu@empresa.com"
-                className="w-full rounded-full border border-line-strong bg-paper px-5 py-3 text-sm text-ink outline-none placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/30"
+                aria-invalid={!!error}
+                aria-describedby={error ? "waitlist-error" : undefined}
+                placeholder={t.placeholder}
+                className="w-full rounded-full border border-line-strong bg-paper px-5 py-3 text-sm text-ink outline-none placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand"
               />
               <Button type="submit" disabled={loading} className="px-6 py-3 shrink-0">
-                {loading ? "Enviando…" : "Solicitar acceso"}
+                {loading ? t.submitting : t.submit}
               </Button>
             </form>
           )}
 
           {error && (
-            <p className="mt-3 text-sm text-[var(--tone-danger-fg)]">{error}</p>
+            <p
+              id="waitlist-error"
+              role="alert"
+              className="mt-3 text-sm text-[var(--tone-danger-fg)]"
+            >
+              {error}
+            </p>
           )}
 
-          <p className="mt-4 text-xs text-muted">
-            Sin compromiso. Attesta ofrece orientación de compliance, no asesoría
-            legal.
-          </p>
+          {/* Marcadores de confianza — todos reales (nada de logos/testimonios inventados). */}
+          <ul className="mx-auto mt-8 flex max-w-lg flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            {t.trustMarkers.map((marker) => (
+              <li key={marker} className="flex items-center gap-1.5 text-xs text-ink-soft">
+                <svg
+                  viewBox="0 0 16 16"
+                  className="size-3.5 shrink-0 text-brand"
+                  fill="none"
+                  aria-hidden
+                >
+                  <path
+                    d="m3.5 8.5 3 3 6-7"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                {marker}
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-4 text-xs text-muted">{t.disclaimer}</p>
         </div>
       </div>
     </section>

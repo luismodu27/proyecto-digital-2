@@ -1,12 +1,12 @@
 import { SealMark } from "@/components/ui/SealMark";
+import type { Dictionary } from "@/lib/i18n";
 
 /** Mockup on-brand del producto para el hero (no es una captura: escala nítido). */
-export function HeroPreview() {
-  const risk = [
-    { label: "Alto riesgo", pct: 67, color: "#c9761f" },
-    { label: "Riesgo limitado", pct: 17, color: "#b0824a" },
-    { label: "Riesgo mínimo", pct: 17, color: "#0b6b4e" },
-  ];
+export function HeroPreview({ t }: { t: Dictionary["landing"]["heroPreview"] }) {
+  // Estructura visual (pct/color/flag) — se combina con el texto del diccionario.
+  const riskColors = ["#c9761f", "#b0824a", "#0b6b4e"];
+  const riskPcts = [67, 17, 17];
+  const statWarn = [false, true, false];
 
   return (
     <div className="animate-float-soft rounded-2xl border border-line-strong bg-paper-raised p-2 shadow-[0_40px_90px_-40px_rgba(15,26,20,0.45)]">
@@ -16,7 +16,7 @@ export function HeroPreview() {
         <span className="size-2.5 rounded-full bg-[#e6cfa0]" />
         <span className="size-2.5 rounded-full bg-[#bfdccf]" />
         <div className="ml-3 flex-1 rounded-md bg-paper-sunken px-3 py-1 text-[11px] text-muted">
-          app.attesta.io/dashboard
+          {t.urlBar}
         </div>
       </div>
 
@@ -31,37 +31,40 @@ export function HeroPreview() {
                 Attesta
               </span>
             </div>
-            {["Resumen", "Inventario", "Riesgo", "Vigilancia", "Equipo"].map(
-              (n, i) => (
-                <div
-                  key={n}
-                  className={`rounded-md px-2 py-1 text-[11px] ${
-                    i === 0
-                      ? "bg-brand-soft font-medium text-brand-strong"
-                      : "text-ink-soft"
-                  }`}
-                >
-                  {n}
-                </div>
-              ),
-            )}
+            {t.navItems.map((n, i) => (
+              <div
+                key={n}
+                className={`rounded-md px-2 py-1 text-[11px] ${
+                  i === 0
+                    ? "bg-brand-soft font-medium text-brand-strong"
+                    : "text-ink-soft"
+                }`}
+              >
+                {n}
+              </div>
+            ))}
           </div>
 
           {/* Contenido */}
           <div className="flex-1 p-4">
-            <p className="font-display text-sm font-semibold text-ink">
-              Resumen de gobernanza
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="font-display text-sm font-semibold text-ink">
+                {t.overviewTitle}
+              </p>
+              <span className="flex items-center gap-1.5 text-[10px] font-medium text-brand-strong">
+                <span className="relative flex size-1.5">
+                  <span className="absolute inline-flex size-full rounded-full bg-brand/60 motion-safe:animate-ping" />
+                  <span className="relative inline-flex size-1.5 rounded-full bg-brand" />
+                </span>
+                {t.liveLabel}
+              </span>
+            </div>
             <div className="mt-3 grid grid-cols-3 gap-2">
-              {[
-                { k: "Sistemas", v: "6" },
-                { k: "Alto riesgo", v: "4", warn: true },
-                { k: "% listo", v: "59%" },
-              ].map((c) => (
+              {t.stats.map((c, i) => (
                 <div key={c.k} className="rounded-lg border border-line bg-paper-raised p-2">
                   <p
                     className={`font-display text-lg font-semibold ${
-                      c.warn ? "text-[#a3271f]" : "text-ink"
+                      statWarn[i] ? "text-[var(--tone-danger-fg)]" : "text-ink"
                     }`}
                   >
                     {c.v}
@@ -72,7 +75,7 @@ export function HeroPreview() {
             </div>
 
             {/* Próximo hito regulatorio (el foso, ya en el hero) */}
-            <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[#bfdccf] bg-brand-soft/50 px-3 py-2">
+            <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[var(--tone-good-bd)] bg-brand-soft/50 px-3 py-2">
               <div className="flex items-center gap-1.5">
                 <svg
                   viewBox="0 0 24 24"
@@ -89,26 +92,26 @@ export function HeroPreview() {
                   />
                 </svg>
                 <span className="text-[10px] font-medium text-ink">
-                  Próximo hito · Transparencia (Art. 50)
+                  {t.milestoneLabel}
                 </span>
               </div>
               <span className="shrink-0 text-[10px] font-semibold tabular-nums text-brand-strong">
-                en 16 días
+                {t.countdown}
               </span>
             </div>
 
             <div className="mt-3 rounded-lg border border-line bg-paper-raised p-3">
-              <p className="text-[11px] font-medium text-ink">Distribución de riesgo</p>
+              <p className="text-[11px] font-medium text-ink">{t.distributionTitle}</p>
               <div className="mt-2.5 space-y-2">
-                {risk.map((r) => (
-                  <div key={r.label} className="flex items-center gap-2">
+                {t.riskLabels.map((label, i) => (
+                  <div key={label} className="flex items-center gap-2">
                     <span className="w-20 shrink-0 text-[10px] text-ink-soft">
-                      {r.label}
+                      {label}
                     </span>
                     <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-paper-sunken">
                       <div
                         className="h-full rounded-full"
-                        style={{ width: `${r.pct}%`, backgroundColor: r.color }}
+                        style={{ width: `${riskPcts[i]}%`, backgroundColor: riskColors[i] }}
                       />
                     </div>
                   </div>

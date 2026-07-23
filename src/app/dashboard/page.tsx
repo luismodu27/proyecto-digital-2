@@ -2,30 +2,117 @@ import Link from "next/link";
 import { PageHeader, StatCard, Meter } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
+import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
 import { DeadlineReminders } from "@/components/dashboard/DeadlineReminders";
-import { getAiSystems, getOrgJurisdictions, getActionTasks } from "@/lib/data";
-import { avgCompliance, riskCounts } from "@/lib/mock-data";
+import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
+import { DashboardWelcome } from "@/components/dashboard/DashboardWelcome";
+import {
+  getAiSystems,
+  getOrgJurisdictions,
+  getActionTasks,
+  getGapItems,
+  getOrgMembers,
+  getOrganizationName,
+  getRegulatoryEvents,
+  getRegulatoryAcks,
+  isSupabaseConfigured,
+} from "@/lib/data";
+import { getCurrentUser } from "@/lib/data/context";
+import {
+  avgCompliance,
+  riskCounts,
+  AUDIT_READY_THRESHOLD,
+  isAuditReady,
+  riskLabel,
+  regAckLabel,
+  type RegAckStatus,
+} from "@/lib/mock-data";
 import {
   upcomingDeadlines,
   daysUntil,
   affectedSystems,
   FRAMEWORK_META,
+  frameworkMeta,
   type RegulatoryEvent,
 } from "@/lib/regulatory-watch";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
 
 // El widget de "próximo hito" depende de la fecha actual.
 export const dynamic = "force-dynamic";
 
+// Tono del chip de estado interno en el widget de próximo hito.
+const ACK_CHIP: Record<RegAckStatus, string> = {
+  reviewed:
+    "border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)]",
+  planned:
+    "border-[var(--tone-info-bd)] bg-[var(--tone-info-bg)] text-[var(--tone-info-fg)]",
+  not_applicable:
+    "border-[var(--tone-neutral-bd)] bg-[var(--tone-neutral-bg)] text-[var(--tone-neutral-fg)]",
+};
+
 export default async function DashboardOverview() {
-  const [systems, orgJur, tasks] = await Promise.all([
-    getAiSystems(),
-    getOrgJurisdictions(),
-    getActionTasks(),
-  ]);
+  const [systems, orgJur, tasks, gaps, members, user, orgName, regEvents, regAcks] =
+    await Promise.all([
+      getAiSystems(),
+      getOrgJurisdictions(),
+      getActionTasks(),
+      getGapItems(),
+      getOrgMembers(),
+      getCurrentUser(),
+      getOrganizationName(),
+      getRegulatoryEvents(),
+      getRegulatoryAcks(),
+    ]);
+
+  const locale = await resolveLocale();
+  const d = getDictionary(locale).dashboard;
+  const o = d.overview;
+
+  // Nombre de pila para el saludo (solo si hay un nombre real en el perfil; no
+  // usamos el prefijo del email para no mostrar algo poco natural).
+  const meta = user?.user_metadata as { full_name?: string; name?: string } | undefined;
+  const firstName =
+    (meta?.full_name ?? meta?.name)?.trim().split(/\s+/)[0] ?? null;
+
+  // Pasos de activación (primeros pasos). Se ocultan solos al completarse.
+  const onboardingSteps = [
+    {
+      key: "system",
+      label: d.onboarding.steps.system.label,
+      hint: d.onboarding.steps.system.hint,
+      href: "/dashboard/inventario/nuevo",
+      done: systems.length > 0,
+    },
+    {
+      key: "risk",
+      label: d.onboarding.steps.risk.label,
+      hint: d.onboarding.steps.risk.hint,
+      href: "/dashboard/riesgo/evaluar",
+      done: systems.some((s) => !!s.evidenceState),
+    },
+    {
+      key: "gap",
+      label: d.onboarding.steps.gap.label,
+      hint: d.onboarding.steps.gap.hint,
+      href: "/dashboard/packs",
+      done: gaps.length > 0,
+      paid: true,
+    },
+    {
+      key: "team",
+      label: d.onboarding.steps.team.label,
+      hint: d.onboarding.steps.team.hint,
+      href: "/dashboard/equipo",
+      done: members.length > 1,
+      paid: true,
+    },
+  ];
   const counts = riskCounts(systems);
   const avg = avgCompliance(systems);
   const highRisk = counts.high + counts.unacceptable;
+  const openGaps = gaps.filter((g) => g.status !== "done").length;
   const recent = [...systems]
     .sort((a, b) => a.compliance - b.compliance)
     .slice(0, 4);
@@ -36,35 +123,101 @@ export default async function DashboardOverview() {
   const inNexus = (e: RegulatoryEvent) =>
     orgJur.length === 0 ||
     orgJur.includes(FRAMEWORK_META[e.framework]?.jurisdiction ?? "");
-  const nextDeadline = upcomingDeadlines(now).filter(inNexus)[0];
+  const nextDeadline = upcomingDeadlines(now, regEvents).filter(inNexus)[0];
   const nextDays = nextDeadline ? daysUntil(nextDeadline.date, now) : 0;
   const nextAffected = nextDeadline
     ? affectedSystems(nextDeadline, systems).length
     : 0;
+  const nextAck = nextDeadline ? regAcks[nextDeadline.id] : undefined;
+  // Tono de urgencia del contador (coherente con el radar: ≤45 días urgente).
+  const nextDaysTone =
+    nextDays <= 45
+      ? "text-[var(--tone-danger-fg)]"
+      : nextDays <= 365
+        ? "text-[var(--tone-gold-fg)]"
+        : "text-ink";
+
+  // Cuenta sin sistemas todavía: en vez de widgets en cero (distribución vacía,
+  // "requieren atención"), damos una bienvenida cálida con la misión y los
+  // caminos para empezar.
+  if (systems.length === 0) {
+    return (
+      <>
+        <PageHeader title={o.title} subtitle={o.subtitleStart} />
+        <DashboardWelcome
+          name={firstName}
+          orgName={orgName}
+          canSeed={isSupabaseConfigured}
+          deadline={
+            nextDeadline ? { title: nextDeadline.title, days: nextDays } : null
+          }
+          t={d.welcome}
+          units={d.units}
+        />
+      </>
+    );
+  }
 
   return (
     <>
       <PageHeader
-        title="Resumen de gobernanza"
-        subtitle="Estado de preparación de tus sistemas de IA en un vistazo."
+        title={o.title}
+        subtitle={o.subtitle}
         action={
           <ButtonLink href="/dashboard/informe" variant="outline">
-            ⬇ Informe ejecutivo
+            <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden>
+              <path
+                d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {o.executiveReport}
           </ButtonLink>
         }
       />
 
+      <OnboardingChecklist steps={onboardingSteps} userId={user?.id} />
+
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Sistemas de IA" value={systems.length} hint="en inventario" />
         <StatCard
-          label="Alto riesgo"
-          value={highRisk}
-          hint="requieren obligaciones estrictas"
-          accent="danger"
+          label={o.stat.systems}
+          value={systems.length}
+          hint={o.stat.systemsHint}
+          href="/dashboard/inventario"
         />
-        <StatCard label="Preparación media" value={`${avg}%`} hint="% listo para auditoría" accent={avg >= 60 ? "brand" : "warn"} />
-        <StatCard label="Brechas abiertas" value={4} hint="ver gap assessment" accent="warn" />
+        <StatCard
+          label={o.stat.highRisk}
+          value={highRisk}
+          hint={o.stat.highRiskHint}
+          accent="warn"
+        />
+        <StatCard
+          label={o.stat.avgReadiness}
+          value={`${avg}%`}
+          hint={`${o.stat.avgReadinessHintBefore}${AUDIT_READY_THRESHOLD}${o.stat.avgReadinessHintAfter}`}
+          accent={isAuditReady(avg) ? "brand" : "warn"}
+        />
+        <StatCard
+          label={o.stat.openGaps}
+          value={openGaps}
+          hint={o.stat.openGapsHint}
+          accent="warn"
+          href="/dashboard/gap"
+        />
       </section>
+
+      <p className="mt-3 flex items-center gap-2 text-xs text-muted">
+        <span className="inline-block h-3 w-0.5 rounded-full bg-ink/45" aria-hidden />
+        {o.meterNoteBefore}
+        <span className="font-medium text-ink-soft">
+          {AUDIT_READY_THRESHOLD}
+          {o.meterNoteReady}
+        </span>
+        {o.meterNoteAfter}
+      </p>
 
       {nextDeadline && (
         <Link
@@ -84,12 +237,24 @@ export default async function DashboardOverview() {
               </svg>
             </span>
             <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-muted">
-                Próximo hito regulatorio ·{" "}
-                {FRAMEWORK_META[
-                  nextDeadline.framework as RegulatoryEvent["framework"]
-                ]?.short ?? nextDeadline.framework}
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xs uppercase tracking-wide text-muted">
+                  {o.nextMilestone} ·{" "}
+                  {frameworkMeta(nextDeadline.framework, locale)?.short ??
+                    nextDeadline.framework}
+                </p>
+                {nextAck ? (
+                  <span
+                    className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${ACK_CHIP[nextAck.status]}`}
+                  >
+                    {regAckLabel(nextAck.status, locale)}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full border border-dashed border-line-strong px-2 py-0.5 text-[11px] font-medium text-muted">
+                    {d.pages.monitoring.notMarked}
+                  </span>
+                )}
+              </div>
               <p className="truncate text-sm font-medium text-ink">
                 {nextDeadline.title}
               </p>
@@ -97,13 +262,14 @@ export default async function DashboardOverview() {
           </div>
           <div className="flex shrink-0 items-center gap-4">
             <div className="text-right">
-              <p className="text-sm font-semibold tabular-nums text-ink">
+              <p className={`text-sm font-semibold tabular-nums ${nextDaysTone}`}>
                 {nextDays === 0
-                  ? "hoy"
-                  : `en ${nextDays} ${nextDays === 1 ? "día" : "días"}`}
+                  ? o.today
+                  : `${o.inDaysPrefix}${nextDays} ${nextDays === 1 ? d.units.dayOne : d.units.dayOther}`}
               </p>
               <p className="text-xs text-muted">
-                {nextAffected} {nextAffected === 1 ? "sistema" : "sistemas"}
+                {nextAffected}{" "}
+                {nextAffected === 1 ? d.units.systemOne : d.units.systemOther}
               </p>
             </div>
             <span className="text-brand transition-transform group-hover:translate-x-0.5">
@@ -113,48 +279,74 @@ export default async function DashboardOverview() {
         </Link>
       )}
 
-      <DeadlineReminders tasks={tasks} now={now} />
+      <DeadlineReminders tasks={tasks} now={now} t={d.deadlines} locale={locale} />
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">
           <h2 className="font-display text-lg font-semibold text-ink">
-            Distribución de riesgo
+            {o.riskDistribution}
           </h2>
           <div className="mt-6">
-            <RiskDonut counts={counts} />
+            <RiskDonut
+              counts={counts}
+              labels={d.risk.labels}
+              systemsLabel={d.risk.systems}
+            />
           </div>
         </div>
 
         <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-semibold text-ink">
-              Requieren atención
+              {o.needAttention}
             </h2>
             <Link
               href="/dashboard/inventario"
               className="text-sm font-medium text-brand hover:text-brand-strong"
             >
-              Ver todos →
+              {o.viewAll}
             </Link>
           </div>
-          <ul className="mt-4 divide-y divide-line">
-            {recent.map((s) => (
-              <li key={s.id} className="flex items-center justify-between gap-3 py-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-ink">{s.name}</p>
-                  <p className="text-xs text-muted">{s.owner}</p>
-                </div>
-                <div className="flex shrink-0 items-center gap-3">
-                  <div className="w-24">
-                    <Meter value={s.compliance} />
+          {recent.length === 0 ? (
+            <div className="mt-4 rounded-xl border border-dashed border-line-strong px-4 py-8 text-center">
+              <p className="text-sm font-medium text-ink">
+                {o.emptyAttentionTitle}
+              </p>
+              <p className="mx-auto mt-1 max-w-xs text-xs text-ink-soft">
+                {o.emptyAttentionBody}
+              </p>
+              <Link
+                href="/dashboard/inventario/nuevo"
+                className="mt-3 inline-block text-xs font-semibold text-brand hover:text-brand-strong"
+              >
+                {o.registerSystem}
+              </Link>
+            </div>
+          ) : (
+            <ul className="mt-4 divide-y divide-line">
+              {recent.map((s) => (
+                <li key={s.id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-ink">{s.name}</p>
+                    <p className="text-xs text-muted">{s.owner}</p>
                   </div>
-                  <RiskBadge level={s.risk} />
-                </div>
-              </li>
-            ))}
-          </ul>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <div className="w-24">
+                      <Meter value={s.compliance} target={AUDIT_READY_THRESHOLD} />
+                    </div>
+                    <RiskBadge level={s.risk} label={riskLabel(s.risk, locale)} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
+
+      <LegalNote
+        text={`${o.legalNote} ${LEGAL_FOOTER_BY_LOCALE[locale]}`}
+        className="mt-6"
+      />
     </>
   );
 }

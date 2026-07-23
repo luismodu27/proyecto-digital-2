@@ -9,7 +9,11 @@ const base =
 const sizes = "px-5 py-2.5";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-brand text-white hover:bg-brand-strong",
+  // Hover por brillo (no por token): `brand-strong` es más oscuro en claro pero
+  // MÁS CLARO en oscuro, así que usarlo de fondo dejaba texto blanco sobre menta
+  // claro (contraste ~1.5:1). `brightness-90` oscurece en ambos temas y mantiene
+  // el texto blanco legible.
+  primary: "bg-brand text-white transition hover:brightness-90",
   outline:
     "border border-line-strong text-ink hover:border-ink hover:bg-paper-sunken",
   ghost: "text-ink-soft hover:text-ink hover:bg-paper-sunken",

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 
 export function PageHeader({
   title,
@@ -27,41 +28,82 @@ export function StatCard({
   value,
   hint,
   accent = "ink",
+  href,
 }: {
   label: string;
   value: ReactNode;
   hint?: string;
   accent?: "ink" | "brand" | "warn" | "danger";
+  href?: string;
 }) {
   const accents = {
     ink: "text-ink",
     brand: "text-brand",
-    warn: "text-[#a4610f]",
-    danger: "text-[#a3271f]",
+    warn: "text-[var(--tone-warn-fg)]",
+    danger: "text-[var(--tone-danger-fg)]",
   };
-  return (
-    <div className="card-lift rounded-2xl border border-line bg-paper-raised p-5">
+  const inner = (
+    <>
       <p className="text-xs font-medium uppercase tracking-wide text-muted">
         {label}
       </p>
       <p className={`mt-2 font-display text-3xl font-semibold ${accents[accent]}`}>
         {value}
       </p>
-      {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
-    </div>
+      {hint && (
+        <p className="mt-1 flex items-center gap-1 text-xs text-muted">
+          {hint}
+          {href && (
+            <span className="text-brand transition-transform group-hover:translate-x-0.5">
+              →
+            </span>
+          )}
+        </p>
+      )}
+    </>
   );
+  const cls = "card-lift block rounded-2xl border border-line bg-paper-raised p-5";
+  if (href) {
+    return (
+      <Link href={href} className={`group ${cls} hover:border-brand/40`}>
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={cls}>{inner}</div>;
 }
 
-export function Meter({ value }: { value: number }) {
+export function Meter({
+  value,
+  target,
+  targetLabel,
+}: {
+  value: number;
+  target?: number;
+  /** Texto del tooltip del marcador de objetivo (i18n; lo pasa el caller). */
+  targetLabel?: string;
+}) {
   const color =
-    value >= 75 ? "bg-brand" : value >= 50 ? "bg-[#c9761f]" : "bg-[#b4322a]";
+    value >= 75
+      ? "bg-brand"
+      : value >= 50
+        ? "bg-[var(--tone-warn-fg)]"
+        : "bg-[var(--tone-danger-fg)]";
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-paper-sunken">
+      <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-paper-sunken">
         <div
           className={`h-full rounded-full transition-[width] duration-700 ease-out ${color}`}
           style={{ width: `${value}%` }}
         />
+        {target != null && (
+          <span
+            className="absolute inset-y-0 w-0.5 -translate-x-1/2 rounded-full bg-ink/45"
+            style={{ left: `${target}%` }}
+            title={targetLabel ?? `Objetivo: ${target}%`}
+            aria-hidden
+          />
+        )}
       </div>
       <span className="w-9 shrink-0 text-right text-xs tabular-nums text-ink-soft">
         {value}%

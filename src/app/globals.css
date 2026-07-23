@@ -17,7 +17,7 @@
   /* Tinta / texto */
   --color-ink: #0f1a14; /* verde-negro profundo */
   --color-ink-soft: #38443d;
-  --color-muted: #6b756e;
+  --color-muted: #5c665f;
 
   /* Líneas */
   --color-line: #e6e1d4;
@@ -135,6 +135,8 @@
     font-family: var(--font-sans), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Evita huérfanos/viudas en párrafos largos (mejora progresiva). */
+    text-wrap: pretty;
   }
   ::selection {
     background: var(--color-brand);
@@ -142,7 +144,11 @@
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display), Georgia, serif;
-    letter-spacing: -0.01em;
+    /* Display serif ceñido y refinado: tracking negativo sutil, optical sizing
+       (Fraunces es variable con eje opsz) y saltos de línea equilibrados. */
+    letter-spacing: -0.014em;
+    font-optical-sizing: auto;
+    text-wrap: balance;
   }
 }
 
@@ -166,6 +172,21 @@
 @keyframes sheen {
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }
+}
+
+@keyframes guide-step {
+  from { opacity: 0; transform: translateX(14px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes guide-row {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes guide-bar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 
 @layer utilities {
@@ -198,6 +219,20 @@
   .animate-float-soft {
     animation: float-soft 7s ease-in-out infinite;
   }
+
+  /* Entrada de cada paso de la guía de uso. */
+  .animate-guide-step {
+    animation: guide-step 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* Filas/ítems de los mini-ejemplos de la guía (aparición escalonada). */
+  .animate-guide-row {
+    animation: guide-row 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  /* Barras de los mini-ejemplos (se rellenan de izquierda a derecha). */
+  .animate-guide-bar {
+    transform-origin: left center;
+    animation: guide-bar 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -209,15 +244,68 @@
   .animate-float-soft {
     animation: none !important;
   }
+  .animate-guide-step,
+  .animate-guide-row,
+  .animate-guide-bar {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
   * {
     scroll-behavior: auto !important;
   }
 }
 
-/* Impresión: documento limpio (informes/evidencia) */
+/* Márgenes de página consistentes para los PDF (dossier, informe, evidencia).
+   Sin esto, el contenido queda pegado al borde y depende del diálogo del navegador. */
+@page {
+  margin: 16mm 14mm;
+}
+
+/* Impresión: documento limpio SIEMPRE en claro (aunque la app esté en oscuro).
+   Un PDF claro se ve más profesional. Reponemos los tokens claros con la misma
+   especificidad que los overrides oscuros para que ganen en @media print. */
 @media print {
+  /* Un título nunca debe quedar huérfano al pie de una página, ni una fila de
+     tabla partirse entre dos páginas: mejora la legibilidad del PDF. */
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+  tr {
+    break-inside: avoid;
+  }
+  :root:not([data-theme="light"]),
+  [data-theme="dark"] {
+    --color-paper: #faf8f2;
+    --color-paper-raised: #ffffff;
+    --color-paper-sunken: #f3f0e7;
+    --color-ink: #0f1a14;
+    --color-ink-soft: #38443d;
+    --color-muted: #5c665f;
+    --color-line: #e6e1d4;
+    --color-line-strong: #d6d0bf;
+    --color-brand: #0b6b4e;
+    --color-brand-strong: #084d38;
+    --color-brand-bright: #11a071;
+    --color-brand-soft: #e4efe9;
+    --color-seal: #b0824a;
+    --color-seal-soft: #f0e7d7;
+    --grid-line: rgba(15, 26, 20, 0.04);
+    --seal-img: url("/sealmark.png");
+
+    --tone-danger-bg: #f7e4e2;   --tone-danger-fg: #8f271f;   --tone-danger-bd: #e6b6b1;
+    --tone-warn-bg:   #f7ead8;   --tone-warn-fg:   #8a4f14;   --tone-warn-bd:   #e6cba3;
+    --tone-gold-bg:   #f2e9d9;   --tone-gold-fg:   #7c5a2e;   --tone-gold-bd:   #e0d0b3;
+    --tone-good-bg:   #e4efe9;   --tone-good-fg:   #084d38;   --tone-good-bd:   #bfdccf;
+    --tone-info-bg:   #e8eef7;   --tone-info-fg:   #33507e;   --tone-info-bd:   #c3d2ea;
+    --tone-neutral-bg: #f3f0e7;  --tone-neutral-fg: #38443d;  --tone-neutral-bd: #d6d0bf;
+  }
+  html,
   body {
     background: #fff;
+    color-scheme: light;
   }
   * {
     -webkit-print-color-adjust: exact;

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
-import { LegalNote, LEGAL_FOOTER } from "@/components/ui/LegalNote";
+import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { EventStatusControl } from "@/components/dashboard/EventStatusControl";
 import {
   getAiSystems,
@@ -14,16 +14,17 @@ import {
 } from "@/lib/data";
 import { JurisdictionSettings } from "@/components/dashboard/JurisdictionSettings";
 import {
-  REG_ACK_LABEL,
+  regAckLabel,
   type RegAck,
   type RegAckStatus,
 } from "@/lib/mock-data";
 import {
-  REG_KIND_LABEL,
+  regKindLabel,
   FRAMEWORK_META,
   JURISDICTION_ORDER,
-  JURISDICTION_LABEL,
+  JURISDICTION_LABEL_BY_LOCALE,
   frameworkLabel,
+  frameworkMeta,
   affectedSystems,
   daysUntil,
   upcomingDeadlines,
@@ -31,6 +32,14 @@ import {
   type RegJurisdiction,
   type RegulatoryEvent,
 } from "@/lib/regulatory-watch";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getDictionary } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
+
+type MonitoringDict = ReturnType<
+  typeof getDictionary
+>["dashboard"]["pages"]["monitoring"];
+type UnitsDict = ReturnType<typeof getDictionary>["dashboard"]["units"];
 
 // El radar depende de la fecha actual: nunca prerenderizar el countdown.
 export const dynamic = "force-dynamic";
@@ -60,16 +69,50 @@ const ACK_TONE: Record<RegAckStatus, keyof typeof TONE_PILL> = {
   not_applicable: "neutral",
 };
 
-function AckPill({ status }: { status: RegAckStatus }) {
-  return <Pill tone={ACK_TONE[status]}>{REG_ACK_LABEL[status]}</Pill>;
+function AckPill({
+  status,
+  locale,
+}: {
+  status: RegAckStatus;
+  locale: Locale;
+}) {
+  return <Pill tone={ACK_TONE[status]}>{regAckLabel(status, locale)}</Pill>;
+}
+
+/**
+ * Estado interno de un evento, siempre visible: si hay acuse muestra su estado
+ * (Revisado / Plan en marcha / No aplica); si no, un chip sutil "Sin marcar"
+ * (borde discontinuo, tono apagado) para que cada plazo comunique su situación
+ * de un vistazo sin tener que abrirlo.
+ */
+function StatusChip({
+  ack,
+  locale,
+  notMarked,
+}: {
+  ack?: RegAck;
+  locale: Locale;
+  notMarked: string;
+}) {
+  if (ack) return <AckPill status={ack.status} locale={locale} />;
+  return (
+    <span className="inline-flex items-center rounded-full border border-dashed border-line-strong px-2.5 py-0.5 text-xs font-medium text-muted">
+      {notMarked}
+    </span>
+  );
 }
 
 /** Pill sutil con el marco/jurisdicción de un evento. */
-function FrameworkPill({ framework }: { framework: string }) {
-  const meta = FRAMEWORK_META[framework as RegulatoryEvent["framework"]];
+function FrameworkPill({
+  framework,
+  locale,
+}: {
+  framework: string;
+  locale: Locale;
+}) {
   return (
     <span className="inline-flex items-center rounded-full border border-line bg-paper px-2 py-0.5 text-[11px] font-medium text-ink-soft">
-      {meta?.short ?? framework}
+      {frameworkMeta(framework, locale)?.short ?? framework}
     </span>
   );
 }
@@ -80,11 +123,13 @@ function JurisdictionChip({
   href,
   active,
   inNexus = false,
+  nexusAria,
 }: {
   label: string;
   href: string;
   active: boolean;
   inNexus?: boolean;
+  nexusAria: string;
 }) {
   return (
     <Link
@@ -96,11 +141,32 @@ function JurisdictionChip({
       }`}
     >
       {inNexus && (
-        <span
-          className="size-1.5 rounded-full bg-brand"
-          aria-label="en tu nexo"
-        />
+        <span className="size-1.5 rounded-full bg-brand" aria-label={nexusAria} />
       )}
+      {label}
+    </Link>
+  );
+}
+
+/** Chip de filtro simple (sin punto de nexo), p. ej. para el estado interno. */
+function FilterChip({
+  label,
+  href,
+  active,
+}: {
+  label: string;
+  href: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+        active
+          ? "border-brand bg-brand-soft text-brand-strong"
+          : "border-line-strong text-ink-soft hover:bg-paper-sunken"
+      }`}
+    >
       {label}
     </Link>
   );
@@ -114,31 +180,34 @@ function countdownTone(days: number): keyof typeof TONE_PILL {
   return "info";
 }
 
-function formatDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+function formatDate(iso: string, locale: Locale): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString(
+    locale === "en" ? "en-GB" : "es-ES",
+    {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    },
+  );
 }
 
 /** Etiqueta de tiempo relativa: "en 16 días", "hoy", "hace 3 meses". */
-function relativeLabel(days: number): string {
-  if (days === 0) return "hoy";
+function relativeLabel(days: number, t: MonitoringDict): string {
+  if (days === 0) return t.relToday;
   if (days > 0) {
-    if (days === 1) return "mañana";
-    if (days < 45) return `en ${days} días`;
+    if (days === 1) return t.relTomorrow;
+    if (days < 45) return `${t.relInPrefix}${days} ${t.relDays}`;
     const months = Math.round(days / 30);
-    if (months < 24) return `en ${months} meses`;
-    return `en ${Math.round(days / 365)} años`;
+    if (months < 24) return `${t.relInPrefix}${months} ${t.relMonths}`;
+    return `${t.relInPrefix}${Math.round(days / 365)} ${t.relYears}`;
   }
   const abs = Math.abs(days);
-  if (abs === 1) return "ayer";
-  if (abs < 45) return `hace ${abs} días`;
+  if (abs === 1) return t.relYesterday;
+  if (abs < 45) return `${t.relAgoPrefix}${abs} ${t.relDays}${t.relAgoSuffix}`;
   const months = Math.round(abs / 30);
-  if (months < 24) return `hace ${months} meses`;
-  return `hace ${Math.round(abs / 365)} años`;
+  if (months < 24) return `${t.relAgoPrefix}${months} ${t.relMonths}${t.relAgoSuffix}`;
+  return `${t.relAgoPrefix}${Math.round(abs / 365)} ${t.relYears}${t.relAgoSuffix}`;
 }
 
 function Pill({
@@ -157,10 +226,160 @@ function Pill({
   );
 }
 
+/** Celda de la banda de orientación (valor grande + etiqueta). */
+function SummaryStat({
+  value,
+  label,
+  accent = false,
+}: {
+  value: string;
+  label: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="bg-paper-raised px-5 py-4">
+      <p
+        className={`font-display text-2xl font-semibold tabular-nums ${
+          accent ? "text-brand-strong" : "text-ink"
+        }`}
+      >
+        {value}
+      </p>
+      <p className="mt-0.5 text-[11px] uppercase tracking-wide text-muted">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Briefing "aclaración de plazos" — diferenciador de Attesta: corrige el error
+ * extendido de que el 2-ago-2026 es el plazo de alto riesgo (el Digital Omnibus
+ * lo movió a dic-2027) y enfoca lo que el deployer sí debe tener listo pronto.
+ * Determinista, basado en los eventos curados del radar.
+ */
+function EuReadinessBriefing({
+  art50,
+  highRisk,
+  now,
+  locale,
+  t,
+}: {
+  art50: RegulatoryEvent;
+  highRisk: RegulatoryEvent;
+  now: Date;
+  locale: Locale;
+  t: MonitoringDict;
+}) {
+  const art50Days = daysUntil(art50.date, now);
+  const hrDays = daysUntil(highRisk.date, now);
+  // Prosa estática del briefing. Validada por el experto (ES/EN). Fidelidad
+  // exacta: fechas/artículos/Anexo idénticos; "Digital Omnibus"/"deployer"
+  // intactos; el matiz "el 2-ago-2026 no es el plazo de alto riesgo" se conserva.
+  // Las etiquetas relativas/fechas incrustadas ya son locale-aware.
+  const bp =
+    locale === "en"
+      ? {
+          kicker: "Deadline clarification · EU AI Act",
+          heading: "2 August 2026 is not the deadline for high-risk systems",
+          p1a: "It is a widespread misconception in the market. The ",
+          p1b: " moved the high-risk obligations of Annex III (employment) to ",
+          p1c: ". What your organization does need to have ready soon as a ",
+          p1d: ":",
+          aiLiteracy: "AI literacy",
+          inForceNow: "already in force",
+          transparency: "Transparency",
+          inForce: "in force",
+          applyPack: "Apply the HR pack to get the evidence ready →",
+        }
+      : {
+          kicker: "Aclaración de plazos · EU AI Act",
+          heading:
+            "El 2 de agosto de 2026 no es el plazo de los sistemas de alto riesgo",
+          p1a: "Es un error extendido en el mercado. El ",
+          p1b: " movió las obligaciones de alto riesgo del Anexo III (empleo) al ",
+          p1c: ". Lo que tu organización sí debe tener listo pronto como ",
+          p1d: ":",
+          aiLiteracy: "Alfabetización en IA",
+          inForceNow: "ya vigente",
+          transparency: "Transparencia",
+          inForce: "en vigor",
+          applyPack: "Aplicar el pack de RRHH para dejar la evidencia lista →",
+        };
+  return (
+    <section className="mb-8 rounded-2xl border border-brand/30 bg-brand-soft/40 p-6">
+      <div className="flex items-start gap-3">
+        <svg
+          viewBox="0 0 24 24"
+          className="mt-0.5 size-5 shrink-0 text-brand-strong"
+          fill="none"
+          aria-hidden
+        >
+          <path
+            d="M12 3a6 6 0 0 0-3.6 10.8c.5.4.9 1 1 1.6l.2 1.1h4.8l.2-1.1c.1-.6.5-1.2 1-1.6A6 6 0 0 0 12 3Z"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M9.5 20.5h5M10 18.4h4"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-strong">
+            {bp.kicker}
+          </p>
+          <h2 className="mt-1 font-display text-lg font-semibold text-ink">
+            {bp.heading}
+          </h2>
+          <p className="mt-1.5 text-sm text-ink-soft">
+            {bp.p1a}
+            <span className="font-medium text-ink">Digital Omnibus</span>
+            {bp.p1b}
+            <span className="font-medium text-ink">
+              {formatDate(highRisk.date, locale)}
+            </span>
+            {hrDays > 0 && ` (${relativeLabel(hrDays, t)})`}
+            {bp.p1c}
+            <span className="font-medium text-ink">deployer</span>
+            {bp.p1d}
+          </p>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            <li className="flex items-center justify-between gap-3 rounded-xl border border-line bg-paper-raised px-3.5 py-2.5">
+              <span className="text-sm text-ink">
+                {bp.aiLiteracy} <span className="text-muted">· Art. 4</span>
+              </span>
+              <Pill tone="good">{bp.inForceNow}</Pill>
+            </li>
+            <li className="flex items-center justify-between gap-3 rounded-xl border border-line bg-paper-raised px-3.5 py-2.5">
+              <span className="text-sm text-ink">
+                {bp.transparency} <span className="text-muted">· Art. 50.3/50.4</span>
+              </span>
+              <Pill tone={countdownTone(art50Days)}>
+                {art50Days >= 0 ? relativeLabel(art50Days, t) : bp.inForce}
+              </Pill>
+            </li>
+          </ul>
+          <Link
+            href="/dashboard/packs"
+            className="mt-3 inline-flex text-xs font-medium text-brand hover:text-brand-strong"
+          >
+            {bp.applyPack}
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default async function VigilanciaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ j?: string }>;
+  searchParams: Promise<{ j?: string; s?: string }>;
 }) {
   const sp = await searchParams;
   const [systems, acks, role, events, isAdmin, orgJur] = await Promise.all([
@@ -172,6 +391,11 @@ export default async function VigilanciaPage({
     getOrgJurisdictions(),
   ]);
   const now = new Date();
+  const locale = await resolveLocale();
+  const dd = getDictionary(locale).dashboard;
+  const tm = dd.pages.monitoring;
+  const u = dd.units;
+  const jurLabels = JURISDICTION_LABEL_BY_LOCALE[locale];
   const canManage =
     isSupabaseConfigured && (role === "owner" || role === "admin");
 
@@ -219,7 +443,6 @@ export default async function VigilanciaPage({
     .filter((x) => x.days >= 0)
     .sort((a, b) => a.days - b.days);
   const past = withDays.filter((x) => x.days < 0).sort((a, b) => b.days - a.days);
-  const feed = [...upcoming, ...past];
 
   const deadlines = upcomingDeadlines(now, shown);
   const hero = deadlines[0];
@@ -228,20 +451,116 @@ export default async function VigilanciaPage({
   const heroAck = hero ? acks[hero.id] : undefined;
   const otherDeadlines = deadlines.slice(1);
 
+  // Etiqueta larga del marco en el hero: solo si aporta algo sobre el pill corto
+  // (evita el "EU AI Act · EU AI Act" cuando short y label coinciden).
+  const heroFull = hero ? frameworkLabel(hero.framework, locale) : "";
+  const heroShort = hero ? frameworkMeta(hero.framework, locale)?.short : undefined;
+
+  // Cifras de orientación para la banda de resumen (deterministas, del feed ya calculado).
+  const frameworkCount = new Set(shown.map((e) => e.framework)).size;
+  const nearestDays = upcoming[0]?.days;
+
+  // Briefing "aclaración de plazos" (diferenciador): se muestra con la UE en vista
+  // y mientras el alto riesgo del Anexo III siga por venir (mito aún vivo).
+  const art50Ev = shown.find((e) => e.id === "eu-transparency-art50");
+  const highRiskEv = events.find((e) => e.id === "eu-highrisk-annex-iii");
+  const showBriefing =
+    !!art50Ev && !!highRiskEv && daysUntil(highRiskEv.date, now) > 0;
+
+  // Filtro por estado interno: una lente sobre la cronología (la lista de trabajo).
+  // No altera el hero ni la banda de resumen, que siguen siendo la orientación global.
+  const STATUS_KEYS = ["unmarked", "reviewed", "planned", "not_applicable"] as const;
+  type StatusKey = (typeof STATUS_KEYS)[number];
+  const statusOf = (evId: string): StatusKey =>
+    (acks[evId]?.status as StatusKey | undefined) ?? "unmarked";
+  const activeStatus: StatusKey | "all" =
+    sp.s && (STATUS_KEYS as readonly string[]).includes(sp.s)
+      ? (sp.s as StatusKey)
+      : "all";
+  const matchesStatus = (evId: string) =>
+    activeStatus === "all" || statusOf(evId) === activeStatus;
+
+  const timelineUpcoming = upcoming.filter((x) => matchesStatus(x.ev.id));
+  const timelinePast = past.filter((x) => matchesStatus(x.ev.id));
+
+  // Conteos por estado sobre todo el feed de la jurisdicción activa (para las pills).
+  const feedAll = [...upcoming, ...past];
+  const statusCounts: Record<StatusKey, number> = {
+    unmarked: 0,
+    reviewed: 0,
+    planned: 0,
+    not_applicable: 0,
+  };
+  feedAll.forEach((x) => {
+    statusCounts[statusOf(x.ev.id)] += 1;
+  });
+  // Chips a mostrar: los estados con eventos + el activo (aunque quede en 0, para poder limpiarlo).
+  const statusChipKeys = STATUS_KEYS.filter(
+    (k) => statusCounts[k] > 0 || k === activeStatus,
+  );
+  const showStatusFilter =
+    feedAll.length > 0 &&
+    (statusChipKeys.filter((k) => statusCounts[k] > 0).length >= 2 ||
+      activeStatus !== "all");
+  const statusLabel = (k: StatusKey | "all"): string =>
+    k === "all"
+      ? tm.statusAll
+      : k === "unmarked"
+        ? tm.notMarked
+        : regAckLabel(k, locale);
+
+  // Construye la URL preservando ambos filtros (jurisdicción + estado).
+  const hrefFor = (j?: string, s?: string): string => {
+    const p = new URLSearchParams();
+    if (j) p.set("j", j);
+    if (s && s !== "all") p.set("s", s);
+    const qs = p.toString();
+    return `/dashboard/vigilancia${qs ? `?${qs}` : ""}`;
+  };
+
   return (
     <>
       <PageHeader
-        title="Vigilancia regulatoria"
-        subtitle="Radar de plazos y cambios normativos que afectan a tus sistemas de IA."
+        title={tm.title}
+        subtitle={tm.subtitle}
         action={
-          isAdmin ? (
+          <div className="flex flex-wrap gap-2">
             <Link
-              href="/dashboard/vigilancia/candidatos"
-              className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
+              href={
+                sp.j
+                  ? `/dashboard/vigilancia/informe?j=${sp.j}`
+                  : "/dashboard/vigilancia/informe"
+              }
+              className="inline-flex items-center justify-center gap-1.5 rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
             >
-              Bandeja de validación →
+              <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden>
+                <path
+                  d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {dd.pages.reportRadar.downloadPdf}
             </Link>
-          ) : undefined
+            {isAdmin && (
+              <>
+                <Link
+                  href="/dashboard/vigilancia/fuentes"
+                  className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
+                >
+                  {tm.watchedSources}
+                </Link>
+                <Link
+                  href="/dashboard/vigilancia/candidatos"
+                  className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
+                >
+                  {tm.validationInbox}
+                </Link>
+              </>
+            )}
+          </div>
         }
       />
 
@@ -254,30 +573,58 @@ export default async function VigilanciaPage({
       {jurisdictions.length > 1 && (
         <div className="mb-6 flex flex-wrap items-center gap-2">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-            Jurisdicción
+            {tm.jurisdictionFilter}
           </span>
           {nexus.length > 0 && (
             <JurisdictionChip
-              label="Mis jurisdicciones"
-              href="/dashboard/vigilancia"
+              label={tm.myJurisdictions}
+              href={hrefFor(undefined, activeStatus)}
               active={usingNexus}
+              nexusAria={tm.inNexus}
             />
           )}
           {jurisdictions.map((j) => (
             <JurisdictionChip
               key={j}
-              label={JURISDICTION_LABEL[j]}
-              href={`/dashboard/vigilancia?j=${j}`}
+              label={jurLabels[j]}
+              href={hrefFor(j, activeStatus)}
               active={singleJ === j}
               inNexus={nexus.includes(j)}
+              nexusAria={tm.inNexus}
             />
           ))}
           <JurisdictionChip
-            label="Todas"
-            href="/dashboard/vigilancia?j=all"
+            label={tm.allJurisdictions}
+            href={hrefFor("all", activeStatus)}
             active={showAll || (!singleJ && nexus.length === 0)}
+            nexusAria={tm.inNexus}
           />
         </div>
+      )}
+
+      {/* Banda de orientación: lectura de un vistazo del estado del radar */}
+      {shown.length > 0 && (
+        <section className="mb-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4">
+          <SummaryStat value={String(upcoming.length)} label={tm.summaryUpcoming} />
+          <SummaryStat
+            value={nearestDays != null ? relativeLabel(nearestDays, tm) : tm.summaryNone}
+            label={tm.summaryNearest}
+            accent
+          />
+          <SummaryStat value={String(past.length)} label={tm.summaryInForce} />
+          <SummaryStat value={String(frameworkCount)} label={tm.summaryFrameworks} />
+        </section>
+      )}
+
+      {/* Briefing: aclaración del plazo del 2-ago-2026 (corrige el error de mercado) */}
+      {showBriefing && art50Ev && highRiskEv && (
+        <EuReadinessBriefing
+          art50={art50Ev}
+          highRisk={highRiskEv}
+          now={now}
+          locale={locale}
+          t={tm}
+        />
       )}
 
       {/* Hero: próximo plazo */}
@@ -286,26 +633,27 @@ export default async function VigilanciaPage({
           <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <Pill tone={countdownTone(heroDays)}>Próximo plazo</Pill>
-                <FrameworkPill framework={hero.framework} />
-                <span className="text-xs text-muted">
-                  {frameworkLabel(hero.framework)}
-                </span>
-                {heroAck && <AckPill status={heroAck.status} />}
+                <Pill tone={countdownTone(heroDays)}>{tm.nextDeadline}</Pill>
+                <FrameworkPill framework={hero.framework} locale={locale} />
+                {heroFull && heroFull !== heroShort && (
+                  <span className="text-xs text-muted">{heroFull}</span>
+                )}
+                <StatusChip ack={heroAck} locale={locale} notMarked={tm.notMarked} />
               </div>
               <h2 className="mt-2 font-display text-xl font-semibold text-ink">
                 {hero.title}
               </h2>
               <p className="mt-1 text-sm text-ink-soft">
-                {formatDate(hero.date)} ·{" "}
+                {formatDate(hero.date, locale)} ·{" "}
                 {heroAffected.length > 0 ? (
                   <span className="font-medium text-ink">
-                    afecta a {heroAffected.length}{" "}
-                    {heroAffected.length === 1 ? "sistema" : "sistemas"} de tu
-                    inventario
+                    {tm.affectsPrefix}
+                    {heroAffected.length}{" "}
+                    {heroAffected.length === 1 ? u.systemOne : u.systemOther}
+                    {tm.affectsSuffix}
                   </span>
                 ) : (
-                  "sin sistemas afectados en tu inventario"
+                  tm.noAffected
                 )}
               </p>
             </div>
@@ -315,14 +663,14 @@ export default async function VigilanciaPage({
                   {heroDays}
                 </p>
                 <p className="text-[11px] uppercase tracking-wide text-muted">
-                  {heroDays === 1 ? "día" : "días"}
+                  {heroDays === 1 ? u.dayOne : u.dayOther}
                 </p>
               </div>
               <Link
                 href="/dashboard/inventario"
                 className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
               >
-                Ver sistemas →
+                {tm.viewSystems}
               </Link>
             </div>
           </div>
@@ -333,7 +681,7 @@ export default async function VigilanciaPage({
       {otherDeadlines.length > 0 && (
         <section className="mb-8">
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
-            Más plazos por venir
+            {tm.morePastDeadlines}
           </h3>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {otherDeadlines.map((e) => {
@@ -346,20 +694,20 @@ export default async function VigilanciaPage({
                   className="card-lift rounded-2xl border border-line bg-paper-raised p-4"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <Pill tone={countdownTone(d)}>{relativeLabel(d)}</Pill>
+                    <Pill tone={countdownTone(d)}>{relativeLabel(d, tm)}</Pill>
                     <span className="text-xs tabular-nums text-muted">
-                      {formatDate(e.date)}
+                      {formatDate(e.date, locale)}
                     </span>
                   </div>
                   <div className="mt-2 flex items-center gap-2">
-                    <FrameworkPill framework={e.framework} />
+                    <FrameworkPill framework={e.framework} locale={locale} />
                   </div>
                   <p className="mt-1.5 text-sm font-medium text-ink">{e.title}</p>
                   <div className="mt-1 flex items-center justify-between gap-2">
                     <p className="text-xs text-muted">
-                      {n} {n === 1 ? "sistema afectado" : "sistemas afectados"}
+                      {n} {n === 1 ? tm.affectedOne : tm.affectedOther}
                     </p>
-                    {ack && <AckPill status={ack.status} />}
+                    <StatusChip ack={ack} locale={locale} notMarked={tm.notMarked} />
                   </div>
                 </div>
               );
@@ -371,15 +719,38 @@ export default async function VigilanciaPage({
       {/* Cronología completa */}
       <section>
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
-          Cronología regulatoria
+          {tm.regulatoryTimeline}
           {singleJ
-            ? ` · ${JURISDICTION_LABEL[singleJ]}`
+            ? ` · ${jurLabels[singleJ]}`
             : usingNexus
-              ? " · mis jurisdicciones"
+              ? tm.timelineMyJurisdictions
               : ""}
         </h3>
+
+        {/* Filtro por estado interno (lista de trabajo: "solo lo que aún no marqué") */}
+        {showStatusFilter && (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+              {tm.internalStatus}
+            </span>
+            <FilterChip
+              label={`${tm.statusAll} · ${feedAll.length}`}
+              href={hrefFor(sp.j, "all")}
+              active={activeStatus === "all"}
+            />
+            {statusChipKeys.map((k) => (
+              <FilterChip
+                key={k}
+                label={`${statusLabel(k)} · ${statusCounts[k]}`}
+                href={hrefFor(sp.j, k)}
+                active={activeStatus === k}
+              />
+            ))}
+          </div>
+        )}
+
         <div className="space-y-3">
-          {feed.map(({ ev, days, affected }) => (
+          {timelineUpcoming.map(({ ev, days, affected }) => (
             <EventRow
               key={ev.id}
               ev={ev}
@@ -388,12 +759,42 @@ export default async function VigilanciaPage({
               affected={affected}
               ack={acks[ev.id]}
               canManage={canManage}
+              locale={locale}
+              t={tm}
+              u={u}
             />
           ))}
+          {timelineUpcoming.length > 0 && timelinePast.length > 0 && (
+            <div className="flex items-center gap-3 pt-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                {tm.timelineInForceDivider}
+              </span>
+              <span className="h-px flex-1 bg-line" />
+            </div>
+          )}
+          {timelinePast.map(({ ev, days, affected }) => (
+            <EventRow
+              key={ev.id}
+              ev={ev}
+              days={days}
+              affectedCount={affected.length}
+              affected={affected}
+              ack={acks[ev.id]}
+              canManage={canManage}
+              locale={locale}
+              t={tm}
+              u={u}
+            />
+          ))}
+          {timelineUpcoming.length === 0 && timelinePast.length === 0 && (
+            <p className="rounded-2xl border border-dashed border-line-strong bg-paper-raised p-6 text-center text-sm text-muted">
+              {tm.timelineEmptyFiltered}
+            </p>
+          )}
         </div>
       </section>
 
-      <LegalNote text={LEGAL_FOOTER} className="mt-8" />
+      <LegalNote text={LEGAL_FOOTER_BY_LOCALE[locale]} className="mt-8" />
     </>
   );
 }
@@ -405,6 +806,9 @@ function EventRow({
   affected,
   ack,
   canManage,
+  locale,
+  t,
+  u,
 }: {
   ev: RegulatoryEvent;
   days: number;
@@ -412,6 +816,9 @@ function EventRow({
   affected: { id: string; name: string }[];
   ack?: RegAck;
   canManage: boolean;
+  locale: Locale;
+  t: MonitoringDict;
+  u: UnitsDict;
 }) {
   const upcoming = days >= 0;
   return (
@@ -419,28 +826,28 @@ function EventRow({
       <summary className="flex cursor-pointer list-none items-start gap-4 p-5 [&::-webkit-details-marker]:hidden">
         <div className="mt-0.5 flex w-24 shrink-0 flex-col items-start gap-1">
           <span className="text-xs font-medium tabular-nums text-ink-soft">
-            {relativeLabel(days)}
+            {relativeLabel(days, t)}
           </span>
           <span className="text-[11px] tabular-nums text-muted">
-            {formatDate(ev.date).replace(/ de \d{4}$/, (m) => m)}
+            {formatDate(ev.date, locale)}
           </span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <Pill tone={KIND_TONE[ev.kind]}>{REG_KIND_LABEL[ev.kind]}</Pill>
-            <FrameworkPill framework={ev.framework} />
+            <Pill tone={KIND_TONE[ev.kind]}>{regKindLabel(ev.kind, locale)}</Pill>
+            <FrameworkPill framework={ev.framework} locale={locale} />
             {upcoming ? (
-              <span className="text-[11px] font-medium text-muted">por venir</span>
+              <span className="text-[11px] font-medium text-muted">{t.upcoming}</span>
             ) : (
-              <span className="text-[11px] font-medium text-muted">en vigor</span>
+              <span className="text-[11px] font-medium text-muted">{t.inForce}</span>
             )}
-            {ack && <AckPill status={ack.status} />}
+            {ack && <AckPill status={ack.status} locale={locale} />}
           </div>
           <p className="mt-1.5 font-medium text-ink">{ev.title}</p>
           <p className="mt-0.5 text-xs text-muted">
             {affectedCount > 0
-              ? `Afecta a ${affectedCount} ${affectedCount === 1 ? "sistema" : "sistemas"} de tu inventario`
-              : "Sin sistemas afectados en tu inventario"}
+              ? `${t.affectsPrefixCap}${affectedCount} ${affectedCount === 1 ? u.systemOne : u.systemOther}${t.affectsSuffix}`
+              : t.noAffectedCap}
           </p>
         </div>
         <svg
@@ -461,9 +868,9 @@ function EventRow({
 
       <div className="border-t border-line px-5 pb-5 pt-4">
         <div className="grid gap-4 sm:grid-cols-3">
-          <Detail label="Qué es">{ev.summary}</Detail>
-          <Detail label="Qué significa para ti">{ev.impact}</Detail>
-          <Detail label="Qué hacer">{ev.action}</Detail>
+          <Detail label={t.detailWhat}>{ev.summary}</Detail>
+          <Detail label={t.detailMeaning}>{ev.impact}</Detail>
+          <Detail label={t.detailAction}>{ev.action}</Detail>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -500,14 +907,14 @@ function EventRow({
 
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line pt-4">
           <p className="text-[11px] uppercase tracking-wide text-muted">
-            Estado interno
+            {t.internalStatus}
           </p>
           {canManage ? (
             <EventStatusControl eventId={ev.id} status={ack?.status} />
           ) : ack ? (
-            <AckPill status={ack.status} />
+            <AckPill status={ack.status} locale={locale} />
           ) : (
-            <span className="text-xs text-muted">Sin marcar</span>
+            <span className="text-xs text-muted">{t.notMarked}</span>
           )}
           {ack?.note && (
             <span className="text-xs text-ink-soft">· {ack.note}</span>
@@ -517,7 +924,7 @@ function EventRow({
         {affected.length > 0 && (
           <div className="mt-4 border-t border-line pt-4">
             <p className="text-[11px] uppercase tracking-wide text-muted">
-              Sistemas afectados
+              {t.affectedSystemsLabel}
             </p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {affected.map((s) => (

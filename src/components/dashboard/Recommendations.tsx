@@ -1,4 +1,6 @@
 import type { Priority, Recommendation } from "@/lib/recommendations";
+import { priorityLabel } from "@/lib/recommendations";
+import type { Locale } from "@/lib/i18n/config";
 
 const priorityCls: Record<Priority, string> = {
   crítica:
@@ -8,13 +10,13 @@ const priorityCls: Record<Priority, string> = {
     "bg-[var(--tone-neutral-bg)] text-[var(--tone-neutral-fg)] border-[var(--tone-neutral-bd)]",
 };
 
-function PriorityBadge({ p }: { p: Priority }) {
+function PriorityBadge({ p, locale = "es" }: { p: Priority; locale?: Locale }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${priorityCls[p]}`}
     >
       <span className="size-1.5 rounded-full bg-current" />
-      {p}
+      {priorityLabel(p, locale)}
     </span>
   );
 }
@@ -52,13 +54,19 @@ export function RecommendationCard({ rec }: { rec: Recommendation }) {
 }
 
 /** Lista compacta (para el resultado del asistente). */
-export function RecommendationList({ recs }: { recs: Recommendation[] }) {
+export function RecommendationList({
+  recs,
+  locale = "es",
+}: {
+  recs: Recommendation[];
+  locale?: Locale;
+}) {
   return (
     <ul className="space-y-3">
       {recs.map((r) => (
         <li key={r.id} className="flex gap-3">
           <span className="mt-1 shrink-0">
-            <PriorityBadge p={r.priority} />
+            <PriorityBadge p={r.priority} locale={locale} />
           </span>
           <div>
             <p className="text-sm font-medium text-ink">

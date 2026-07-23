@@ -4,31 +4,40 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { runVigia } from "@/lib/vigia/run";
+import { getIsPlatformAdmin } from "@/lib/data";
+import { runVigia } from "@/lib/reg-watch/run";
 
-const QUEUE = "/dashboard/vigilancia/candidatos";
+const PAGE = "/dashboard/vigilancia/fuentes";
 
 /**
- * Disparo manual del Vigía desde la bandeja del Validador. Corre con la sesión
- * del usuario: solo un `platform_admin` puede escribir en `reg_sources` /
- * `reg_candidates` (lo impone la RLS). El cron desatendido usa la ruta
- * `/api/cron/vigia` con service_role.
+ * Ejecuta el Vigía a demanda (botón del panel de fuentes). La autorización real
+ * la impone también el RPC `vigia_report` (solo platform_admin / service_role);
+ * aquí cortamos antes para dar un aviso claro.
  */
 export async function runVigiaNow() {
-  if (!isSupabaseConfigured) redirect(`${QUEUE}?toast=vigia-demo`);
+  if (!isSupabaseConfigured) redirect(`${PAGE}?toast=vigia-demo`);
+
+  const isAdmin = await getIsPlatformAdmin();
+  if (!isAdmin) redirect(`${PAGE}?toast=vigia-denied`);
 
   const supabase = await createClient();
 
-  const { data: isAdmin } = await supabase.rpc("is_platform_admin");
-  if (!isAdmin) redirect(`${QUEUE}?toast=vigia-denied`);
-
-  const report = await runVigia(supabase, new Date().toISOString());
-  revalidatePath(QUEUE);
-  revalidatePath("/dashboard/vigilancia");
-
-  const created = report.summary.changed;
-  if (report.summary.error > 0 && created === 0) {
-    redirect(`${QUEUE}?toast=vigia-error`);
+  let ok = true;
+  let checked = 0;
+  let changed = 0;
+  try {
+    const summary = await runVigia(supabase);
+    checked = summary.checked;
+    changed = summary.changed;
+  } catch {
+    ok = false;
   }
-  redirect(`${QUEUE}?toast=${created > 0 ? "vigia-done" : "vigia-none"}`);
+
+  revalidatePath(PAGE);
+  revalidatePath("/dashboard/vigilancia/candidatos");
+  redirect(
+    ok
+      ? `${PAGE}?toast=vigia-ok&checked=${checked}&changed=${changed}`
+      : `${PAGE}?toast=vigia-error`,
+  );
 }

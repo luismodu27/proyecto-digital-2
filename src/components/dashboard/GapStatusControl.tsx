@@ -1,20 +1,20 @@
+"use client";
+
 import { updateGapStatus } from "@/lib/data/actions";
 import type { GapItem } from "@/lib/mock-data";
+import { useT } from "@/lib/i18n/provider";
 
-const options: { value: GapItem["status"]; label: string; active: string }[] = [
+const options: { value: GapItem["status"]; active: string }[] = [
   {
     value: "missing",
-    label: "Falta",
     active: "bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)]",
   },
   {
     value: "partial",
-    label: "Parcial",
     active: "bg-[var(--tone-warn-bg)] text-[var(--tone-warn-fg)]",
   },
   {
     value: "done",
-    label: "Cubierto",
     active: "bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)]",
   },
 ];
@@ -27,6 +27,7 @@ export function GapStatusControl({
   id: string;
   status: GapItem["status"];
 }) {
+  const labels = useT().dashboard.controls.gapStatus;
   return (
     <form
       action={updateGapStatus}
@@ -47,7 +48,7 @@ export function GapStatusControl({
                 : "text-muted hover:text-ink"
             }`}
           >
-            {o.label}
+            {labels[o.value]}
           </button>
         );
       })}

@@ -6,8 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
 import type { Answers, ClassificationResult } from "@/lib/risk-assessment";
-import { AI_SYSTEMS, GAP_ITEMS } from "@/lib/mock-data";
-import { RRHH_PACK } from "@/lib/policy-packs/rrhh";
+import { AI_SYSTEMS, GAP_ITEMS, RISK_ORDER } from "@/lib/mock-data";
+import { policyPackById } from "@/lib/policy-packs";
+import { resolveLocale } from "@/lib/i18n/resolve";
 
 const SEVERITY_EN: Record<string, string> = {
   alta: "high",
@@ -15,9 +16,79 @@ const SEVERITY_EN: Record<string, string> = {
   baja: "low",
 };
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
- * Aplica el policy pack RRHH a un sistema: precarga sus controles como brechas
- * (gap_items), sin duplicar los que ya existen.
+ * Verifica que un `ai_system` existe y pertenece a la organización activa.
+ * Defensa en profundidad: aunque la RLS ya aísla por tenant, comprobamos la
+ * pertenencia (y el formato UUID) antes de escribir filas que lo referencian,
+ * para no crear referencias colgantes a sistemas de otro tenant.
+ */
+async function systemBelongsToOrg(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  org: string,
+  systemId: string,
+): Promise<boolean> {
+  if (!UUID_RE.test(systemId)) return false;
+  const { data } = await supabase
+    .from("ai_systems")
+    .select("id")
+    .eq("organization_id", org)
+    .eq("id", systemId)
+    .maybeSingle();
+  return !!data;
+}
+
+/**
+ * Recalcula y persiste el "% listo" (`compliance_pct`) de un sistema a partir de
+ * la cobertura de sus brechas: proporción de controles en estado "done" sobre el
+ * total evaluado (misma fórmula que el informe de gap en vivo). Se invoca tras
+ * cualquier mutación de brechas o al aplicar un policy pack, para que la métrica
+ * insignia refleje el trabajo real y no quede clavada en 0 (antes solo la fijaba
+ * el seed de demo). Sin brechas evaluadas ⇒ 0% (nada declarado aún).
+ */
+async function recomputeReadiness(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  org: string,
+  aiSystemId: string,
+): Promise<void> {
+  // Se intenta leer la marca `prohibited` (migración 0022). Si la columna aún no
+  // existe, se cae al cálculo clásico (todas las brechas cuentan) — degradación
+  // segura sin romper el recálculo.
+  let items: { status: string | null; prohibited?: boolean }[] = [];
+  const withFlag = await supabase
+    .from("gap_items")
+    .select("status, prohibited")
+    .eq("organization_id", org)
+    .eq("ai_system_id", aiSystemId);
+  if (withFlag.error) {
+    const base = await supabase
+      .from("gap_items")
+      .select("status")
+      .eq("organization_id", org)
+      .eq("ai_system_id", aiSystemId);
+    items = base.data ?? [];
+  } else {
+    items = withFlag.data ?? [];
+  }
+  // Las prácticas prohibidas (Art. 5, riesgo inaceptable) NO se "preparan para
+  // auditoría": quedan fuera del cómputo de preparación ("% listo").
+  const counted = items.filter((r) => !r.prohibited);
+  const total = counted.length;
+  const done = counted.filter((r) => r.status === "done").length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  await supabase
+    .from("ai_systems")
+    .update({ compliance_pct: pct })
+    .eq("organization_id", org)
+    .eq("id", aiSystemId);
+}
+
+/**
+ * Aplica un policy pack a un sistema: precarga sus controles como brechas
+ * (gap_items), sin duplicar los que ya existen. El pack se elige por `packId`
+ * (por defecto, el de RRHH, por compatibilidad).
  */
 export async function applyPolicyPack(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/dashboard/packs");
@@ -25,9 +96,20 @@ export async function applyPolicyPack(formData: FormData) {
   const systemId = String(formData.get("systemId") ?? "");
   if (!systemId) redirect("/dashboard/packs");
 
+  // Resolvemos el locale para insertar los controles en el idioma de la UI: en
+  // EN se guardan los textos EN validados como gap_items (datos persistidos).
+  const locale = await resolveLocale();
+  const pack = policyPackById(String(formData.get("packId") ?? "rrhh"), locale);
+  if (!pack) redirect("/dashboard/packs");
+
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
+
+  // El sistema debe pertenecer a la org activa (evita referencias cross-tenant).
+  if (!(await systemBelongsToOrg(supabase, org, systemId))) {
+    redirect("/dashboard/packs");
+  }
 
   const {
     data: { user },
@@ -40,7 +122,7 @@ export async function applyPolicyPack(formData: FormData) {
     .eq("ai_system_id", systemId);
   const seen = new Set((existing ?? []).map((r) => r.requirement));
 
-  const rows = RRHH_PACK.controls
+  const rows = pack.controls
     .filter((c) => !seen.has(c.title))
     .map((c) => ({
       organization_id: org,
@@ -49,12 +131,32 @@ export async function applyPolicyPack(formData: FormData) {
       article: c.article,
       status: "missing",
       severity: SEVERITY_EN[c.severity] ?? "medium",
+      // Práctica prohibida del Art. 5 (fuera del "% listo"). La columna la aporta
+      // la migración 0022; si no está aplicada, el insert de abajo reintenta sin ella.
+      prohibited: c.prohibited ?? false,
       created_by: user?.id,
     }));
 
-  if (rows.length > 0) await supabase.from("gap_items").insert(rows);
+  if (rows.length > 0) {
+    const { error } = await supabase.from("gap_items").insert(rows);
+    if (error) {
+      // Degradación: si la columna `prohibited` aún no existe (migración 0022 sin
+      // aplicar), se reinserta sin ella (todos los controles como brecha ordinaria).
+      const legacy = rows.map((r) => {
+        const rest: Record<string, unknown> = { ...r };
+        delete rest.prohibited;
+        return rest;
+      });
+      const retry = await supabase.from("gap_items").insert(legacy);
+      if (retry.error) redirect("/dashboard/packs?toast=pack-error");
+    }
+  }
+
+  // El pack añadió controles como brechas ⇒ recalcula el "% listo" del sistema.
+  await recomputeReadiness(supabase, org, systemId);
 
   revalidatePath("/dashboard/gap");
+  revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard/plan");
   revalidatePath("/dashboard");
   redirect("/dashboard/gap?toast=pack-applied");
@@ -75,7 +177,7 @@ export async function createAiSystem(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) redirect("/dashboard/inventario/nuevo");
 
-  await supabase.from("ai_systems").insert({
+  const { error } = await supabase.from("ai_systems").insert({
     organization_id: org,
     name,
     owner: (String(formData.get("owner") ?? "").trim() || null) as string | null,
@@ -85,6 +187,7 @@ export async function createAiSystem(formData: FormData) {
       "deployer") as string,
     created_by: user?.id,
   });
+  if (error) redirect("/dashboard/inventario/nuevo?toast=system-error");
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
@@ -107,7 +210,7 @@ export async function seedSampleData() {
   } = await supabase.auth.getUser();
 
   // Inserta los sistemas (upsert por (organization_id, code)) y recupera sus ids.
-  const { data: systems } = await supabase
+  const { data: systems, error: seedError } = await supabase
     .from("ai_systems")
     .upsert(
       AI_SYSTEMS.map((s) => ({
@@ -126,6 +229,7 @@ export async function seedSampleData() {
       { onConflict: "organization_id,code" },
     )
     .select("id, code");
+  if (seedError) redirect("/dashboard/inventario?toast=seed-error");
 
   // Mapa code → id para enlazar las brechas a sus sistemas.
   const idByCode = new Map((systems ?? []).map((r) => [r.code, r.id]));
@@ -144,7 +248,8 @@ export async function seedSampleData() {
   }).filter(Boolean);
 
   if (gapRows.length > 0) {
-    await supabase.from("gap_items").insert(gapRows as never[]);
+    const { error } = await supabase.from("gap_items").insert(gapRows as never[]);
+    if (error) redirect("/dashboard/inventario?toast=seed-error");
   }
 
   revalidatePath("/dashboard");
@@ -171,7 +276,7 @@ export async function updateAiSystem(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) redirect(`/dashboard/inventario/${id}/editar`);
 
-  await supabase
+  const { error } = await supabase
     .from("ai_systems")
     .update({
       name,
@@ -183,6 +288,7 @@ export async function updateAiSystem(formData: FormData) {
     })
     .eq("organization_id", org)
     .eq("id", id);
+  if (error) redirect(`/dashboard/inventario/${id}/editar?toast=system-error`);
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
@@ -199,11 +305,12 @@ export async function deleteAiSystem(formData: FormData) {
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
 
-  await supabase
+  const { error } = await supabase
     .from("ai_systems")
     .delete()
     .eq("organization_id", org)
     .eq("id", id);
+  if (error) redirect("/dashboard/inventario?toast=system-error");
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
@@ -226,9 +333,12 @@ export async function createGapItem(formData: FormData) {
   const aiSystemId = String(formData.get("systemId") ?? "");
   const requirement = String(formData.get("requirement") ?? "").trim();
   if (!aiSystemId || !requirement) redirect("/dashboard/gap/nuevo");
+  if (!(await systemBelongsToOrg(supabase, org, aiSystemId))) {
+    redirect("/dashboard/gap/nuevo?toast=gap-error");
+  }
 
   const status = String(formData.get("status") ?? "missing");
-  await supabase.from("gap_items").insert({
+  const { error } = await supabase.from("gap_items").insert({
     organization_id: org,
     ai_system_id: aiSystemId,
     requirement,
@@ -237,9 +347,13 @@ export async function createGapItem(formData: FormData) {
     status: ["missing", "partial", "done"].includes(status) ? status : "missing",
     created_by: user?.id,
   });
+  if (error) redirect("/dashboard/gap/nuevo?toast=gap-error");
+
+  await recomputeReadiness(supabase, org, aiSystemId);
 
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/plan");
+  revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
   redirect("/dashboard/gap?toast=gap-created");
 }
@@ -254,14 +368,22 @@ export async function deleteGapItem(formData: FormData) {
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
 
-  await supabase
+  const { data: deleted, error } = await supabase
     .from("gap_items")
     .delete()
     .eq("organization_id", org)
-    .eq("id", id);
+    .eq("id", id)
+    .select("ai_system_id")
+    .maybeSingle();
+  if (error) redirect("/dashboard/gap?toast=gap-error");
+
+  if (deleted?.ai_system_id) {
+    await recomputeReadiness(supabase, org, deleted.ai_system_id);
+  }
 
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/plan");
+  revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
   redirect("/dashboard/gap?toast=gap-deleted");
 }
@@ -279,16 +401,65 @@ export async function updateGapStatus(formData: FormData) {
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
 
-  await supabase
+  const { data: updated, error } = await supabase
     .from("gap_items")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("organization_id", org)
-    .eq("id", id);
+    .eq("id", id)
+    .select("ai_system_id")
+    .maybeSingle();
+  if (error) redirect("/dashboard/gap?toast=gap-error");
+
+  if (updated?.ai_system_id) {
+    await recomputeReadiness(supabase, org, updated.ai_system_id);
+  }
 
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/plan");
+  revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
-  redirect("/dashboard/gap");
+  redirect("/dashboard/gap?toast=gap-updated");
+}
+
+/**
+ * Registra la evidencia de auditoría de sesgo (NYC LL144) de un sistema.
+ * Attesta REGISTRA lo declarado; no realiza ni valida la auditoría.
+ */
+export async function saveBiasAudit(formData: FormData) {
+  if (!isSupabaseConfigured) redirect("/dashboard/inventario");
+  const id = String(formData.get("id") ?? "");
+  if (!id) redirect("/dashboard/inventario");
+
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) redirect("/onboarding");
+
+  const dateOrNull = (key: string) => {
+    const v = String(formData.get(key) ?? "").trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
+  };
+  const textOrNull = (key: string) => String(formData.get(key) ?? "").trim() || null;
+
+  const back = `/dashboard/inventario/${id}/editar`;
+  const { error } = await supabase
+    .from("ai_systems")
+    .update({
+      is_aedt: formData.get("is_aedt") === "on",
+      last_bias_audit_date: dateOrNull("last_bias_audit_date"),
+      independent_auditor_name: textOrNull("independent_auditor_name"),
+      auditor_independence_confirmed:
+        formData.get("auditor_independence_confirmed") === "on",
+      bias_audit_summary_url: textOrNull("bias_audit_summary_url"),
+      summary_published_date: dateOrNull("summary_published_date"),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("organization_id", org)
+    .eq("id", id);
+  if (error) redirect(`${back}?toast=bias-error`);
+
+  revalidatePath(back);
+  revalidatePath("/dashboard/inventario");
+  redirect(`${back}?toast=bias-saved`);
 }
 
 export type EvidenceInput = {
@@ -308,6 +479,16 @@ export async function saveRiskAssessment(
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return { ok: false as const, error: "sin organización" };
+
+  // El nivel llega calculado en cliente: validarlo contra el enum antes de
+  // persistirlo (no confiar en la clasificación enviada sin comprobar).
+  if (!RISK_ORDER.includes(result.level)) {
+    return { ok: false as const, error: "nivel de riesgo no válido" };
+  }
+  // El sistema debe pertenecer a la org activa.
+  if (!(await systemBelongsToOrg(supabase, org, aiSystemId))) {
+    return { ok: false as const, error: "sistema no encontrado" };
+  }
 
   const {
     data: { user },
@@ -347,6 +528,7 @@ export async function saveRiskAssessment(
       last_reviewed_at: new Date().toISOString(),
       evidence_state: evidenceState,
     })
+    .eq("organization_id", org)
     .eq("id", aiSystemId);
 
   revalidatePath("/dashboard/inventario");
