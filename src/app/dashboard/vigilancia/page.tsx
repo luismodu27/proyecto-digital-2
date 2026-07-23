@@ -524,22 +524,43 @@ export default async function VigilanciaPage({
         title={tm.title}
         subtitle={tm.subtitle}
         action={
-          isAdmin ? (
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/dashboard/vigilancia/fuentes"
-                className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
-              >
-                {tm.watchedSources}
-              </Link>
-              <Link
-                href="/dashboard/vigilancia/candidatos"
-                className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
-              >
-                {tm.validationInbox}
-              </Link>
-            </div>
-          ) : undefined
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={
+                sp.j
+                  ? `/dashboard/vigilancia/informe?j=${sp.j}`
+                  : "/dashboard/vigilancia/informe"
+              }
+              className="inline-flex items-center justify-center gap-1.5 rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
+            >
+              <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden>
+                <path
+                  d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {dd.pages.reportRadar.downloadPdf}
+            </Link>
+            {isAdmin && (
+              <>
+                <Link
+                  href="/dashboard/vigilancia/fuentes"
+                  className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
+                >
+                  {tm.watchedSources}
+                </Link>
+                <Link
+                  href="/dashboard/vigilancia/candidatos"
+                  className="inline-flex items-center justify-center rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-sunken"
+                >
+                  {tm.validationInbox}
+                </Link>
+              </>
+            )}
+          </div>
         }
       />
 
