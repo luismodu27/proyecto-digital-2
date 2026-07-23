@@ -6,7 +6,48 @@
 > - **[CLAUDE.md](./CLAUDE.md)** — mapa técnico del código.
 > - **[docs/supabase.md](./docs/supabase.md)** — backend/migraciones.
 >
-> Última actualización: **2026-07-22**.
+> Última actualización: **2026-07-23**.
+
+---
+
+## ⭐ 0. Sesión 2026-07-23 — Landing, Vigilancia y BLINDAJE DE SEGURIDAD
+
+**Todo desplegado a `main`.** Resumen para retomar:
+
+### 0.1 · Landing + Vigilancia (8 PRs · #10–#15)
+- Landing: card de **California** + chip de **Colorado (SB 26-189 · 2027)** en la rejilla de cobertura.
+- Vigilancia (dashboard): banda de orientación (4 stats) · arreglo del hero duplicado · divisor "Ya en vigor" ·
+  **estado interno visible** en hero/tarjetas (StatusChip) · **filtro por estado interno** en la cronología (`?s=`) ·
+  **export del radar a PDF** (`/dashboard/vigilancia/informe` + botón "Descargar radar (PDF)").
+- Home: widget de próximo hito enriquecido (estado interno + color de urgencia).
+- **Decisión del fundador:** los artículos (Art./Anexo) del **dashboard se quedan en mono** (el rechazo del mono era
+  SOLO para el landing).
+
+### 0.2 · Seguridad (Fase 1 blindaje + red team, PRs #16–#22)
+A petición del fundador ("que un hacker no pueda robar datos nuestros ni de usuarios"). **Auditoría + 3 rondas de red
+team adversarial (83 agentes).** Resultado: **aislamiento entre organizaciones intacto en las 3 rondas**; se
+encontraron y cerraron **2 fallas HIGH**; ronda 3 limpia (0 hallazgos).
+- **Fase 1:** deps `npm audit` = 0 vulns (Next 16.2.11 + overrides sharp/postcss) · **CSP con nonce** (report-only
+  estricto + enforce de lo seguro) · HSTS `preload` · **rate-limit** waitlist · cron `api/audit-verify` (tamper-detecting).
+- **Fase 2 (red team):** (1) escalada **admin→owner** por INSERT directo (memberships/invitations) → **0024**;
+  (2) **bypass de plan Enterprise** gratis por UPDATE directo → **0024 FIX 3 fue un no-op** (revoke de columna no recorta
+  grant de tabla) → **rehecho bien en 0025** (revoke UPDATE de tabla + grant solo name/slug); (3) fuga LOW de estado de
+  suscripción → **0025**; `plan.ts` dejó de fallar-abierto.
+- **Regla aprendida:** verificar grants/revokes EJECUTANDO el exploit, no asumirlos.
+
+### 0.3 · ✅ Migraciones 0023, 0024, 0025 — APLICADAS por el fundador (2026-07-23)
+El fundador las pegó en el SQL Editor. Con esto las 2 fallas HIGH quedan **cerradas en la BD real**.
+
+### 0.4 · 🔴 PENDIENTE TUYO restante de seguridad
+- [ ] **Promover la CSP a `enforce`** — hoy la política estricta (anti-XSS) va en *Report-Only* (observa, no bloquea).
+  Es un cambio de **1 línea** en `src/lib/security/csp.ts` (mover el bloque `reportOnly` a `enforced`). **Antes:**
+  smoke-test en el preview de un PR → login (Supabase) + checkout (Stripe) + descargar radar, y confirmar que no hay
+  violaciones que rompan. Avísame y lo hago + valido.
+
+### 0.5 · 🟡 PENDIENTE MÍO / higiene continua de seguridad
+- [ ] **Re-auditar tras conectar el flujo real de Stripe** (cobros/downgrades/reconciliación no se validan por código).
+- [ ] **Regla continua:** toda tabla/función nueva nace con su **guard de pertenencia** por defecto (`org in
+  (select private.user_orgs())`) — fue justo lo que le faltaba a `org_has_active_subscription`.
 
 ---
 
@@ -369,13 +410,15 @@ Mantenibilidad, **sin impacto de usuario**; no urgente. Del escaneo completo:
 ### Seguridad — ítems BAJA documentados (auditoría 2026-07-21)
 - [ ] `api/reminders/run`: exigir **POST** (o token CSRF) en el modo sesión (hoy acepta GET → CSRF de bajo
   impacto). Tocar cuando se active el cron de correos.
-- [ ] `submitWaitlist`: **rate-limit / captcha** (hoy solo honeypot cliente) para evitar spam al fundador.
+- [x] ~~`submitWaitlist`: **rate-limit / captcha**~~ ✅ HECHO (2026-07-23). Throttle por IP (5/10min, ventana deslizante
+  en memoria) + cota de longitud de email, además del honeypot cliente. Ver §0.2.
 - [ ] `saveRiskAssessment`: recomputar `rationale/citations/obligations` en servidor desde `answers` (hoy se guardan
   tal cual llegan del cliente → integridad intra-tenant, sin XSS). Coherencia con "contenido legal determinista".
 
 ### Follow-ups de la tanda P1 (auditoría 2026-07-21)
-- [ ] **CSP estricta con nonce** en `next.config.ts` (ya están HSTS/X-Frame-Options/nosniff/Referrer/Permissions).
-  Requiere prueba en navegador: no romper el script de tema inline (`layout.tsx`), Stripe.js ni Supabase.
+- [x] ~~**CSP estricta con nonce**~~ ✅ CONSTRUIDA (2026-07-23) en el middleware (`src/lib/security/csp.ts`). Nonce por
+  request; enforce de lo seguro (frame-ancestors/form-action/base-uri/object-src) + política estricta en **Report-Only**.
+  **PENDIENTE:** promoverla a `enforce` tras smoke-test en preview (login/checkout/radar) — ver §0.4.
 - [x] ~~**`.env.example` incompleto**~~ — ✅ hecho (2026-07-21): añadidas Stripe ×5, correo ×3, SSO ×2, `NEXT_PUBLIC_APP_URL`.
 - [x] ~~**`select("*")` → columnas explícitas**~~ — ✅ hecho (2026-07-21): `getAiSystems` y `getGapItems` enumeran
   columnas (sin las 6 de bias-audit 0019, que no usan). `getSystemDossier` se deja con `*` **a propósito**: sí usa las
@@ -394,7 +437,8 @@ Queda (bajo, deferido con motivo):
   Alliance** 2026: **>50 %** sin inventario formal de IA
   (https://labs.cloudsecurityalliance.org/research/csa-research-note-eu-ai-act-high-risk-compliance-deadline-20/).
   El 35 M€/7 % se marca como dato del propio Art. 99. Nota al pie con fuentes y el caveat "Alemania".
-- [ ] `npm audit`: 2 moderate en `postcss` **vendorizado por Next** (build-time, no accionable sin update de Next). Aceptado.
+- [x] ~~`npm audit`: 2 moderate en `postcss`~~ ✅ HECHO (2026-07-23). Next 16.2.11 + `overrides` (`sharp ^0.35.0`,
+  `postcss ^8.5.10`) → **0 vulnerabilidades**. Ver §0.2.
 - [ ] Cosméticos: parpadeo de icono en `ThemeToggle` tras montaje; dots decorativos con hex fijo (semáforo macOS, intencional).
 
 ### Follow-ups de la 2ª verificación (2026-07-21) — BAJO no bloqueantes
