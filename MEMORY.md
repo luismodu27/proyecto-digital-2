@@ -127,6 +127,15 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-23** · **Red team ronda 3 (corta): LIMPIA, 0 hallazgos.** Verificó que los fixes de 0025 aguantan (plan
+  no escribible por el cliente; guard de suscripción) y barrido de completitud (escalada, aislamiento, rutas API, plan.ts).
+  Nada sobrevivió a la verificación adversarial. **Cierre del loop de seguridad ("suficiente").** Estado tras 3 rondas:
+  aislamiento entre orgs intacto en las 3; escalada admin→owner cerrada (0024); bypass de plan cerrado de raíz (0025,
+  tras pillar la ronda 2 que 0024 era cosmético); fuga de estado de suscripción cerrada (0025). Migraciones 0023/0024/0025
+  aplicadas por el fundador. **Higiene continua pendiente:** toda tabla/función nueva nace con su guard de pertenencia por
+  defecto; re-auditar tras cambios grandes (sobre todo el flujo real de Stripe); promover CSP a enforce tras validar
+  login+checkout en preview. Regla aprendida: **verificar grants/revokes EJECUTANDO el exploit**, no asumirlos.
+
 - **2026-07-23** · **Red team ronda 2: el FIX 3 de 0024 era un no-op — rehecho (migración 0025).** La 2ª pasada
   (sobre el código con 0024) confirmó que FIX 1/2 (escalada admin→owner) **aguantan**, pero **FIX 3 (bypass de plan) NO
   funcionaba**: `revoke update (plan) ... from authenticated` es un no-op porque Supabase concede UPDATE a NIVEL DE TABLA
