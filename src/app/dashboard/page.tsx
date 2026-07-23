@@ -15,6 +15,7 @@ import {
   getOrgMembers,
   getOrganizationName,
   getRegulatoryEvents,
+  getRegulatoryAcks,
   isSupabaseConfigured,
 } from "@/lib/data";
 import { getCurrentUser } from "@/lib/data/context";
@@ -24,6 +25,8 @@ import {
   AUDIT_READY_THRESHOLD,
   isAuditReady,
   riskLabel,
+  regAckLabel,
+  type RegAckStatus,
 } from "@/lib/mock-data";
 import {
   upcomingDeadlines,
@@ -39,8 +42,18 @@ import { getDictionary } from "@/lib/i18n";
 // El widget de "próximo hito" depende de la fecha actual.
 export const dynamic = "force-dynamic";
 
+// Tono del chip de estado interno en el widget de próximo hito.
+const ACK_CHIP: Record<RegAckStatus, string> = {
+  reviewed:
+    "border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)]",
+  planned:
+    "border-[var(--tone-info-bd)] bg-[var(--tone-info-bg)] text-[var(--tone-info-fg)]",
+  not_applicable:
+    "border-[var(--tone-neutral-bd)] bg-[var(--tone-neutral-bg)] text-[var(--tone-neutral-fg)]",
+};
+
 export default async function DashboardOverview() {
-  const [systems, orgJur, tasks, gaps, members, user, orgName, regEvents] =
+  const [systems, orgJur, tasks, gaps, members, user, orgName, regEvents, regAcks] =
     await Promise.all([
       getAiSystems(),
       getOrgJurisdictions(),
@@ -50,6 +63,7 @@ export default async function DashboardOverview() {
       getCurrentUser(),
       getOrganizationName(),
       getRegulatoryEvents(),
+      getRegulatoryAcks(),
     ]);
 
   const locale = await resolveLocale();
@@ -114,6 +128,14 @@ export default async function DashboardOverview() {
   const nextAffected = nextDeadline
     ? affectedSystems(nextDeadline, systems).length
     : 0;
+  const nextAck = nextDeadline ? regAcks[nextDeadline.id] : undefined;
+  // Tono de urgencia del contador (coherente con el radar: ≤45 días urgente).
+  const nextDaysTone =
+    nextDays <= 45
+      ? "text-[var(--tone-danger-fg)]"
+      : nextDays <= 365
+        ? "text-[var(--tone-gold-fg)]"
+        : "text-ink";
 
   // Cuenta sin sistemas todavía: en vez de widgets en cero (distribución vacía,
   // "requieren atención"), damos una bienvenida cálida con la misión y los
@@ -215,11 +237,24 @@ export default async function DashboardOverview() {
               </svg>
             </span>
             <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-muted">
-                {o.nextMilestone} ·{" "}
-                {frameworkMeta(nextDeadline.framework, locale)?.short ??
-                  nextDeadline.framework}
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xs uppercase tracking-wide text-muted">
+                  {o.nextMilestone} ·{" "}
+                  {frameworkMeta(nextDeadline.framework, locale)?.short ??
+                    nextDeadline.framework}
+                </p>
+                {nextAck ? (
+                  <span
+                    className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${ACK_CHIP[nextAck.status]}`}
+                  >
+                    {regAckLabel(nextAck.status, locale)}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full border border-dashed border-line-strong px-2 py-0.5 text-[11px] font-medium text-muted">
+                    {d.pages.monitoring.notMarked}
+                  </span>
+                )}
+              </div>
               <p className="truncate text-sm font-medium text-ink">
                 {nextDeadline.title}
               </p>
@@ -227,7 +262,7 @@ export default async function DashboardOverview() {
           </div>
           <div className="flex shrink-0 items-center gap-4">
             <div className="text-right">
-              <p className="text-sm font-semibold tabular-nums text-ink">
+              <p className={`text-sm font-semibold tabular-nums ${nextDaysTone}`}>
                 {nextDays === 0
                   ? o.today
                   : `${o.inDaysPrefix}${nextDays} ${nextDays === 1 ? d.units.dayOne : d.units.dayOther}`}
