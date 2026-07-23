@@ -1,9 +1,24 @@
 "use server";
 
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { rateLimit } from "@/lib/security/rate-limit";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Máximo razonable de longitud de correo (RFC 5321) para acotar la entrada.
+const MAX_EMAIL_LEN = 254;
+// Anti-abuso: como mucho 5 solicitudes por IP cada 10 minutos.
+const RL_LIMIT = 5;
+const RL_WINDOW_MS = 10 * 60 * 1000;
+
+/** IP del solicitante a partir de las cabeceras del proxy (Vercel). */
+async function clientIp(): Promise<string> {
+  const h = await headers();
+  const fwd = h.get("x-forwarded-for");
+  if (fwd) return fwd.split(",")[0]!.trim();
+  return h.get("x-real-ip")?.trim() || "unknown";
+}
 
 /** Correo del fundador que recibe la notificación de solicitudes de acceso. */
 const FOUNDER_EMAIL =
@@ -70,8 +85,18 @@ export async function submitWaitlist(
   source = "landing",
 ): Promise<{ ok: boolean; error?: string }> {
   const email = emailRaw.trim().toLowerCase();
-  if (!EMAIL_RE.test(email)) {
+  if (email.length > MAX_EMAIL_LEN || !EMAIL_RE.test(email)) {
     return { ok: false, error: "Introduce un correo válido (p. ej. tu@empresa.com)." };
+  }
+
+  // Throttle por IP: frena ráfagas de alta automatizada sin afectar a una
+  // persona real. No filtra datos; solo protege la tabla del spam.
+  const ip = await clientIp();
+  if (!rateLimit(`waitlist:${ip}`, RL_LIMIT, RL_WINDOW_MS)) {
+    return {
+      ok: false,
+      error: "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.",
+    };
   }
 
   if (isSupabaseConfigured) {
