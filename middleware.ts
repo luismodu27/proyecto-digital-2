@@ -1,5 +1,6 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { buildCsp, generateNonce } from "@/lib/security/csp";
 import {
   coerceLocale,
   DEFAULT_LOCALE,
@@ -26,9 +27,18 @@ export async function middleware(request: NextRequest) {
   // al construir su NextResponse.next({ request }), así que la cabecera propaga.
   request.headers.set(LOCALE_HEADER, locale);
 
+  // CSP: nonce por request. Se expone al layout (via `x-nonce`) para el script
+  // inline de tema. La cabecera se fija en request antes de updateSession para
+  // que propague, y en la respuesta para que el navegador la aplique.
+  const nonce = generateNonce();
+  const { enforced, reportOnly } = buildCsp(nonce);
+  request.headers.set("x-nonce", nonce);
+
   const response = await updateSession(request);
   // Refleja el locale también en la respuesta (útil para debug/edge caches).
   response.headers.set(LOCALE_HEADER, locale);
+  response.headers.set("Content-Security-Policy", enforced);
+  response.headers.set("Content-Security-Policy-Report-Only", reportOnly);
   return response;
 }
 
