@@ -127,6 +127,13 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-23** · **Home del dashboard: mejora del widget de próximo hito regulatorio.** El widget ya existía
+  (`src/app/dashboard/page.tsx`, tarjeta clicable → `/dashboard/vigilancia` con "Próximo hito · marco", título y "en N
+  días"). En vez de duplicarlo se **mejoró** para ligarlo al trabajo de vigilancia: (1) **chip de estado interno**
+  (Plan en marcha / Revisado / No aplica, o "Sin marcar" sutil) junto al eyebrow — carga `getRegulatoryAcks`; (2)
+  **color de urgencia** en el contador de días, coherente con el radar (≤45 días rojo, ≤365 gold, resto neutro).
+  Reutiliza `regAckLabel` + `d.pages.monitoring.notMarked`; sin claves nuevas. lint+tsc+build verdes; verificado en demo.
+
 - **2026-07-22** · **Vigilancia: filtro por estado interno en la cronología.** A petición del fundador. Nueva fila de chips
   "Estado interno" sobre la cronología (`?s=` en la URL): `Todos · N` + un chip con conteo por cada estado presente
   (Sin marcar / Revisado / Plan en marcha / No aplica). Filtra **solo la cronología** (la lista de trabajo: "solo lo que
