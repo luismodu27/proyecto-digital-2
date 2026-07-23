@@ -1574,3 +1574,41 @@ begin
 end $$;
 
 revoke all on function public.verify_all_audit_chains() from anon, authenticated;
+
+-- ============================================================================
+-- 0024_redteam_fixes.sql
+-- ============================================================================
+-- Correcciones del red team: escalada admin→owner por INSERT directo
+-- (memberships + invitations) y bypass de facturación (organizations.plan).
+-- Endurece RLS (los RPCs security definer la bypasean, no se rompen) y revoca el
+-- UPDATE de la columna plan al rol authenticated.
+
+drop policy if exists memberships_write_admin on public.memberships;
+create policy memberships_write_admin on public.memberships
+  for all
+  using (
+    private.user_has_role(organization_id, array['owner','admin']::public.member_role[])
+  )
+  with check (
+    private.user_has_role(organization_id, array['owner','admin']::public.member_role[])
+    and (
+      role::text <> 'owner'
+      or private.user_has_role(organization_id, array['owner']::public.member_role[])
+    )
+  );
+
+drop policy if exists invitations_write on public.invitations;
+create policy invitations_write on public.invitations
+  for all
+  using (
+    private.user_has_role(organization_id, array['owner','admin']::public.member_role[])
+  )
+  with check (
+    private.user_has_role(organization_id, array['owner','admin']::public.member_role[])
+    and (
+      role::text <> 'owner'
+      or private.user_has_role(organization_id, array['owner']::public.member_role[])
+    )
+  );
+
+revoke update (plan) on public.organizations from authenticated;
