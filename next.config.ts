@@ -12,10 +12,12 @@ import type { NextConfig } from "next";
  * validarla en navegador antes de activarla.
  */
 const securityHeaders = [
-  // Fuerza HTTPS durante 2 años en el dominio y sus subdominios.
+  // Fuerza HTTPS durante 2 años en el dominio y sus subdominios. `preload`
+  // habilita la inclusión en la lista de precarga HSTS de los navegadores
+  // (enviar el dominio en hstspreload.org una vez el dominio propio esté en uso).
   {
     key: "Strict-Transport-Security",
-    value: "max-age=63072000; includeSubDomains",
+    value: "max-age=63072000; includeSubDomains; preload",
   },
   // Anti-clickjacking: la app no puede embeberse en un iframe de terceros.
   { key: "X-Frame-Options", value: "DENY" },
