@@ -127,6 +127,18 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-23** · **Red team ronda 2: el FIX 3 de 0024 era un no-op — rehecho (migración 0025).** La 2ª pasada
+  (sobre el código con 0024) confirmó que FIX 1/2 (escalada admin→owner) **aguantan**, pero **FIX 3 (bypass de plan) NO
+  funcionaba**: `revoke update (plan) ... from authenticated` es un no-op porque Supabase concede UPDATE a NIVEL DE TABLA
+  por defecto y en PostgreSQL un `revoke` de columna no recorta un grant de tabla → el bypass de Enterprise gratis seguía
+  vivo. **Lección clave: los grants/revokes hay que VERIFICARLOS ejecutando el exploit, no asumirlos.** Fix (0025): el app
+  no actualiza `organizations` directo como authenticated (todo SELECT; name/jurisdictions por RPC), así que `revoke update
+  on organizations from authenticated` + `grant update (name, slug)` — `plan` queda no escribible por el cliente; Stripe
+  (service_role) y el fundador (postgres) intactos. También: guard de pertenencia que le faltaba a
+  `org_has_active_subscription` (fuga LOW cross-tenant del estado de suscripción), y `plan.ts` dejó de **fallar abierto**
+  (un error de query devolvía 'enterprise'; ahora solo si la columna no existe → si no, 'free' conservador). **⚠️ 0025 es
+  migración MANUAL: pegar en el SQL Editor.** Ronda 2 no encontró fuga cross-tenant de datos; el aislamiento sigue intacto.
+
 - **2026-07-23** · **Red team (Fase 2): 2 fallas HIGH encontradas y corregidas (migración 0024).** Workflow adversarial
   (48 agentes, 6 ángulos, verificación por refutación). **El aislamiento entre organizaciones AGUANTÓ** (nadie llega a
   datos de otra org). Pero encontró 2 fallas intra-org explotables **saltándose la app** (PostgREST + anon key + JWT

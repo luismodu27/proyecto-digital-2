@@ -1612,3 +1612,24 @@ create policy invitations_write on public.invitations
   );
 
 revoke update (plan) on public.organizations from authenticated;
+
+-- ============================================================================
+-- 0025_redteam_round2_fixes.sql
+-- ============================================================================
+-- Ronda 2: FIX 3 de 0024 (bypass de plan) era un no-op (revoke de columna no
+-- recorta el grant de tabla). Se revoca UPDATE de tabla y se re-otorga solo
+-- columnas de identidad; `plan` queda no escribible por authenticated. Además el
+-- guard de pertenencia que le faltaba a org_has_active_subscription.
+
+revoke update on public.organizations from authenticated;
+grant update (name, slug) on public.organizations to authenticated;
+
+create or replace function public.org_has_active_subscription(org uuid)
+returns boolean
+language sql stable security definer set search_path = '' as $$
+  select exists (
+    select 1 from public.subscriptions
+    where organization_id = org
+      and status in ('active', 'trialing')
+  ) and (org in (select private.user_orgs()))
+$$;

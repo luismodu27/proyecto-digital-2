@@ -55,11 +55,19 @@ export const getOrgPlan = cache(async (orgId: string): Promise<PlanTier> => {
       .select("plan")
       .eq("id", orgId)
       .maybeSingle();
-    // Columna ausente (migración sin aplicar) u otro error → acceso completo.
-    if (error) return "enterprise";
-    plan = coerceTier(data?.plan) ?? "free";
+    if (error) {
+      // Solo si la columna/tabla aún NO existe (migración sin aplicar) damos
+      // acceso completo, para no bloquear a nadie por sorpresa. Ante cualquier
+      // OTRO error fallamos CERRADO a 'free' (no regalar entitlements por un
+      // fallo transitorio); la suscripción activa de abajo aún puede subir el tier.
+      if (error.code === "42703" || error.code === "42P01") return "enterprise";
+      plan = "free";
+    } else {
+      plan = coerceTier(data?.plan) ?? "free";
+    }
   } catch {
-    return "enterprise";
+    // Error inesperado: conservador (free). No fallar abierto en entitlements.
+    plan = "free";
   }
 
   // Una suscripción Stripe activa sube a Preparación como mínimo.
