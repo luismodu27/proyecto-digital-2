@@ -127,6 +127,20 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-23** · **Blindaje de seguridad (Fase 1, 4 PRs) + red team.** A petición del fundador ("que un hacker no pueda
+  robar datos nuestros ni de usuarios"). Primero una **auditoría** (subagente): veredicto sólido — aislamiento multi-tenant
+  con doble candado (RLS en 16/16 tablas + validación en Server Actions), audit log inmutable y *tamper-evident* (cadena
+  SHA-256), sin secretos en repo, service_role nunca en cliente, cero SQL manual. Huecos: falta CSP, deps con CVEs, waitlist
+  sin rate-limit. Correcciones por prioridad: **(1/4)** parche de dependencias — Next 16.2.11 + `overrides` de `sharp
+  ^0.35.0` y `postcss ^8.5.10` → `npm audit` = 0 vulns. **(2/4)** CSP con **nonce por request** (middleware): estrategia por
+  fases — enforce ya de lo que no rompe (`frame-ancestors`/`form-action`/`base-uri`/`object-src`) + política estricta
+  completa en **Report-Only** (Supabase+Stripe allowlist). **PENDIENTE:** promover a enforce (mover `reportOnly`→`enforced`
+  en `src/lib/security/csp.ts`) tras smoke-test de login+checkout en preview. **(3/4)** HSTS `preload` + rate-limit por IP de
+  la waitlist (5/10min, en memoria). **(4/4)** cron `api/audit-verify` (lun 07:00) + migración **0023** (`verify_all_audit_chains()`,
+  service_role) que verifica la cadena de todas las orgs y avisa al fundador si se rompe → tamper-**detecting**. **⚠️
+  0023 es migración MANUAL: pegar `supabase/setup.sql` en el SQL Editor** (ya concatenada). Luego: **Fase 2 red team**
+  (agentes adversariales) para intentar romperlo.
+
 - **2026-07-23** · **Vigilancia: exportar el radar a PDF.** A petición del fundador. Nueva ruta imprimible
   `src/app/dashboard/vigilancia/informe/page.tsx` (Server Component) siguiendo el patrón existente de PDFs
   (`window.print()` vía `PrintButton` + clases `print:`, como `informe/dossier`). Documento determinista: portada con sello
