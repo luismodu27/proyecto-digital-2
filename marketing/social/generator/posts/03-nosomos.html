@@ -1,0 +1,111 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../brand.css">
+<style>
+  .stmt{font-family:"Fraunces",serif;font-weight:600;line-height:.98;letter-spacing:-.02em;font-size:78px}
+  .stmt .no{color:var(--ink)}
+  .stmt .si{color:var(--brand);font-style:italic}
+  .strike{position:relative;display:inline-block}
+  .strike::after{content:"";position:absolute;left:-4px;right:-4px;top:54%;height:4px;background:var(--seal);transform:rotate(-1.5deg)}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:44px;
+    border:1px solid var(--line);border-radius:22px;overflow:hidden}
+  .col{padding:34px 34px 40px}
+  .col.no{background:var(--paper-sunken);border-right:1px solid var(--line)}
+  .col.si{background:var(--paper-raised)}
+  .colhead{display:flex;align-items:center;gap:13px;padding-bottom:22px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+  .colhead .lbl{font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.16em;text-transform:uppercase;font-weight:500}
+  .col.no .colhead .lbl{color:var(--muted)}
+  .col.si .colhead .lbl{color:var(--brand)}
+  .badge{width:36px;height:36px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .col.no .badge{background:#f0e0dd;color:var(--risk-unacceptable)}
+  .col.si .badge{background:var(--brand-soft);color:var(--brand)}
+
+  .li{display:flex;align-items:flex-start;gap:16px;padding:19px 0;border-bottom:1px solid var(--line)}
+  .li:last-child{border-bottom:0;padding-bottom:0}
+  .li .m{width:26px;height:26px;flex:none;margin-top:4px}
+  .col.no .li .m{color:var(--muted)}
+  .col.si .li .m{color:var(--brand)}
+  .li .txt .h{font-family:"Geist",sans-serif;font-weight:600;font-size:27px;color:var(--ink);letter-spacing:-.01em;line-height:1.15}
+  .li .txt .s{font-family:"Geist",sans-serif;font-size:20px;line-height:1.4;color:var(--muted);margin-top:5px}
+  .col.no .li .txt .h{color:var(--ink-soft)}
+
+  .close{background:var(--brand);color:#fff;border-radius:18px;padding:28px 34px;margin-top:34px}
+  .close .t{font-family:"Fraunces",serif;font-weight:600;font-size:33px;line-height:1.18;letter-spacing:-.01em}
+  .close .t .em{font-style:italic;color:#7fd8b4}
+</style></head>
+<body>
+<div class="canvas">
+  <div class="frame">
+
+    <div class="brandbar">
+      <div class="brandmark"><span class="seal"></span><span class="wordmark">Attesta</span></div>
+      <span class="kicker bronze">Honestidad&nbsp;=&nbsp;confianza</span>
+    </div>
+
+    <div class="stmt mt-l">
+      <span class="no">No <span class="strike">certificamos</span>.</span>
+      <span class="si">Te preparamos.</span>
+    </div>
+
+    <div class="cols">
+      <div class="col no">
+        <div class="colhead">
+          <span class="badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+          </span>
+          <span class="lbl">Lo que NO somos</span>
+        </div>
+        <div class="li">
+          <svg class="m" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3 7-7 9-4-2-7-4-7-9V6z"/></svg>
+          <div class="txt"><div class="h">Un organismo certificador</div><div class="s">No emitimos sellos ni declaraciones de conformidad.</div></div>
+        </div>
+        <div class="li">
+          <svg class="m" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16c2-4 4-4 6 0M12 12c2-4 4-4 6 0"/><path d="M3 20c3 0 3-2 6-2s3 2 6 2"/></svg>
+          <div class="txt"><div class="h">Un sello de humo</div><div class="s">Nada de insignias vacías que no resisten una revisión.</div></div>
+        </div>
+        <div class="li">
+          <svg class="m" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.5a3 3 0 0 1 5.6 1.5c0 2-3 2.5-3 4"/><line x1="12" y1="17.5" x2="12" y2="17.5"/></svg>
+          <div class="txt"><div class="h">Un cuestionario mágico</div><div class="s">Rellenar un test no te deja preparado por arte de magia.</div></div>
+        </div>
+      </div>
+
+      <div class="col si">
+        <div class="colhead">
+          <span class="badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg>
+          </span>
+          <span class="lbl">Lo que SÍ hacemos</span>
+        </div>
+        <div class="li">
+          <svg class="m" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <div class="txt"><div class="h">Autoevaluación guiada</div><div class="s">Tu organización se evalúa paso a paso, con criterio.</div></div>
+        </div>
+        <div class="li">
+          <svg class="m" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h5l2 6 4-12 2 6h5"/></svg>
+          <div class="txt"><div class="h">Brechas identificadas</div><div class="s">Ves qué falta y qué priorizar, sin adivinar.</div></div>
+        </div>
+        <div class="li">
+          <svg class="m" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9.5 14.5l2 2 3.5-4"/></svg>
+          <div class="txt"><div class="h">Evidencia lista para auditoría</div><div class="s">Cada dato queda documentado y exportable.</div></div>
+        </div>
+        <div class="li">
+          <svg class="m" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <div class="txt"><div class="h">Registro inmutable</div><div class="s">Trazabilidad que no se puede alterar a posteriori.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="close">
+      <div class="t">El mérito es de <span class="em">tu organización</span>. Nosotros somos el sistema de registro.</div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="footer">
+      <span class="handle">@attesta.io</span>
+      <span class="footnote">Preparación real &gt; sellos de humo</span>
+    </div>
+
+  </div>
+</div>
+</body></html>

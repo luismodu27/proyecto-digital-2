@@ -1,0 +1,39 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../brand.css">
+<style>
+  .banner{position:relative;width:1500px;height:500px;background:#0e1512;color:#eef2ee;overflow:hidden;font-family:"Geist",sans-serif}
+  .banner::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity:.03;mix-blend-mode:screen}
+  .track{position:absolute;inset:0;z-index:1}
+  .wrap{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 120px}
+  .kick{font-family:"Geist Mono",monospace;font-size:17px;letter-spacing:.32em;text-transform:uppercase;color:#22b581}
+  .hl{font-family:"Fraunces",serif;font-weight:600;font-size:62px;line-height:1.06;letter-spacing:-.015em;color:#eef2ee;margin-top:20px}
+  .hl .em{color:#7fd8b4;font-style:italic}
+  .rule{width:120px;height:2px;background:#c79a5f;margin:26px 0 18px}
+  .sub{font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.18em;text-transform:uppercase;color:#8f9a92}
+</style></head>
+<body>
+<div class="banner">
+  <svg class="track" viewBox="0 0 1500 500" xmlns="http://www.w3.org/2000/svg">
+    <!-- línea conectada de marca, sutil, en la base -->
+    <line x1="0" y1="432" x2="1500" y2="432" stroke="#243b31" stroke-width="2"/>
+    <g>
+      <circle cx="250" cy="432" r="9" fill="#0e1512" stroke="#12946a" stroke-width="2.5"/><circle cx="250" cy="432" r="3.5" fill="#22b581"/>
+      <circle cx="620" cy="432" r="9" fill="#0e1512" stroke="#12946a" stroke-width="2.5"/><circle cx="620" cy="432" r="3.5" fill="#22b581"/>
+      <circle cx="990" cy="432" r="9" fill="#0e1512" stroke="#12946a" stroke-width="2.5"/><circle cx="990" cy="432" r="3.5" fill="#22b581"/>
+      <circle cx="1300" cy="432" r="15" fill="#12946a"/><path d="M1293 432 l5 5 l9 -11" stroke="#04150f" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <!-- arcos radar muy sutiles arriba-derecha -->
+    <g fill="none" stroke="#183028" stroke-width="1.6" opacity="0.9">
+      <circle cx="1420" cy="90" r="70"/><circle cx="1420" cy="90" r="130"/><circle cx="1420" cy="90" r="190"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="kick">Gobernanza continua de IA · EU&nbsp;AI&nbsp;Act</div>
+    <div class="hl">El sistema de registro de la <span class="em">gobernanza de IA.</span></div>
+    <div class="rule"></div>
+    <div class="sub">Autoevaluación · Preparación para auditoría · Evidencia declarada</div>
+  </div>
+</div>
+</body></html>

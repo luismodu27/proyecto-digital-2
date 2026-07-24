@@ -1,0 +1,94 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../brand.css">
+<style>
+  /* Fecha grande + turno de plazo */
+  .hero{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin-top:26px}
+  .date{font-family:"Fraunces",serif;font-weight:600;line-height:.86;letter-spacing:-.025em;color:var(--brand-strong)}
+  .date .d{font-size:172px;display:block}
+  .date .my{font-size:74px;color:var(--ink);display:flex;align-items:baseline;gap:20px;margin-top:2px}
+  .date .my .mo{color:var(--seal)}
+  .shiftbox{flex:none;border:1px solid var(--line-strong);border-radius:16px;padding:22px 26px;background:var(--paper-raised);text-align:right}
+  .shiftbox .lb{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .shiftbox .val{margin-top:12px;font-family:"Geist",sans-serif;font-size:26px;color:var(--ink);display:flex;align-items:center;gap:16px;justify-content:flex-end}
+  .shiftbox .old{text-decoration:line-through;text-decoration-color:var(--seal);color:var(--muted)}
+  .shiftbox .arrow{color:var(--brand-strong);font-size:30px}
+  .shiftbox .new{font-weight:600;color:var(--brand-strong)}
+  .shiftbox .why{margin-top:10px;font-family:"Geist",sans-serif;font-size:18px;color:var(--muted)}
+  .shiftbox .why b{color:var(--seal);font-weight:600}
+
+  /* Dos bloques de contenido */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:34px}
+  .block{border:1px solid var(--line);border-radius:18px;padding:28px 30px;background:var(--paper-raised)}
+  .block .bk{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--seal);font-weight:500}
+  .block .bk.jade{color:var(--brand-strong)}
+  .block .bt{font-family:"Fraunces",serif;font-weight:600;font-size:29px;line-height:1.1;color:var(--ink);margin-top:10px;letter-spacing:-.01em}
+
+  .exl{list-style:none;margin-top:20px;display:flex;flex-direction:column;gap:15px}
+  .exl li{display:flex;gap:14px;align-items:flex-start;font-family:"Geist",sans-serif;font-size:24px;line-height:1.28;color:var(--ink-soft)}
+  .exl li .d{width:8px;height:8px;border-radius:50%;background:var(--risk-high);flex:none;margin-top:11px}
+
+  .steps{list-style:none;margin-top:20px;display:flex;flex-direction:column;gap:16px}
+  .steps li{display:flex;gap:16px;align-items:flex-start}
+  .steps .no{width:40px;height:40px;flex:none;border-radius:50%;background:var(--brand-soft);color:var(--brand-strong);
+    font-family:"Fraunces",serif;font-weight:600;font-size:22px;display:flex;align-items:center;justify-content:center}
+  .steps .st .h{font-family:"Geist",sans-serif;font-weight:600;font-size:24px;color:var(--ink);letter-spacing:-.01em}
+  .steps .st .s{font-family:"Geist",sans-serif;font-size:20px;line-height:1.3;color:var(--muted);margin-top:3px}
+
+  .disc{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.08em;color:var(--muted);margin-top:26px}
+</style></head>
+<body>
+<div class="canvas dark">
+  <div class="frame">
+    <div class="brandbar">
+      <div class="brandmark"><span class="seal"></span><span class="wordmark">Attesta</span></div>
+      <span class="kicker">Fecha clave · EU AI Act</span>
+    </div>
+
+    <div class="hero">
+      <div class="date">
+        <span class="d">2 DIC</span>
+        <span class="my"><span>2027</span></span>
+      </div>
+      <div class="shiftbox">
+        <div class="lb">El plazo se movió</div>
+        <div class="val"><span class="old">Ago 2026</span><span class="arrow">→</span><span class="new">Dic 2027</span></div>
+        <div class="why">por el <b>Digital Omnibus</b></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="block">
+        <span class="bk">Qué es alto riesgo · Anexo III</span>
+        <div class="bt">Si usas IA para decidir sobre personas en RRHH:</div>
+        <ul class="exl">
+          <li><span class="d"></span>Cribado automático de CVs</li>
+          <li><span class="d"></span>Ranking de candidaturas</li>
+          <li><span class="d"></span>Entrevistas evaluadas por vídeo</li>
+        </ul>
+      </div>
+
+      <div class="block">
+        <span class="bk jade">Qué hacer con el tiempo extra</span>
+        <div class="bt">No lo desperdicies: prepárate <span class="serif" style="font-style:italic;color:var(--brand-strong)">bien</span>.</div>
+        <ul class="steps">
+          <li><span class="no">1</span><span class="st"><div class="h">Inventaría</div><div class="s">Qué IA usas y para qué.</div></span></li>
+          <li><span class="no">2</span><span class="st"><div class="h">Clasifica</div><div class="s">Riesgo orientativo por sistema.</div></span></li>
+          <li><span class="no">3</span><span class="st"><div class="h">Reúne evidencia</div><div class="s">Documenta antes del plazo.</div></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <hr class="rule mt-l">
+    <div class="lead mt-m" style="max-width:920px;color:var(--ink)">
+      Nueva fecha límite para las obligaciones de IA de <b>alto riesgo (Anexo III)</b>. Más tiempo no es menos trabajo: es la ventana para llegar <b>listo</b>.
+    </div>
+    <div class="disc">Contenido informativo, no asesoría legal.</div>
+
+    <div class="spacer"></div>
+    <div class="footer">
+      <span class="handle">@attesta.io</span>
+      <span class="footnote">Educación regulatoria</span>
+    </div>
+  </div>
+</div>
+</body></html>

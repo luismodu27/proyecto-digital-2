@@ -1,0 +1,98 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../brand.css">
+<style>
+  .pano{position:relative;width:4320px;height:1350px;background:#faf8f2;color:#0f1a14;overflow:hidden;font-family:"Geist",sans-serif}
+  .pano::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity:.022;mix-blend-mode:multiply}
+  .track{position:absolute;left:0;top:0;width:4320px;height:1350px;z-index:1}
+  .col{position:absolute;top:0;width:1080px;height:1350px;z-index:2}
+  .c0{left:0}.c1{left:1080px}.c2{left:2160px}.c3{left:3240px}
+  .brand{position:absolute;top:86px;left:80px;display:flex;align-items:center;gap:15px}
+  .brand .seal{width:52px;height:52px;background:url("../assets/sealmark.png") center/contain no-repeat}
+  .brand .wm{font-family:"Fraunces",serif;font-weight:600;font-size:31px;color:#0f1a14}
+  .idx{position:absolute;top:96px;right:80px;font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.2em;color:#6b756e}
+  .kick{position:absolute;top:244px;left:80px;font-family:"Geist Mono",monospace;font-size:19px;letter-spacing:.2em;text-transform:uppercase;color:#b0824a}
+  .hl{position:absolute;top:302px;left:80px;width:940px;font-family:"Fraunces",serif;font-weight:600;font-size:72px;line-height:1.03;letter-spacing:-.015em;color:#0f1a14}
+  .cap{position:absolute;top:432px;left:80px;width:900px;font-family:"Geist",sans-serif;font-size:31px;line-height:1.45;color:#38443d}
+  .icon{position:absolute;top:716px;left:496px;width:88px;height:88px;color:#0b6b4e;z-index:3}
+  .badge{position:absolute;top:854px;left:80px;width:920px;text-align:center}
+  .badge span{display:inline-flex;align-items:center;gap:11px;font-family:"Geist Mono",monospace;font-size:17px;
+    letter-spacing:.12em;text-transform:uppercase;padding:12px 22px;border-radius:100px}
+  .badge .hi{color:#8a4f14;background:#f7ead8;border:1px solid #e6cba3}
+  .badge .tr{color:#33507e;background:#e8eef7;border:1px solid #c3d2ea}
+  .dotc{width:9px;height:9px;border-radius:50%;background:currentColor}
+  .foot{position:absolute;bottom:92px;left:80px;font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:#6b756e}
+  .cta{position:absolute;bottom:86px;left:80px;display:inline-flex;align-items:center;gap:12px;background:#0b6b4e;color:#fff;font-family:"Geist",sans-serif;font-weight:600;font-size:27px;padding:18px 30px;border-radius:100px}
+  .swipe{position:absolute;bottom:92px;right:80px;font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:#0b6b4e;display:flex;align-items:center;gap:10px}
+  .sup{position:absolute;top:960px;left:80px;width:900px;display:flex;flex-direction:column;gap:20px}
+  .sup .it{display:flex;align-items:flex-start;gap:16px;font-family:"Geist",sans-serif;font-size:25px;line-height:1.3;color:#38443d}
+  .sup .it::before{content:"";flex:none;width:11px;height:11px;margin-top:10px;border-radius:50%;background:#0b6b4e}
+</style></head>
+<body>
+<div class="pano">
+  <svg class="track" viewBox="0 0 4320 1350" xmlns="http://www.w3.org/2000/svg">
+    <line x1="40" y1="762" x2="464" y2="762" stroke="#0b6b4e" stroke-width="3"/>
+    <line x1="616" y1="762" x2="1560" y2="762" stroke="#0b6b4e" stroke-width="3"/>
+    <line x1="1680" y1="762" x2="2640" y2="762" stroke="#0b6b4e" stroke-width="3"/>
+    <line x1="2760" y1="762" x2="3720" y2="762" stroke="#0b6b4e" stroke-width="3"/>
+    <circle cx="540" cy="762" r="52" fill="#faf8f2" stroke="#0b6b4e" stroke-width="3"/>
+    <circle cx="1620" cy="762" r="52" fill="#faf8f2" stroke="#0b6b4e" stroke-width="3"/>
+    <circle cx="2700" cy="762" r="52" fill="#faf8f2" stroke="#0b6b4e" stroke-width="3"/>
+    <circle cx="3780" cy="762" r="52" fill="#faf8f2" stroke="#0b6b4e" stroke-width="3"/>
+    <path d="M3832 762 h320" stroke="#0b6b4e" stroke-width="3" fill="none"/>
+    <path d="M4138 750 l16 12 l-16 12" stroke="#0b6b4e" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+
+  <!-- S1 -->
+  <div class="col c0">
+    <div class="brand"><span class="seal"></span><span class="wm">Attesta</span></div>
+    <div class="idx">01 / 04</div>
+    <div class="kick">Tu proceso bajo la lupa</div>
+    <div class="hl">Cribado de CVs</div>
+    <div class="cap">Filtra automáticamente qué currículos pasan de fase.</div>
+    <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="11" y="6" width="26" height="36" rx="3"/><line x1="17" y1="17" x2="31" y2="17"/><line x1="17" y1="25" x2="31" y2="25"/><line x1="17" y1="33" x2="26" y2="33"/></svg>
+    <div class="badge"><span class="hi"><span class="dotc"></span>Alto riesgo · Anexo III</span></div>
+    <div class="sup"><div class="it">¿Con qué criterios descarta?</div><div class="it">Exige trazabilidad al proveedor</div></div>
+    <div class="foot">@attesta.io</div>
+    <div class="swipe">Desliza <span style="font-size:22px">→</span></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="col c1">
+    <div class="idx">02 / 04</div>
+    <div class="kick">Tu proceso bajo la lupa</div>
+    <div class="hl">Ranking de candidatos</div>
+    <div class="cap">Ordena a las personas por un “encaje” calculado por la IA.</div>
+    <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="40" x2="10" y2="24"/><line x1="20" y1="40" x2="20" y2="15"/><line x1="30" y1="40" x2="30" y2="20"/><line x1="40" y1="40" x2="40" y2="9"/></svg>
+    <div class="badge"><span class="hi"><span class="dotc"></span>Alto riesgo · Anexo III</span></div>
+    <div class="sup"><div class="it">¿Qué pesa en el “encaje”?</div><div class="it">Vigila el sesgo</div></div>
+    <div class="foot">Clasificación orientativa</div>
+  </div>
+
+  <!-- S3 -->
+  <div class="col c2">
+    <div class="idx">03 / 04</div>
+    <div class="kick">Tu proceso bajo la lupa</div>
+    <div class="hl">Entrevistas por vídeo</div>
+    <div class="cap">Analiza respuestas —y a veces voz o expresión— del candidato.</div>
+    <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="13" width="26" height="22" rx="3"/><path d="M32 20 L42 14 V34 L32 28 Z"/></svg>
+    <div class="badge"><span class="hi"><span class="dotc"></span>Alto riesgo · Anexo III</span></div>
+    <div class="sup"><div class="it">¿Analiza voz o expresión?</div><div class="it">Requiere supervisión humana</div></div>
+    <div class="foot">EU AI Act</div>
+  </div>
+
+  <!-- S4 -->
+  <div class="col c3">
+    <div class="idx">04 / 04</div>
+    <div class="kick">Tu proceso bajo la lupa</div>
+    <div class="hl">Chatbot de selección</div>
+    <div class="cap">Conversa con candidatos y resuelve sus dudas.</div>
+    <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12 h32 a2 2 0 0 1 2 2 v18 a2 2 0 0 1 -2 2 H22 l-9 7 v-7 H8 a2 2 0 0 1 -2 -2 V14 a2 2 0 0 1 2 -2 Z"/></svg>
+    <div class="badge"><span class="tr"><span class="dotc"></span>Transparencia · Art. 50</span></div>
+    <div class="sup"><div class="it">Debe avisar que es una IA</div><div class="it">Registra qué decide y qué no</div></div>
+    <div class="cta">Inventaría tu IA <span style="font-size:22px">→</span></div>
+  </div>
+
+</div>
+</body></html>

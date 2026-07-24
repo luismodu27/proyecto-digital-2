@@ -1,0 +1,107 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../brand.css">
+<style>
+  /* Banda de contexto superior */
+  .ctx{display:flex;align-items:center;gap:22px;background:var(--paper-sunken);border:1px solid var(--line);
+    border-radius:16px;padding:22px 28px;margin-top:34px}
+  .ctx .fig{font-family:"Fraunces",serif;font-weight:600;font-size:52px;line-height:.9;color:var(--seal);flex:none;letter-spacing:-.02em}
+  .ctx .tx{font-family:"Geist",sans-serif;font-size:24px;line-height:1.32;color:var(--ink-soft)}
+  .ctx .tx b{color:var(--ink);font-weight:600}
+
+  /* Tabla comparativa */
+  .cmp{margin-top:30px;border:1px solid var(--line);border-radius:20px;overflow:hidden}
+  .cmp .head{display:grid;grid-template-columns:1.05fr 1.4fr 1.55fr}
+  .cmp .head>div{padding:22px 30px}
+  .cmp .head .hl{font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.14em;text-transform:uppercase}
+  .cmp .head .c0{background:var(--paper-raised)}
+  .cmp .head .c1{background:var(--paper-sunken);color:var(--muted);border-left:1px solid var(--line)}
+  .cmp .head .c2{background:var(--brand);color:#eafff5;border-left:1px solid var(--brand-strong)}
+  .cmp .head .c2 .hl{color:#bfe6d4}
+  .cmp .head .brand-lb{font-family:"Fraunces",serif;font-weight:600;font-size:27px;margin-top:4px;color:#fff}
+
+  .cmp .r{display:grid;grid-template-columns:1.05fr 1.4fr 1.55fr;border-top:1px solid var(--line)}
+  .cmp .r>div{padding:26px 30px;display:flex;flex-direction:column;justify-content:center}
+  .cmp .r .lbl{font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .cmp .r .lbl-n{font-family:"Geist",sans-serif;font-weight:600;font-size:26px;color:var(--ink);margin-top:6px;letter-spacing:-.01em}
+  .cmp .r .old{background:var(--paper-sunken);border-left:1px solid var(--line);
+    font-family:"Geist",sans-serif;font-size:25px;line-height:1.3;color:var(--muted)}
+  .cmp .r .new{background:var(--brand-soft);border-left:1px solid var(--brand);
+    font-family:"Geist",sans-serif;font-size:25px;line-height:1.3;color:var(--brand-strong);font-weight:500}
+  .cmp .r .new b{color:var(--brand);font-weight:600}
+  .cmp .r .old .h{font-family:"Fraunces",serif;font-weight:600;font-size:30px;color:var(--ink-soft);letter-spacing:-.01em}
+  .cmp .r .new .h{font-family:"Fraunces",serif;font-weight:600;font-size:30px;color:var(--brand);letter-spacing:-.01em}
+
+  /* Caja de cierre tipo takeaway */
+  .take{background:var(--brand);color:#fff;border-radius:20px;padding:30px 36px;margin-top:26px;
+    display:flex;align-items:center;justify-content:space-between;gap:30px}
+  .take .k{font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:#bfe6d4}
+  .take .t{font-family:"Fraunces",serif;font-weight:600;font-size:34px;line-height:1.12;letter-spacing:-.01em;margin-top:10px}
+  .take .t .em{font-style:italic;color:#7fd8b4}
+  .take .btn{flex:none;font-family:"Geist",sans-serif;font-weight:600;font-size:24px;color:var(--brand);
+    background:#fff;border-radius:100px;padding:18px 30px;display:inline-flex;align-items:center;gap:12px}
+</style></head>
+<body>
+<div class="canvas">
+  <div class="frame">
+    <div class="brandbar">
+      <div class="brandmark"><span class="seal"></span><span class="wordmark">Attesta</span></div>
+      <span class="kicker">Consultores vs. software</span>
+    </div>
+
+    <div class="headline mt-m" style="max-width:920px;font-size:60px">
+      Compliance de IA <span class="em">sin pagar $500 la hora.</span>
+    </div>
+
+    <div class="ctx">
+      <span class="fig">$8–15M</span>
+      <span class="tx">Lo que un programa de compliance a medida llega a costar en <b>grandes empresas</b>. El mid-market necesita otro camino.</span>
+    </div>
+
+    <div class="cmp">
+      <div class="head">
+        <div class="c0"><span class="hl faint">&nbsp;</span></div>
+        <div class="c1"><span class="hl">El camino lento</span></div>
+        <div class="c2"><span class="hl">Con software</span><div class="brand-lb">Attesta</div></div>
+      </div>
+
+      <div class="r">
+        <div><span class="lbl">01</span><span class="lbl-n">Coste</span></div>
+        <div class="old"><span class="h">~$500/h</span><br>Consultor externo, por horas</div>
+        <div class="new"><span class="h">Incluido</span><br>En tu suscripción, <b>sin sorpresas</b></div>
+      </div>
+
+      <div class="r">
+        <div><span class="lbl">02</span><span class="lbl-n">Tiempo</span></div>
+        <div class="old"><span class="h">Semanas</span><br>Inventario y gap manuales</div>
+        <div class="new"><span class="h">Continuo</span><br>Flujo <b>siempre activo</b></div>
+      </div>
+
+      <div class="r">
+        <div><span class="lbl">03</span><span class="lbl-n">Resultado</span></div>
+        <div class="old"><span class="h">Un informe</span><br>Una foto fija que envejece</div>
+        <div class="new"><span class="h">Un sistema</span><br>Vivo, <b>consultable a diario</b></div>
+      </div>
+
+      <div class="r">
+        <div><span class="lbl">04</span><span class="lbl-n">Actualización</span></div>
+        <div class="old"><span class="h">Manual</span><br>Vuelves a contratar cada vez</div>
+        <div class="new"><span class="h">Automática</span><br>El radar <b>avisa de cambios</b></div>
+      </div>
+    </div>
+
+    <div class="take">
+      <div>
+        <div class="k">Por qué te importa</div>
+        <div class="t">Compra un <span class="em">sistema vivo</span>, no un PDF que caduca.</div>
+      </div>
+      <span class="btn">Empieza gratis →</span>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="footer">
+      <span class="handle">@attesta.io</span>
+      <span class="footnote">Autoevaluación · Preparación para auditoría</span>
+    </div>
+  </div>
+</div>
+</body></html>

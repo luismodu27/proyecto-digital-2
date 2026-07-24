@@ -1,0 +1,37 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../brand.css">
+<style>
+  .banner{position:relative;width:1500px;height:500px;background:#faf8f2;color:#0f1a14;overflow:hidden;font-family:"Geist",sans-serif}
+  .banner::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity:.022;mix-blend-mode:multiply}
+  .track{position:absolute;inset:0;z-index:1}
+  .wrap{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 120px}
+  .kick{font-family:"Geist Mono",monospace;font-size:17px;letter-spacing:.32em;text-transform:uppercase;color:#0b6b4e}
+  .hl{font-family:"Fraunces",serif;font-weight:600;font-size:62px;line-height:1.06;letter-spacing:-.015em;color:#0f1a14;margin-top:20px}
+  .hl .em{color:#0b6b4e;font-style:italic}
+  .rule{width:120px;height:2px;background:#b0824a;margin:26px 0 18px}
+  .sub{font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.18em;text-transform:uppercase;color:#6b756e}
+</style></head>
+<body>
+<div class="banner">
+  <svg class="track" viewBox="0 0 1500 500" xmlns="http://www.w3.org/2000/svg">
+    <line x1="0" y1="432" x2="1500" y2="432" stroke="#e4ddcd" stroke-width="2"/>
+    <g>
+      <circle cx="250" cy="432" r="9" fill="#faf8f2" stroke="#0b6b4e" stroke-width="2.5"/><circle cx="250" cy="432" r="3.5" fill="#0b6b4e"/>
+      <circle cx="620" cy="432" r="9" fill="#faf8f2" stroke="#0b6b4e" stroke-width="2.5"/><circle cx="620" cy="432" r="3.5" fill="#0b6b4e"/>
+      <circle cx="990" cy="432" r="9" fill="#faf8f2" stroke="#0b6b4e" stroke-width="2.5"/><circle cx="990" cy="432" r="3.5" fill="#0b6b4e"/>
+      <circle cx="1300" cy="432" r="15" fill="#0b6b4e"/><path d="M1293 432 l5 5 l9 -11" stroke="#faf8f2" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g fill="none" stroke="#ece5d6" stroke-width="1.6">
+      <circle cx="1420" cy="90" r="70"/><circle cx="1420" cy="90" r="130"/><circle cx="1420" cy="90" r="190"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="kick">Gobernanza continua de IA · EU&nbsp;AI&nbsp;Act</div>
+    <div class="hl">El sistema de registro de la <span class="em">gobernanza de IA.</span></div>
+    <div class="rule"></div>
+    <div class="sub">Autoevaluación · Preparación para auditoría · Evidencia declarada</div>
+  </div>
+</div>
+</body></html>

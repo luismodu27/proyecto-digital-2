@@ -1,0 +1,116 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../brand.css">
+<style>
+  .split{display:grid;grid-template-columns:1.28fr .72fr;gap:40px;margin-top:34px;align-items:start}
+
+  /* Lista "Qué incluye" */
+  .kick{font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:var(--seal);font-weight:500}
+  .incl{list-style:none;margin-top:24px;display:flex;flex-direction:column}
+  .incl li{display:flex;gap:22px;align-items:flex-start;padding:24px 0;border-bottom:1px solid var(--line)}
+  .incl li:last-child{border-bottom:0}
+  .incl .ck{width:44px;height:44px;flex:none;border-radius:50%;background:var(--brand-soft);
+    display:flex;align-items:center;justify-content:center;margin-top:2px}
+  .incl .tx .h{font-family:"Fraunces",serif;font-weight:600;font-size:34px;line-height:1.06;color:var(--ink);letter-spacing:-.012em}
+  .incl .tx .h .qual{font-family:"Geist",sans-serif;font-weight:500;font-size:21px;color:var(--seal);
+    letter-spacing:.02em;margin-left:10px;vertical-align:middle}
+  .incl .tx .s{font-family:"Geist",sans-serif;font-size:24px;line-height:1.34;color:var(--muted);margin-top:7px}
+
+  /* Columna mockup PDF */
+  .aside{position:sticky;top:0}
+  .doc-shadow{filter:drop-shadow(0 30px 46px rgba(15,26,20,.14)) drop-shadow(0 6px 12px rgba(15,26,20,.08))}
+  .meta{margin-top:26px;border:1px solid var(--line);border-radius:16px;background:var(--paper-raised);padding:24px 26px}
+  .meta .row2{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 0}
+  .meta .row2+.row2{border-top:1px solid var(--line)}
+  .meta .kk{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .meta .vv{font-family:"Geist",sans-serif;font-weight:600;font-size:22px;color:var(--ink)}
+  .meta .vv.jade{color:var(--brand)}
+
+  /* Cierre */
+  .close{background:var(--brand);color:#fff;border-radius:20px;padding:28px 36px;margin-top:30px;
+    display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .close .t{font-family:"Fraunces",serif;font-weight:600;font-size:38px;line-height:1.05;letter-spacing:-.01em}
+  .close .t .em{font-style:italic;color:#7fd8b4}
+  .close .pill{flex:none;font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.14em;text-transform:uppercase;
+    color:#bfe6d4;border:1px solid var(--brand-strong);border-radius:100px;padding:12px 22px}
+</style></head>
+<body>
+<div class="canvas">
+  <div class="frame">
+    <div class="brandbar">
+      <div class="brandmark"><span class="seal"></span><span class="wordmark">Attesta</span></div>
+      <span class="kicker">Evidencia lista</span>
+    </div>
+
+    <div class="headline mt-m" style="max-width:940px;font-size:58px">
+      El <span class="em">dossier de gobernanza</span> que arma tu evidencia por ti.
+    </div>
+
+    <div class="split">
+      <div>
+        <span class="kick">Qué incluye · por sistema</span>
+        <ul class="incl">
+          <li>
+            <span class="ck"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11.5l4.5 4.5L18 6" stroke="#0b6b4e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="tx"><div class="h">Clasificación de riesgo<span class="qual">orientativa</span></div><div class="s">Alto, limitado o mínimo según el uso real declarado.</div></span>
+          </li>
+          <li>
+            <span class="ck"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11.5l4.5 4.5L18 6" stroke="#0b6b4e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="tx"><div class="h">Obligaciones aplicables</div><div class="s">Los artículos del AI Act que tocan a ese sistema.</div></span>
+          </li>
+          <li>
+            <span class="ck"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11.5l4.5 4.5L18 6" stroke="#0b6b4e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="tx"><div class="h">Brechas identificadas</div><div class="s">Qué falta hoy para llegar al 100&nbsp;% listo.</div></span>
+          </li>
+          <li>
+            <span class="ck"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11.5l4.5 4.5L18 6" stroke="#0b6b4e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="tx"><div class="h">Plan de acción sugerido</div><div class="s">Pasos priorizados con responsable y fecha.</div></span>
+          </li>
+          <li>
+            <span class="ck"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11.5l4.5 4.5L18 6" stroke="#0b6b4e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="tx"><div class="h">Registro inmutable</div><div class="s">Traza de cada cambio: quién, qué y cuándo.</div></span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="aside">
+        <svg width="100%" viewBox="0 0 340 300" class="doc-shadow" xmlns="http://www.w3.org/2000/svg">
+          <rect x="40" y="24" width="248" height="256" rx="12" fill="#ffffff" stroke="#e6e1d4" stroke-width="2" transform="rotate(-3 164 152)"/>
+          <rect x="34" y="18" width="260" height="266" rx="14" fill="#ffffff" stroke="#d6d0bf" stroke-width="2"/>
+          <rect x="34" y="18" width="260" height="60" rx="14" fill="#0b6b4e"/>
+          <rect x="34" y="60" width="260" height="12" fill="#0b6b4e"/>
+          <circle cx="66" cy="48" r="15" fill="none" stroke="#faf8f2" stroke-width="2"/>
+          <path d="M59 48 l5 5 l9 -11" fill="none" stroke="#faf8f2" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="90" y="40" width="96" height="9" rx="4.5" fill="#faf8f2"/>
+          <rect x="90" y="55" width="60" height="6" rx="3" fill="#7fd8b4"/>
+          <rect x="222" y="40" width="56" height="22" rx="11" fill="#c9761f"/>
+          <text x="250" y="55" font-family="Geist Mono, monospace" font-size="11" letter-spacing="1" fill="#fff" text-anchor="middle">ALTO</text>
+          <g fill="#e6e1d4"><rect x="58" y="100" width="200" height="8" rx="4"/><rect x="58" y="118" width="176" height="8" rx="4"/></g>
+          <rect x="58" y="146" width="70" height="7" rx="3.5" fill="#b0824a"/>
+          <g fill="#eef0ea"><rect x="58" y="164" width="216" height="20" rx="6"/><rect x="58" y="190" width="216" height="20" rx="6"/><rect x="58" y="216" width="216" height="20" rx="6"/></g>
+          <g fill="#0b6b4e"><circle cx="70" cy="174" r="5"/><circle cx="70" cy="200" r="5"/><circle cx="70" cy="226" r="5"/></g>
+          <g fill="#cfe3d8"><rect x="84" y="170" width="130" height="7" rx="3.5"/><rect x="84" y="196" width="112" height="7" rx="3.5"/><rect x="84" y="222" width="140" height="7" rx="3.5"/></g>
+          <circle cx="258" cy="250" r="20" fill="none" stroke="#b0824a" stroke-width="2"/>
+          <path d="M249 250 l6 6 l11 -14" fill="none" stroke="#b0824a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+
+        <div class="meta">
+          <div class="row2"><span class="kk">Formato</span><span class="vv">PDF</span></div>
+          <div class="row2"><span class="kk">Alcance</span><span class="vv">Por sistema</span></div>
+          <div class="row2"><span class="kk">Genera en</span><span class="vv jade">1 clic</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="close">
+      <div class="t">Toda tu evidencia declarada, <span class="em">en PDF, con un clic.</span></div>
+      <span class="pill">Listo para el auditor</span>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="footer">
+      <span class="handle">@attesta.io</span>
+      <span class="footnote">Preparación para auditoría · Evidencia declarada</span>
+    </div>
+  </div>
+</div>
+</body></html>

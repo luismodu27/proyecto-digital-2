@@ -1,0 +1,73 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../brand.css">
+<style>
+  .figs{display:flex;align-items:baseline;gap:30px;flex-wrap:wrap}
+  .fig{font-family:"Fraunces",serif;font-weight:600;line-height:.9;letter-spacing:-.02em;color:var(--ink);position:relative}
+  .fig .n{font-size:150px;display:inline-block}
+  .fig .u{font-size:62px}
+  .fig .ul{position:absolute;left:0;right:0;bottom:-12px;height:5px;background:var(--seal);border-radius:3px}
+  .orsep{font-family:"Fraunces",serif;font-style:italic;font-size:50px;color:var(--muted)}
+  .tiers{margin-top:38px;border-top:1px solid var(--line)}
+  .tier{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:22px 0;border-bottom:1px solid var(--line)}
+  .tier .lb{min-width:0}
+  .tier .lb .t{display:block;font-family:"Geist",sans-serif;font-size:27px;font-weight:600;color:var(--ink);line-height:1.2}
+  .tier .lb .s{display:block;font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+  .tier .amt{font-family:"Fraunces",serif;font-weight:600;font-size:36px;color:var(--brand-strong);white-space:nowrap;text-align:right;line-height:1}
+  .tier .amt .pct{display:block;font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.06em;color:var(--muted);margin-top:8px;font-weight:400}
+  .tier.gdpr .amt{color:var(--ink-soft)}
+  .tier.gdpr .lb .t{color:var(--ink-soft)}
+  .gdprtag{font-family:"Geist Mono",monospace;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line-strong);border-radius:100px;padding:5px 12px;display:inline-block;margin-bottom:10px}
+  .close{background:var(--paper-raised);border:1px solid var(--line);border-radius:20px;padding:30px 34px;margin-top:34px}
+  .close .k{font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .close .t{font-family:"Fraunces",serif;font-style:italic;font-weight:500;font-size:38px;line-height:1.14;color:var(--brand-strong);margin-top:12px;letter-spacing:-.01em}
+</style></head>
+<body>
+<div class="canvas dark">
+  <div class="frame">
+    <div class="brandbar">
+      <div class="brandmark"><span class="seal"></span><span class="wordmark">Attesta</span></div>
+      <span class="kicker">Sanciones · Informativo</span>
+    </div>
+
+    <div class="small mt-l" style="letter-spacing:.02em;color:var(--ink-soft);font-size:28px">Las sanciones del EU AI Act llegan hasta</div>
+    <div class="figs mt-s">
+      <span class="fig"><span class="n">35</span><span class="u"> M€</span><span class="ul"></span></span>
+      <span class="orsep">o el</span>
+      <span class="fig"><span class="n">7</span><span class="u">%</span><span class="ul"></span></span>
+    </div>
+    <div class="lead mt-m" style="max-width:920px;color:var(--ink);font-size:29px">
+      de la facturación global anual. La cuantía depende de la gravedad de la infracción:
+    </div>
+
+    <div class="tiers">
+      <div class="tier">
+        <span class="lb"><span class="t">Prácticas prohibidas</span><span class="s">Art. 5 · IA vetada</span></span>
+        <span class="amt">hasta 35 M€<span class="pct">o 7% facturación</span></span>
+      </div>
+      <div class="tier">
+        <span class="lb"><span class="t">Sistemas de alto riesgo</span><span class="s">RRHH · Anexo III</span></span>
+        <span class="amt">hasta 15 M€<span class="pct">o 3% facturación</span></span>
+      </div>
+      <div class="tier">
+        <span class="lb"><span class="t">Información incorrecta</span><span class="s">A autoridades</span></span>
+        <span class="amt">hasta 7,5 M€<span class="pct">o 1% facturación</span></span>
+      </div>
+      <div class="tier gdpr">
+        <span class="lb"><span class="gdprtag">Referencia · GDPR</span><span class="t">Protección de datos</span></span>
+        <span class="amt">hasta 20 M€<span class="pct">o 4% facturación</span></span>
+      </div>
+    </div>
+
+    <div class="close">
+      <div class="k">Por qué lo compartimos</div>
+      <div class="t">La tranquilidad se construye antes, no después.</div>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="footer">
+      <span class="handle">@attesta.io</span>
+      <span class="footnote">Contenido informativo, no asesoría legal</span>
+    </div>
+  </div>
+</div>
+</body></html>
