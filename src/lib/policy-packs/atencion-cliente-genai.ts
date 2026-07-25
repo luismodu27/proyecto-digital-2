@@ -35,7 +35,7 @@ export const ATENCION_CLIENTE_GENAI_PACK: PolicyPack = {
   summary:
     "Controles para chatbots de soporte al cliente e IA generativa de contenido público (riesgo limitado / transparencia del Art. 50, GPAI y RGPD; por regla general NO alto riesgo del Anexo III). Aplícalo a un sistema para precargar sus brechas.",
   note:
-    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 (avisos de chatbot, deepfakes, contenido sintético) aplica el 2-ago-2026 y NO fue aplazada por el Digital Omnibus (que solo movió el alto riesgo del Anexo III al 2-dic-2027). Estos sistemas son, por regla general, de riesgo LIMITADO: no confundas transparencia con las obligaciones de alto riesgo. Las obligaciones GPAI (Cap. V) recaen en el proveedor del modelo, no en quien solo lo usa vía API/SaaS. Además del AI Act aplica siempre el RGPD. Este pack te deja lista la evidencia con antelación.",
+    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 (avisos de chatbot, deepfakes, contenido sintético) aplica el 2-ago-2026 y NO fue aplazada por el Digital Omnibus (que solo movió el alto riesgo del Anexo III al 2-dic-2027, aplazamiento adoptado y firmado en 2026 pero pendiente de publicación en el DOUE). Estos sistemas son, por regla general, de riesgo LIMITADO: no confundas transparencia con las obligaciones de alto riesgo. Las obligaciones GPAI (Cap. V) recaen en el proveedor del modelo, no en quien solo lo usa vía API/SaaS. Además del AI Act aplica siempre el RGPD. Este pack te deja lista la evidencia con antelación.",
   controls: [
     {
       id: "clasificacion-triaje",
@@ -204,7 +204,7 @@ export const ATENCION_CLIENTE_GENAI_PACK_EN: PolicyPack = {
   summary:
     "Controls for customer-support chatbots and generative AI for public content (limited risk / Art. 50 transparency, GPAI and GDPR; as a general rule NOT high-risk under Annex III). Apply it to a system to preload its gaps.",
   note:
-    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions are already enforceable (since 2 Feb 2025); Art. 50 transparency (chatbot notices, deepfakes, synthetic content) applies on 2 Aug 2026 and was NOT postponed by the Digital Omnibus (which only moved Annex III high-risk to 2 Dec 2027). These systems are, as a general rule, LIMITED risk: do not confuse transparency with the high-risk obligations. The GPAI obligations (Chapter V) fall on the model provider, not on someone who merely uses it via API/SaaS. Beyond the AI Act, the GDPR always applies. This pack gets your evidence ready ahead of time.",
+    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions are already enforceable (since 2 Feb 2025); Art. 50 transparency (chatbot notices, deepfakes, synthetic content) applies on 2 Aug 2026 and was NOT postponed by the Digital Omnibus (which only moved Annex III high-risk to 2 Dec 2027, a postponement adopted and signed in 2026 but pending publication in the OJEU). These systems are, as a general rule, LIMITED risk: do not confuse transparency with the high-risk obligations. The GPAI obligations (Chapter V) fall on the model provider, not on someone who merely uses it via API/SaaS. Beyond the AI Act, the GDPR always applies. This pack gets your evidence ready ahead of time.",
   controls: [
     {
       id: "clasificacion-triaje",

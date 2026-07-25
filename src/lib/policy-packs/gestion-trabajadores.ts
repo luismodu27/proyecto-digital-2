@@ -36,7 +36,7 @@ export const GESTION_TRABAJADORES_PACK: PolicyPack = {
   summary:
     "Controles para IA de gestión, evaluación y monitorización de trabajadores (alto riesgo, Anexo III.4.b). Aplícalo a un sistema para precargar sus brechas.",
   note:
-    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 —incluido el reconocimiento de emociones en el trabajo (Art. 5.1.f)— ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 aplica el 2-ago-2026. Las obligaciones de alto riesgo del Anexo III.4.b (Arts. 14/26/27) se aplazaron al 2-dic-2027 con el Digital Omnibus, NO el 2-ago-2026 (un error extendido en el mercado). Además del AI Act aplica el RGPD y el derecho laboral nacional/convenios (Art. 88 RGPD), que pueden exigir consulta previa a los representantes. Este pack te deja lista la evidencia con antelación.",
+    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 —incluido el reconocimiento de emociones en el trabajo (Art. 5.1.f)— ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 aplica el 2-ago-2026. Las obligaciones de alto riesgo del Anexo III.4.b (Arts. 14/26/27) se aplazaron al 2-dic-2027 con el Digital Omnibus, NO el 2-ago-2026 (un error extendido en el mercado). El aplazamiento fue adoptado (Consejo, 29-jun-2026) y firmado (8-jul-2026) pero está pendiente de publicación en el DOUE: confirma su publicación antes de planificar sobre la fecha de 2027. Además del AI Act aplica el RGPD y el derecho laboral nacional/convenios (Art. 88 RGPD), que pueden exigir consulta previa a los representantes. Este pack te deja lista la evidencia con antelación.",
   controls: [
     {
       id: "emociones-prohibicion",
@@ -238,7 +238,7 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
   summary:
     "Controls for AI that manages, evaluates and monitors workers (high-risk, Annex III.4.b). Apply it to a system to preload its gaps.",
   note:
-    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions —including emotion recognition in the workplace (Art. 5.1.f)— are already enforceable (since 2 Feb 2025); Art. 50 transparency applies on 2 Aug 2026. The Annex III.4.b high-risk obligations (Arts. 14/26/27) were postponed to 2 Dec 2027 by the Digital Omnibus, NOT 2 Aug 2026 (a widespread misconception in the market). Beyond the AI Act, the GDPR and national labor law/collective agreements also apply (Art. 88 GDPR), which may require prior consultation of representatives. This pack gets your evidence ready ahead of time.",
+    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions —including emotion recognition in the workplace (Art. 5.1.f)— are already enforceable (since 2 Feb 2025); Art. 50 transparency applies on 2 Aug 2026. The Annex III.4.b high-risk obligations (Arts. 14/26/27) were postponed to 2 Dec 2027 by the Digital Omnibus, NOT 2 Aug 2026 (a widespread misconception in the market). The postponement was adopted (Council, 29 Jun 2026) and signed (8 Jul 2026) but is pending publication in the OJEU: confirm its publication before planning around the 2027 date. Beyond the AI Act, the GDPR and national labor law/collective agreements also apply (Art. 88 GDPR), which may require prior consultation of representatives. This pack gets your evidence ready ahead of time.",
   controls: [
     {
       id: "emociones-prohibicion",

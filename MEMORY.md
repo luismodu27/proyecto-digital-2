@@ -1838,5 +1838,12 @@ diseño, nombre, features grandes); autónomo en lo demás.
 - **Canal:** consultores/auditores como aliados ("powered by" + reparto), no competencia.
 
 ### 13.6 Corrección de fechas vs el doc
-- El doc dice "deadline ago-2026, posible aplazamiento". **Actualizado:** el Omnibus ya se
-  adoptó (2026) → alto riesgo **2 dic 2027** (ver §6). El mensaje es "ventana, no urgencia".
+- El doc dice "deadline ago-2026, posible aplazamiento". **Actualizado:** el Omnibus mueve el
+  alto riesgo del Anexo III a **2 dic 2027** (ver §6). El mensaje es "ventana, no urgencia".
+- **Matiz de honestidad (2026-07-25, revisor adversarial del pack `educacion`):** ese aplazamiento
+  fue **adoptado** (Consejo, 29-jun-2026) y **firmado** (8-jul-2026) pero **pendiente de publicación
+  en el DOUE** a esa fecha → hasta que se publique, la fecha vinculante nominal sigue siendo 2-ago-2026.
+  **Todos los packs UE** (`rrhh`, `gestion-trabajadores`, `atencion-cliente-genai`, `credito-seguros`,
+  `educacion`) redactan el plazo pidiendo **verificar la publicación** antes de planificar sobre 2027
+  (regla de marca: no fingir certeza legal). Si el DOUE publica, se promueve el dato sin cambiar la
+  afirmación.
