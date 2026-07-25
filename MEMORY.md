@@ -127,6 +127,32 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-25** · **Foso — nuevo policy pack UE `educacion` (Educación y formación, Anexo III.3).** El fundador decidió
+  ampliar el foso al vertical de **educación** (nuevo caso de uso, distinto de la cuña RRHH). Investigado y verificado en
+  **DOS pasadas** por el `compliance-domain-expert` (draft + revisión adversarial de citas), contra el texto del EU AI Act
+  (Anexo III.3.a-d; Arts. 4, 5.1.a/b/f, 14, 26, 27, 49, 50, 86), RGPD (Arts. 5, 13-14, 22, 35 + Considerando 71) y
+  antidiscriminación, con fuentes (artificialintelligenceact.eu, FPF, Gibson Dunn, White & Case, Freshfields). **20
+  controles** del deployer, **1 solo `prohibited:true`** (`emociones-prohibicion`). Nuevo archivo `policy-packs/educacion.ts`
+  (`EDUCACION_PACK` + `_EN` validado), cableado en `index.ts` (tras `credito-seguros`, antes de los packs US). Sin migración
+  (la infra de packs es genérica; `prohibited` ya lo soporta 0022). Verificado: tsc + lint + build (exit 0); espejo ES/EN con
+  mismos 20 ids en el mismo orden.
+  - **TRAMPAS clave (lo que hace honesto el pack):** (1) inferir emociones/atención/«engagement» de estudiantes por
+    biometría en un centro educativo = **PROHIBIDO** (Art. 5.1.f, vigente 2-feb-2025), no alto riesgo → triaje. (2)
+    **Proctoring** (III.3.d) es alto riesgo GESTIONABLE si detecta comportamiento observable, pero cruza a la **prohibición**
+    si infiere estados internos por biometría → se documenta la línea roja, no se afirma la clasificación (nota del Art. 6.3
+    para tareas procedimentales estrechas; antiplagio documental normalmente fuera de III.3.d). (3) **FRIA (Art. 27) SÍ suele
+    aplicar** (al revés que RRHH): centros públicos u entidades privadas que prestan servicio público → severidad **alta**;
+    NO alcanza a todo EdTech privado ni a formación corporativa interna. (4) **Menores** → protección reforzada RGPD +
+    **Considerando 71** (decisiones únicamente automatizadas no deberían afectar a un menor). (5) **Registro en la base de
+    datos de la UE (Art. 49.4)** para deployers públicos.
+  - **Corrección del revisor adversarial aplicada:** el plazo del **Digital Omnibus** (alto riesgo Anexo III → 2-dic-2027)
+    NO se afirma como firme: adoptado (Consejo 29-jun-2026) y firmado (8-jul-2026) pero **pendiente de publicación en el
+    DOUE** a 25-jul-2026; la `note` y los `conditional` piden **verificar la publicación** antes de planificar sobre 2027
+    (coherente con la regla de marca de no fingir certeza). **CHECKPOINT abierto:** los otros 6 packs afirman "2-dic-2027 vía
+    Omnibus" sin ese matiz (y MEMORY §13.6 lo daba por hecho) — pendiente decidir si se alinea ese wording en todos los packs.
+  - **Descartado del pack (por diseño):** EE. UU. (FERPA/COPPA/leyes estatales) → pack `us-*` futuro separado; controles de
+    proveedor puro (Arts. 9-13/15) reencuadrados como "exige evidencia del proveedor", no como deber propio.
+
 - **2026-07-23** · **Red team ronda 3 (corta): LIMPIA, 0 hallazgos.** Verificó que los fixes de 0025 aguantan (plan
   no escribible por el cliente; guard de suscripción) y barrido de completitud (escalada, aislamiento, rutas API, plan.ts).
   Nada sobrevivió a la verificación adversarial. **Cierre del loop de seguridad ("suficiente").** Estado tras 3 rondas:
