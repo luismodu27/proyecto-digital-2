@@ -23,7 +23,7 @@ export const RRHH_PACK: PolicyPack = {
   summary:
     "Controles típicos para IA de selección de personal (alto riesgo, Anexo III). Aplícalo a un sistema para precargar sus brechas.",
   note:
-    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 aplica el 2-ago-2026. Las obligaciones de alto riesgo del Anexo III (empleo, Arts. 14/26/27) se aplazaron al 2-dic-2027 con el Digital Omnibus — NO el 2-ago-2026, un error extendido en el mercado. Este pack te deja lista la evidencia con antelación.",
+    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 aplica el 2-ago-2026. Las obligaciones de alto riesgo del Anexo III (empleo, Arts. 14/26/27) se aplazaron al 2-dic-2027 con el Digital Omnibus — NO el 2-ago-2026, un error extendido en el mercado. El aplazamiento fue adoptado (Consejo, 29-jun-2026) y firmado (8-jul-2026) pero está pendiente de publicación en el DOUE: confirma su publicación antes de planificar sobre la fecha de 2027. Este pack te deja lista la evidencia con antelación.",
   controls: [
     {
       id: "alfabetizacion-ia",
@@ -165,7 +165,7 @@ export const RRHH_PACK_EN: PolicyPack = {
   summary:
     "Typical controls for personnel-selection AI (high-risk, Annex III). Apply it to a system to preload its gaps.",
   note:
-    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions are already enforceable (since 2 Feb 2025); Art. 50 transparency applies on 2 Aug 2026. The Annex III high-risk obligations (employment, Arts. 14/26/27) were postponed to 2 Dec 2027 by the Digital Omnibus — NOT 2 Aug 2026, a widespread misconception in the market. This pack gets your evidence ready ahead of time.",
+    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions are already enforceable (since 2 Feb 2025); Art. 50 transparency applies on 2 Aug 2026. The Annex III high-risk obligations (employment, Arts. 14/26/27) were postponed to 2 Dec 2027 by the Digital Omnibus — NOT 2 Aug 2026, a widespread misconception in the market. The postponement was adopted (Council, 29 Jun 2026) and signed (8 Jul 2026) but is pending publication in the OJEU: confirm its publication before planning around the 2027 date. This pack gets your evidence ready ahead of time.",
   controls: [
     {
       id: "alfabetizacion-ia",

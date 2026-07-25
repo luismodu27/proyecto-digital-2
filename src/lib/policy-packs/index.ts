@@ -20,6 +20,7 @@ import {
   CREDITO_SEGUROS_PACK,
   CREDITO_SEGUROS_PACK_EN,
 } from "./credito-seguros";
+import { EDUCACION_PACK, EDUCACION_PACK_EN } from "./educacion";
 import { US_HIRING_PACK, US_HIRING_PACK_EN } from "./us-hiring";
 import { US_CA_FEHA_PACK, US_CA_FEHA_PACK_EN } from "./us-ca-feha";
 import { US_CA_ADMT_PACK, US_CA_ADMT_PACK_EN } from "./us-ca-admt";
@@ -34,6 +35,7 @@ export {
   ATENCION_CLIENTE_GENAI_PACK_EN,
 } from "./atencion-cliente-genai";
 export { CREDITO_SEGUROS_PACK, CREDITO_SEGUROS_PACK_EN } from "./credito-seguros";
+export { EDUCACION_PACK, EDUCACION_PACK_EN } from "./educacion";
 export { US_HIRING_PACK, US_HIRING_PACK_EN } from "./us-hiring";
 export { US_CA_FEHA_PACK, US_CA_FEHA_PACK_EN } from "./us-ca-feha";
 export { US_CA_ADMT_PACK, US_CA_ADMT_PACK_EN } from "./us-ca-admt";
@@ -44,6 +46,7 @@ export const POLICY_PACKS: PolicyPack[] = [
   GESTION_TRABAJADORES_PACK,
   ATENCION_CLIENTE_GENAI_PACK,
   CREDITO_SEGUROS_PACK,
+  EDUCACION_PACK,
   US_HIRING_PACK,
   US_CA_FEHA_PACK,
   US_CA_ADMT_PACK,
@@ -55,6 +58,7 @@ export const POLICY_PACKS_EN: PolicyPack[] = [
   GESTION_TRABAJADORES_PACK_EN,
   ATENCION_CLIENTE_GENAI_PACK_EN,
   CREDITO_SEGUROS_PACK_EN,
+  EDUCACION_PACK_EN,
   US_HIRING_PACK_EN,
   US_CA_FEHA_PACK_EN,
   US_CA_ADMT_PACK_EN,
