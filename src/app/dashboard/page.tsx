@@ -188,17 +188,25 @@ export default async function DashboardOverview() {
           hint={o.stat.systemsHint}
           href="/dashboard/inventario"
         />
+        {/* Las cuatro tarjetas son navegables: sin `href` tienen el mismo aspecto
+            de tarjeta pulsable pero no llevan a ninguna parte. "Alto riesgo" va a
+            la clasificación (donde se actúa sobre el riesgo) y "% listo" a las
+            brechas, que es lo que mueve ese número. Un inventario FILTRADO por
+            riesgo sería el destino ideal, pero el filtro llega en el Sprint 4
+            (PENDIENTES §0.D): no se enlaza a un parámetro que hoy se ignoraría. */}
         <StatCard
           label={o.stat.highRisk}
           value={highRisk}
           hint={o.stat.highRiskHint}
           accent="warn"
+          href="/dashboard/riesgo"
         />
         <StatCard
           label={o.stat.avgReadiness}
           value={`${avg}%`}
           hint={`${o.stat.avgReadinessHintBefore}${AUDIT_READY_THRESHOLD}${o.stat.avgReadinessHintAfter}`}
           accent={isAuditReady(avg) ? "brand" : "warn"}
+          href="/dashboard/gap"
         />
         <StatCard
           label={o.stat.openGaps}
