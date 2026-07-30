@@ -1,6 +1,23 @@
 import { CtaLink } from "@/components/telemetry/CtaLink";
 import { Reveal } from "@/components/ui/Reveal";
+import { POLICY_PACKS } from "@/lib/policy-packs";
 import type { Dictionary } from "@/lib/i18n";
+
+/**
+ * El número de policy packs se DERIVA del catálogo, no se escribe a mano.
+ *
+ * Estaba escrito ("8 packs") en cuatro cadenas del diccionario y ya se había
+ * quedado corto al añadir el noveno. Es la peor clase de error de copy: una
+ * afirmación numérica y comprobable, en la página de precios, que envejece sola y
+ * en silencio. Ahora el diccionario escribe `{packs}` y el número lo pone el
+ * catálogo, así que un pack nuevo actualiza la landing sin que nadie se acuerde.
+ *
+ * Este es un componente de servidor, así que importar el catálogo entero no añade
+ * nada al bundle del navegador.
+ */
+function fill(text: string): string {
+  return text.replace("{packs}", String(POLICY_PACKS.length));
+}
 
 // Estructura (estructural) por plan — el texto llega por diccionario.
 // Diagnóstico y Preparación abren el formulario ya en modo REGISTRO (`?signup=1`):
@@ -135,7 +152,7 @@ export function Pricing({ t }: { t: Dictionary["landing"]["pricing"] }) {
                             strokeLinejoin="round"
                           />
                         </svg>
-                        {f}
+                        {fill(f)}
                       </li>
                     ))}
                   </ul>
@@ -187,7 +204,7 @@ export function Pricing({ t }: { t: Dictionary["landing"]["pricing"] }) {
             <tbody>
               {t.compare.rows.map((label, r) => (
                 <tr key={label} className="border-b border-line">
-                  <td className="py-3 pr-4 text-sm text-ink">{label}</td>
+                  <td className="py-3 pr-4 text-sm text-ink">{fill(label)}</td>
                   {COMPARE_CELLS[r].map((cell, i) => (
                     <td
                       key={i}

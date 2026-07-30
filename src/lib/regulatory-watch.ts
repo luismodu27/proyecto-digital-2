@@ -125,8 +125,8 @@ export const FRAMEWORK_META: Record<RegFramework, FrameworkMeta> = {
     jurisdictionLabel: "EE. UU. — Nueva York",
   },
   "us-co-aiact": {
-    label: "Colorado AI Act (SB 26-189)",
-    short: "Colorado AI Act",
+    label: "Colorado ADMT Act (SB 26-189)",
+    short: "Colorado ADMT",
     jurisdiction: "us-co",
     jurisdictionLabel: "EE. UU. — Colorado",
   },
@@ -188,8 +188,8 @@ export const FRAMEWORK_META_EN: Record<RegFramework, FrameworkMeta> = {
     jurisdictionLabel: "US — New York",
   },
   "us-co-aiact": {
-    label: "Colorado AI Act (SB 26-189)",
-    short: "Colorado AI Act",
+    label: "Colorado ADMT Act (SB 26-189)",
+    short: "Colorado ADMT",
     jurisdiction: "us-co",
     jurisdictionLabel: "US — Colorado",
   },
@@ -578,9 +578,9 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     impact:
       "El empleo es una 'decisión consecuente', así que si operas en Colorado y usas IA en contratación, esta ley te alcanza como deployer/usuario. PERO cuidado con material desactualizado: gran parte de lo publicado describe la SB 24-205 (deber de cuidado + impact assessments) que YA NO es la ley vigente. El régimen aplicable a 2027 es el de SB 26-189, más ligero en cargas de riesgo pero con foco en transparencia, aviso y revisión humana. Es ventana, no urgencia.",
     action:
-      "No inviertas todavía en documentación pesada asumiendo el modelo antiguo de Colorado. Mantén este evento en observación y reconfirma el contenido definitivo de SB 26-189 (aviso al consumidor, derecho a revisión humana, documentación exigible al proveedor) conforme se publique el texto consolidado y las reglas del Fiscal General. Marca tus sistemas de selección usados en Colorado para revisión antes de 2027.",
+      "Aplica el policy pack de Colorado a tus sistemas usados allí: los deberes son de aviso previo, explicación en 30 días tras un resultado adverso, corrección de datos, revisión humana significativa y conservación del expediente de cada decisión 3 años. NO montes programa de gestión de riesgos ni evaluaciones de impacto: esta versión de la ley no los exige. Y no cuentes con 'cumplimos NIST AI RMF' como defensa: esa defensa afirmativa existía en la ley derogada y no sobrevivió. Falta por publicarse el reglamento del Fiscal General (obligado antes del 1-ene-2027) que define 'influir materialmente' y el contenido de la carta al consumidor: verifícalo antes de cerrar plantillas y alcance.",
     articles: [
-      "SB 26-189 (deroga y reescribe C.R.S. § 6-1-1701 y ss.) — numeración consolidada a reconfirmar",
+      "C.R.S. §§ 6-1-1701 a 6-1-1709 (Parte 17, derogada y reexpedida por SB 26-189)",
     ],
     source: {
       label: "Colorado General Assembly — SB 26-189 (fuente legislativa oficial)",
@@ -1021,9 +1021,9 @@ export const REGULATORY_EVENTS_EN: RegulatoryEvent[] = [
     impact:
       "Employment is a 'consequential decision', so if you operate in Colorado and use AI in hiring, this law reaches you as a deployer/user. BUT beware of outdated material: much of what is published describes SB 24-205 (duty of care + impact assessments), which is NO LONGER the law in force. The regime applicable in 2027 is SB 26-189, lighter on risk burdens but focused on transparency, notice and human review. It is a window, not urgency.",
     action:
-      "Do not yet invest in heavy documentation assuming the old Colorado model. Keep this event under watch and reconfirm the final content of SB 26-189 (consumer notice, right to human review, documentation required from the provider) as the consolidated text and the Attorney General's rules are published. Flag your hiring systems used in Colorado for review before 2027.",
+      "Apply the Colorado policy pack to the systems you use there: the duties are advance notice, a plain-language explanation within 30 days of an adverse outcome, data correction, meaningful human review, and keeping the file for each decision for 3 years. Do NOT build a risk-management program or impact assessments: this version of the law does not require them. And do not count on 'we follow the NIST AI RMF' as a defense: that affirmative defense existed in the repealed law and did not survive. The Attorney General's rule defining 'materially influence' and the content of the consumer letter is still to be published (required before 1 Jan 2027): verify it before finalizing templates and scope.",
     articles: [
-      "SB 26-189 (repeals and rewrites C.R.S. § 6-1-1701 et seq.) — consolidated numbering to be reconfirmed",
+      "C.R.S. §§ 6-1-1701 to 6-1-1709 (Part 17, repealed and reenacted by SB 26-189)",
     ],
     source: {
       label: "Colorado General Assembly — SB 26-189 (official legislative source)",

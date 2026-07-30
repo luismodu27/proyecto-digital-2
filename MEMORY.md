@@ -127,6 +127,34 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 3 · pack de Colorado: el valor estuvo en lo que NO se construyó.** El noveno pack
+  (`us-co-admt`, SB 26-189, 15 controles ES+EN). La investigación previa —obligatoria por la regla de CLAUDE.md
+  de pasar todo contenido regulatorio por el experto— cambió el pack de arriba abajo antes de escribir una
+  línea: **la ley de 2024 que casi todo el mercado sigue citando está DEROGADA**. La reescritura de 2026 eliminó
+  el programa de gestión de riesgos, la evaluación de impacto, el aviso al fiscal en 90 días, la exención de
+  pequeña empresa y la **defensa afirmativa por NIST AI RMF / ISO 42001**. Nuestra propia ficha en PENDIENTES
+  describía el régimen derogado, o sea que sin investigar habríamos construido seis controles inventados y los
+  habríamos vendido como deberes legales. **Consecuencia comercial que hay que recordar: "cumplimos NIST" ya NO
+  es escudo legal en Colorado** (sigue siendo buena forma de trabajar, y sigue siendo nuestro land-and-expand,
+  pero no se vende como puerto seguro).
+  Tres decisiones de redacción que sostienen la regla de marca: (1) donde la extracción del PDF dio dos
+  numeraciones distintas para la misma subsección, se cita **la sección sin subsección** en vez de elegir una
+  —una cita legal falsa es peor que una cita menos precisa—; (2) el control de documentación del proveedor dice
+  **textualmente** que la ley no obliga al deployer a obtenerla, que es preparación de evidencia, no obligación;
+  (3) el control de trazabilidad avisa de que **no** reintroduce por la puerta de atrás el programa de riesgos
+  que la ley eliminó. La deuda (leer el PDF enrolado con los ojos) queda declarada en el propio fichero del pack
+  y en PENDIENTES, no escondida.
+  **Corrección de rumbo propia:** al mover Colorado de "en el radar" a cobertura declarada en la landing, metí
+  también el bill de chatbots (HB 26-1263) que el memo marcaba con fuente **secundaria**. Lo saqué antes de
+  comitear: un número de ley mal citado **en público** por una empresa de compliance cuesta más credibilidad
+  que la que gana un ítem de más en una lista.
+  **Mejora colateral con vida propia:** la landing decía "8 packs" a mano en cuatro cadenas y ya mentía. Ahora
+  el diccionario escribe `{packs}` y el número lo pone `POLICY_PACKS.length`, con un test que **falla si alguien
+  vuelve a escribirlo a mano** (verificado inyectando la regresión). Es la peor clase de error de copy: una
+  afirmación numérica, comprobable, en la página de precios, que envejece sola y en silencio.
+  **El test de paridad ES/EN volvió a pagar**: cambié las citas del evento de radar en español y no en inglés,
+  y saltó solo. Es exactamente para lo que existe.
+
 - **2026-07-30** · **0026/0027 aplicadas por el fundador. Verificar en el Supabase REAL destapó lo que el
   Postgres de pruebas no podía ver → migración 0028.** Las dos migraciones quedaron confirmadas por API
   (insert anónimo de telemetría **201**, RPC del embudo **200**, y `submit_intake` devolviendo el mismo

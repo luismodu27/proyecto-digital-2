@@ -24,6 +24,7 @@ import { EDUCACION_PACK, EDUCACION_PACK_EN } from "./educacion";
 import { US_HIRING_PACK, US_HIRING_PACK_EN } from "./us-hiring";
 import { US_CA_FEHA_PACK, US_CA_FEHA_PACK_EN } from "./us-ca-feha";
 import { US_CA_ADMT_PACK, US_CA_ADMT_PACK_EN } from "./us-ca-admt";
+import { US_CO_ADMT_PACK, US_CO_ADMT_PACK_EN } from "./us-co-admt";
 
 export { RRHH_PACK, RRHH_PACK_EN } from "./rrhh";
 export {
@@ -39,6 +40,7 @@ export { EDUCACION_PACK, EDUCACION_PACK_EN } from "./educacion";
 export { US_HIRING_PACK, US_HIRING_PACK_EN } from "./us-hiring";
 export { US_CA_FEHA_PACK, US_CA_FEHA_PACK_EN } from "./us-ca-feha";
 export { US_CA_ADMT_PACK, US_CA_ADMT_PACK_EN } from "./us-ca-admt";
+export { US_CO_ADMT_PACK, US_CO_ADMT_PACK_EN } from "./us-co-admt";
 
 /** Catálogo canónico (ES) — orden estable. Retrocompatible. */
 export const POLICY_PACKS: PolicyPack[] = [
@@ -50,6 +52,7 @@ export const POLICY_PACKS: PolicyPack[] = [
   US_HIRING_PACK,
   US_CA_FEHA_PACK,
   US_CA_ADMT_PACK,
+  US_CO_ADMT_PACK,
 ];
 
 /** Catálogo en inglés (validado), mismo orden e ids que `POLICY_PACKS`. */
@@ -62,6 +65,7 @@ export const POLICY_PACKS_EN: PolicyPack[] = [
   US_HIRING_PACK_EN,
   US_CA_FEHA_PACK_EN,
   US_CA_ADMT_PACK_EN,
+  US_CO_ADMT_PACK_EN,
 ];
 
 /** Selector locale-aware del catálogo de packs (default ES). */

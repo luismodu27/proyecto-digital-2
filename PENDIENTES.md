@@ -112,11 +112,13 @@
 > que solo salió al verificar contra el Supabase **real**: `revoke ... from anon` sobre una función no revoca
 > nada, porque `EXECUTE` se concede a **PUBLIC** por defecto (→ migración 0028, §1.1-nonies).
 
-### 0.C · SPRINT 3 — monetización + compliance EE. UU. ⬅️ EN CURSO (1 de 4)
-> **Dónde retomar (pausa del 2026-07-30).** El metering está **hecho y desplegado**. La investigación de
-> **Colorado está hecha y guardada** en `docs/research/colorado-sb26-189.md` — el siguiente paso es escribir
-> el pack a partir de ella. Las investigaciones de **Anexo III.5.a** y **educación EE. UU.** se cayeron por
-> errores de la API a mitad y **hay que relanzarlas** (no dejaron memo).
+### 0.C · SPRINT 3 — monetización + compliance EE. UU. ⬅️ EN CURSO (2 de 4)
+> **Dónde retomar.** Metering ✅ y pack de Colorado ✅. Quedan los **dos packs restantes**: Anexo III.5.a
+> (servicios esenciales) y educación EE. UU. Sus investigaciones se relanzaron el 2026-07-30 escribiendo el
+> memo **de forma incremental dentro del repo** (`docs/research/eu-anexo-iii-5a.md` y
+> `docs/research/us-educacion.md`), después de que el primer intento se perdiera entero por un error de API
+> justo antes de volcar el resultado — lección aplicada: **el trabajo largo se guarda mientras se hace, no al
+> final**.
 >
 > ⚠️ **Migración 0029 pendiente de aplicar** (§1.1-decies): sin ella el metering funciona con los cupos del
 > plan, pero no se pueden pactar topes a medida para un Enterprise.
@@ -131,19 +133,24 @@
       de la base de datos se **deja pasar** (al revés que en los entitlements: bloquear a quien paga por un
       fallo transitorio es peor que un sistema de más); (3) el CSV importa **lo que cabe** en vez de rechazar el
       fichero entero. Señal nueva `quota_blocked` en el embudo — mide intentos reales, no intenciones. `alto · M`
-- [ ] **Pack Colorado ADMT Act (SB 26-189)** — ⬅️ **SIGUIENTE. Investigación TERMINADA**, memo en
-      `docs/research/colorado-sb26-189.md`. Bill confirmado contra fuente primaria: **SB 26-189**, firmada
-      **14-may-2026**, C.R.S. §§ 6-1-1701–1709, **exigible 1-ene-2027**. ⚠️ **El régimen real NO es el que
-      describía esta ficha**: la reescritura de 2026 **eliminó** el programa de gestión de riesgos, la evaluación
-      de impacto, el aviso al fiscal en 90 días, la exención de pequeña empresa (<50 empleados) y la **defensa
-      afirmativa por NIST AI RMF / ISO 42001** — el acto no menciona NIST ni ISO en ninguna parte, así que
-      **no podemos vender "NIST = puerto seguro en Colorado"**. Lo que queda son deberes de aviso previo,
-      explicación en ≤30 días tras un resultado adverso, corrección de datos, revisión humana significativa,
-      registros ≥3 años y evidencia exigida al proveedor. 15 controles ya definidos en el memo. Antes de
-      publicar: (a) el título oficial es **"Automated Decision-Making Technology"**, no "AI Act"; (b) dos citas
-      de subsección quedaron sin confirmar por no poder leer el PDF con los ojos — resolverlas o citar solo la
-      sección; (c) el reglamento del fiscal general (pendiente, define "materially influence") va redactado como
-      "verifica su estado", igual que hacemos con el Digital Omnibus. `alto · M`
+- [x] **Pack Colorado ADMT Act (SB 26-189)** — ✅ **HECHO (2026-07-30)**. `us-co-admt`, 15 controles ES+EN,
+      noveno pack del catálogo. Investigación contra fuente primaria en `docs/research/colorado-sb26-189.md`.
+      **Lo que más valor tuvo fue lo que NO se construyó**: la reescritura de 2026 eliminó el programa de gestión
+      de riesgos, la evaluación de impacto, el aviso al fiscal en 90 días, la exención de pequeña empresa
+      (<50 empleados) y la **defensa afirmativa por NIST AI RMF / ISO 42001** — el acto no menciona NIST ni ISO
+      en ninguna parte. Casi todo el material publicado describe esa ley derogada, así que incluir cualquiera
+      de esos seis habría generado trabajo inútil al cliente y se habría caído en la primera revisión de un
+      abogado. **Consecuencia comercial: no podemos vender "NIST = puerto seguro en Colorado".** Lo que queda:
+      aviso previo, explicación en 30 días tras resultado adverso, corrección de datos (con el límite de que no
+      hay deber de corregir puntuaciones), revisión humana significativa, expediente por decisión 3 años y
+      evidencia exigida al proveedor. Se actualizó además el radar (etiqueta → "Colorado ADMT Act"; el consejo
+      pasó de "espera a saber el contenido" a "aplica el pack y no montes gestión de riesgos") y Colorado subió
+      de "en el radar" a **cobertura declarada** en la landing. `alto · M`
+      ⚠️ **Deuda declarada antes de GA:** el texto oficial solo existe en PDF y la investigación se hizo por
+      extracción de texto — alta confianza en el contenido, **media en la numeración fina de subsecciones**.
+      Donde hubo discrepancia (la vía FERPA y la cláusula de acción privada) se cita **la sección sin
+      subsección**, que sí está confirmada. Hay que leer el PDF enrolado con los ojos y afinar. Igual que los
+      demás packs, necesita revisión de abogado —de Colorado— antes de GA.
 - [ ] **Pack Anexo III.5.a (servicios esenciales y ayudas públicas)** — hoy el clasificador manda "alto riesgo"
       ahí y el usuario llega a `/packs` **sin pack**: cul-de-sac. Utilities, aseguradoras de salud, prestaciones;
       FRIA (Art. 27) clara. `alto · M`
