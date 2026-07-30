@@ -128,8 +128,8 @@
 > repo** (`docs/research/`), después de perder un memo entero por un fallo de API justo antes de volcarlo. El
 > trabajo largo se guarda mientras se hace.
 >
-> ⚠️ **Pendiente del fundador, sin prisa:** migraciones **0028** (§1.1-nonies) y **0029** (§1.1-decies). Ninguna
-> bloquea nada.
+> ✅ **Nada pendiente del fundador en este sprint:** las migraciones **0028** y **0029** están aplicadas y
+> verificadas por API (2026-07-30). El metering está activo de punta a punta.
 
 
 - [x] **Metering por nº de sistemas/asientos + Enterprise a medida** — ✅ **HECHO (2026-07-30)**.
@@ -358,14 +358,16 @@ update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
 -- o 'enterprise'
 ```
 
-### 1.1-decies · Aplicar migración 0029 (topes a medida para Enterprise) — RÁPIDO, no urgente
-El metering **ya funciona sin ella**: los cupos por plan (3/1 · 25/5 · sin tope) viven en el código. Lo que
-añade 0029 son dos columnas (`max_systems`, `max_seats`) en la organización para poder pactar los números de
-un Enterprise concreto ("hasta 200 sistemas y 40 asientos"). Sin aplicarla, la app lo detecta, lo registra
-como `migration-pending` y usa los cupos del plan — nadie se queda bloqueado.
+### 1.1-decies · Migración 0029 (topes a medida para Enterprise) — ✅ APLICADA (verificada 2026-07-30)
+**Verificada por API:** `organizations?select=plan,max_systems,max_seats` → **200**, mientras una columna
+inventada da `42703 does not exist` (prueba de contraste). Ya se pueden pactar topes por organización.
 
-1. Pega **`supabase/migrations/0029_org_limits.sql`** en el SQL Editor (solo ese archivo).
-2. Al cerrar un Enterprise, fija sus topes (el SQL está también dentro del propio archivo):
+*(Lo que NO se pudo verificar con la anon key: los dos `CHECK` de cordura. Si los quieres confirmar:
+`select conname, pg_get_constraintdef(oid) from pg_constraint where conname in
+('organizations_max_systems_check','organizations_max_seats_check');` — deben salir dos filas. No es crítico:
+el código ignora por su cuenta cualquier tope ≤ 0.)*
+
+Para cerrar un Enterprise a medida (el SQL está también dentro del propio archivo de migración):
    ```sql
    -- ver el consumo real de cada organización antes de pactar:
    select o.id, o.name, o.plan, o.max_systems, o.max_seats,
@@ -380,9 +382,12 @@ como `migration-pending` y usa los cupos del plan — nadie se queda bloqueado.
 3. **Al terminar un contrato, limpia el pacto** (`set max_systems = null, max_seats = null`): el número
    pactado gana sobre el plan, así que si se queda puesto seguirá aplicándose bajo un plan que ya no toca.
 
-### 1.1-nonies · Aplicar migración 0028 (endurecer permisos) — RÁPIDO, no urgente
-**No arregla ninguna fuga: cierra una segunda cerradura que 0026/0027 dejaron sin echar.** Todo funciona
-igual con o sin ella; conviene aplicarla, pero no bloquea nada.
+### 1.1-nonies · Migración 0028 (endurecer permisos) — ✅ APLICADA (verificada 2026-07-30)
+**No arreglaba ninguna fuga: cerraba una segunda cerradura que 0026/0027 habían dejado sin echar.**
+**Verificada por API:** `anon` recibe ahora `42501 permission denied` en `intake_links`, `intake_submissions`,
+`product_events` (select) y en la función `product_funnel` — el corte ocurre en los permisos, antes de llegar
+a la RLS. Y siguen abiertos los dos que deben estarlo: el insert de telemetría (**201**) y `submit_intake`
+(**`false`/200**).
 
 Salió al verificar 0026/0027 contra el Supabase **real** (no contra el Postgres de pruebas), y son dos
 diferencias entre lo que el SQL *parecía* hacer y lo que hace:
