@@ -60,9 +60,14 @@
 ### 0.B · SPRINT 2 — activación + red de seguridad del contenido ⬅️ SIGUIENTE
 - [ ] **Import CSV + enlace de intake compartible** — el alta manual uno-a-uno es el muro de activación #1
       (nadie teclea 30 sistemas); sin inventario, riesgo/gap/dossier quedan vacíos. `alto · M`
-- [ ] **Tests con Vitest sobre la lógica pura** — `risk-assessment`, `recommendations`, `task-reminders`,
-      `regulatory-watch`, `audit`, `bias-audit`. Hoy build+lint+tsc **no** detecta una regla legal mal editada:
-      es la red de seguridad del contenido "cero LLM". ROI altísimo. `alto · M`
+- [x] **Tests con Vitest sobre la lógica pura** — ✅ **HECHO (2026-07-30)**. 221 tests en 8 ficheros
+      (`npm test`, <1 s, en CI): `risk-assessment`, `recommendations`, `task-reminders`, `regulatory-watch`,
+      `audit`, `bias-audit`, `telemetry/events` y **paridad de los 8 policy packs**. Codifican la expectativa
+      REGULATORIA (Art. 5 manda; el perfilado del Art. 6.3 anula excepciones; LL144 = auditoría **y**
+      publicación; el catálogo curado gana al pipeline) y la paridad ES/EN. Se verificó que detectan
+      regresiones con **6 mutaciones inyectadas** (las 6 fallaron). Encontraron 3 cosas reales: el campo
+      `article` sí se traduce en parte (comparar por números, no literal), `minimal: []` es correcto y no un
+      hueco, y un `?? "/"` que nunca se activaba en `normalizePath`.
 - [ ] **Logging / observabilidad de errores** — el patrón `if (error) return []` confunde "migración ausente"
       con "Supabase caído / RLS rota"; en producción un incidente es indistinguible de "aún no hay datos".
       Loggear con contexto o integrar Sentry. `alto · M`
@@ -567,8 +572,9 @@ El **foso automatizado** (Vigía + Analista + Validador) está completo y verifi
 2. Lee **MEMORY.md** (§11 "RETOMAR AQUÍ") y el resto de este archivo.
 3. Pregunta al fundador en qué punto está de los pendientes 🔴 (sobre todo Stripe y dominio).
 4. Rama de trabajo: `claude/init-3bwfhm`; PR a `main` y merge al pasar CI (`verify`); Vercel redespliega solo.
-5. Verificación: `npm run build` + `npm run lint` + `npx tsc --noEmit`; backend real por curl.
-   (⚠️ Sprint 2 añade **Vitest** — cuando exista, incluir `npm test` en la verificación.)
+5. Verificación: `npm run lint` + `npx tsc --noEmit` + `npm run check:copy` + **`npm test`** +
+   `npm run build`; backend real por curl. Para una **migración nueva**, valídala antes en un Postgres
+   desechable (ver gotcha en `CLAUDE.md`), no directamente en el SQL Editor del fundador.
 
 ---
 

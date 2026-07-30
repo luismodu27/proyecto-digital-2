@@ -127,6 +127,27 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 2 · red de seguridad del contenido: 221 tests con Vitest.**
+  Por qué importaba tanto: el producto promete contenido legal **determinista y sin LLM**, pero nada
+  impedía que una edición desafortunada invirtiera una regla del AI Act — `build`, `lint` y `tsc`
+  compilan un `if` mal puesto sin pestañear. Los tests no comprueban la implementación, comprueban la
+  **expectativa regulatoria**: el Art. 5 manda sobre todo, el perfilado del Art. 6.3 párr. 2 anula
+  cualquier excepción, LL144 exige auditoría **Y** publicación (no se colapsan en un semáforo), el
+  catálogo curado siempre gana al pipeline de vigilancia, ninguna brecha se pierde al deduplicar el
+  plan, y el navegador no puede emitir `checkout_completed`.
+  - **Lo importante del método:** un test que pasa no demuestra nada. Se inyectaron **6 mutaciones**
+    (invertir la puerta de perfilado, 13 meses en LL144, `<`→`<=` en vencimientos, dejar que el
+    pipeline gane, abrir `CLIENT_EVENTS`, quitar un `prohibited` del espejo EN) y **las 6 fallaron**.
+    Ritual a repetir siempre que se añadan tests.
+  - **Tres cosas que encontraron y que yo daba por otra cosa:** (1) el campo `article` de los packs y
+    los `articles` del radar **sí se traducen en parte** ("Anexo III" → "Annex III", "Cap. V" →
+    "Chapter V"), así que la paridad ES/EN se comprueba por los **números** de la cita, no literalmente
+    —lo que de verdad no puede divergir es la referencia legal—; (2) `minimal: []` en
+    `recommendations` es **correcto** (el AI Act no impone deberes al riesgo mínimo; inventar
+    recomendaciones ahí sería alarmismo), no un hueco que rellenar; (3) un `?? "/"` mío en
+    `normalizePath` **nunca se activaba** porque `"".split()` devuelve `""` y no `undefined`.
+  - Entorno `node`, sin jsdom, <1 s: una suite lenta se acaba desactivando. `npm test` ya está en CI.
+
 - **2026-07-30** · **SPRINT 2 · telemetría de producto ADELANTADA (antes que el resto del sprint).**
   Razón: el Sprint 1 optimizó conversión y activación **a ciegas** y el Sprint 2 iba a hacer lo mismo con el
   import CSV. Medir primero, optimizar después. Decisiones que conviene no volver a discutir:

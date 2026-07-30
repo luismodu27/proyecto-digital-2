@@ -38,9 +38,28 @@ npm run lint    # ESLint
 npm run check:copy   # guard de COPY PROHIBIDO (regla #1: Attesta NO certifica)
 ```
 
-No hay framework de tests todavía: la verificación se hace con **build + lint + tsc +
-`check:copy`** y, para el backend real, con **curl por API** (usuarios `*@attesta-test.dev`)
-— ver gotchas. (Vitest está planificado en `PENDIENTES.md §0.B`.)
+```bash
+npm test          # Vitest sobre la lógica pura (221 tests, <1 s)
+npm run test:watch
+```
+
+La verificación completa es **lint + tsc + `check:copy` + `test` + build** (los cinco están en CI)
+y, para el backend real, **curl por API** (usuarios `*@attesta-test.dev`) — ver gotchas.
+
+**Tests (`npm test`, Vitest, `src/**/*.test.ts`).** Cubren solo **lógica pura** (nada de componentes
+ni de Supabase; entorno `node`, sin jsdom, para que la suite corra en <1 s y nadie la desactive).
+Existen porque `build`/`lint`/`tsc` compilan tan felices una **regla legal mal editada**: un `if`
+invertido en `classify()` da un veredicto equivocado sobre el EU AI Act sin romper nada. Por eso los
+tests codifican la **expectativa regulatoria**, no la implementación: el Art. 5 manda sobre todo, el
+perfilado del Art. 6.3 párr. 2 anula las excepciones, LL144 exige auditoría **y** publicación (no se
+colapsan), el catálogo curado **siempre gana** al pipeline de vigilancia, ninguna brecha se pierde al
+deduplicar el plan de acción, y el navegador **no** puede emitir `checkout_completed`. Cubren además
+la **paridad ES/EN** de packs, catálogo regulatorio, clasificador y audit-trail (`article`/`articles`
+se comparan por sus **números**, no literalmente: la prosa —"Anexo III" → "Annex III"— sí se traduce).
+Al escribirlos se validó que **detectan** las regresiones inyectando 6 mutaciones (invertir la puerta
+de perfilado, 13 meses en LL144, `<` → `<=` en vencimientos, que el pipeline gane al catálogo, abrir
+`CLIENT_EVENTS`, quitar un `prohibited` del espejo EN): las 6 fallaron. **Repetir ese ritual** al
+añadir tests — un test que no falla al romper la regla no protege nada.
 
 **Guard de copy prohibido (`scripts/check-prohibited-copy.mjs`, en CI).** Hace verificable la
 regla #1 del producto. NO es una lista negra de palabras: escanear "certificado" o "marcado CE"

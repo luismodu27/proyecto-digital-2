@@ -1,8 +1,7 @@
 name: CI
 
-# Puerta de calidad: como el proyecto no tiene tests, la verificación es
-# lint + typecheck + build (lo que dice CLAUDE.md). Corre en cada PR y en los
-# push a main para que ninguna regresión de lint/tipos/build llegue a producción.
+# Puerta de calidad: lint + typecheck + guard de copy + tests + build. Corre en
+# cada PR y en los push a main para que ninguna regresión llegue a producción.
 on:
   pull_request:
   push:
@@ -45,6 +44,13 @@ jobs:
       # que también falla si alguien debilita una de sus reglas.
       - name: Copy prohibido (Attesta NO certifica)
         run: npm run check:copy
+
+      # Red de seguridad del contenido "cero LLM": lint/tsc/build compilan
+      # perfectamente una regla legal mal editada (un `if` invertido en la
+      # clasificación de riesgo produce un veredicto equivocado sobre el EU AI
+      # Act). Estos tests codifican la expectativa regulatoria y la paridad ES/EN.
+      - name: Tests (lógica pura)
+        run: npm test
 
       # Build sin credenciales → modo demo (self-contained, sin red). Verifica que
       # el bundle compila. El build real de producción lo hace Vercel con las vars

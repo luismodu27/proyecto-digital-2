@@ -122,7 +122,9 @@ const MAX_VALUE_LEN = 64;
  * no aporta nada al embudo.
  */
 export function normalizePath(raw: string): string {
-  const path = raw.split(/[?#]/)[0] ?? "/";
+  // `||` y no `??`: al partir una cadena vacía sale `""`, no `undefined`, y un
+  // path vacío en la columna se lee como un fallo de instrumentación.
+  const path = raw.split(/[?#]/)[0] || "/";
   return path
     .replace(
       /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$)/gi,
