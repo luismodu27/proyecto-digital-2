@@ -9,11 +9,22 @@ import { AUDIT_READY_THRESHOLD, riskLabel } from "@/lib/mock-data";
 import { seedSampleData } from "@/lib/data/actions";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import { QuotaMeter } from "@/components/dashboard/QuotaMeter";
+import { getQuota } from "@/lib/billing/quota";
+import { getActiveOrg } from "@/lib/data/context";
 
 export default async function InventarioPage() {
   const systems = await getAiSystems();
   const locale = await resolveLocale();
-  const t = getDictionary(locale).dashboard.inventory;
+  const dict = getDictionary(locale).dashboard;
+  const t = dict.inventory;
+
+  // Cupo de sistemas. Se resuelve aquí (no dentro del componente) para que la
+  // pantalla siga pintándose si la consulta falla: `getActiveOrg` puede devolver
+  // null en demo y `quotaState` degrada a "sin tope", así que el aviso simplemente
+  // no aparece en vez de romper el inventario.
+  const org = await getActiveOrg();
+  const quota = org ? await getQuota(org, "systems") : null;
 
   return (
     <>
@@ -33,6 +44,18 @@ export default async function InventarioPage() {
           </div>
         }
       />
+
+      {quota && (
+        <QuotaMeter
+          state={quota}
+          label={dict.quota.systems
+            .replace("{used}", String(quota.used))
+            .replace("{max}", String(quota.max ?? "∞"))}
+          nearText={dict.quota.nearSystems}
+          atText={dict.quota.atSystems}
+          upgradeText={dict.quota.upgrade}
+        />
+      )}
 
       {systems.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-line-strong bg-paper-raised px-6 py-16 text-center">

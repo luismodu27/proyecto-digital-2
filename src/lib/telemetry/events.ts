@@ -38,6 +38,14 @@ export const PRODUCT_EVENTS = [
   // --- Monetización ------------------------------------------------------
   /** Un muro de pago se mostró de verdad (servidor). props: `{ feature }`. */
   "paywall_viewed",
+  /**
+   * Un cupo bloqueó un alta de verdad (servidor). props: `{ kind, plan }`.
+   *
+   * Es la señal de expansión más honesta que tenemos: no dice "podría pagar
+   * más", dice "quiso hacer algo y el plan no le dejó". Se emite solo cuando el
+   * bloqueo ocurre, nunca al pintar un aviso.
+   */
+  "quota_blocked",
   /** Se abrió el checkout de Stripe (servidor). */
   "checkout_started",
   /** Stripe confirmó el pago por webhook (servidor). */

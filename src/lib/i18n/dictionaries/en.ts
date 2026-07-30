@@ -446,7 +446,7 @@ export const en: Dictionary = {
           price: "Free",
           note: "A taste to start today",
           features: [
-            "AI systems inventory",
+            "Up to 3 AI systems in the inventory",
             "Risk classification (EU AI Act + U.S.)",
             "1 user",
           ],
@@ -460,6 +460,7 @@ export const en: Dictionary = {
           note: "The system of record for your governance",
           lead: "Everything in the free plan, plus you unlock:",
           features: [
+            "Up to 25 AI systems and 5 users",
             "Gap assessment + action plan",
             "Continuous regulatory watch",
             "Dossier and executive report (PDF)",
@@ -475,6 +476,7 @@ export const en: Dictionary = {
           note: "For multiple entities and advanced needs",
           lead: "Everything in Readiness, plus:",
           features: [
+            "Custom systems and users",
             "Multi-organization",
             "SSO and advanced controls",
             "Priority support",
@@ -486,11 +488,13 @@ export const en: Dictionary = {
         title: "Compare the plans",
         capability: "Capability",
         team: "Team",
+        custom: "Custom",
         includedLabel: "Included",
         notIncludedLabel: "Not included",
         rows: [
           "AI systems inventory",
           "Risk classification (EU AI Act + U.S.)",
+          "AI systems included",
           "Users",
           "Gap assessment + action plan",
           "Continuous regulatory watch",
@@ -791,6 +795,21 @@ export const en: Dictionary = {
 
     toastClose: "Close notification",
 
+    // Plan quotas (metering). `{used}`/`{max}` are substituted by the component.
+    quota: {
+      systems: "{used} of {max} systems in your plan",
+      seats: "{used} of {max} seats in your plan",
+      nearSystems:
+        "You are running low on slots. What you already have is always kept; the cap only affects adding new ones.",
+      nearSeats:
+        "You are running low on seats. Members and not-yet-accepted invitations both count.",
+      atSystems:
+        "You have reached your plan's cap: no more systems can be added. Nothing already recorded is hidden or deleted.",
+      atSeats:
+        "You have reached your plan's seat cap: no more invitations can be sent.",
+      upgrade: "See plans",
+    },
+
     toasts: {
       "system-created": "System registered in the inventory.",
       "system-updated": "System updated.",
@@ -805,6 +824,12 @@ export const en: Dictionary = {
       "intake-already": "Someone else had already resolved that entry.",
       "intake-demo": "The shareable intake needs your organization connected.",
       "intake-error": "Could not complete the action. Please try again.",
+      // Plan quotas. The message states the LIMIT and the WAY OUT, not just a
+      // refusal: a cap with no next step is a closed door with no doorbell.
+      "quota-systems":
+        "You have reached the number of systems included in your plan. Upgrade to keep adding; everything you already have stays untouched.",
+      "quota-seats":
+        "You have reached the number of seats included in your plan (members plus pending invitations). Upgrade to invite more people.",
       "pack-applied": "HR policy pack applied to the system.",
       "pack-error": "Couldn't apply the policy pack. Please try again.",
       "gap-created": "Gap added.",
@@ -1225,6 +1250,10 @@ export const en: Dictionary = {
         resultSkipped: "{n} already existed with the same name and were not duplicated.",
         resultRejected: "{n} rows discarded due to incomplete data.",
         resultTruncated: "{n} rows beyond this import's cap.",
+        // Different from `resultTruncated`: there the FILE had extra rows, here
+        // the PLAN is full. Each case calls for a different action.
+        resultQuota:
+          "{n} did not fit because your plan reached its systems cap. Everything that fit was imported.",
         failures: {
           demo: "Importing needs a connected organization.",
           "no-org": "We could not find your organization. Sign in again and retry.",

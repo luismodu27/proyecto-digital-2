@@ -15,13 +15,18 @@ const TIER_META: { href: string; highlight: boolean; cta: string }[] = [
   { href: "#waitlist", highlight: false, cta: "pricing_enterprise" },
 ];
 
-// Matriz de comparación: cada fila = una capacidad; celdas true/false o un
-// marcador de texto ("one"/"team") que se resuelve con el diccionario.
-type Cell = boolean | "one" | "team";
+// Matriz de comparación: cada fila = una capacidad. Una celda es `true`/`false`
+// (incluido / no incluido) o un TEXTO. Los textos que son cifras van literales
+// aquí porque no se traducen ("3" es "3" en los dos idiomas) y así los cupos del
+// producto quedan en un solo sitio visible; los que sí se traducen ("Equipo",
+// "A medida") van por el marcador `team`/`custom`, que resuelve el diccionario.
+type Cell = boolean | string;
 const COMPARE_CELLS: [Cell, Cell, Cell][] = [
   [true, true, true],
   [true, true, true],
-  ["one", "team", "team"],
+  // Sistemas de IA en el inventario y asientos: son los dos cupos que se miden.
+  ["3", "25", "custom"],
+  ["1", "5", "custom"],
   [false, true, true],
   [false, true, true],
   [false, true, true],
@@ -59,7 +64,9 @@ export function Pricing({ t }: { t: Dictionary["landing"]["pricing"] }) {
           —
         </span>
       );
-    const text = value === "one" ? "1" : t.compare.team;
+    // `team`/`custom` se traducen; cualquier otra cosa (una cifra) va tal cual.
+    const text =
+      value === "team" ? t.compare.team : value === "custom" ? t.compare.custom : value;
     return <span className="text-sm font-medium text-ink">{text}</span>;
   }
 

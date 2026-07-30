@@ -112,13 +112,38 @@
 > que solo salió al verificar contra el Supabase **real**: `revoke ... from anon` sobre una función no revoca
 > nada, porque `EXECUTE` se concede a **PUBLIC** por defecto (→ migración 0028, §1.1-nonies).
 
-### 0.C · SPRINT 3 — monetización + compliance EE. UU. ⬅️ SIGUIENTE
-- [ ] **Metering por nº de sistemas/asientos + Enterprise a medida** — hoy una org con 2 sistemas y otra con 50
-      pagan lo mismo; captura el ACV enterprise (30-50k $/año de referencia vs. los ~120-350 $/mes actuales).
-      `alto · M`
-- [ ] **Pack Colorado AI Act (SB 26-189)** — 1ª ley estatal de EE. UU. con deberes reales de *deployer* (gestión
-      de riesgos, evaluaciones de impacto, aviso, notificación al fiscal); reutiliza la mecánica deployer casi
-      1:1. Confirmar nº de bill y secciones tras la reescritura 2026. `alto · M`
+### 0.C · SPRINT 3 — monetización + compliance EE. UU. ⬅️ EN CURSO (1 de 4)
+> **Dónde retomar (pausa del 2026-07-30).** El metering está **hecho y desplegado**. La investigación de
+> **Colorado está hecha y guardada** en `docs/research/colorado-sb26-189.md` — el siguiente paso es escribir
+> el pack a partir de ella. Las investigaciones de **Anexo III.5.a** y **educación EE. UU.** se cayeron por
+> errores de la API a mitad y **hay que relanzarlas** (no dejaron memo).
+>
+> ⚠️ **Migración 0029 pendiente de aplicar** (§1.1-decies): sin ella el metering funciona con los cupos del
+> plan, pero no se pueden pactar topes a medida para un Enterprise.
+
+- [x] **Metering por nº de sistemas/asientos + Enterprise a medida** — ✅ **HECHO (2026-07-30)**.
+      Cupos: **3 sistemas / 1 usuario** (Diagnóstico) · **25 / 5** (Preparación) · **a medida** (Enterprise, por
+      SQL con las columnas `max_systems`/`max_seats` de la migración 0029). Aritmética pura y con tests en
+      `billing/limits.ts` (26 tests, 6 mutaciones inyectadas y las 6 detectadas); resolución contra la BD en
+      `billing/quota.ts`. Bloquea en los **cuatro** caminos que crean cosas (alta manual, CSV, aceptar ficha de
+      intake, invitar) y avisa al 80 % con `QuotaMeter`. Tres decisiones que conviene no revertir sin pensarlo:
+      (1) los cupos limitan **crear**, nunca **ver** — bajar de plan no oculta ni borra nada; (2) ante un error
+      de la base de datos se **deja pasar** (al revés que en los entitlements: bloquear a quien paga por un
+      fallo transitorio es peor que un sistema de más); (3) el CSV importa **lo que cabe** en vez de rechazar el
+      fichero entero. Señal nueva `quota_blocked` en el embudo — mide intentos reales, no intenciones. `alto · M`
+- [ ] **Pack Colorado ADMT Act (SB 26-189)** — ⬅️ **SIGUIENTE. Investigación TERMINADA**, memo en
+      `docs/research/colorado-sb26-189.md`. Bill confirmado contra fuente primaria: **SB 26-189**, firmada
+      **14-may-2026**, C.R.S. §§ 6-1-1701–1709, **exigible 1-ene-2027**. ⚠️ **El régimen real NO es el que
+      describía esta ficha**: la reescritura de 2026 **eliminó** el programa de gestión de riesgos, la evaluación
+      de impacto, el aviso al fiscal en 90 días, la exención de pequeña empresa (<50 empleados) y la **defensa
+      afirmativa por NIST AI RMF / ISO 42001** — el acto no menciona NIST ni ISO en ninguna parte, así que
+      **no podemos vender "NIST = puerto seguro en Colorado"**. Lo que queda son deberes de aviso previo,
+      explicación en ≤30 días tras un resultado adverso, corrección de datos, revisión humana significativa,
+      registros ≥3 años y evidencia exigida al proveedor. 15 controles ya definidos en el memo. Antes de
+      publicar: (a) el título oficial es **"Automated Decision-Making Technology"**, no "AI Act"; (b) dos citas
+      de subsección quedaron sin confirmar por no poder leer el PDF con los ojos — resolverlas o citar solo la
+      sección; (c) el reglamento del fiscal general (pendiente, define "materially influence") va redactado como
+      "verifica su estado", igual que hacemos con el Digital Omnibus. `alto · M`
 - [ ] **Pack Anexo III.5.a (servicios esenciales y ayudas públicas)** — hoy el clasificador manda "alto riesgo"
       ahí y el usuario llega a `/packs` **sin pack**: cul-de-sac. Utilities, aseguradoras de salud, prestaciones;
       FRIA (Art. 27) clara. `alto · M`
@@ -291,6 +316,28 @@ order by o.name;
 update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
 -- o 'enterprise'
 ```
+
+### 1.1-decies · Aplicar migración 0029 (topes a medida para Enterprise) — RÁPIDO, no urgente
+El metering **ya funciona sin ella**: los cupos por plan (3/1 · 25/5 · sin tope) viven en el código. Lo que
+añade 0029 son dos columnas (`max_systems`, `max_seats`) en la organización para poder pactar los números de
+un Enterprise concreto ("hasta 200 sistemas y 40 asientos"). Sin aplicarla, la app lo detecta, lo registra
+como `migration-pending` y usa los cupos del plan — nadie se queda bloqueado.
+
+1. Pega **`supabase/migrations/0029_org_limits.sql`** en el SQL Editor (solo ese archivo).
+2. Al cerrar un Enterprise, fija sus topes (el SQL está también dentro del propio archivo):
+   ```sql
+   -- ver el consumo real de cada organización antes de pactar:
+   select o.id, o.name, o.plan, o.max_systems, o.max_seats,
+          (select count(*) from public.ai_systems s  where s.organization_id = o.id) as sistemas,
+          (select count(*) from public.memberships m where m.organization_id = o.id) as miembros
+     from public.organizations o order by sistemas desc;
+
+   update public.organizations
+      set plan = 'enterprise', max_systems = 200, max_seats = 40
+    where id = '<org-uuid>';
+   ```
+3. **Al terminar un contrato, limpia el pacto** (`set max_systems = null, max_seats = null`): el número
+   pactado gana sobre el plan, así que si se queda puesto seguirá aplicándose bajo un plan que ya no toca.
 
 ### 1.1-nonies · Aplicar migración 0028 (endurecer permisos) — RÁPIDO, no urgente
 **No arregla ninguna fuga: cierra una segunda cerradura que 0026/0027 dejaron sin echar.** Todo funciona

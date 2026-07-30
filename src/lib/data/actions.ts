@@ -11,6 +11,7 @@ import { policyPackById } from "@/lib/policy-packs";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { trackServer } from "@/lib/telemetry/server";
 import { logDataFallback, logIncident } from "@/lib/observability/log";
+import { checkQuota } from "@/lib/billing/quota";
 
 const SEVERITY_EN: Record<string, string> = {
   alta: "high",
@@ -189,6 +190,12 @@ export async function createAiSystem(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) redirect("/dashboard/inventario/nuevo");
 
+  // Cupo de sistemas del plan. Se comprueba DESPUÉS de validar el nombre para no
+  // gastar dos consultas en un envío vacío, y ANTES del insert para que el tope
+  // signifique algo. `checkQuota` ya emite la señal de telemetría del bloqueo.
+  const { blocked } = await checkQuota(org, "systems");
+  if (blocked) redirect("/dashboard/inventario?toast=quota-systems");
+
   const { error } = await supabase.from("ai_systems").insert({
     organization_id: org,
     name,
@@ -227,11 +234,21 @@ export async function seedSampleData() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Los datos de ejemplo también respetan el cupo, pero PARCIALMENTE: se cargan
+  // los que caben en vez de rechazar el botón entero. Un plan gratuito recién
+  // creado (3 sistemas) vería si no "tu plan permite 3" al primer clic, que es una
+  // primera impresión pésima para algo cuyo único objetivo es que el panel no
+  // aparezca vacío. Las brechas de los sistemas que no entran se caen solas: se
+  // enlazan por `code` y el `filter(Boolean)` de abajo las descarta.
+  const { allowed } = await checkQuota(org, "systems", AI_SYSTEMS.length);
+  if (allowed <= 0) redirect("/dashboard/inventario?toast=quota-systems");
+  const seedSystems = AI_SYSTEMS.slice(0, allowed);
+
   // Inserta los sistemas (upsert por (organization_id, code)) y recupera sus ids.
   const { data: systems, error: seedError } = await supabase
     .from("ai_systems")
     .upsert(
-      AI_SYSTEMS.map((s) => ({
+      seedSystems.map((s) => ({
         organization_id: org,
         code: s.id,
         name: s.name,

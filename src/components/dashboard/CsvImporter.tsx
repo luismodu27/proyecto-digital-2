@@ -205,10 +205,16 @@ export function CsvImporter({ locale }: { locale: Locale }) {
       {outcome && (
         <div
           role="status"
+          // Verde solo si se importó ALGO. Un "0 sistemas añadidos" sobre fondo
+          // verde se lee como éxito cuando en realidad no entró nada (todas ya
+          // existían, o el plan estaba lleno); el tono de atención empuja a leer
+          // el detalle de abajo, que es donde está el motivo.
           className={`rounded-2xl border p-5 text-sm ${
-            outcome.ok
-              ? "border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)]"
-              : "border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)]"
+            !outcome.ok
+              ? "border-[var(--tone-danger-bd)] bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)]"
+              : outcome.imported > 0
+                ? "border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)]"
+                : "border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] text-[var(--tone-warn-fg)]"
           }`}
         >
           {outcome.error ? (
@@ -227,6 +233,11 @@ export function CsvImporter({ locale }: { locale: Locale }) {
                 )}
                 {outcome.truncated > 0 && (
                   <li>{t.resultTruncated.replace("{n}", String(outcome.truncated))}</li>
+                )}
+                {outcome.skippedQuota > 0 && (
+                  <li className="font-medium">
+                    {t.resultQuota.replace("{n}", String(outcome.skippedQuota))}
+                  </li>
                 )}
               </ul>
             </>
