@@ -156,6 +156,26 @@ export function RiskWizard({
           </p>
         )}
 
+        {/* Capa GPAI (Cap. V). Va DESPUÉS del nivel y del motivo, y con tono
+            distinto según el caso: informativo si solo se usa un modelo de un
+            tercero, de aviso si el ajuste o la marca blanca pueden haber cambiado
+            el rol a proveedor (Art. 25) — eso último es revisión jurídica, no un
+            veredicto que podamos dar nosotros. */}
+        {result.gpai && (
+          <div
+            className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
+              result.gpai.providerRisk
+                ? "border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] text-[var(--tone-warn-fg)]"
+                : "border-line bg-paper-sunken text-ink-soft"
+            }`}
+          >
+            <p className="font-medium">
+              {result.gpai.providerRisk ? tr.gpaiWarnTitle : tr.gpaiTitle}
+            </p>
+            <p className="mt-1">{result.gpai.note}</p>
+          </div>
+        )}
+
         <div className="mt-6 grid gap-6 md:grid-cols-2">
           <div>
             <h3 className="font-display text-sm font-semibold text-ink">

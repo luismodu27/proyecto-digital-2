@@ -127,6 +127,27 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 2 · capa GPAI en el clasificador (cierra el Sprint 2).**
+  GenAI es el caso de IA más común del mid-market y caía en "limitado/mínimo" sin más. La decisión de diseño
+  clave —y la que hay que defender si alguien propone lo contrario— es que la capa GPAI **no cambia el nivel
+  de riesgo**: el Cap. V es un régimen paralelo cuyas obligaciones son del **proveedor del modelo**, así que
+  "alto riesgo porque usa ChatGPT" sería alarmismo y regulatoriamente falso. Lo que sí aporta es lo que un
+  deployer puede hacer: exigir por escrito la documentación del Art. 53.1.b, la política de derechos de autor
+  y el resumen de contenido de entrenamiento; y el aviso del **Art. 25** cuando hay fine-tuning o marca blanca.
+  - Truco de implementación que evitó tocar tres pantallas: las citas y obligaciones GPAI se **anexan** a
+    `citations`/`obligations`, que ya se persisten en `risk_assessments`, así que dossier e informe muestran
+    la capa sin cambiar ni una línea de su código.
+  - **Precisión que no tenía y encontré verificando:** el criterio del **tercio del cómputo de entrenamiento**
+    para decidir si quien ajusta un modelo pasa a ser su proveedor es de las **directrices de la Comisión de
+    julio de 2025** y es **explícitamente indicativo**, no un umbral del Reglamento; el **Recital 109** limita
+    esas obligaciones al **alcance de la modificación**. Hay un test que vigila que el texto siempre lo
+    califique como indicativo y lo atribuya a su fuente: presentarlo como umbral legal sería justo el tipo de
+    afirmación que este producto no puede hacer.
+  - **Honestidad sobre el proceso:** esta vez el texto NO pasó por el subagente `compliance-domain-expert`
+    (esta sesión no debía invocar subagentes), sino que lo verifiqué contra fuentes autorizadas y quedó
+    anotado en `PENDIENTES §0.B` como **pendiente de validación experta** antes de GA, igual que el resto del
+    corpus. Está redactado como orientación y revisión jurídica, nunca como veredicto.
+
 - **2026-07-30** · **SPRINT 2 · muro de activación: import CSV + enlace de intake compartible.**
   Eran **dos** problemas, no uno, y por eso hay dos caminos: el CSV sirve cuando la organización YA tiene la
   lista; el **enlace de intake** sirve para CONSTRUIRLA, porque quien contrata (Legal, Compliance) no sabe

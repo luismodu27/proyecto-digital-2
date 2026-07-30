@@ -275,3 +275,108 @@ describe("paridad ES/EN — el idioma cambia el texto, nunca el veredicto", () =
     }
   });
 });
+
+describe("capa GPAI (Cap. V) — régimen paralelo, no un nivel de riesgo", () => {
+  it("usar GenAI NO sube el nivel de riesgo", () => {
+    // Decir "alto riesgo porque usa ChatGPT" sería alarmismo y falso: el Cap. V es
+    // un régimen aparte cuyas obligaciones son del PROVEEDOR del modelo.
+    const sinGpai = classify(a({ transparency: ["interacts"] }), BEFORE_OMNIBUS);
+    const conGpai = classify(
+      a({ transparency: ["interacts"], gpai: ["third_party"] }),
+      BEFORE_OMNIBUS,
+    );
+    expect(conGpai.level).toBe(sinGpai.level);
+    expect(conGpai.level).toBe("limited");
+  });
+
+  it("tampoco convierte en 'limitado' un sistema de riesgo mínimo", () => {
+    expect(classify(a({ gpai: ["third_party"] }), BEFORE_OMNIBUS).level).toBe(
+      "minimal",
+    );
+  });
+
+  it("añade citas y obligaciones a las listas principales (las lee el dossier)", () => {
+    const base = classify(a({ domain: ["employment"] }), BEFORE_OMNIBUS);
+    const conGpai = classify(
+      a({ domain: ["employment"], gpai: ["third_party"] }),
+      BEFORE_OMNIBUS,
+    );
+    expect(conGpai.citations.length).toBeGreaterThan(base.citations.length);
+    expect(conGpai.obligations.length).toBeGreaterThan(base.obligations.length);
+    expect(conGpai.citations.some((c) => c.article.includes("51-56"))).toBe(true);
+  });
+
+  it("sin modelo GPAI declarado, no hay capa ni ruido en las listas", () => {
+    for (const answers of [{}, { gpai: [NONE] }, { gpai: ["inventado"] }] as Answers[]) {
+      const r = classify(answers, BEFORE_OMNIBUS);
+      expect(r.gpai, JSON.stringify(answers)).toBeUndefined();
+      expect(r.citations.some((c) => c.article.includes("51-56"))).toBe(false);
+    }
+  });
+
+  it("el aviso de cambio de rol (Art. 25) salta SOLO con fine-tuning o marca blanca", () => {
+    const rol = (choice: string) =>
+      classify(a({ gpai: [choice] }), BEFORE_OMNIBUS).gpai?.providerRisk;
+    expect(rol("third_party")).toBe(false);
+    expect(rol("self_hosted")).toBe(false);
+    expect(rol("finetuned")).toBe(true);
+    expect(rol("own_brand")).toBe(true);
+  });
+
+  it("el aviso de rol añade obligaciones extra y marca revisión jurídica", () => {
+    const conRiesgo = classify(a({ gpai: ["finetuned"] }), BEFORE_OMNIBUS);
+    const sinRiesgo = classify(a({ gpai: ["third_party"] }), BEFORE_OMNIBUS);
+    expect(conRiesgo.obligations.length).toBeGreaterThan(sinRiesgo.obligations.length);
+    expect(conRiesgo.obligations.join(" ")).toMatch(/[Rr]evisión jurídica/);
+  });
+
+  it("cada opción trae su propia explicación, no un texto genérico", () => {
+    const notas = ["third_party", "self_hosted", "finetuned", "own_brand"].map(
+      (c) => classify(a({ gpai: [c] }), BEFORE_OMNIBUS).gpai!.note,
+    );
+    expect(new Set(notas).size).toBe(4);
+    for (const n of notas) expect(n.trim().length).toBeGreaterThan(0);
+  });
+
+  it("el criterio de cómputo se presenta como INDICATIVO, nunca como umbral legal", () => {
+    // Es de las directrices de la Comisión (jul-2025), no del Reglamento. Afirmarlo
+    // como umbral sería exactamente el tipo de texto legal que no podemos publicar.
+    const r = classify(a({ gpai: ["finetuned"] }), BEFORE_OMNIBUS);
+    const texto = `${r.gpai!.note} ${r.obligations.join(" ")} ${r.citations.map((c) => c.text).join(" ")}`;
+    // Debe calificarse siempre como indicativo/orientativo…
+    expect(texto).toMatch(/indicativ|orientativ/i);
+    // …y atribuirse a su fuente real (directrices de la Comisión), que es lo que
+    // impide leerlo como si el Reglamento fijara un umbral de cómputo.
+    expect(texto).toMatch(/directrices de la Comisión/);
+    expect(texto).toMatch(/no un umbral legal/);
+  });
+
+  it("una práctica PROHIBIDA no recibe capa GPAI: no se prepara, se cesa", () => {
+    const r = classify(
+      a({ prohibited: ["social_scoring"], gpai: ["finetuned"] }),
+      BEFORE_OMNIBUS,
+    );
+    expect(r.level).toBe("unacceptable");
+    expect(r.gpai).toBeUndefined();
+  });
+
+  it("la capa GPAI funciona igual en EN y el nivel no cambia con el idioma", () => {
+    for (const choice of ["third_party", "finetuned"]) {
+      const es = classify(a({ gpai: [choice] }), BEFORE_OMNIBUS, "es");
+      const en = classify(a({ gpai: [choice] }), BEFORE_OMNIBUS, "en");
+      expect(en.level).toBe(es.level);
+      expect(en.gpai?.providerRisk).toBe(es.gpai?.providerRisk);
+      expect(en.gpai?.note).not.toBe(es.gpai?.note);
+      expect(en.citations.length).toBe(es.citations.length);
+      expect(en.obligations.length).toBe(es.obligations.length);
+    }
+  });
+
+  it("las obligaciones GPAI se redactan como deberes del DEPLOYER", () => {
+    // Los deberes del Cap. V son del proveedor del modelo: los nuestros son
+    // exigirle evidencia, no fabricar la documentación del modelo.
+    const texto = classify(a({ gpai: ["third_party"] }), BEFORE_OMNIBUS)
+      .obligations.join(" ");
+    expect(texto).toMatch(/Exige al proveedor|Deber propio/);
+  });
+});

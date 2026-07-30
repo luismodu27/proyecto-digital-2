@@ -81,9 +81,18 @@
       `{"kind":"migration-pending","code":"PGRST205"}` y la app sigue funcionando.
       **Sentry NO se integró a propósito**: sumar un subprocesador es decisión tuya (coste + DPA);
       el enganche está listo (sustituir `emit`). `alto · M`
-- [ ] **Rama GPAI en el clasificador de riesgo** — GenAI es el caso de IA más común del mid-market y hoy cae en
-      "limitado/mínimo", perdiendo la capa GPAI (Arts. 51-56) y la trampa del **Art. 25** (con fine-tuning
-      sustancial pasas a proveedor). Vigente desde ago-2025. **Validar con el experto.** `alto · M`
+- [x] **Rama GPAI en el clasificador de riesgo** — ✅ **HECHO (2026-07-30)**. Pregunta nueva (paso 6) con
+      cinco casos (tercero tal cual · autoalojado · fine-tuning · marca blanca · ninguno) y una **capa GPAI**
+      en el resultado que NO cambia el nivel de riesgo (el Cap. V es un régimen paralelo; decir "alto riesgo
+      porque usa ChatGPT" sería falso), sino que añade citas y deberes de **exigir evidencia al proveedor del
+      modelo**, y avisa de la trampa del **Art. 25** cuando hay ajuste o marca blanca.
+      ⚠️ **PENDIENTE DE VALIDACIÓN EXPERTA:** el texto lo verifiqué yo contra fuentes autorizadas —Arts. 51-56
+      aplicables desde el 2-ago-2025 (multas con periodo de gracia hasta ago-2026; modelos previos hasta
+      ago-2027); el Digital Omnibus **no** cambió los Arts. 53/55; el criterio de **un tercio del cómputo de
+      entrenamiento** es de las **directrices de la Comisión (jul-2025)** y es explícitamente **indicativo**,
+      no un umbral del Reglamento; el **Recital 109** limita las obligaciones al alcance de la modificación—
+      pero **no ha pasado por el `compliance-domain-expert`** ni por el visto bueno del abogado (§ pendiente
+      antes de GA). Está redactado como orientación y revisión jurídica, nunca como veredicto. `alto · M`
 - [x] **Verificación local del JWT en el middleware (`getClaims`)** — ✅ **HECHO (2026-07-30)**. El
       middleware ya no pregunta a Supabase Auth por red en cada navegación: verifica la firma del JWT en
       local con WebCrypto. **Comprobado que aplica de verdad**: el proyecto ya firma con llaves

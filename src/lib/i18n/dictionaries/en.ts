@@ -1528,7 +1528,9 @@ export const en: Dictionary = {
         evaluateAnother: "Assess another system",
         backToRisk: "Back to risk",
         result: {
-          indicativeLabel: "Indicative result",
+          gpaiTitle: "General-purpose model (GenAI) detected",
+      gpaiWarnTitle: "⚠️ Your role may have changed: legal review needed",
+      indicativeLabel: "Indicative result",
           indicativeSuffix: "(indicative)",
           indicativeDesc:
             "Indicative classification based on EU AI Act criteria, drawn from what your organization has declared.",

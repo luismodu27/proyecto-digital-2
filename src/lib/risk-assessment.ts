@@ -30,11 +30,32 @@ export type Answers = Record<string, string[]>;
 
 export type Citation = { article: string; text: string };
 
+/**
+ * Capa GPAI (Cap. V, Arts. 51-56). NO es un nivel de riesgo: un chatbot de
+ * atención con GenAI sigue siendo "limitado" por el Art. 50. Lo que añade es una
+ * capa de deberes de EVIDENCIA frente al proveedor del modelo y, en dos casos, un
+ * aviso de que el encuadre del cliente puede haber pasado de *deployer* a
+ * *proveedor* (Art. 25 + directrices de la Comisión sobre GPAI).
+ */
+export type GpaiLayer = {
+  /** Hay un modelo de propósito general por debajo. */
+  applies: boolean;
+  /**
+   * El rol puede haber cambiado a PROVEEDOR (ajuste con datos propios o marca
+   * blanca). Es un aviso para revisión jurídica, nunca un veredicto.
+   */
+  providerRisk: boolean;
+  /** Explicación en el idioma de la UI. */
+  note: string;
+};
+
 export type ClassificationResult = {
   level: RiskLevel;
   rationale: string;
   citations: Citation[];
   obligations: string[];
+  /** Presente solo si el sistema declara un modelo de propósito general. */
+  gpai?: GpaiLayer;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -194,7 +215,106 @@ export const RISK_QUESTIONS: Question[] = [
       { value: NONE, label: "Ninguna de las anteriores" },
     ],
   },
+  {
+    id: "gpai",
+    step: 6,
+    title: "¿Por debajo hay un modelo de IA de propósito general (GenAI)?",
+    help: "Capa GPAI del AI Act (Cap. V, Arts. 51-56), en vigor desde el 2-ago-2025. Elige la opción que mejor describa vuestro caso.",
+    type: "single",
+    choices: [
+      {
+        value: "third_party",
+        label: "Usamos un servicio de un tercero tal cual",
+        hint: "ChatGPT, Copilot, Gemini, Claude… sin modificarlos.",
+      },
+      {
+        value: "self_hosted",
+        label: "Desplegamos un modelo por nuestra cuenta, sin modificarlo",
+        hint: "Open-weights o API integrada en un producto propio.",
+      },
+      {
+        value: "finetuned",
+        label: "Lo ajustamos con datos propios (fine-tuning)",
+        hint: "Entrenamiento adicional sobre un modelo existente.",
+      },
+      {
+        value: "own_brand",
+        label: "Lo ofrecemos a terceros bajo nuestra marca",
+        hint: "Aunque el modelo sea de otro.",
+      },
+      { value: NONE, label: "No hay ningún modelo de propósito general" },
+    ],
+  },
 ];
+
+/* -------------------------------------------------------------------------- */
+/* Capa GPAI (Cap. V) — contenido verificado                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Opciones de la pregunta `gpai` que implican que el ROL puede haber pasado de
+ * *deployer* a *proveedor*.
+ *
+ * Base: **Art. 25** (quien pone su nombre o marca en un sistema, o lo modifica
+ * sustancialmente, asume las obligaciones del proveedor) y, para modelos GPAI, las
+ * **directrices de la Comisión de julio de 2025**, que dan un criterio
+ * **indicativo** (no vinculante): se considera proveedor del modelo modificado
+ * cuando el cómputo de entrenamiento del ajuste supera **un tercio** del cómputo
+ * del modelo original. El **Recital 109** aclara que, en ese caso, las
+ * obligaciones se limitan **al alcance de la modificación**.
+ *
+ * Por eso esto es un AVISO para revisión jurídica, nunca un veredicto: un ajuste
+ * pequeño con LoRA no convierte a nadie en proveedor, y el criterio de cómputo no
+ * cubre modificaciones que cambian el comportamiento sin gastar GPU.
+ */
+const GPAI_PROVIDER_RISK = new Set(["finetuned", "own_brand"]);
+const GPAI_VALUES = new Set([
+  "third_party",
+  "self_hosted",
+  "finetuned",
+  "own_brand",
+]);
+
+export const GPAI_CITATIONS: Citation[] = [
+  {
+    article: "Arts. 51-56 (Cap. V)",
+    text: "Los modelos de IA de propósito general tienen un régimen propio: documentación técnica, política de derechos de autor, resumen del contenido de entrenamiento e información a los proveedores que integran el modelo. Estas obligaciones son del PROVEEDOR del modelo, y son aplicables desde el 2 de agosto de 2025.",
+  },
+  {
+    article: "Art. 53.1.b",
+    text: "El proveedor del modelo debe facilitar información y documentación a quienes lo integran en sus sistemas, para que puedan cumplir sus propias obligaciones. Es la base para exigirle evidencia por escrito.",
+  },
+  {
+    article: "Art. 25",
+    text: "Quien pone su nombre o marca en un sistema, o lo modifica sustancialmente, asume las obligaciones del proveedor. Las directrices de la Comisión (julio de 2025) añaden un criterio INDICATIVO para modelos GPAI: superar un tercio del cómputo de entrenamiento del modelo original. El Recital 109 limita esas obligaciones al alcance de la modificación.",
+  },
+];
+
+/** Deberes del DEPLOYER cuando por debajo hay un modelo de propósito general. */
+export const GPAI_OBLIGATIONS: string[] = [
+  "Deber propio: identifica y documenta qué modelo de propósito general hay por debajo, de qué proveedor y en qué versión. Sin eso no se puede exigir nada ni acreditar nada.",
+  "Exige al proveedor del modelo la documentación del Art. 53.1.b (información para integradores), su política de derechos de autor y el resumen público del contenido de entrenamiento; conserva copia como evidencia declarada.",
+  "Pregunta por escrito si el modelo está designado como de riesgo sistémico (Art. 51): cambia las obligaciones del proveedor y, por tanto, la evidencia que puedes exigirle.",
+  "Deber propio: alfabetización en IA de quien lo usa (Art. 4) y límites de uso escritos — para qué sí y para qué no, con quién revisa las salidas.",
+  "Deber propio: si el sistema interactúa con personas o genera contenido sintético, cumple la transparencia del Art. 50 (avisar de que es IA y marcar el contenido generado).",
+];
+
+/** Aviso extra cuando el ajuste o la marca blanca pueden cambiar el rol. */
+export const GPAI_PROVIDER_OBLIGATIONS: string[] = [
+  "⚠️ Revisión jurídica: al ajustar el modelo con datos propios o ofrecerlo bajo vuestra marca, vuestra organización puede pasar a considerarse PROVEEDOR (Art. 25). El criterio de cómputo de las directrices de la Comisión es indicativo, no un umbral legal.",
+  "Si el rol cambia, las obligaciones se limitan al alcance de la modificación (Recital 109), pero incluyen documentar el ajuste: qué datos, qué objetivo y qué se evaluó antes de ponerlo en uso.",
+];
+
+export const GPAI_NOTES = {
+  third_party:
+    "Vuestro papel sigue siendo el de responsable del despliegue: las obligaciones del Cap. V son del proveedor del modelo. Lo vuestro es exigirle evidencia por escrito y documentar qué modelo y versión usáis.",
+  self_hosted:
+    "Desplegarlo por vuestra cuenta no os convierte en proveedores del modelo, pero sí os deja sin nadie a quien reclamar la documentación: conservad la del modelo de origen (licencia, tarjeta del modelo, versión) como evidencia.",
+  finetuned:
+    "Ajustar el modelo con datos propios es la frontera del Art. 25: puede convertir a vuestra organización en proveedora del modelo resultante. El criterio de un tercio del cómputo de entrenamiento es orientativo (directrices de la Comisión, jul-2025) y necesita revisión jurídica, no autoevaluación.",
+  own_brand:
+    "Ofrecerlo bajo vuestra marca activa el Art. 25 de forma directa: quien pone su nombre en el sistema asume las obligaciones del proveedor. Necesita revisión jurídica antes de seguir.",
+} as const;
 
 /* -------------------------------------------------------------------------- */
 /* Citas y obligaciones                                                       */
@@ -403,12 +523,16 @@ export function classify(
 
     // Sin perfilado: la excepción NO aplica si no eligió una excepción real.
     if (!exceptionApplies) {
-      return {
-        level: "high",
-        rationale: rationales.high,
-        citations: citations.high,
-        obligations: obligations.high,
-      };
+      return withGpai(
+        {
+          level: "high",
+          rationale: rationales.high,
+          citations: citations.high,
+          obligations: obligations.high,
+        },
+        answers,
+        locale,
+      );
     }
     // Si aplica excepción, cae a evaluar transparencia (limitado/mínimo).
   }
@@ -416,20 +540,74 @@ export function classify(
   // 3) Transparencia (Art. 50) — limitado.
   const transparency = (answers.transparency ?? []).filter((v) => v !== NONE);
   if (transparency.length > 0) {
-    return {
-      level: "limited",
-      rationale: rationales.limited,
-      citations: citations.limited,
-      obligations: obligations.limited,
-    };
+    return withGpai(
+      {
+        level: "limited",
+        rationale: rationales.limited,
+        citations: citations.limited,
+        obligations: obligations.limited,
+      },
+      answers,
+      locale,
+    );
   }
 
   // 4) Riesgo mínimo.
+  return withGpai(
+    {
+      level: "minimal",
+      rationale: rationales.minimal,
+      citations: citations.minimal,
+      obligations: obligations.minimal,
+    },
+    answers,
+    locale,
+  );
+}
+
+/**
+ * Añade la capa GPAI al resultado, si el sistema declara un modelo de propósito
+ * general.
+ *
+ * Dos decisiones importantes:
+ *
+ *  1. **No toca el nivel de riesgo.** La capa GPAI es un régimen paralelo (Cap. V),
+ *     no una clase de riesgo: un chatbot con GenAI sigue siendo "limitado" por el
+ *     Art. 50. Decir "alto riesgo porque usa ChatGPT" sería alarmismo y
+ *     regulatoriamente falso.
+ *  2. **Las citas y obligaciones se anexan a las listas principales**, no viven
+ *     aparte. Así el dossier y el informe —que leen esos dos campos ya
+ *     persistidos— muestran la capa GPAI sin cambiar ni una línea de su código.
+ */
+function withGpai(
+  base: ClassificationResult,
+  answers: Answers,
+  locale: Locale,
+): ClassificationResult {
+  const choice = (answers.gpai ?? [])[0];
+  if (!choice || !GPAI_VALUES.has(choice)) return base;
+
+  const providerRisk = GPAI_PROVIDER_RISK.has(choice);
+  const gpaiCitations = locale === "en" ? GPAI_CITATIONS_EN : GPAI_CITATIONS;
+  const gpaiObligations =
+    locale === "en" ? GPAI_OBLIGATIONS_EN : GPAI_OBLIGATIONS;
+  const providerObligations =
+    locale === "en" ? GPAI_PROVIDER_OBLIGATIONS_EN : GPAI_PROVIDER_OBLIGATIONS;
+  const notes = locale === "en" ? GPAI_NOTES_EN : GPAI_NOTES;
+
   return {
-    level: "minimal",
-    rationale: rationales.minimal,
-    citations: citations.minimal,
-    obligations: obligations.minimal,
+    ...base,
+    citations: [...base.citations, ...gpaiCitations],
+    obligations: [
+      ...base.obligations,
+      ...gpaiObligations,
+      ...(providerRisk ? providerObligations : []),
+    ],
+    gpai: {
+      applies: true,
+      providerRisk,
+      note: notes[choice as keyof typeof notes],
+    },
   };
 }
 
@@ -631,6 +809,36 @@ export const RISK_QUESTIONS_EN: Question[] = [
       { value: NONE, label: "None of the above" },
     ],
   },
+  {
+    id: "gpai",
+    step: 6,
+    title: "Is there a general-purpose AI model (GenAI) underneath?",
+    help: "The AI Act's GPAI layer (Chapter V, Articles 51-56), applicable since 2 August 2025. Pick the option that best describes your case.",
+    type: "single",
+    choices: [
+      {
+        value: "third_party",
+        label: "We use a third-party service as-is",
+        hint: "ChatGPT, Copilot, Gemini, Claude… without modifying them.",
+      },
+      {
+        value: "self_hosted",
+        label: "We deploy a model ourselves, unmodified",
+        hint: "Open-weights, or an API integrated into our own product.",
+      },
+      {
+        value: "finetuned",
+        label: "We fine-tune it with our own data",
+        hint: "Additional training on top of an existing model.",
+      },
+      {
+        value: "own_brand",
+        label: "We offer it to third parties under our own brand",
+        hint: "Even if the model belongs to someone else.",
+      },
+      { value: NONE, label: "There is no general-purpose model involved" },
+    ],
+  },
 ];
 
 export const OBLIGATIONS_BY_LEVEL_EN: Record<RiskLevel, string[]> = {
@@ -714,3 +922,42 @@ export const OMNIBUS_CITATIONS_EN: Citation[] = [
     text: "Non-consensual intimate images: a criminal offence via national law.",
   },
 ];
+
+export const GPAI_CITATIONS_EN: Citation[] = [
+  {
+    article: "Arts. 51-56 (Chapter V)",
+    text: "General-purpose AI models have their own regime: technical documentation, a copyright policy, a summary of the training content, and information for the providers that integrate the model. These obligations belong to the model's PROVIDER, and have applied since 2 August 2025.",
+  },
+  {
+    article: "Art. 53(1)(b)",
+    text: "The model provider must supply information and documentation to those who integrate it into their systems, so they can meet their own obligations. This is the basis for demanding written evidence from them.",
+  },
+  {
+    article: "Art. 25",
+    text: "Whoever puts their name or trademark on a system, or substantially modifies it, takes on the provider's obligations. The Commission's guidelines (July 2025) add an INDICATIVE criterion for GPAI models: exceeding one third of the original model's training compute. Recital 109 limits those obligations to the scope of the modification.",
+  },
+];
+
+export const GPAI_OBLIGATIONS_EN: string[] = [
+  "Your own duty: identify and document which general-purpose model sits underneath, from which provider and in which version. Without that you can neither demand nor evidence anything.",
+  "Require from the model provider the Art. 53(1)(b) documentation (information for integrators), their copyright policy and the public summary of training content; keep a copy as declared evidence.",
+  "Ask in writing whether the model is designated as posing systemic risk (Art. 51): it changes the provider's obligations and therefore the evidence you can demand.",
+  "Your own duty: AI literacy for the people using it (Art. 4) and written limits of use — what it is and is not for, and who reviews the outputs.",
+  "Your own duty: if the system interacts with people or generates synthetic content, meet the Art. 50 transparency duties (disclose that it is AI and mark generated content).",
+];
+
+export const GPAI_PROVIDER_OBLIGATIONS_EN: string[] = [
+  "⚠️ Legal review: by fine-tuning the model with your own data or offering it under your brand, your organization may come to be considered a PROVIDER (Art. 25). The Commission's compute criterion is indicative, not a legal threshold.",
+  "If the role changes, the obligations are limited to the scope of the modification (Recital 109), but they do include documenting the fine-tune: which data, which objective and what was evaluated before putting it into use.",
+];
+
+export const GPAI_NOTES_EN = {
+  third_party:
+    "Your role remains that of deployer: the Chapter V obligations belong to the model's provider. Yours is to demand written evidence from them and to document which model and version you use.",
+  self_hosted:
+    "Deploying it yourself does not make you the model's provider, but it does leave you with no one to claim documentation from: keep the source model's paperwork (licence, model card, version) as evidence.",
+  finetuned:
+    "Fine-tuning with your own data is the Art. 25 boundary: it may make your organization the provider of the resulting model. The one-third training-compute criterion is indicative (Commission guidelines, Jul 2025) and calls for legal review, not self-assessment.",
+  own_brand:
+    "Offering it under your own brand triggers Art. 25 directly: whoever puts their name on the system takes on the provider's obligations. This needs legal review before going further.",
+} as const;

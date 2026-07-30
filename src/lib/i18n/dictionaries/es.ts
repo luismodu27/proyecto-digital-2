@@ -1544,7 +1544,9 @@ export const es = {
         evaluateAnother: "Evaluar otro sistema",
         backToRisk: "Volver a riesgo",
         result: {
-          indicativeLabel: "Resultado orientativo",
+          gpaiTitle: "Modelo de propósito general (GenAI) detectado",
+      gpaiWarnTitle: "⚠️ Puede haber cambiado vuestro papel: revisión jurídica",
+      indicativeLabel: "Resultado orientativo",
           indicativeSuffix: "(indicativo)",
           indicativeDesc:
             "Clasificación orientativa según los criterios del EU AI Act, a partir de lo que tu organización ha declarado.",

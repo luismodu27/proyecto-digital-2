@@ -133,6 +133,15 @@ para webhooks/crons sin sesión) y `telemetry/client.ts` (`track`, `sendBeacon` 
 un correo sin darse cuenta. Nunca lanza: si 0026 no está aplicada, medir es un no-op y la app funciona igual.
 El panel `/dashboard/telemetria` es interno (solo `platform_admins`, y en demo devuelve vacío a propósito).
 
+**Capa GPAI del clasificador (Cap. V).** `classify()` devuelve un bloque `gpai` opcional cuando el sistema
+declara un modelo de propósito general, y **no toca el nivel de riesgo**: el Cap. V es un régimen paralelo, así
+que un chatbot con GenAI sigue siendo "limitado" por el Art. 50 — marcarlo como alto riesgo sería alarmismo y
+regulatoriamente falso. Lo que añade son citas y deberes de **exigir evidencia al proveedor del modelo**
+(Art. 53.1.b), más un aviso de **Art. 25** (fine-tuning o marca blanca ⇒ puede pasarse a *proveedor*). Se
+**anexan a `citations`/`obligations`**, que ya se persisten, de modo que dossier e informe muestran la capa sin
+tocar su código. El criterio del **tercio del cómputo** se cita siempre como **indicativo y de las directrices
+de la Comisión (jul-2025)**, nunca como umbral del Reglamento; un test lo vigila.
+
 **Observabilidad de las degradaciones (`src/lib/observability/log.ts`).** La fachada está llena de
 `if (error) return []` deliberados —la app no puede romperse porque falte una migración—, pero borraban
 la causa: "la tabla no existe", "la RLS está mal" y "Supabase está caído" se veían igual, una pantalla
