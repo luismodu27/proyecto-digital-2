@@ -101,6 +101,15 @@ pertenecer a N organizaciones. El `audit_log` es **inmutable** (triggers `block_
 rellenan triggers `write_audit` en cada tabla con `organization_id`. `src/lib/audit.ts` traduce
 filas crudas a español legible.
 
+**Importación de inventario por CSV.** El parser vive aparte y es **puro**
+(`src/lib/import/csv.ts`, con tests): autodetecta el delimitador (**Excel en español exporta con `;`** — la
+causa nº 1 de "tu importador no funciona"), acepta cabeceras ES/EN con alias, se come el BOM, respeta comas
+dentro de comillas y **valida e informa por filas** (número de línea + motivo) en vez de abortar el fichero.
+El cliente previsualiza con la MISMA función que usa el servidor, pero el servidor **vuelve a parsear**: la
+previsualización es UX, no validación. Trampa comprobada: en un insert múltiple, PostgREST exige que todas
+las filas tengan **exactamente las mismas claves** (`PGRST102 All object keys must match`), así que
+`import-actions.ts` enumera los seis campos siempre, con `null` — no omitir los nulos.
+
 **Telemetría de producto = primera parte, catálogo cerrado, cero PII.** No hay PostHog/GA/Plausible: los
 eventos se escriben en `product_events` (migración **0026**, misma BD en la UE) y el embudo se lee con la RPC
 `product_funnel`, que lleva el guard de `is_platform_admin()` **dentro**. El catálogo de eventos vive en

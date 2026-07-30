@@ -21,9 +21,16 @@ export default async function InventarioPage() {
         title={t.title}
         subtitle={t.subtitle}
         action={
-          <ButtonLink href="/dashboard/inventario/nuevo" variant="primary">
-            {t.addSystem}
-          </ButtonLink>
+          <div className="flex flex-wrap gap-2">
+            {/* La importación va PRIMERO en el flujo real: quien llega con 30
+                sistemas en una hoja no los teclea uno a uno. */}
+            <ButtonLink href="/dashboard/inventario/importar" variant="outline">
+              {t.importCta}
+            </ButtonLink>
+            <ButtonLink href="/dashboard/inventario/nuevo" variant="primary">
+              {t.addSystem}
+            </ButtonLink>
+          </div>
         }
       />
 
@@ -38,6 +45,9 @@ export default async function InventarioPage() {
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <ButtonLink href="/dashboard/inventario/nuevo" variant="primary">
               {t.addSystem}
+            </ButtonLink>
+            <ButtonLink href="/dashboard/inventario/importar" variant="outline">
+              {t.importCta}
             </ButtonLink>
             {isSupabaseConfigured && (
               <form action={seedSampleData}>
