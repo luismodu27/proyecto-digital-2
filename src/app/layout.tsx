@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import { localeFromHeader } from "@/lib/i18n/resolve";
+import { PageView } from "@/components/telemetry/PageView";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -82,7 +83,12 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        {/* Telemetría de primera parte: un solo punto de montaje cubre web
+            pública, auth y dashboard. No renderiza nada y respeta GPC/DNT. */}
+        <PageView />
+      </body>
     </html>
   );
 }

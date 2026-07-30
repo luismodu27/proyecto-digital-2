@@ -1,5 +1,6 @@
 import { Logo } from "@/components/ui/Logo";
 import { ButtonLink } from "@/components/ui/Button";
+import { CtaLink } from "@/components/telemetry/CtaLink";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LocaleToggle } from "@/components/ui/LocaleToggle";
 import { MobileNav } from "@/components/landing/MobileNav";
@@ -45,9 +46,9 @@ export function SiteHeader({
           </ButtonLink>
           {/* Registro real, no lista de espera: el plan Diagnóstico es gratuito
               y el checkout está activo (ver comentario en Hero.tsx). */}
-          <ButtonLink href="/login?signup=1" variant="primary">
+          <CtaLink cta="header_signup" href="/login?signup=1" variant="primary">
             {t.nav.requestAccess}
-          </ButtonLink>
+          </CtaLink>
           <MobileNav
             items={nav}
             loginLabel={t.nav.login}

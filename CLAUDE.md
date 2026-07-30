@@ -38,9 +38,28 @@ npm run lint    # ESLint
 npm run check:copy   # guard de COPY PROHIBIDO (regla #1: Attesta NO certifica)
 ```
 
-No hay framework de tests todavía: la verificación se hace con **build + lint + tsc +
-`check:copy`** y, para el backend real, con **curl por API** (usuarios `*@attesta-test.dev`)
-— ver gotchas. (Vitest está planificado en `PENDIENTES.md §0.B`.)
+```bash
+npm test          # Vitest sobre la lógica pura (221 tests, <1 s)
+npm run test:watch
+```
+
+La verificación completa es **lint + tsc + `check:copy` + `test` + build** (los cinco están en CI)
+y, para el backend real, **curl por API** (usuarios `*@attesta-test.dev`) — ver gotchas.
+
+**Tests (`npm test`, Vitest, `src/**/*.test.ts`).** Cubren solo **lógica pura** (nada de componentes
+ni de Supabase; entorno `node`, sin jsdom, para que la suite corra en <1 s y nadie la desactive).
+Existen porque `build`/`lint`/`tsc` compilan tan felices una **regla legal mal editada**: un `if`
+invertido en `classify()` da un veredicto equivocado sobre el EU AI Act sin romper nada. Por eso los
+tests codifican la **expectativa regulatoria**, no la implementación: el Art. 5 manda sobre todo, el
+perfilado del Art. 6.3 párr. 2 anula las excepciones, LL144 exige auditoría **y** publicación (no se
+colapsan), el catálogo curado **siempre gana** al pipeline de vigilancia, ninguna brecha se pierde al
+deduplicar el plan de acción, y el navegador **no** puede emitir `checkout_completed`. Cubren además
+la **paridad ES/EN** de packs, catálogo regulatorio, clasificador y audit-trail (`article`/`articles`
+se comparan por sus **números**, no literalmente: la prosa —"Anexo III" → "Annex III"— sí se traduce).
+Al escribirlos se validó que **detectan** las regresiones inyectando 6 mutaciones (invertir la puerta
+de perfilado, 13 meses en LL144, `<` → `<=` en vencimientos, que el pipeline gane al catálogo, abrir
+`CLIENT_EVENTS`, quitar un `prohibited` del espejo EN): las 6 fallaron. **Repetir ese ritual** al
+añadir tests — un test que no falla al romper la regla no protege nada.
 
 **Guard de copy prohibido (`scripts/check-prohibited-copy.mjs`, en CI).** Hace verificable la
 regla #1 del producto. NO es una lista negra de palabras: escanear "certificado" o "marcado CE"
@@ -82,6 +101,59 @@ pertenecer a N organizaciones. El `audit_log` es **inmutable** (triggers `block_
 rellenan triggers `write_audit` en cada tabla con `organization_id`. `src/lib/audit.ts` traduce
 filas crudas a español legible.
 
+**Intake compartible (migración 0027).** La otra mitad del problema de activación: quien contrata Attesta
+no sabe qué IA usa cada área. Se emite un **enlace con token de capacidad** (24 bytes aleatorios en
+base64url, generados en el servidor) y quien lo recibe rellena una ficha **sin cuenta**. Modelo de
+seguridad, que es lo delicado porque es la ÚNICA escritura anónima del producto: lo enviado NO entra en el
+inventario, cae en `intake_submissions` (bandeja) y un miembro autenticado la acepta —así el expediente y el
+audit-trail siempre tienen un responsable con nombre—; `anon` no tiene NINGUNA policy de lectura y su única
+puerta es la RPC `submit_intake` (`security definer`), que devuelve **el mismo `false`** para token
+inexistente, caducado, revocado o agotado, para no ser un oráculo de tokens; el enlace caduca (30 días), se
+revoca y tiene tope de envíos. Por el mismo motivo, `/intake/[token]` **no valida el token al renderizar**:
+si lo hiciera, la URL diría qué enlaces existen. Va con `noindex`.
+
+**Importación de inventario por CSV.** El parser vive aparte y es **puro**
+(`src/lib/import/csv.ts`, con tests): autodetecta el delimitador (**Excel en español exporta con `;`** — la
+causa nº 1 de "tu importador no funciona"), acepta cabeceras ES/EN con alias, se come el BOM, respeta comas
+dentro de comillas y **valida e informa por filas** (número de línea + motivo) en vez de abortar el fichero.
+El cliente previsualiza con la MISMA función que usa el servidor, pero el servidor **vuelve a parsear**: la
+previsualización es UX, no validación. Trampa comprobada: en un insert múltiple, PostgREST exige que todas
+las filas tengan **exactamente las mismas claves** (`PGRST102 All object keys must match`), así que
+`import-actions.ts` enumera los seis campos siempre, con `null` — no omitir los nulos.
+
+**Telemetría de producto = primera parte, catálogo cerrado, cero PII.** No hay PostHog/GA/Plausible: los
+eventos se escriben en `product_events` (migración **0026**, misma BD en la UE) y el embudo se lee con la RPC
+`product_funnel`, que lleva el guard de `is_platform_admin()` **dentro**. El catálogo de eventos vive en
+`src/lib/telemetry/events.ts` y es **cerrado** (un nombre nuevo no compila); `CLIENT_EVENTS` marca los pocos que
+el navegador puede emitir — los hechos de negocio (pago, alta de sistema) se emiten en el servidor, donde son
+comprobables, para que nadie pueda falsear el embudo desde la consola. Tres emisores según el contexto:
+`telemetry/server.ts` (`trackServer`, aplaza el insert con `after()`), `telemetry/service.ts` (`trackService`,
+para webhooks/crons sin sesión) y `telemetry/client.ts` (`track`, `sendBeacon` + respeto de GPC/DNT).
+`sanitizeProps` acota los metadatos y **descarta cualquier valor con `@`**: la fuga de PII más probable es colar
+un correo sin darse cuenta. Nunca lanza: si 0026 no está aplicada, medir es un no-op y la app funciona igual.
+El panel `/dashboard/telemetria` es interno (solo `platform_admins`, y en demo devuelve vacío a propósito).
+
+**Capa GPAI del clasificador (Cap. V).** `classify()` devuelve un bloque `gpai` opcional cuando el sistema
+declara un modelo de propósito general, y **no toca el nivel de riesgo**: el Cap. V es un régimen paralelo, así
+que un chatbot con GenAI sigue siendo "limitado" por el Art. 50 — marcarlo como alto riesgo sería alarmismo y
+regulatoriamente falso. Lo que añade son citas y deberes de **exigir evidencia al proveedor del modelo**
+(Art. 53.1.b), más un aviso de **Art. 25** (fine-tuning o marca blanca ⇒ puede pasarse a *proveedor*). Se
+**anexan a `citations`/`obligations`**, que ya se persisten, de modo que dossier e informe muestran la capa sin
+tocar su código. El criterio del **tercio del cómputo** se cita siempre como **indicativo y de las directrices
+de la Comisión (jul-2025)**, nunca como umbral del Reglamento; un test lo vigila.
+
+**Observabilidad de las degradaciones (`src/lib/observability/log.ts`).** La fachada está llena de
+`if (error) return []` deliberados —la app no puede romperse porque falte una migración—, pero borraban
+la causa: "la tabla no existe", "la RLS está mal" y "Supabase está caído" se veían igual, una pantalla
+vacía. `logDataFallback(at, error, detail?)` clasifica en **`migration-pending`** (códigos 42P01/42703/
+42883/PGRST20x o el mensaje de *schema cache* → `warn`, es el estado esperado antes de aplicar una
+migración), **`permission`** (42501, RLS) e **`incident`** (todo lo demás → `error`), y emite **una línea
+JSON** (`{"src":"attesta","at":"getGapItems",…}`) que Vercel parsea sin configurar nada. Hay antirruido
+de 5 min por (sitio + código) para que una migración pendiente no escriba una línea por render.
+`logIncident` es para los `catch` de escritura. **Aquí NO entran datos de cliente**: solo el sitio, el
+código y el mensaje de Postgres. No manda nada a terceros a propósito: enchufar Sentry es sustituir
+`emit`, y sumar un subprocesador es decisión del fundador (coste + DPA), no un detalle de un commit.
+
 **Contenido legal = 100% determinista, cero LLM.** Las rutas que emiten texto regulatorio (dossier,
 informe, radar de vigilancia, clasificación de riesgo, recomendaciones) se ensamblan solo con datos
 reales del cliente + texto del AI Act ya verificado por el experto. Un texto legal alucinado es un
@@ -107,6 +179,7 @@ src/
     mock-data.ts   # datos demo + TIPOS canónicos (AiSystem, GapItem, ...)
     risk-assessment.ts regulatory-watch.ts recommendations.ts audit.ts
     policy-packs/rrhh.ts  task-reminders.ts
+    telemetry/     # events (catálogo cerrado) + server/service/client + actions
 supabase/
   migrations/*.sql   # 0001..0013 (esquema, RLS, audit, RPCs)
   setup.sql          # todas las migraciones concatenadas (el fundador las pega en SQL Editor)
@@ -157,3 +230,9 @@ docs/{supabase.md,thesis.md}
   dinámico usa un **mapa de hex** en el componente, no `var(--color-...)` de un token no referenciado.
   Todo color semántico nuevo va por **token/tono** (`--tone-*`), nunca hex hardcodeado en clases.
 - **Rutas con datos frescos** (countdown de vigilancia, audit-trail) llevan `export const dynamic = "force-dynamic"`.
+- **`greatest`/`least` NO se pueden cualificar con esquema.** Son construcciones del lenguaje SQL, no funciones:
+  `pg_catalog.least(...)` da *"function does not exist"*. Tampoco les afecta `search_path = ''`, así que en
+  `security definer` van **sin** prefijo (a diferencia de `make_interval`, `now()`, casts, tablas…). Se detectó
+  levantando un Postgres 16 desechable y aplicando la migración 0026 antes de dársela al fundador; **merece la
+  pena hacerlo con cada migración nueva** (`initdb` + un scaffold con `auth.users`, `organizations`, los roles
+  `anon`/`authenticated` y `is_platform_admin()` basta para validar sintaxis, CHECKs y policies).

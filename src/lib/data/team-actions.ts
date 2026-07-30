@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
+import { trackServer } from "@/lib/telemetry/server";
 import type { MemberRole } from "@/lib/mock-data";
 
 const TEAM = "/dashboard/equipo";
@@ -50,6 +51,12 @@ export async function inviteMember(formData: FormData) {
   });
 
   if (error) back("team-error");
+
+  // Señal de expansión de cuenta. Se mide el ROL invitado, jamás el correo.
+  await trackServer("invite_sent", {
+    organizationId: ctx.org,
+    props: { role, outcome: String(data ?? "invited") },
+  });
 
   revalidatePath(TEAM);
   if (data === "added") back("member-added");

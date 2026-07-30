@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
 import { friendlyError } from "@/lib/friendly-error";
+import { reportOrgCreated } from "@/lib/telemetry/actions";
 import type { Dictionary } from "@/lib/i18n";
 
 function slugify(name: string) {
@@ -37,6 +38,10 @@ export function OnboardingForm({ t }: { t: Dictionary["auth"] }) {
         org_slug: slugify(name),
       });
       if (error) throw error;
+      // Hito del embudo. La RPC la llama el navegador, así que no hay punto de
+      // servidor que se entere: se avisa y el servidor lo verifica antes de
+      // contarlo. Sin `await`: no debe retrasar la entrada al dashboard.
+      void reportOrgCreated();
       router.push("/dashboard");
       router.refresh();
     } catch (err) {

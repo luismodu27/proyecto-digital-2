@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/server";
 import { STRIPE_WEBHOOK_SECRET, isStripeConfigured } from "@/lib/stripe/config";
 import { createServiceClient } from "@/lib/supabase/service";
+import { trackService } from "@/lib/telemetry/service";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -67,6 +68,9 @@ export async function POST(req: NextRequest) {
           const sub = await stripe.subscriptions.retrieve(subId);
           await upsert(sub, orgId);
         }
+        // Cierre del embudo: pago confirmado por Stripe, no "el usuario pulsó
+        // pagar". Se mide aquí porque es el único punto donde el hecho consta.
+        await trackService("checkout_completed", { organizationId: orgId });
         break;
       }
       case "customer.subscription.created":

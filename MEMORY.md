@@ -127,6 +127,139 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 2 · capa GPAI en el clasificador (cierra el Sprint 2).**
+  GenAI es el caso de IA más común del mid-market y caía en "limitado/mínimo" sin más. La decisión de diseño
+  clave —y la que hay que defender si alguien propone lo contrario— es que la capa GPAI **no cambia el nivel
+  de riesgo**: el Cap. V es un régimen paralelo cuyas obligaciones son del **proveedor del modelo**, así que
+  "alto riesgo porque usa ChatGPT" sería alarmismo y regulatoriamente falso. Lo que sí aporta es lo que un
+  deployer puede hacer: exigir por escrito la documentación del Art. 53.1.b, la política de derechos de autor
+  y el resumen de contenido de entrenamiento; y el aviso del **Art. 25** cuando hay fine-tuning o marca blanca.
+  - Truco de implementación que evitó tocar tres pantallas: las citas y obligaciones GPAI se **anexan** a
+    `citations`/`obligations`, que ya se persisten en `risk_assessments`, así que dossier e informe muestran
+    la capa sin cambiar ni una línea de su código.
+  - **Precisión que no tenía y encontré verificando:** el criterio del **tercio del cómputo de entrenamiento**
+    para decidir si quien ajusta un modelo pasa a ser su proveedor es de las **directrices de la Comisión de
+    julio de 2025** y es **explícitamente indicativo**, no un umbral del Reglamento; el **Recital 109** limita
+    esas obligaciones al **alcance de la modificación**. Hay un test que vigila que el texto siempre lo
+    califique como indicativo y lo atribuya a su fuente: presentarlo como umbral legal sería justo el tipo de
+    afirmación que este producto no puede hacer.
+  - **Honestidad sobre el proceso:** esta vez el texto NO pasó por el subagente `compliance-domain-expert`
+    (esta sesión no debía invocar subagentes), sino que lo verifiqué contra fuentes autorizadas y quedó
+    anotado en `PENDIENTES §0.B` como **pendiente de validación experta** antes de GA, igual que el resto del
+    corpus. Está redactado como orientación y revisión jurídica, nunca como veredicto.
+
+- **2026-07-30** · **SPRINT 2 · muro de activación: import CSV + enlace de intake compartible.**
+  Eran **dos** problemas, no uno, y por eso hay dos caminos: el CSV sirve cuando la organización YA tiene la
+  lista; el **enlace de intake** sirve para CONSTRUIRLA, porque quien contrata (Legal, Compliance) no sabe
+  qué IA usa cada área — eso lo saben RRHH, Marketing o Soporte, y a esa gente no se le va a dar una cuenta.
+  - **CSV:** el parser es puro y aparte. El detalle que decide si el importador "funciona" o no es que
+    **Excel en español exporta con `;`**: sin autodetección, el fichero entra como una sola columna. También
+    BOM, CRLF, comas entrecomilladas y validación **por filas** (línea + motivo) en vez de abortar el
+    fichero. Y trampa de PostgREST cazada en la verificación: en un insert múltiple **todas las filas deben
+    tener exactamente las mismas claves** (`PGRST102`), así que se enumeran los seis campos con `null`.
+  - **Intake:** es la **única escritura anónima** del producto, así que el diseño gira en torno a contenerla.
+    Lo enviado NO entra en el inventario: cae en una bandeja y un miembro autenticado la acepta, de modo que
+    el expediente y el audit-trail siempre tienen un responsable con nombre. `anon` no tiene ninguna policy
+    de lectura y su única puerta es una RPC que devuelve **el mismo `false`** para token inexistente,
+    caducado, revocado o agotado — no puede usarse como oráculo de tokens. Por lo mismo,
+    `/intake/[token]` **no valida el token al renderizar**: si lo hiciera, la URL revelaría qué enlaces
+    existen (y por tanto quién es cliente). Caduca a 30 días, tope de envíos y revocable.
+  - **El Postgres desechable volvió a pagar el billete**: encontró que `submit_intake` con nombre en blanco
+    devolvía un **500 a un anónimo** en vez de `false`, porque `btrim_safe` devuelve NULL y `NULL = ''` no es
+    cierto. Y de paso: `create policy` no admite `IF NOT EXISTS`, así que 0027 lleva `drop policy if exists`
+    delante de cada una — re-pegar una migración corregida es algo que pasa, y sin eso falla a mitad.
+  - Verificada la matriz de seguridad completa contra el Postgres local: anon no lee nada, no puede insertar
+    directo, la RPC acepta el token válido y rechaza los cuatro casos malos, y un miembro de OTRA
+    organización ve cero. Y contra el Supabase real (sin 0027): la pantalla degrada limpia y el log dice
+    `migration-pending`.
+
+- **2026-07-30** · **SPRINT 2 · el middleware verifica el JWT en local (`getClaims`).**
+  Antes, cada clic dentro del dashboard pagaba una ida y vuelta a Supabase Auth en el camino crítico.
+  Lo interesante fue **comprobar la premisa en vez de suponerla**: `getClaims` solo verifica en local
+  si el proyecto firma con llaves **asimétricas**. Miré el JWT real de un usuario de prueba y llegaba
+  con `alg: ES256` + JWKS público en `/auth/v1/.well-known/jwks.json` → la mejora está activa hoy, sin
+  que el fundador tenga que migrar nada (si hubiera sido el secreto simétrico heredado, el cambio
+  habría sido correcto pero sin ganancia, y habría hecho falta una acción suya en el panel).
+  Verificado por curl con sesión real: sin cookie `/dashboard`→`/login`; con sesión `/login`→`/dashboard`;
+  y con una cookie de JWT malformado se trata como "sin sesión" en vez de romper con un 500.
+
+- **2026-07-30** · **SPRINT 2 · observabilidad: las degradaciones ya no son mudas.**
+  El patrón `if (error) return []` de la fachada es correcto (la app no puede caerse porque falte una
+  migración) pero **borraba la causa**: en producción, "la tabla aún no existe", "la RLS está mal" y
+  "Supabase está caído" se veían idénticos — una pantalla vacía. Ahora cada degradación se clasifica
+  (`migration-pending` → warn, `permission` → error, `incident` → error) y deja **una línea JSON**.
+  - Dos decisiones conscientes: (1) **antirruido de 5 min** por sitio+código, porque una migración
+    pendiente escribiría una línea por render y un log ruidoso se deja de leer, que es como muere la
+    observabilidad; (2) **nada de Sentry todavía** — el enganche está listo (sustituir `emit`), pero
+    sumar un subprocesador es decisión del fundador (coste + DPA), no algo que se cuele en un commit
+    de alguien que vende gobernanza de datos.
+  - El caso que más valor añade y no estaba en el plan: **`getOrgPlan`**. Degradar a `free` una org que
+    paga era un incidente de facturación completamente invisible; ahora se distingue de "0018 sin
+    aplicar", que es el caso benigno.
+  - Verificado de punta a punta contra el Supabase real (que aún no tiene 0026): la telemetría emite
+    `{"kind":"migration-pending","code":"PGRST205"}` y la app responde igual. **Nota de higiene:** la
+    verificación dejó una fila de prueba en `waitlist` (`probe@attesta-test.dev`); sin service-role key
+    en local no pude borrarla — el fundador puede eliminarla desde el SQL Editor cuando quiera.
+
+- **2026-07-30** · **SPRINT 2 · red de seguridad del contenido: 221 tests con Vitest.**
+  Por qué importaba tanto: el producto promete contenido legal **determinista y sin LLM**, pero nada
+  impedía que una edición desafortunada invirtiera una regla del AI Act — `build`, `lint` y `tsc`
+  compilan un `if` mal puesto sin pestañear. Los tests no comprueban la implementación, comprueban la
+  **expectativa regulatoria**: el Art. 5 manda sobre todo, el perfilado del Art. 6.3 párr. 2 anula
+  cualquier excepción, LL144 exige auditoría **Y** publicación (no se colapsan en un semáforo), el
+  catálogo curado siempre gana al pipeline de vigilancia, ninguna brecha se pierde al deduplicar el
+  plan, y el navegador no puede emitir `checkout_completed`.
+  - **Lo importante del método:** un test que pasa no demuestra nada. Se inyectaron **6 mutaciones**
+    (invertir la puerta de perfilado, 13 meses en LL144, `<`→`<=` en vencimientos, dejar que el
+    pipeline gane, abrir `CLIENT_EVENTS`, quitar un `prohibited` del espejo EN) y **las 6 fallaron**.
+    Ritual a repetir siempre que se añadan tests.
+  - **Tres cosas que encontraron y que yo daba por otra cosa:** (1) el campo `article` de los packs y
+    los `articles` del radar **sí se traducen en parte** ("Anexo III" → "Annex III", "Cap. V" →
+    "Chapter V"), así que la paridad ES/EN se comprueba por los **números** de la cita, no literalmente
+    —lo que de verdad no puede divergir es la referencia legal—; (2) `minimal: []` en
+    `recommendations` es **correcto** (el AI Act no impone deberes al riesgo mínimo; inventar
+    recomendaciones ahí sería alarmismo), no un hueco que rellenar; (3) un `?? "/"` mío en
+    `normalizePath` **nunca se activaba** porque `"".split()` devuelve `""` y no `undefined`.
+  - Entorno `node`, sin jsdom, <1 s: una suite lenta se acaba desactivando. `npm test` ya está en CI.
+
+- **2026-07-30** · **SPRINT 2 CERRADO (6/6): activación + red de seguridad.** Telemetría de primera parte,
+  274 tests sobre la lógica regulatoria, observabilidad de las degradaciones, import CSV, enlace de intake
+  compartible y verificación local del JWT. Seis commits, cada uno verificado con lint + tsc + `check:copy` +
+  tests + build y, donde tenía sentido, por **curl contra el Supabase real** (usuarios `*@attesta-test.dev`).
+  - **Lo que más va a valer a futuro no es ninguno de los seis ítems, es el ritual nuevo:** validar cada
+    migración en un **Postgres 16 desechable** antes de dársela al fundador. En este sprint cazó tres bugs que
+    habrían fallado en el SQL Editor (`greatest`/`least` no admiten prefijo de esquema; `submit_intake`
+    devolvía un 500 a un anónimo con nombre en blanco; `create policy` no es idempotente). Está documentado en
+    los gotchas de `CLAUDE.md`.
+  - **Segundo hábito nuevo:** los tests se comprueban **rompiendo la lógica a propósito** (6 mutaciones, las 6
+    detectadas). Un test que no falla al invertir la regla no protege nada.
+  - Pendientes del fundador que desbloquean lo construido: migración **0026** (telemetría) y **0027**
+    (intake). Sin ellas todo funciona igual, con degradación verificada, solo que sin métricas ni enlaces.
+
+- **2026-07-30** · **SPRINT 2 · telemetría de producto ADELANTADA (antes que el resto del sprint).**
+  Razón: el Sprint 1 optimizó conversión y activación **a ciegas** y el Sprint 2 iba a hacer lo mismo con el
+  import CSV. Medir primero, optimizar después. Decisiones que conviene no volver a discutir:
+  - **De primera parte, no PostHog/GA/Plausible.** Vendemos gobernanza de IA y transparencia de datos a
+    mid-market europeo: enviar la navegación de nuestros clientes a un tercero exigiría DPA, subprocesador
+    declarado y aviso de cookies, y contradice el discurso. Los eventos se quedan en la misma BD (UE). Además
+    no toca la CSP ni añade scripts de terceros, y sale gratis.
+  - **Catálogo cerrado de eventos** (`src/lib/telemetry/events.ts`): un nombre nuevo no compila. La telemetría
+    de texto libre se degrada en semanas (`cta_click` / `click_cta` / `ctaClick`) y deja de poder responder la
+    única pregunta que importa. `CLIENT_EVENTS` limita lo que puede emitir el navegador: `checkout_completed`
+    solo lo escribe el webhook de Stripe, así que el embudo de ingresos no se puede falsear desde la consola.
+  - **Privacidad como decisión de producto, no como adorno:** sin IP, sin user-agent, sin PII (`sanitizeProps`
+    tira cualquier valor con `@`), se respetan GPC/DNT, y el `anon_id` es un aleatorio de primera parte que
+    solo evita contar dos veces la misma visita. Queda pendiente declararlo en la página de privacidad (§0.F).
+  - **Hallazgo técnico reutilizable:** levanté un **Postgres 16 desechable** con un scaffold mínimo
+    (`auth.users`, `organizations`, roles `anon`/`authenticated`, `is_platform_admin()`) y apliqué la migración
+    antes de dársela al fundador. Cazó un bug real que habría fallado en el SQL Editor: **`greatest`/`least` son
+    construcciones SQL y no admiten prefijo de esquema** (`pg_catalog.least(...)` → *does not exist*), al
+    contrario que `make_interval` o los casts. También verifiqué las policies de verdad: `anon` inserta pero no
+    lee; `authenticated` no admin ve 0 filas; admin ve todo; UPDATE/DELETE son no-op silencioso (append-only).
+    **Repetir este ritual con cada migración nueva** — está documentado en los gotchas de `CLAUDE.md`.
+  - Un no-obvio: el panel interno en **modo demo devuelve vacío a propósito** (`mock-repo`). Poner números de
+    ejemplo en un marcador de negocio invita a decidir con datos inventados.
+
 - **2026-07-30** · **SPRINT 1 completado (blindaje de marca + conversión) — 7 ítems, 5 commits.**
   Primer sprint de la hoja de ruta 360° (`PENDIENTES.md §0.A`). Lo relevante para el futuro:
   - **Guard de copy prohibido en CI** (`scripts/check-prohibited-copy.mjs` + `npm run check:copy`). La regla #1

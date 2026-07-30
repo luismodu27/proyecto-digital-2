@@ -34,6 +34,9 @@ import {
 } from "@/lib/regulatory-watch";
 import type { BiasAudit } from "@/lib/bias-audit";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import { logDataFallback } from "@/lib/observability/log";
+import type { FunnelRow } from "@/lib/telemetry/events";
+import type { IntakeLink, IntakeSubmission } from "@/lib/intake/types";
 
 /** Mapea la severidad de BD (en) a la del modelo de UI (es). */
 const SEVERITY_ES: Record<string, GapItem["severity"]> = {
@@ -66,7 +69,10 @@ export async function getAiSystems(): Promise<AiSystem[]> {
     .eq("organization_id", org)
     .order("created_at", { ascending: true });
 
-  if (error || !data) return [];
+  if (error || !data) {
+    logDataFallback("getAiSystems", error);
+    return [];
+  }
 
   return data.map((row) => ({
     id: row.code ?? row.id,
@@ -210,7 +216,12 @@ export async function getSystemBiasAudit(
     .eq("organization_id", org)
     .eq("id", id)
     .maybeSingle();
-  if (error || !data) return null;
+  if (error || !data) {
+    // Sin fila no hay incidente (el sistema puede no tener datos de sesgo aún);
+    // solo se registra si Supabase devolvió error.
+    if (error) logDataFallback("getSystemBiasAudit", error);
+    return null;
+  }
   return mapBiasRow(data as BiasRow);
 }
 
@@ -475,7 +486,10 @@ export async function getRegulatoryEvents(): Promise<RegulatoryEvent[]> {
     .select(
       "id, event_date, kind, framework, title, summary, impact, action, articles, source, scope",
     );
-  if (error || !data) return mergeCatalog([], undefined, locale);
+  if (error || !data) {
+    logDataFallback("getRegulatoryEvents", error, "cae al catálogo curado");
+    return mergeCatalog([], undefined, locale);
+  }
   return mergeCatalog(
     (data as RegEventRow[]).map(rowToRegEvent),
     undefined,
@@ -540,7 +554,10 @@ export async function getRegCandidates(): Promise<RegCandidate[]> {
       "id, proposed_event_id, event_date, kind, framework, title, summary, impact, action, articles, source, scope, status, provenance, created_at, reviewed_at, review_note, reg_sources(label)",
     )
     .order("created_at", { ascending: false });
-  if (error || !data) return [];
+  if (error || !data) {
+    logDataFallback("getRegCandidates", error);
+    return [];
+  }
   return (data as unknown as RegCandidateRow[]).map(rowToCandidate);
 }
 
@@ -588,7 +605,10 @@ export async function getRegSources(): Promise<RegSource[]> {
     )
     .order("framework", { ascending: true })
     .order("label", { ascending: true });
-  if (error || !data) return [];
+  if (error || !data) {
+    logDataFallback("getRegSources", error);
+    return [];
+  }
   return (data as RegSourceRow[]).map(rowToSource);
 }
 
@@ -671,7 +691,10 @@ export async function getActionTasks(): Promise<ActionTask[]> {
 export const getIsPlatformAdmin = cache(async (): Promise<boolean> => {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("is_platform_admin");
-  if (error) return false;
+  if (error) {
+    logDataFallback("getIsPlatformAdmin", error);
+    return false;
+  }
   return data === true;
 });
 
@@ -681,7 +704,8 @@ export async function getAuditLog(): Promise<AuditEntry[]> {
   const org = await getActiveOrg();
   if (!org) return [];
   const locale = await resolveLocale();
-  const { data } = await supabase.rpc("list_audit_log", { org, lim: 100 });
+  const { data, error } = await supabase.rpc("list_audit_log", { org, lim: 100 });
+  if (error) logDataFallback("getAuditLog", error);
   return ((data ?? []) as RawAudit[]).map((r) => toAuditEntry(r, locale));
 }
 
@@ -695,7 +719,12 @@ export async function verifyAuditChain(): Promise<AuditChainStatus | null> {
   const org = await getActiveOrg();
   if (!org) return null;
   const { data, error } = await supabase.rpc("verify_audit_chain", { org });
-  if (error) return null;
+  if (error) {
+    // Distingue "migración 0020 sin aplicar" de "la verificación de integridad
+    // del audit-trail está fallando", que es un incidente de primer orden.
+    logDataFallback("verifyAuditChain", error);
+    return null;
+  }
   const row = ((data ?? []) as {
     total: number;
     ok: boolean;
@@ -844,12 +873,20 @@ export async function getGapItems(): Promise<GapItem[]> {
     .order("created_at", { ascending: true });
   let data = primary.data as RawGap[] | null;
   if (primary.error) {
+    logDataFallback(
+      "getGapItems",
+      primary.error,
+      "reintento sin la columna prohibited (0022)",
+    );
     const fb = await supabase
       .from("gap_items")
       .select(COLS_BASE)
       .eq("organization_id", org)
       .order("created_at", { ascending: true });
-    if (fb.error || !fb.data) return [];
+    if (fb.error || !fb.data) {
+      logDataFallback("getGapItems", fb.error, "también falló el reintento");
+      return [];
+    }
     data = fb.data as RawGap[];
   }
   if (!data) return [];
@@ -871,6 +908,142 @@ export async function getGapItems(): Promise<GapItem[]> {
       severity: SEVERITY_ES[row.severity] ?? "media",
       system: sys?.code ?? row.ai_system_id,
       prohibited: row.prohibited === true,
+    };
+  });
+}
+
+/**
+ * Embudo de activación agregado (telemetría de producto interna, migración 0026).
+ *
+ * Solo devuelve datos si quien consulta es `platform_admin`: el guard está DENTRO
+ * de la RPC, así que no depende de que la página se acuerde de comprobarlo.
+ *
+ * Degradación segura: si la migración 0026 no está aplicada (la RPC no existe),
+ * devuelve `[]` y el panel muestra su estado vacío en lugar de romperse.
+ */
+export async function getProductFunnel(days = 30): Promise<FunnelRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("product_funnel", { days });
+  if (error || !Array.isArray(data)) {
+    logDataFallback("getProductFunnel", error, "migración 0026 sin aplicar?");
+    return [];
+  }
+
+  type Raw = {
+    event: string;
+    events: number | string;
+    visitors: number | string;
+    last_at: string | null;
+  };
+  return (data as Raw[]).map((row) => ({
+    event: row.event,
+    // Postgres devuelve `bigint` como string por precisión: normalizar a número.
+    events: Number(row.events) || 0,
+    visitors: Number(row.visitors) || 0,
+    lastAt: row.last_at ?? null,
+  }));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Intake compartible (migración 0027)                                        */
+/* -------------------------------------------------------------------------- */
+
+type IntakeLinkRow = {
+  id: string;
+  token: string;
+  label: string | null;
+  created_at: string;
+  expires_at: string;
+  revoked_at: string | null;
+  submissions: number;
+  max_submissions: number;
+};
+
+/**
+ * Enlaces de intake de la organización activa. Degradación segura: si la
+ * migración 0027 no está aplicada, devuelve `[]` y la pantalla muestra su estado
+ * vacío en lugar de romperse.
+ */
+export async function getIntakeLinks(): Promise<IntakeLink[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data, error } = await supabase
+    .from("intake_links")
+    .select(
+      "id, token, label, created_at, expires_at, revoked_at, submissions, max_submissions",
+    )
+    .eq("organization_id", org)
+    .order("created_at", { ascending: false });
+  if (error || !data) {
+    logDataFallback("getIntakeLinks", error, "migración 0027 sin aplicar?");
+    return [];
+  }
+  const now = Date.now();
+  return (data as IntakeLinkRow[]).map((r) => ({
+    id: r.id,
+    token: r.token,
+    label: r.label,
+    createdAt: r.created_at,
+    expiresAt: r.expires_at,
+    revokedAt: r.revoked_at,
+    submissions: r.submissions,
+    maxSubmissions: r.max_submissions,
+    // Mismo criterio que la RPC `submit_intake`: si esto dijera "activo" y la RPC
+    // rechazara (o al revés), el usuario mandaría un enlace que no funciona.
+    active:
+      !r.revoked_at &&
+      new Date(r.expires_at).getTime() > now &&
+      r.submissions < r.max_submissions,
+  }));
+}
+
+type IntakeSubmissionRow = {
+  id: string;
+  name: string;
+  owner: string | null;
+  domain: string | null;
+  vendor: string | null;
+  notes: string | null;
+  submitted_by: string | null;
+  status: string;
+  created_at: string;
+  intake_links: { label: string | null } | { label: string | null }[] | null;
+};
+
+/** Bandeja de envíos PENDIENTES de la organización activa (lo ya resuelto no estorba). */
+export async function getIntakeSubmissions(): Promise<IntakeSubmission[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data, error } = await supabase
+    .from("intake_submissions")
+    .select(
+      "id, name, owner, domain, vendor, notes, submitted_by, status, created_at, intake_links(label)",
+    )
+    .eq("organization_id", org)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+  if (error || !data) {
+    logDataFallback("getIntakeSubmissions", error, "migración 0027 sin aplicar?");
+    return [];
+  }
+  const VALID: IntakeSubmission["status"][] = ["pending", "accepted", "discarded"];
+  return (data as unknown as IntakeSubmissionRow[]).map((r) => {
+    const link = Array.isArray(r.intake_links) ? r.intake_links[0] : r.intake_links;
+    return {
+      id: r.id,
+      name: r.name,
+      owner: r.owner,
+      domain: r.domain,
+      vendor: r.vendor,
+      notes: r.notes,
+      submittedBy: r.submitted_by,
+      status: VALID.includes(r.status as IntakeSubmission["status"])
+        ? (r.status as IntakeSubmission["status"])
+        : "pending",
+      createdAt: r.created_at,
+      linkLabel: link?.label ?? null,
     };
   });
 }

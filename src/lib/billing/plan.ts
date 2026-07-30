@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getIsPlatformAdmin } from "@/lib/data";
 import { getOrgSubscription } from "@/lib/billing/subscription";
+import { logDataFallback, logIncident } from "@/lib/observability/log";
 
 /** Niveles de plan, en orden de acceso creciente. */
 export type PlanTier = "free" | "preparacion" | "enterprise";
@@ -60,13 +61,17 @@ export const getOrgPlan = cache(async (orgId: string): Promise<PlanTier> => {
       // acceso completo, para no bloquear a nadie por sorpresa. Ante cualquier
       // OTRO error fallamos CERRADO a 'free' (no regalar entitlements por un
       // fallo transitorio); la suscripción activa de abajo aún puede subir el tier.
-      if (error.code === "42703" || error.code === "42P01") return "enterprise";
+      const kind = logDataFallback("getOrgPlan", error);
+      if (kind === "migration-pending") return "enterprise";
       plan = "free";
     } else {
       plan = coerceTier(data?.plan) ?? "free";
     }
-  } catch {
+  } catch (err) {
     // Error inesperado: conservador (free). No fallar abierto en entitlements.
+    // Se registra porque degradar a `free` a una org que paga es un incidente
+    // de facturación silencioso — exactamente lo que no queremos que pase inadvertido.
+    logIncident("getOrgPlan", err, "degradado a free");
     plan = "free";
   }
 

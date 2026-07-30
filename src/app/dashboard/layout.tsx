@@ -5,7 +5,7 @@ import { WelcomeGuide } from "@/components/dashboard/WelcomeGuide";
 import { Toaster } from "@/components/ui/Toast";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
-import { getUserOrgs } from "@/lib/data";
+import { getIsPlatformAdmin, getUserOrgs } from "@/lib/data";
 import { getOrgPlan, type PlanTier } from "@/lib/billing/plan";
 import type { UserOrg } from "@/lib/mock-data";
 import { I18nProvider } from "@/lib/i18n/provider";
@@ -24,6 +24,7 @@ export default async function DashboardLayout({
   let plan: PlanTier | undefined;
   let orgs: UserOrg[] = [];
   let activeOrgId: string | undefined;
+  let isPlatformAdmin = false;
 
   // En modo conectado, exige sesión y organización. En modo demo, abierto.
   if (isSupabaseConfigured) {
@@ -34,7 +35,13 @@ export default async function DashboardLayout({
     userEmail = user.email ?? undefined;
     userId = user.id;
     activeOrgId = org;
-    [plan, orgs] = await Promise.all([getOrgPlan(org), getUserOrgs()]);
+    // `getIsPlatformAdmin` es una lectura indexada de una fila; solo sirve para
+    // añadir los paneles internos a la navegación del equipo de Attesta.
+    [plan, orgs, isPlatformAdmin] = await Promise.all([
+      getOrgPlan(org),
+      getUserOrgs(),
+      getIsPlatformAdmin().catch(() => false),
+    ]);
     const meta = user.user_metadata ?? {};
     const rawName =
       (typeof meta.full_name === "string" && meta.full_name) ||
@@ -64,6 +71,7 @@ export default async function DashboardLayout({
           plan={plan}
           orgs={orgs}
           activeOrgId={activeOrgId}
+          isPlatformAdmin={isPlatformAdmin}
         />
         <main id="contenido" className="flex-1 md:h-dvh md:overflow-y-auto">
           <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">{children}</div>

@@ -40,6 +40,48 @@ export const es = {
     closeMenu: "Cerrar menú",
   },
 
+  // Formulario PÚBLICO del enlace de intake: lo rellena alguien de la organización
+  // del cliente que no tiene cuenta en Attesta.
+  intake: {
+    metaTitle: "Registrar una herramienta de IA",
+    metaDescription:
+      "Formulario para declarar una herramienta de IA que usa tu equipo, dentro del inventario de gobernanza de tu organización.",
+    title: "¿Qué herramienta de IA usa tu equipo?",
+    subtitle:
+      "Tu organización está inventariando sus sistemas de IA para cumplir con la normativa. Cuéntanos qué usáis: se tarda menos de un minuto y no necesitas cuenta.",
+    nameLabel: "Nombre de la herramienta *",
+    namePlaceholder: "ChatGPT, un ATS, un chatbot de soporte…",
+    nameHint:
+      "Vale el nombre comercial. Si es algo hecho en casa, describe para qué sirve.",
+    ownerLabel: "Área o responsable",
+    ownerPlaceholder: "Marketing",
+    domainLabel: "¿Para qué se usa?",
+    domainPlaceholder: "Redactar borradores de anuncios",
+    vendorLabel: "Proveedor",
+    vendorPlaceholder: "OpenAI, HireFlow…",
+    byLabel: "Tu nombre o correo (opcional)",
+    byPlaceholder: "Para poder preguntarte dudas",
+    notesLabel: "Algo más que debamos saber",
+    notesPlaceholder:
+      "¿Toma decisiones sobre personas? ¿Se le pasan datos de clientes o candidatos?",
+    submit: "Enviar",
+    sending: "Enviando…",
+    thanksTitle: "¡Gracias!",
+    thanksBody:
+      "Tu equipo de compliance revisará la ficha y la añadirá al inventario. Si usáis más herramientas, añádelas también.",
+    addAnother: "Añadir otra herramienta",
+    privacyNote:
+      "Lo que envías va al inventario de gobernanza de tu organización. Attesta solo procesa los datos por encargo suyo.",
+    footerNote: "Inventario de IA gestionado con Attesta.",
+    errors: {
+      demo: "Este enlace no está conectado a una organización.",
+      "no-name": "Escribe al menos el nombre de la herramienta.",
+      "rate-limit": "Demasiados envíos seguidos. Espera unos minutos.",
+      invalid:
+        "Este enlace ya no acepta envíos: puede haber caducado o haberse revocado. Pídele uno nuevo a quien te lo compartió.",
+    },
+  },
+
   meta: {
     title: "Attesta — Gobernanza continua de IA para el mid-market",
     description:
@@ -731,6 +773,7 @@ export const es = {
       activity: "Actividad",
       organizations: "Organizaciones",
       security: "Seguridad",
+      telemetry: "Telemetría",
       lockedTitle: "Función del plan Preparación",
       lockedTitleEnterprise: "Función del plan Enterprise",
       lockedLabel: "Bloqueado",
@@ -760,6 +803,13 @@ export const es = {
       "system-error": "No se pudo guardar el sistema. Inténtalo de nuevo.",
       seeded: "Datos de ejemplo cargados.",
       "seed-error": "No se pudieron cargar los datos de ejemplo. Inténtalo de nuevo.",
+      "intake-created": "Enlace de intake creado. Cópialo y compártelo con el área.",
+      "intake-revoked": "Enlace revocado: deja de aceptar envíos.",
+      "intake-accepted": "Ficha añadida al inventario.",
+      "intake-discarded": "Ficha descartada.",
+      "intake-already": "Esa ficha ya la había resuelto otra persona.",
+      "intake-demo": "El intake compartible requiere conectar tu organización.",
+      "intake-error": "No se pudo completar la acción. Inténtalo de nuevo.",
       "pack-applied": "Policy pack RRHH aplicado al sistema.",
       "pack-error": "No se pudo aplicar el policy pack. Inténtalo de nuevo.",
       "gap-created": "Brecha añadida.",
@@ -1111,6 +1161,88 @@ export const es = {
       },
       classify: "Clasificar",
       dossier: "Dossier",
+      addTitle: "Añadir sistemas al inventario",
+      addSubtitle:
+        "Dos caminos: pregunta a cada área con un enlace, o sube la lista que ya tengas en una hoja de cálculo.",
+      intake: {
+        title: "Enlace de intake compartible",
+        subtitle:
+          "Manda un enlace a cada área y que ellos declaren qué IA usan. No necesitan cuenta y lo que envían no entra directo al inventario: llega a una bandeja que revisas tú.",
+        labelLabel: "¿A quién se lo vas a mandar?",
+        labelPlaceholder: "RRHH, Marketing, Soporte…",
+        create: "Crear enlace",
+        creating: "Creando…",
+        empty: "Todavía no has creado ningún enlace.",
+        untitled: "Enlace sin etiqueta",
+        linkMeta: "{n} de {max} envíos · caduca el {expires}",
+        copy: "Copiar enlace",
+        copied: "¡Copiado!",
+        copyFallback: "Copia este enlace:",
+        revoke: "Revocar",
+        revoking: "Revocando…",
+        stateRevoked: "revocado",
+        stateExpired: "caducado",
+        inboxTitle: "Fichas recibidas ({n})",
+        inboxHint:
+          "Cada ficha la envió alguien de tu organización sin cuenta en Attesta. Al aceptarla se crea el sistema en tu inventario y queda registrado a tu nombre en la actividad.",
+        accept: "Añadir al inventario",
+        accepting: "Añadiendo…",
+        discard: "Descartar",
+        discarding: "Descartando…",
+        from: "Enviado por {who}",
+        fromAnonymous: "Envío anónimo",
+        noDetails: "Sin más detalles",
+      },
+      import: {
+        title: "Importar inventario desde CSV",
+        subtitle:
+          "Pega tu hoja de cálculo o sube el CSV. Verás exactamente qué se va a crear antes de guardar nada.",
+        demoNotice:
+          "Modo demo: la importación necesita una organización conectada. Crea tu cuenta para importar tu inventario real.",
+        pasteLabel: "Pega aquí el CSV (o elige un fichero abajo)",
+        pastePlaceholder:
+          "nombre,responsable,ambito,proveedor,rol\nCribado de CV,RRHH,Contratación,HireFlow,deployer",
+        fileLabel: "Elegir fichero CSV",
+        templateLink: "Descargar plantilla",
+        limitNote:
+          "Hasta {max} sistemas por importación. Cabeceras en español o inglés; el separador (coma o punto y coma) se detecta solo.",
+        previewTitle: "Vista previa",
+        previewCount: "{rows} para crear · {errors} descartadas",
+        noHeaderNotice:
+          "No se reconoció ninguna cabecera, así que se asume el orden de la plantilla: nombre, responsable, ámbito, proveedor, rol.",
+        delimiterNote: "Separador detectado: «{delimiter}».",
+        truncatedNote:
+          "El tope es {max} sistemas por importación: {n} filas se quedaron fuera. Súbelas en una segunda tanda.",
+        colName: "Nombre",
+        colOwner: "Responsable",
+        colDomain: "Ámbito",
+        colVendor: "Proveedor",
+        colRole: "Rol",
+        roleDeployer: "Responsable del despliegue",
+        roleProvider: "Proveedor",
+        andMore: "y {n} más",
+        errorsTitle: "Filas que NO se importarán",
+        errCodes: {
+          "missing-name": "sin nombre de sistema",
+          "name-too-long": "el nombre es demasiado largo",
+          "duplicate-in-file": "repetida en el propio fichero",
+          "too-many-columns": "demasiadas columnas (¿separador equivocado?)",
+        },
+        submit: "Importar {n} sistemas",
+        submitting: "Importando…",
+        resultOk: "{n} sistemas añadidos a tu inventario.",
+        resultSkipped: "{n} ya existían con el mismo nombre y no se duplicaron.",
+        resultRejected: "{n} filas descartadas por datos incompletos.",
+        resultTruncated: "{n} filas fuera del tope de esta importación.",
+        failures: {
+          demo: "La importación necesita una organización conectada.",
+          "no-org": "No encontramos tu organización. Vuelve a entrar e inténtalo de nuevo.",
+          empty: "No encontramos ninguna fila válida. Revisa que haya al menos una columna con el nombre del sistema.",
+          "too-large": "El fichero es demasiado grande. Divídelo en tandas más pequeñas.",
+          "write-failed": "No pudimos guardar la importación. Inténtalo de nuevo en un momento.",
+        },
+      },
+      importCta: "Importar CSV",
       backToInventory: "← Volver al inventario",
       cancel: "Cancelar",
       nameLabel: "Nombre del sistema *",
@@ -1412,7 +1544,9 @@ export const es = {
         evaluateAnother: "Evaluar otro sistema",
         backToRisk: "Volver a riesgo",
         result: {
-          indicativeLabel: "Resultado orientativo",
+          gpaiTitle: "Modelo de propósito general (GenAI) detectado",
+      gpaiWarnTitle: "⚠️ Puede haber cambiado vuestro papel: revisión jurídica",
+      indicativeLabel: "Resultado orientativo",
           indicativeSuffix: "(indicativo)",
           indicativeDesc:
             "Clasificación orientativa según los criterios del EU AI Act, a partir de lo que tu organización ha declarado.",
@@ -1659,6 +1793,45 @@ export const es = {
         never: "nunca",
         failOne: "fallo",
         failOther: "fallos",
+      },
+
+      telemetry: {
+        title: "Telemetría de producto",
+        subtitle:
+          "Embudo de activación de los últimos 30 días: de la visita al pago. Datos de primera parte, sin herramientas de terceros y sin datos personales.",
+        subtitleNonAdmin: "Métricas internas de producto de Attesta.",
+        nonAdminNotice:
+          "Esta área es del equipo de Attesta: mide cómo se usa el producto y no contiene datos de tu organización.",
+        empty:
+          "Todavía no hay eventos registrados. Si el despliegue es reciente, comprueba que la migración 0026 esté aplicada: sin ella la app funciona igual, pero no guarda métricas.",
+        funnelTitle: "Embudo de activación",
+        funnelHint:
+          "Cada paso se cuenta por visitantes distintos. La conversión compara con el paso anterior. No es una secuencia obligatoria: se puede pagar sin haber aplicado un pack.",
+        othersTitle: "Otros eventos",
+        colStep: "Paso",
+        colEvent: "Evento",
+        colVisitors: "Visitantes",
+        colEvents: "Eventos",
+        colConversion: "Conversión",
+        colLast: "Último",
+        never: "nunca",
+        privacyNote:
+          "Sin IP, sin user-agent y sin datos personales. El identificador anónimo solo evita contar dos veces la misma visita, y se respetan las señales GPC/DNT del navegador.",
+        events: {
+          page_view: "Visitas",
+          cta_click: "Clic en un CTA",
+          waitlist_submit: "Solicitud de acceso",
+          signup_submitted: "Registro enviado",
+          org_created: "Organización creada",
+          system_created: "Sistema dado de alta",
+          risk_assessed: "Riesgo evaluado",
+          pack_applied: "Policy pack aplicado",
+          paywall_viewed: "Muro de pago visto",
+          checkout_started: "Checkout iniciado",
+          checkout_completed: "Pago confirmado",
+          export_downloaded: "Evidencia exportada",
+          invite_sent: "Invitación enviada",
+        },
       },
 
       // Chrome de los documentos PDF: SOLO botón de descarga + paywall. El cuerpo

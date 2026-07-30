@@ -9,6 +9,8 @@ import type { Answers, ClassificationResult } from "@/lib/risk-assessment";
 import { AI_SYSTEMS, GAP_ITEMS, RISK_ORDER } from "@/lib/mock-data";
 import { policyPackById } from "@/lib/policy-packs";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import { trackServer } from "@/lib/telemetry/server";
+import { logDataFallback, logIncident } from "@/lib/observability/log";
 
 const SEVERITY_EN: Record<string, string> = {
   alta: "high",
@@ -140,6 +142,7 @@ export async function applyPolicyPack(formData: FormData) {
   if (rows.length > 0) {
     const { error } = await supabase.from("gap_items").insert(rows);
     if (error) {
+      logDataFallback("applyPolicyPack", error, "reintento sin prohibited (0022)");
       // Degradación: si la columna `prohibited` aún no existe (migración 0022 sin
       // aplicar), se reinserta sin ella (todos los controles como brecha ordinaria).
       const legacy = rows.map((r) => {
@@ -148,12 +151,21 @@ export async function applyPolicyPack(formData: FormData) {
         return rest;
       });
       const retry = await supabase.from("gap_items").insert(legacy);
-      if (retry.error) redirect("/dashboard/packs?toast=pack-error");
+      if (retry.error) {
+        logIncident("applyPolicyPack", retry.error, "también falló el reintento");
+        redirect("/dashboard/packs?toast=pack-error");
+      }
     }
   }
 
   // El pack añadió controles como brechas ⇒ recalcula el "% listo" del sistema.
   await recomputeReadiness(supabase, org, systemId);
+
+  // Hito de activación: la cuenta ya tiene brechas reales que cerrar.
+  await trackServer("pack_applied", {
+    organizationId: org,
+    props: { pack: pack.id, controls: rows.length },
+  });
 
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/inventario");
@@ -187,7 +199,13 @@ export async function createAiSystem(formData: FormData) {
       "deployer") as string,
     created_by: user?.id,
   });
-  if (error) redirect("/dashboard/inventario/nuevo?toast=system-error");
+  if (error) {
+    // El usuario ve un toast; sin esta línea nadie sabría POR QUÉ falló el alta.
+    logIncident("createAiSystem", error);
+    redirect("/dashboard/inventario/nuevo?toast=system-error");
+  }
+
+  await trackServer("system_created", { organizationId: org });
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
@@ -530,6 +548,13 @@ export async function saveRiskAssessment(
     })
     .eq("organization_id", org)
     .eq("id", aiSystemId);
+
+  // `level` es un enum cerrado (ya validado arriba), no un dato personal: sirve
+  // para ver si las cuentas que llegan a "alto riesgo" son las que convierten.
+  await trackServer("risk_assessed", {
+    organizationId: org,
+    props: { level: result.level, evidence: evidenceState },
+  });
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard/riesgo");

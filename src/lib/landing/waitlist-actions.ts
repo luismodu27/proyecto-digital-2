@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { trackServer } from "@/lib/telemetry/server";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Máximo razonable de longitud de correo (RFC 5321) para acotar la entrada.
@@ -114,6 +115,9 @@ export async function submitWaitlist(
       };
     }
   }
+
+  // Solicitud registrada. NUNCA se mide el correo: solo de dónde vino el lead.
+  await trackServer("waitlist_submit", { props: { source } });
 
   await notifyFounder(email, source);
   return { ok: true };

@@ -28,10 +28,24 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  let user = null;
+  // `getClaims()` en vez de `getUser()`: verifica la FIRMA del JWT en local con
+  // WebCrypto (el JWKS se cachea) en lugar de preguntar a Supabase Auth por red en
+  // CADA navegación. Antes, cada clic del dashboard pagaba una ida y vuelta en el
+  // camino crítico.
+  //
+  // Requisito comprobado (no supuesto): el proyecto firma con llaves ASIMÉTRICAS
+  // — los tokens llegan con `alg: ES256` y hay JWKS público en
+  // `/auth/v1/.well-known/jwks.json` —, que es la condición para que la
+  // verificación sea local. Con el secreto simétrico heredado `getClaims` haría la
+  // misma llamada que `getUser` (correcto igualmente, solo sin la mejora).
+  //
+  // La seguridad no baja: se verifica la firma, no se confía en la cookie. E igual
+  // que `getUser`, refresca la sesión si el token está por expirar, así que las
+  // cookies se siguen renovando aquí.
+  let hasSession = false;
   try {
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
+    const { data, error } = await supabase.auth.getClaims();
+    hasSession = !error && !!data?.claims?.sub;
   } catch {
     // Error de red/config: trátalo como sin sesión, no rompas la navegación.
   }
@@ -40,13 +54,13 @@ export async function updateSession(request: NextRequest) {
   const isPrivate = pathname.startsWith("/dashboard");
   const isAuthPage = pathname === "/login" || pathname === "/onboarding";
 
-  if (!user && isPrivate) {
+  if (!hasSession && isPrivate) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname === "/login") {
+  if (hasSession && pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);

@@ -57,22 +57,60 @@
 - [x] ✅ **`createClient()` con `cache()`** — un cliente SSR por render en vez de uno por getter. `cache()` no
       cruza requests → sin riesgo de compartir sesión.
 
-### 0.B · SPRINT 2 — activación + red de seguridad del contenido ⬅️ SIGUIENTE
-- [ ] **Import CSV + enlace de intake compartible** — el alta manual uno-a-uno es el muro de activación #1
-      (nadie teclea 30 sistemas); sin inventario, riesgo/gap/dossier quedan vacíos. `alto · M`
-- [ ] **Tests con Vitest sobre la lógica pura** — `risk-assessment`, `recommendations`, `task-reminders`,
-      `regulatory-watch`, `audit`, `bias-audit`. Hoy build+lint+tsc **no** detecta una regla legal mal editada:
-      es la red de seguridad del contenido "cero LLM". ROI altísimo. `alto · M`
-- [ ] **Logging / observabilidad de errores** — el patrón `if (error) return []` confunde "migración ausente"
-      con "Supabase caído / RLS rota"; en producción un incidente es indistinguible de "aún no hay datos".
-      Loggear con contexto o integrar Sentry. `alto · M`
-- [ ] **Rama GPAI en el clasificador de riesgo** — GenAI es el caso de IA más común del mid-market y hoy cae en
-      "limitado/mínimo", perdiendo la capa GPAI (Arts. 51-56) y la trampa del **Art. 25** (con fine-tuning
-      sustancial pasas a proveedor). Vigente desde ago-2025. **Validar con el experto.** `alto · M`
-- [ ] **Verificación local del JWT en el middleware (`getClaims`)** — hoy cada navegación paga una llamada de
-      red a Supabase Auth en el camino crítico. `alto · M`
+### 0.B · SPRINT 2 — activación + red de seguridad del contenido ✅ COMPLETADO (2026-07-30)
+- [x] **Import CSV + enlace de intake compartible** — ✅ **HECHO (2026-07-30)**. Dos caminos, porque son dos
+      problemas: el **CSV** sirve cuando la lista YA existe (parser puro con 25 tests: autodetecta el `;` de
+      Excel español, cabeceras ES/EN, BOM, comas entrecomilladas, valida e informa **por filas**); el
+      **enlace de intake** sirve para construirla preguntando a cada área sin darles cuenta (migración
+      **0027**, token de capacidad, bandeja de revisión, `noindex`). Los dos en
+      `/dashboard/inventario/importar`. **Requiere aplicar 0027** (§1.1-octies). `alto · M`
+- [x] **Tests con Vitest sobre la lógica pura** — ✅ **HECHO (2026-07-30)**. 274 tests en 10 ficheros (221 al cerrar este ítem; el resto llegó con los ítems siguientes del sprint)
+      (`npm test`, <1 s, en CI): `risk-assessment`, `recommendations`, `task-reminders`, `regulatory-watch`,
+      `audit`, `bias-audit`, `telemetry/events` y **paridad de los 8 policy packs**. Codifican la expectativa
+      REGULATORIA (Art. 5 manda; el perfilado del Art. 6.3 anula excepciones; LL144 = auditoría **y**
+      publicación; el catálogo curado gana al pipeline) y la paridad ES/EN. Se verificó que detectan
+      regresiones con **6 mutaciones inyectadas** (las 6 fallaron). Encontraron 3 cosas reales: el campo
+      `article` sí se traduce en parte (comparar por números, no literal), `minimal: []` es correcto y no un
+      hueco, y un `?? "/"` que nunca se activaba en `normalizePath`.
+- [x] **Logging / observabilidad de errores** — ✅ **HECHO (2026-07-30)**. `src/lib/observability/log.ts`
+      clasifica cada degradación en `migration-pending` (warn), `permission` (RLS, error) o `incident`
+      (error) y emite **una línea JSON** por evento, con antirruido de 5 min. Instrumentados los 10
+      caminos degradados de `supabase-repo`, más `getOrgPlan` (degradar a `free` una org que paga era un
+      incidente de facturación invisible), `getActiveOrg`, las escrituras de `actions.ts` y la telemetría.
+      Verificado contra el Supabase real: la telemetría sin migración 0026 emite
+      `{"kind":"migration-pending","code":"PGRST205"}` y la app sigue funcionando.
+      **Sentry NO se integró a propósito**: sumar un subprocesador es decisión tuya (coste + DPA);
+      el enganche está listo (sustituir `emit`). `alto · M`
+- [x] **Rama GPAI en el clasificador de riesgo** — ✅ **HECHO (2026-07-30)**. Pregunta nueva (paso 6) con
+      cinco casos (tercero tal cual · autoalojado · fine-tuning · marca blanca · ninguno) y una **capa GPAI**
+      en el resultado que NO cambia el nivel de riesgo (el Cap. V es un régimen paralelo; decir "alto riesgo
+      porque usa ChatGPT" sería falso), sino que añade citas y deberes de **exigir evidencia al proveedor del
+      modelo**, y avisa de la trampa del **Art. 25** cuando hay ajuste o marca blanca.
+      ⚠️ **PENDIENTE DE VALIDACIÓN EXPERTA:** el texto lo verifiqué yo contra fuentes autorizadas —Arts. 51-56
+      aplicables desde el 2-ago-2025 (multas con periodo de gracia hasta ago-2026; modelos previos hasta
+      ago-2027); el Digital Omnibus **no** cambió los Arts. 53/55; el criterio de **un tercio del cómputo de
+      entrenamiento** es de las **directrices de la Comisión (jul-2025)** y es explícitamente **indicativo**,
+      no un umbral del Reglamento; el **Recital 109** limita las obligaciones al alcance de la modificación—
+      pero **no ha pasado por el `compliance-domain-expert`** ni por el visto bueno del abogado (§ pendiente
+      antes de GA). Está redactado como orientación y revisión jurídica, nunca como veredicto. `alto · M`
+- [x] **Verificación local del JWT en el middleware (`getClaims`)** — ✅ **HECHO (2026-07-30)**. El
+      middleware ya no pregunta a Supabase Auth por red en cada navegación: verifica la firma del JWT en
+      local con WebCrypto. **Comprobado que aplica de verdad**: el proyecto ya firma con llaves
+      asimétricas (`alg: ES256`, JWKS público), que es la condición para que sea local — no hace falta
+      que toques nada. Verificado por curl con un usuario real `*@attesta-test.dev`: sin sesión
+      `/dashboard`→`/login`, con sesión `/login`→`/dashboard`, y una cookie con JWT malformado se trata
+      como "sin sesión" (no 500). `alto · M`
 
-### 0.C · SPRINT 3 — monetización + compliance EE. UU.
+> **Cierre del Sprint 2 (6/6 ítems).** Todo verificado con lint + tsc + `check:copy` + **274 tests** + build,
+> y los caminos reales por curl contra el Supabase de producción. Dos migraciones nuevas esperan tu mano:
+> **0026** (telemetría, §1.1-septies) y **0027** (intake compartible, §1.1-octies) — sin ellas la app funciona
+> igual, solo que sin métricas y sin enlaces de intake. Lo aprendido en cada ítem está en `MEMORY.md §10`.
+>
+> Novedad de método que conviene conservar: **toda migración nueva se valida antes en un Postgres desechable**
+> (ver gotcha en `CLAUDE.md`). En este sprint cazó tres bugs que habrían llegado al SQL Editor —`greatest`/`least`
+> cualificados con esquema, un 500 a un anónimo con nombre en blanco, y policies no re-aplicables.
+
+### 0.C · SPRINT 3 — monetización + compliance EE. UU. ⬅️ SIGUIENTE
 - [ ] **Metering por nº de sistemas/asientos + Enterprise a medida** — hoy una org con 2 sistemas y otra con 50
       pagan lo mismo; captura el ACV enterprise (30-50k $/año de referencia vs. los ~120-350 $/mes actuales).
       `alto · M`
@@ -122,9 +160,12 @@
 
 ### 0.F · SPRINT 6 — los 8 huecos que el propio panel se dejó fuera (crítico de completitud)
 > Confirmados contra el repo: **no hay** analítica, ni páginas legales/privacidad, ni Sentry, ni rutas de ayuda.
-- [ ] **Telemetría de producto / funnel de activación** — hoy optimizamos conversión y activación **a ciegas**
-      (sin PostHog/Plausible ni evento "clasificó 1er sistema → vio brechas → pagó"). Debería ir **antes** o a la
-      par del Sprint 1 para poder medirlo. `alto · S-M`
+- [x] **Telemetría de producto / funnel de activación** — ✅ **HECHO (2026-07-30, adelantado antes del Sprint 2)**.
+      De **primera parte** (sin PostHog/Plausible/GA): migración `0026_telemetry.sql` (`product_events` + RPC
+      `product_funnel`), catálogo cerrado de 13 eventos (`src/lib/telemetry/events.ts`), API `/api/telemetry`
+      (whitelist de eventos de cliente + rate-limit + cuerpo acotado), y panel `/dashboard/telemetria` solo para
+      `platform_admins`. Sin IP, sin user-agent, sin PII, y se respetan GPC/DNT. **Requiere aplicar 0026**
+      (§1.1-septies); sin ella la app funciona igual pero no mide.
 - [ ] **Cumplimiento propio de Attesta** — no existe página de **privacidad**, **DPA**, lista de
       **subprocesadores** (Supabase UE, Stripe, proveedor de email) ni aviso de cookies. Vender gobernanza de IA
       a mid-market UE sin tu propio DPA **bloquea la compra** en due-diligence y es incoherente con la marca.
@@ -244,6 +285,40 @@ Para encenderla:
    -- o 'enterprise'
    ```
 4. Cuando Stripe esté activo (§1.2), una suscripción activa sube la org a **preparación** sola.
+
+### 1.1-septies · Aplicar migración 0026 (telemetría de producto) — RÁPIDO ⚠️ SIN ELLA NO HAY MÉTRICAS
+El embudo de activación **ya está instrumentado en el código**, pero no guarda nada hasta que exista la tabla.
+Sin aplicarla la app funciona **exactamente igual** (degradación segura: cada intento de medir es un no-op).
+
+Para encenderla:
+1. Pega **`supabase/migrations/0026_telemetry.sql`** en el SQL Editor de Supabase (solo ese archivo).
+2. Entra en **`/dashboard/telemetria`** (aparece en el menú lateral solo para tu cuenta, que es `platform_admin`).
+   Al principio verá pocas visitas: solo cuenta desde el momento en que se aplica.
+3. Comprobación rápida por API (con la anon key), si quieres confirmar que la tabla existe:
+   ```bash
+   curl -s -o /dev/null -w "%{http_code}\n" \
+     -X POST "$SUPABASE_URL/rest/v1/product_events" \
+     -H "apikey: $ANON_KEY" -H "Content-Type: application/json" \
+     -d '{"event":"page_view"}'    # 201 = tabla lista · 404 = migración sin aplicar
+   ```
+**Qué mide y qué NO:** mide visitas, clics en CTA, altas, primer sistema, evaluación de riesgo, muro de pago,
+checkout y pago confirmado. **No** guarda IP, ni user-agent, ni correos, ni nombres de sistemas. El identificador
+anónimo del navegador solo evita contar dos veces la misma visita, y si el visitante activa "Do Not Track" o GPC
+no se emite nada. Pendiente asociado: declararlo en la futura página de **privacidad** (§0.F, medición de audiencia).
+
+### 1.1-octies · Aplicar migración 0027 (enlace de intake compartible) — RÁPIDO
+El enlace para que cada área declare su IA sin tener cuenta **ya está construido**, pero necesita sus tablas.
+Sin aplicarla la pantalla funciona igual y solo muestra su estado vacío (degradación segura, verificada).
+
+1. Pega **`supabase/migrations/0027_intake_links.sql`** en el SQL Editor (solo ese archivo).
+2. Entra en **`/dashboard/inventario/importar`**, crea un enlace con una etiqueta ("RRHH"), cópialo y ábrelo
+   en una ventana privada: deberías ver el formulario público y poder enviar una ficha.
+3. La ficha aparece en la bandeja de esa misma pantalla. Al pulsar **"Añadir al inventario"** se crea el
+   sistema y queda registrado **a tu nombre** en Actividad (el anónimo nunca escribe en el expediente).
+
+**Qué tener en cuenta al compartirlo:** el enlace es una llave — quien lo tenga puede enviar fichas (nada
+más: no puede leer nada). Caduca a los **30 días**, admite hasta **100 envíos** y puedes **revocarlo** en
+cualquier momento. Si sospechas que se filtró, revócalo y crea otro.
 
 ### 1.1-sexies · Migración 0022 (práctica prohibida en brechas) — ✅ APLICADA (2026-07-22)
 Aplicada por el fundador y **verificada por API** (probe con la anon key: `select=prohibited` → HTTP 200; columna
@@ -544,8 +619,9 @@ El **foso automatizado** (Vigía + Analista + Validador) está completo y verifi
 2. Lee **MEMORY.md** (§11 "RETOMAR AQUÍ") y el resto de este archivo.
 3. Pregunta al fundador en qué punto está de los pendientes 🔴 (sobre todo Stripe y dominio).
 4. Rama de trabajo: `claude/init-3bwfhm`; PR a `main` y merge al pasar CI (`verify`); Vercel redespliega solo.
-5. Verificación: `npm run build` + `npm run lint` + `npx tsc --noEmit`; backend real por curl.
-   (⚠️ Sprint 2 añade **Vitest** — cuando exista, incluir `npm test` en la verificación.)
+5. Verificación: `npm run lint` + `npx tsc --noEmit` + `npm run check:copy` + **`npm test`** +
+   `npm run build`; backend real por curl. Para una **migración nueva**, valídala antes en un Postgres
+   desechable (ver gotcha en `CLAUDE.md`), no directamente en el SQL Editor del fundador.
 
 ---
 

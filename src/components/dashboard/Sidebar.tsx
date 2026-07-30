@@ -19,6 +19,8 @@ const nav: {
   href: string;
   icon: string;
   requires?: PlanTier;
+  /** Solo para el equipo de Attesta (platform_admins), no para clientes. */
+  adminOnly?: boolean;
 }[] = [
   { key: "overview", href: "/dashboard", icon: "M3 12h7V3H3v9Zm0 9h7v-7H3v7Zm11 0h7V12h-7v9Zm0-18v7h7V3h-7Z" },
   { key: "inventory", href: "/dashboard/inventario", icon: "M4 7h16M4 12h16M4 17h16" },
@@ -31,6 +33,9 @@ const nav: {
   { key: "activity", href: "/dashboard/actividad", icon: "M12 7v5l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0Z", requires: "preparacion" },
   { key: "organizations", href: "/dashboard/organizaciones", icon: "M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01", requires: "enterprise" },
   { key: "security", href: "/dashboard/seguridad", icon: "M12 3 4 6v5c0 4.5 3.4 8.3 8 9.9 4.6-1.6 8-5.4 8-9.9V6l-8-3Z", requires: "enterprise" },
+  // Métricas internas de Attesta (embudo de activación). No es una función del
+  // producto: solo la ve el equipo, y nunca en modo demo.
+  { key: "telemetry", href: "/dashboard/telemetria", icon: "M4 20V11m5 9V4m5 16v-6m5 6V8", adminOnly: true },
 ];
 
 export function Sidebar({
@@ -39,17 +44,21 @@ export function Sidebar({
   plan,
   orgs,
   activeOrgId,
+  isPlatformAdmin = false,
 }: {
   userEmail?: string;
   userName?: string;
   plan?: PlanTier;
   orgs?: UserOrg[];
   activeOrgId?: string;
+  /** Personal de Attesta: añade los paneles internos a la navegación. */
+  isPlatformAdmin?: boolean;
 }) {
   const pathname = usePathname();
   const t = useT();
   const td = t.dashboard;
   const planRank = plan ? RANK[plan] : RANK.enterprise;
+  const items = nav.filter((item) => !item.adminOnly || isPlatformAdmin);
 
   return (
     <aside className="flex w-full shrink-0 flex-col border-b border-line bg-paper-raised md:h-dvh md:w-64 md:border-b-0 md:border-r print:hidden">
@@ -58,7 +67,7 @@ export function Sidebar({
         <ThemeToggle />
       </div>
       <nav className="flex gap-1 overflow-x-auto p-3 md:flex-col md:overflow-visible">
-        {nav.map((item) => {
+        {items.map((item) => {
           const active =
             item.href === "/dashboard"
               ? pathname === "/dashboard"

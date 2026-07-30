@@ -4,6 +4,7 @@ import { orgHasTier, type PlanTier } from "@/lib/billing/plan";
 import { Paywall, type PaywallStat } from "@/components/dashboard/Paywall";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import { trackServer } from "@/lib/telemetry/server";
 
 /**
  * Envuelve el contenido de una sección con requisito de plan. Si la organización
@@ -46,6 +47,13 @@ export async function PaidGate({
         resolved = undefined;
       }
     }
+    // Señal de monetización: el muro se mostró DE VERDAD (no "la ruta existe").
+    // `feature` es una etiqueta de sección, no un dato del cliente.
+    await trackServer("paywall_viewed", {
+      organizationId: orgId,
+      props: { tier: requires },
+    });
+
     return (
       <Paywall
         feature={feature}

@@ -37,6 +37,46 @@ export const en: Dictionary = {
     closeMenu: "Close menu",
   },
 
+  intake: {
+    metaTitle: "Register an AI tool",
+    metaDescription:
+      "Form to declare an AI tool your team uses, as part of your organization's governance inventory.",
+    title: "Which AI tool does your team use?",
+    subtitle:
+      "Your organization is inventorying its AI systems to meet regulatory duties. Tell us what you use: it takes less than a minute and needs no account.",
+    nameLabel: "Tool name *",
+    namePlaceholder: "ChatGPT, an ATS, a support chatbot…",
+    nameHint:
+      "The commercial name is fine. If it is homemade, describe what it does.",
+    ownerLabel: "Team or owner",
+    ownerPlaceholder: "Marketing",
+    domainLabel: "What is it used for?",
+    domainPlaceholder: "Drafting ad copy",
+    vendorLabel: "Vendor",
+    vendorPlaceholder: "OpenAI, HireFlow…",
+    byLabel: "Your name or email (optional)",
+    byPlaceholder: "So we can follow up",
+    notesLabel: "Anything else we should know",
+    notesPlaceholder:
+      "Does it make decisions about people? Is customer or candidate data fed into it?",
+    submit: "Send",
+    sending: "Sending…",
+    thanksTitle: "Thank you!",
+    thanksBody:
+      "Your compliance team will review the entry and add it to the inventory. If you use more tools, add those too.",
+    addAnother: "Add another tool",
+    privacyNote:
+      "What you send goes to your organization's governance inventory. Attesta only processes the data on its behalf.",
+    footerNote: "AI inventory managed with Attesta.",
+    errors: {
+      demo: "This link is not connected to an organization.",
+      "no-name": "Please enter at least the tool name.",
+      "rate-limit": "Too many submissions in a row. Wait a few minutes.",
+      invalid:
+        "This link no longer accepts submissions: it may have expired or been revoked. Ask whoever shared it for a new one.",
+    },
+  },
+
   meta: {
     title: "Attesta — Continuous AI governance for the mid-market",
     description:
@@ -728,6 +768,7 @@ export const en: Dictionary = {
       activity: "Activity",
       organizations: "Organizations",
       security: "Security",
+      telemetry: "Telemetry",
       lockedTitle: "Readiness plan feature",
       lockedTitleEnterprise: "Enterprise plan feature",
       lockedLabel: "Locked",
@@ -757,6 +798,13 @@ export const en: Dictionary = {
       "system-error": "Couldn't save the system. Please try again.",
       seeded: "Sample data loaded.",
       "seed-error": "Couldn't load the sample data. Please try again.",
+      "intake-created": "Intake link created. Copy it and share it with the team.",
+      "intake-revoked": "Link revoked: it no longer accepts submissions.",
+      "intake-accepted": "Entry added to the inventory.",
+      "intake-discarded": "Entry discarded.",
+      "intake-already": "Someone else had already resolved that entry.",
+      "intake-demo": "The shareable intake needs your organization connected.",
+      "intake-error": "Could not complete the action. Please try again.",
       "pack-applied": "HR policy pack applied to the system.",
       "pack-error": "Couldn't apply the policy pack. Please try again.",
       "gap-created": "Gap added.",
@@ -1104,6 +1152,88 @@ export const en: Dictionary = {
       },
       classify: "Classify",
       dossier: "Dossier",
+      addTitle: "Add systems to the inventory",
+      addSubtitle:
+        "Two paths: ask each team with a link, or upload the list you already have in a spreadsheet.",
+      intake: {
+        title: "Shareable intake link",
+        subtitle:
+          "Send a link to each team and let them declare the AI they use. They need no account, and what they send does not go straight into the inventory: it lands in an inbox you review.",
+        labelLabel: "Who are you sending it to?",
+        labelPlaceholder: "HR, Marketing, Support…",
+        create: "Create link",
+        creating: "Creating…",
+        empty: "You have not created any links yet.",
+        untitled: "Unlabeled link",
+        linkMeta: "{n} of {max} submissions · expires {expires}",
+        copy: "Copy link",
+        copied: "Copied!",
+        copyFallback: "Copy this link:",
+        revoke: "Revoke",
+        revoking: "Revoking…",
+        stateRevoked: "revoked",
+        stateExpired: "expired",
+        inboxTitle: "Entries received ({n})",
+        inboxHint:
+          "Each entry was sent by someone in your organization without an Attesta account. Accepting it creates the system in your inventory and is recorded under your name in the activity log.",
+        accept: "Add to inventory",
+        accepting: "Adding…",
+        discard: "Discard",
+        discarding: "Discarding…",
+        from: "Sent by {who}",
+        fromAnonymous: "Anonymous submission",
+        noDetails: "No further details",
+      },
+      import: {
+        title: "Import inventory from CSV",
+        subtitle:
+          "Paste your spreadsheet or upload the CSV. You will see exactly what gets created before anything is saved.",
+        demoNotice:
+          "Demo mode: importing needs a connected organization. Create your account to import your real inventory.",
+        pasteLabel: "Paste the CSV here (or pick a file below)",
+        pastePlaceholder:
+          "name,owner,domain,vendor,role\nCV screening,HR,Recruitment,HireFlow,deployer",
+        fileLabel: "Choose CSV file",
+        templateLink: "Download template",
+        limitNote:
+          "Up to {max} systems per import. Headers in Spanish or English; the separator (comma or semicolon) is detected automatically.",
+        previewTitle: "Preview",
+        previewCount: "{rows} to create · {errors} discarded",
+        noHeaderNotice:
+          "No header was recognized, so the template order is assumed: name, owner, domain, vendor, role.",
+        delimiterNote: "Detected separator: “{delimiter}”.",
+        truncatedNote:
+          "The cap is {max} systems per import: {n} rows were left out. Upload them in a second batch.",
+        colName: "Name",
+        colOwner: "Owner",
+        colDomain: "Domain",
+        colVendor: "Vendor",
+        colRole: "Role",
+        roleDeployer: "Deployer",
+        roleProvider: "Provider",
+        andMore: "and {n} more",
+        errorsTitle: "Rows that will NOT be imported",
+        errCodes: {
+          "missing-name": "no system name",
+          "name-too-long": "the name is too long",
+          "duplicate-in-file": "repeated within the file itself",
+          "too-many-columns": "too many columns (wrong separator?)",
+        },
+        submit: "Import {n} systems",
+        submitting: "Importing…",
+        resultOk: "{n} systems added to your inventory.",
+        resultSkipped: "{n} already existed with the same name and were not duplicated.",
+        resultRejected: "{n} rows discarded due to incomplete data.",
+        resultTruncated: "{n} rows beyond this import's cap.",
+        failures: {
+          demo: "Importing needs a connected organization.",
+          "no-org": "We could not find your organization. Sign in again and retry.",
+          empty: "We found no valid rows. Check that there is at least one column with the system name.",
+          "too-large": "The file is too large. Split it into smaller batches.",
+          "write-failed": "We could not save the import. Please try again in a moment.",
+        },
+      },
+      importCta: "Import CSV",
       backToInventory: "← Back to inventory",
       cancel: "Cancel",
       nameLabel: "System name *",
@@ -1398,7 +1528,9 @@ export const en: Dictionary = {
         evaluateAnother: "Assess another system",
         backToRisk: "Back to risk",
         result: {
-          indicativeLabel: "Indicative result",
+          gpaiTitle: "General-purpose model (GenAI) detected",
+      gpaiWarnTitle: "⚠️ Your role may have changed: legal review needed",
+      indicativeLabel: "Indicative result",
           indicativeSuffix: "(indicative)",
           indicativeDesc:
             "Indicative classification based on EU AI Act criteria, drawn from what your organization has declared.",
@@ -1644,6 +1776,45 @@ export const en: Dictionary = {
         never: "never",
         failOne: "failure",
         failOther: "failures",
+      },
+
+      telemetry: {
+        title: "Product telemetry",
+        subtitle:
+          "Activation funnel for the last 30 days: from visit to payment. First-party data, no third-party tools and no personal data.",
+        subtitleNonAdmin: "Attesta's internal product metrics.",
+        nonAdminNotice:
+          "This area belongs to the Attesta team: it measures how the product is used and holds no data from your organization.",
+        empty:
+          "No events recorded yet. If this deployment is recent, check that migration 0026 has been applied: without it the app works the same, but stores no metrics.",
+        funnelTitle: "Activation funnel",
+        funnelHint:
+          "Each step is counted by distinct visitors. Conversion compares against the previous step. It is not a mandatory sequence: someone can pay without having applied a pack.",
+        othersTitle: "Other events",
+        colStep: "Step",
+        colEvent: "Event",
+        colVisitors: "Visitors",
+        colEvents: "Events",
+        colConversion: "Conversion",
+        colLast: "Last",
+        never: "never",
+        privacyNote:
+          "No IP, no user-agent and no personal data. The anonymous identifier only prevents counting the same visit twice, and the browser's GPC/DNT signals are honored.",
+        events: {
+          page_view: "Page views",
+          cta_click: "CTA click",
+          waitlist_submit: "Access request",
+          signup_submitted: "Sign-up submitted",
+          org_created: "Organization created",
+          system_created: "System registered",
+          risk_assessed: "Risk assessed",
+          pack_applied: "Policy pack applied",
+          paywall_viewed: "Paywall shown",
+          checkout_started: "Checkout started",
+          checkout_completed: "Payment confirmed",
+          export_downloaded: "Evidence exported",
+          invite_sent: "Invitation sent",
+        },
       },
 
       reportExec: {

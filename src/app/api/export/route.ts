@@ -1,4 +1,5 @@
 import { getExportBundle } from "@/lib/data";
+import { trackServer } from "@/lib/telemetry/server";
 
 // Genera el paquete al vuelo con los datos de la organización activa.
 export const dynamic = "force-dynamic";
@@ -29,6 +30,12 @@ export async function GET() {
       { status: 401, headers: { "content-type": "application/json" } },
     );
   }
+
+  // Señal de valor: alguien se llevó su expediente. Se mide el tamaño del
+  // paquete (cuántos sistemas), nunca su contenido.
+  await trackServer("export_downloaded", {
+    props: { systems: bundle.systems.length },
+  });
 
   const date = bundle.meta.exportedAt.slice(0, 10);
   const filename = `attesta-${slug(bundle.meta.organization)}-${date}.json`;
