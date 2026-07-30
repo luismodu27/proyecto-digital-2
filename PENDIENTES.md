@@ -63,7 +63,7 @@
       Excel español, cabeceras ES/EN, BOM, comas entrecomilladas, valida e informa **por filas**); el
       **enlace de intake** sirve para construirla preguntando a cada área sin darles cuenta (migración
       **0027**, token de capacidad, bandeja de revisión, `noindex`). Los dos en
-      `/dashboard/inventario/importar`. **Requiere aplicar 0027** (§1.1-septies). `alto · M`
+      `/dashboard/inventario/importar`. 0027 **aplicada** ✅. `alto · M`
 - [x] **Tests con Vitest sobre la lógica pura** — ✅ **HECHO (2026-07-30)**. 274 tests en 10 ficheros (221 al cerrar este ítem; el resto llegó con los ítems siguientes del sprint)
       (`npm test`, <1 s, en CI): `risk-assessment`, `recommendations`, `task-reminders`, `regulatory-watch`,
       `audit`, `bias-audit`, `telemetry/events` y **paridad de los 8 policy packs**. Codifican la expectativa
@@ -102,13 +102,15 @@
       como "sin sesión" (no 500). `alto · M`
 
 > **Cierre del Sprint 2 (6/6 ítems).** Todo verificado con lint + tsc + `check:copy` + **274 tests** + build,
-> y los caminos reales por curl contra el Supabase de producción. Dos migraciones nuevas esperan tu mano:
-> **0026** (telemetría) y **0027** (intake compartible) — ambas en **§1.1-septies**, ya empaquetadas en un solo archivo — sin ellas la app funciona
-> igual, solo que sin métricas y sin enlaces de intake. Lo aprendido en cada ítem está en `MEMORY.md §10`.
+> y los caminos reales por curl contra el Supabase de producción. Las dos migraciones del sprint —**0026** (telemetría)
+> y **0027** (intake compartible)— están **aplicadas y verificadas por API** (§1.1-septies). Queda la **0028**
+> (endurecer permisos, §1.1-nonies): opcional, no bloquea nada. Lo aprendido en cada ítem está en `MEMORY.md §10`.
 >
 > Novedad de método que conviene conservar: **toda migración nueva se valida antes en un Postgres desechable**
 > (ver gotcha en `CLAUDE.md`). En este sprint cazó tres bugs que habrían llegado al SQL Editor —`greatest`/`least`
-> cualificados con esquema, un 500 a un anónimo con nombre en blanco, y policies no re-aplicables.
+> cualificados con esquema, un 500 a un anónimo con nombre en blanco, y policies no re-aplicables. Y una cuarta,
+> que solo salió al verificar contra el Supabase **real**: `revoke ... from anon` sobre una función no revoca
+> nada, porque `EXECUTE` se concede a **PUBLIC** por defecto (→ migración 0028, §1.1-nonies).
 
 ### 0.C · SPRINT 3 — monetización + compliance EE. UU. ⬅️ SIGUIENTE
 - [ ] **Metering por nº de sistemas/asientos + Enterprise a medida** — hoy una org con 2 sistemas y otra con 50
@@ -164,8 +166,7 @@
       De **primera parte** (sin PostHog/Plausible/GA): migración `0026_telemetry.sql` (`product_events` + RPC
       `product_funnel`), catálogo cerrado de 13 eventos (`src/lib/telemetry/events.ts`), API `/api/telemetry`
       (whitelist de eventos de cliente + rate-limit + cuerpo acotado), y panel `/dashboard/telemetria` solo para
-      `platform_admins`. Sin IP, sin user-agent, sin PII, y se respetan GPC/DNT. **Requiere aplicar 0026**
-      (§1.1-septies); sin ella la app funciona igual pero no mide.
+      `platform_admins`. Sin IP, sin user-agent, sin PII, y se respetan GPC/DNT. 0026 **aplicada** ✅ (2026-07-30): ya mide.
 - [ ] **Cumplimiento propio de Attesta** — no existe página de **privacidad**, **DPA**, lista de
       **subprocesadores** (Supabase UE, Stripe, proveedor de email) ni aviso de cookies. Vender gobernanza de IA
       a mid-market UE sin tu propio DPA **bloquea la compra** en due-diligence y es incoherente con la marca.
@@ -291,51 +292,85 @@ update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
 -- o 'enterprise'
 ```
 
-### 1.1-septies + octies · Aplicar 0026 y 0027 — un solo archivo listo para pegar (2026-07-30)
-> **📎 Te entregué `attesta-migraciones-0026-0027.sql`** — un único archivo con las **dos** migraciones
+### 1.1-nonies · Aplicar migración 0028 (endurecer permisos) — RÁPIDO, no urgente
+**No arregla ninguna fuga: cierra una segunda cerradura que 0026/0027 dejaron sin echar.** Todo funciona
+igual con o sin ella; conviene aplicarla, pero no bloquea nada.
+
+Salió al verificar 0026/0027 contra el Supabase **real** (no contra el Postgres de pruebas), y son dos
+diferencias entre lo que el SQL *parecía* hacer y lo que hace:
+
+1. **`revoke ... from anon` sobre una FUNCIÓN casi nunca revoca nada.** Postgres concede `EXECUTE` a
+   **PUBLIC** por defecto en cada función nueva, y `anon` lo hereda por ahí. Comprobado: un anónimo **sí
+   puede ejecutar** `product_funnel`; lo único que lo detiene es el guard `is_platform_admin()` que lleva
+   **dentro** (le devuelve 0 filas). O sea: la protección real está, pero la línea `revoke` era decorativa.
+   El mismo defecto estaba en `is_platform_admin()` desde la 0011.
+2. **En Supabase, `anon` tiene `SELECT` por defecto sobre las tablas de `public`.** En el Postgres de
+   pruebas no lo tiene, y por eso allí un SELECT anónimo daba *permission denied* y en producción da
+   `200 []`. Las dos son seguras —la RLS no le concede ni una fila— pero **en producción la única capa es
+   la RLS**. Si algún día alguien añade una policy permisiva por error, ahí sí habría fuga. Revocando el
+   SELECT hacen falta **dos** errores para filtrar, no uno.
+
+Lo que hace 0028: revoca de **PUBLIC** el `execute` de `product_funnel` e `is_platform_admin()` (y lo
+reconcede a `authenticated`), y le quita a `anon` el `SELECT` sobre `intake_links`, `intake_submissions` y
+`product_events`. **Lo que NO toca:** el `INSERT` anónimo en `product_events` (sin él no se miden las
+visitas de la landing) ni el `EXECUTE` de `submit_intake` (es la puerta pública del intake, a propósito).
+
+Validado en el Postgres desechable con los grants **imitando a Supabase** (`grant select on all tables to
+anon` primero, para que el revoke tenga algo que revocar): antes → `anon` podía las 8 cosas; después → pierde
+los 3 SELECT y los 2 `execute` internos, **conserva** el insert de telemetría y el `submit_intake`, y
+`authenticated` no pierde nada. Aplicada dos veces sin error, y el camino anónimo del intake sigue
+funcionando entero (token válido guarda y suma 1; los cinco casos malos devuelven el mismo `false`).
+
+1. Pega **`supabase/migrations/0028_grant_hardening.sql`** en el SQL Editor (solo ese archivo).
+2. No hay nada que comprobar en la UI: si todo sigue igual, funcionó. La telemetría debe seguir contando
+   visitas de la landing (`/dashboard/telemetria`) y el formulario público de intake debe seguir enviando.
+
+### 1.1-septies + octies · Migraciones 0026 y 0027 — ✅ APLICADAS (verificadas 2026-07-30)
+**Verificadas por API contra tu Supabase real**, no solo dadas por buenas:
+`product_events` → insert anónimo **201**; RPC `product_funnel` → **200**; `intake_links` e
+`intake_submissions` → existen; y `submit_intake` con token inexistente, token demasiado corto, otro token
+falso y nombre en blanco → **los cuatro devuelven el mismo `false` con HTTP 200** (no delata qué enlaces
+existen). Queda una fila de sonda en `product_events` (`path = '/probe-migracion'`) de la propia
+verificación; si te molesta en el panel, bórrala con:
+`delete from public.product_events where path = '/probe-migracion';`
+
+<details><summary>Cómo se aplicaron (referencia)</summary>
+
+> **📎 Se entregó `attesta-migraciones-0026-0027.sql`** — un único archivo con las **dos** migraciones
 > en orden, con instrucciones dentro. Pégalo completo en el SQL Editor y pulsa *Run*. También puedes
 > pegar los dos ficheros por separado (`0026_telemetry.sql` y luego `0027_intake_links.sql`): es lo mismo.
 >
 > **Validado antes de entregártelo** en un Postgres 16 desechable: se aplicó **tres veces seguidas** sobre
 > una base limpia sin un solo error, se comprobaron los objetos creados (3 tablas, 3 funciones, 9 políticas)
 > y se probó el camino anónimo de 0027 — token válido → guarda y suma 1 al contador; token inexistente,
-> revocado, caducado, agotado y nombre en blanco → **todos devuelven exactamente el mismo `false`**;
-> el rol `anon` ni siquiera puede leer las tablas (*permission denied*, antes de llegar a la RLS).
+> revocado, caducado, agotado y nombre en blanco → **todos devuelven exactamente el mismo `false`**.
+>
+> **Corrección de esa validación:** allí se dijo que `anon` "ni siquiera puede leer las tablas
+> (*permission denied*)". Eso era cierto **en el Postgres de pruebas**, pero **no en Supabase**, donde `anon`
+> tiene `SELECT` por defecto sobre `public` y recibe `200 []` (cero filas por la RLS). Sigue siendo seguro,
+> pero con **una** capa en vez de dos. Eso es lo que arregla la **0028** (§1.1-nonies).
 >
 > **Bug corregido en el momento** (por eso hacemos este ritual): 0026 no era **idempotente** — sus dos
 > políticas se creaban sin `drop policy if exists`, y `create policy` no admite `if not exists`. Si hubieras
 > pegado el archivo dos veces (cosa normal: se re-pega tras corregir cualquier otra cosa), la segunda habría
 > muerto con *policy already exists*. Ya está arreglado en la migración y en `setup.sql`.
 
-#### 0026 · Telemetría de producto — ⚠️ SIN ELLA NO HAY MÉTRICAS
-El embudo de activación **ya está instrumentado en el código**, pero no guarda nada hasta que exista la tabla.
-Sin aplicarla la app funciona **exactamente igual** (degradación segura: cada intento de medir es un no-op).
+</details>
 
-Para encenderla:
-1. Pega **`supabase/migrations/0026_telemetry.sql`** en el SQL Editor de Supabase (solo ese archivo).
-2. Entra en **`/dashboard/telemetria`** (aparece en el menú lateral solo para tu cuenta, que es `platform_admin`).
-   Al principio verá pocas visitas: solo cuenta desde el momento en que se aplica.
-3. Comprobación rápida por API (con la anon key), si quieres confirmar que la tabla existe:
-   ```bash
-   curl -s -o /dev/null -w "%{http_code}\n" \
-     -X POST "$SUPABASE_URL/rest/v1/product_events" \
-     -H "apikey: $ANON_KEY" -H "Content-Type: application/json" \
-     -d '{"event":"page_view"}'    # 201 = tabla lista · 404 = migración sin aplicar
-   ```
+#### 0026 · Telemetría de producto
+Panel en **`/dashboard/telemetria`** (en el menú lateral solo para tu cuenta, que es `platform_admin`).
+Mide **desde el momento en que se aplicó**: no rellena el pasado, así que al principio hay pocos datos.
+
 **Qué mide y qué NO:** mide visitas, clics en CTA, altas, primer sistema, evaluación de riesgo, muro de pago,
 checkout y pago confirmado. **No** guarda IP, ni user-agent, ni correos, ni nombres de sistemas. El identificador
 anónimo del navegador solo evita contar dos veces la misma visita, y si el visitante activa "Do Not Track" o GPC
 no se emite nada. Pendiente asociado: declararlo en la futura página de **privacidad** (§0.F, medición de audiencia).
 
 #### 0027 · Enlace de intake compartible
-El enlace para que cada área declare su IA sin tener cuenta **ya está construido**, pero necesita sus tablas.
-Sin aplicarla la pantalla funciona igual y solo muestra su estado vacío (degradación segura, verificada).
-
-1. Pega **`supabase/migrations/0027_intake_links.sql`** en el SQL Editor (solo ese archivo).
-2. Entra en **`/dashboard/inventario/importar`**, crea un enlace con una etiqueta ("RRHH"), cópialo y ábrelo
-   en una ventana privada: deberías ver el formulario público y poder enviar una ficha.
-3. La ficha aparece en la bandeja de esa misma pantalla. Al pulsar **"Añadir al inventario"** se crea el
-   sistema y queda registrado **a tu nombre** en Actividad (el anónimo nunca escribe en el expediente).
+Vive en **`/dashboard/inventario/importar`**. Prueba de humo cuando quieras: crea un enlace con etiqueta
+("RRHH"), cópialo y ábrelo en una ventana privada — debes ver el formulario público y poder enviar una ficha.
+La ficha aparece en la bandeja de esa misma pantalla; al pulsar **"Añadir al inventario"** se crea el sistema
+y queda registrado **a tu nombre** en Actividad (el anónimo nunca escribe en el expediente).
 
 **Qué tener en cuenta al compartirlo:** el enlace es una llave — quien lo tenga puede enviar fichas (nada
 más: no puede leer nada). Caduca a los **30 días**, admite hasta **100 envíos** y puedes **revocarlo** en

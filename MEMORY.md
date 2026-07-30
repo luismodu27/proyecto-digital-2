@@ -127,6 +127,34 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **0026/0027 aplicadas por el fundador. Verificar en el Supabase REAL destapó lo que el
+  Postgres de pruebas no podía ver → migración 0028.** Las dos migraciones quedaron confirmadas por API
+  (insert anónimo de telemetría **201**, RPC del embudo **200**, y `submit_intake` devolviendo el mismo
+  `false` a token inexistente / demasiado corto / falso / nombre en blanco). Pero al comparar esa verificación
+  con la que se había hecho en local aparecieron **dos diferencias entre lo que el SQL parecía hacer y lo que
+  hace**, y las dos importan como método:
+  **(1) `revoke ... from anon` sobre una FUNCIÓN es casi siempre un no-op.** Postgres concede `EXECUTE` a
+  **PUBLIC** por defecto en cada función nueva y `anon` lo hereda por ahí; para revocar de verdad hay que
+  revocar **de PUBLIC**. Se comprobó empíricamente: un anónimo **sí puede ejecutar** `product_funnel`; lo
+  único que lo detiene es el guard `is_platform_admin()` que va **dentro**. No hay fuga —el guard funciona—
+  pero la línea `revoke` era decorativa, y el mismo defecto arrastraba desde la **0011**.
+  **(2) El Postgres de pruebas mintió por omisión.** Allí `anon` no tenía grants, así que un SELECT anónimo
+  daba *permission denied* y se registró eso como prueba de aislamiento. En **Supabase**, `anon` tiene
+  `SELECT` por defecto sobre `public`, así que la misma consulta da `200 []`: seguro, pero por la **RLS
+  sola**. Si alguien añade una policy permisiva por error, en producción eso sí filtra y en pruebas no.
+  **Aprendizaje de método, más valioso que el parche:** el Postgres desechable valida **sintaxis, CHECKs y
+  lógica**, pero **no reproduce los grants por defecto de Supabase**. Para afirmar algo sobre *permisos* hay
+  que replicar esos grants en el scaffold (`grant select on all tables in schema public to anon`) o
+  verificarlo contra el proyecto real — si no, se concluye "dos cerraduras" donde hay una. Se hizo lo
+  primero: el scaffold ahora imita a Supabase, y con él **0028** se validó de verdad (antes: `anon` podía las
+  8 cosas; después: pierde los 3 `SELECT` y los 2 `execute` internos, **conserva** el insert de telemetría y
+  `submit_intake`, y `authenticated` no pierde nada; idempotente en dos pasadas; el intake anónimo sigue
+  funcionando entero).
+  **Decisión: migración NUEVA (0028), no editar 0026/0027.** Ya están aplicadas en producción; retocarlas
+  dejaría el fichero y la base de datos divergiendo en silencio. Es la misma convención que 0016, 0024 y 0025.
+  0028 **no arregla ninguna fuga** y se le dijo así al fundador —cierra una segunda cerradura— para que no
+  la trate como urgente ni pierda la confianza en lo ya aplicado.
+
 - **2026-07-30** · **`sk_live` rotada + 0018 confirmada aplicada + 0026/0027 empaquetadas.** Tres cosas del
   fundador, y dos aprendizajes que conviene no perder.
   **(1)** El fundador **rotó la `sk_live`** de Stripe que se había pegado en el chat. §1.1 pasa de tarea urgente
