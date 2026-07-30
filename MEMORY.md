@@ -127,6 +127,58 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 1 completado (blindaje de marca + conversión) — 7 ítems, 5 commits.**
+  Primer sprint de la hoja de ruta 360° (`PENDIENTES.md §0.A`). Lo relevante para el futuro:
+  - **Guard de copy prohibido en CI** (`scripts/check-prohibited-copy.mjs` + `npm run check:copy`). La regla #1
+    ("Attesta NO certifica") ya no depende de disciplina humana. **Lección de diseño:** la lista negra de
+    palabras es inservible — daba **18 falsos positivos legítimos** (marcado CE *del proveedor*, "no como
+    certificador", "garantiza intervención humana" del RGPD 22, "ley aprobada por…") y un guard así se
+    desactiva. Se detecta el **patrón** (Attesta como sujeto que certifica, afirmación de cumplimiento del
+    cliente, `% de cumplimiento`), ignorando negaciones y preguntas de FAQ, con escape hatch `attesta-copy-ok`.
+    **Se autoprueba** (muestras con reglas esperadas + cobertura de las 20 reglas) → falla si alguien debilita
+    una regex. Verificado por ambos lados. Complementa a `PROHIBITED_COPY` de `analista/llm.ts` (runtime, LLM).
+  - **Conversión:** el Hero mandaba a la lista de espera mientras Precios mandaba a registro+checkout **ya
+    LIVE** → el propio CTA enfriaba el embudo. Ahora "Empieza gratis" → `/login?signup=1` (nuevo: abre el
+    formulario en modo registro). Enterprise sigue en waitlist a propósito (venta asistida).
+  - **El muro de pago ahora enseña valor:** teaser con cifras reales de la org (brechas abiertas/severidad
+    alta/sistemas). `PaidGate` recibe las stats como **función** y solo las resuelve si bloquea.
+  - **CORRECCIÓN a un diagnóstico mío:** dije que el gating de planes no se aplicaba en el servidor. **Falso:**
+    existe `PaidGate` (`src/lib/billing/gate.tsx`) montado vía `layout.tsx` en las 8 rutas de pago; mi grep
+    buscaba `orgHasTier` en las páginas y no lo vio. **No hay hueco de monetización.**
+  - **Matiz honesto sobre `DataRepo`:** la auditoría decía que olvidar un getter del repo demo "falla en
+    producción, no en tsc". Comprobado: **sí fallaba tsc**, pero con diagnósticos engañosos (tipos degradados a
+    `any`, error como *"implicitly any"* en páginas del dashboard). El contrato explícito arregla el
+    diagnóstico, no una ausencia de detección.
+  - **Deuda descubierta:** varios `layout.tsx` de secciones de pago tienen el copy del muro **hardcodeado en
+    español** (se corrigió el de `gap`; quedan los otros 7) → anotado para el sprint de UX.
+
+- **2026-07-30** · **Auditoría 360° de la app + HOJA DE RUTA MAESTRA. Decisión del fundador: "hay que hacer
+  todo, por sprints".** A petición del fundador ("investigación completa en loop constante: cómo ampliar/mejorar
+  la página en distintas áreas o aspectos técnicos"), se corrió un **panel multi-agente de 6 lentes en paralelo**
+  sobre el código real (producto/features/monetización · UX dashboard+landing/conversión · rendimiento Next.js ·
+  calidad+backend/fiabilidad · a11y/SEO/i18n · profundidad de compliance) → **39 hallazgos** → síntesis
+  priorizada → **crítico de completitud** que detectó 8 áreas que el propio panel omitió. Resultado completo
+  guardado como **plan maestro en `PENDIENTES.md §0`** (sprints 0.A–0.F + apuestas 0.G), porque el fundador
+  decidió **ejecutarlo todo por sprints** (nada se descarta, solo se ordena).
+  - **Lección de orquestación:** la 1ª corrida (8 lentes) se colgó — la máquina tiene **4 cores → solo 2 agentes
+    concurrentes**, y una lente murió arrastrando su rama. La v2 lo arregló con **6 lentes**, instrucciones de
+    eficiencia (Grep antes que leer archivos enteros, tope de ~16 tool-calls, sin WebSearch salvo imprescindible)
+    y **`.catch()` por lente** para que un fallo no tumbe el panel. 6/6 lentes, 0 errores, ~10 min.
+  - **Top hallazgos:** (1) la regla #1 de marca ("NO certifica") **no tiene guard automático** — solo disciplina
+    humana → test de copy prohibido en CI; (2) **señal de conversión contradictoria** en la landing (Hero →
+    waitlist vs. Precios → checkout ya LIVE); (3) todo el "aha" (% listo/brechas) está **tras el muro** en el plan
+    free → sin pull de pago; (4) **GPAI ausente del clasificador** (el caso de IA más común del mid-market cae en
+    "limitado"), incl. la trampa del Art. 25; (5) **sin tests** la lógica legal determinista no tiene red de
+    seguridad; (6) `if (error) return []` hace **indistinguible** "migración ausente" de "Supabase caído/RLS rota";
+    (7) `headers()` en el root layout saca a **toda la app** del render estático/CDN.
+  - **Huecos que el panel NO vio (crítico de completitud, confirmados contra el repo):** sin **telemetría** de
+    producto (optimizamos a ciegas), sin **cumplimiento propio** (privacidad/DPA/subprocesadores → bloquea la
+    due-diligence de compra), sin **ciclo de facturación** más allá del checkout (dunning/idempotencia), sin
+    **borrado/exportación por tenant** (GDPR), sin **soporte/docs**, sin **backup/DR**, sin **motion GTM
+    enterprise**, y **deliverability de email** sin SPF/DKIM/DMARC.
+  - **Cul-de-sac detectado:** el clasificador manda "alto riesgo" por **Anexo III.5.a** (servicios/ayudas
+    públicas) pero no existe pack para eso → el usuario llega a `/packs` sin nada que aplicar.
+
 - **2026-07-25** · **Foso — nuevo policy pack UE `educacion` (Educación y formación, Anexo III.3).** El fundador decidió
   ampliar el foso al vertical de **educación** (nuevo caso de uso, distinto de la cuña RRHH). Investigado y verificado en
   **DOS pasadas** por el `compliance-domain-expert` (draft + revisión adversarial de citas), contra el texto del EU AI Act

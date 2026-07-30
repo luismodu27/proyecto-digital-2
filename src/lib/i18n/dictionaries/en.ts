@@ -32,7 +32,7 @@ export const en: Dictionary = {
     pricing: "Pricing",
     faq: "FAQ",
     login: "Log in",
-    requestAccess: "Request access",
+    requestAccess: "Start for free",
     openMenu: "Open menu",
     closeMenu: "Close menu",
   },
@@ -54,9 +54,9 @@ export const en: Dictionary = {
       bodyEmphasis: "high-risk",
       bodyAfter:
         " under the EU AI Act. Attesta inventories it, classifies its risk, generates your evidence and watches regulatory changes. Without needing a GRC team.",
-      ctaPrimary: "Request early access",
+      ctaPrimary: "Start for free",
       ctaSecondary: "Explore the live demo",
-      ctaNote: "No sales call · no sign-up",
+      ctaNote: "Free to start · no card · no sales call",
       footnote:
         "More than 3 in 4 companies move faster on AI than on governing it. You can stay ahead.",
     },
@@ -411,7 +411,7 @@ export const en: Dictionary = {
             "1 user",
           ],
           limits: "No PDF evidence, no watch or action plan.",
-          cta: "Log in",
+          cta: "Start for free",
         },
         {
           name: "Readiness",
@@ -424,7 +424,7 @@ export const en: Dictionary = {
             "Continuous regulatory watch",
             "Dossier and executive report (PDF)",
             "Verifiable evidence and audit trail",
-            "Policy packs (5 domains)",
+            "Policy packs (8 packs · EU and U.S.)",
             "Team and roles",
           ],
           cta: "Subscribe",
@@ -456,7 +456,7 @@ export const en: Dictionary = {
           "Continuous regulatory watch",
           "Dossier and executive report (PDF)",
           "Verifiable evidence and audit trail",
-          "Policy packs (5 domains)",
+          "Policy packs (8 packs · EU and U.S.)",
           "Multi-organization",
           "SSO and advanced controls",
           "Priority support",
@@ -958,6 +958,14 @@ export const en: Dictionary = {
       back: "Back to overview",
       footer:
         "Inventory and risk classification remain available on the free plan.",
+      teaserIntro: "With your current data we have already identified",
+      teaserNote:
+        "Figures computed from what your organization has already declared. Unlock to see the detail, owner and due date of each gap.",
+      gapTeaser: {
+        openGaps: "open gaps",
+        highSeverity: "high severity",
+        systems: "systems affected",
+      },
     },
 
     organizations: {
@@ -1133,6 +1141,9 @@ export const en: Dictionary = {
 
     gap: {
       title: "Gap assessment",
+      paywallFeature: "Gap assessment",
+      paywallDesc:
+        "Measure your readiness against each obligation, generate the gap report and turn the gaps into an action plan.",
       subtitleOne: "1 open gap against the EU AI Act requirements.",
       subtitleOtherAfter: " open gaps against the EU AI Act requirements.",
       addGap: "+ Add gap",
@@ -1555,7 +1566,7 @@ export const en: Dictionary = {
         subtitle:
           "Drafts proposed by the pipeline. Nothing reaches customers' radar without your validation.",
         nonAdminNotice:
-          "This area is for Attesta's compliance team, which validates regulatory changes before publishing them on the radar.",
+          "This area is for Attesta's compliance team, which validates regulatory changes before publishing them on the radar.", // attesta-copy-ok: el objeto es el CAMBIO NORMATIVO (validador humano interno del radar), no el cumplimiento del cliente.
         pendingOne: "candidate pending",
         pendingOther: "candidates pending",
         pendingSuffix: " review",

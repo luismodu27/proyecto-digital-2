@@ -14,6 +14,7 @@ import { Pricing } from "@/components/landing/Pricing";
 import { FAQ } from "@/components/landing/FAQ";
 import { WaitlistCTA } from "@/components/landing/WaitlistCTA";
 import { SiteFooter } from "@/components/landing/SiteFooter";
+import { StructuredData } from "@/components/landing/StructuredData";
 import { Reveal } from "@/components/ui/Reveal";
 import { getDictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/config";
@@ -36,6 +37,8 @@ export function LandingPage({ locale }: { locale: Locale }) {
 
   return (
     <>
+      {/* Datos estructurados (schema.org). No renderiza nada visible. */}
+      <StructuredData locale={locale} t={t} />
       <a
         href="#contenido"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"

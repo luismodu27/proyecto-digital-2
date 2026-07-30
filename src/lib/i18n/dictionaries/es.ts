@@ -32,7 +32,10 @@ export const es = {
     pricing: "Precios",
     faq: "FAQ",
     login: "Entrar",
-    requestAccess: "Solicitar acceso",
+    // CTA principal de la cabecera. Antes era "Solicitar acceso" → lista de
+    // espera; el plan Diagnóstico es gratuito y el registro está activo, así que
+    // el mensaje coherente es que se puede empezar hoy.
+    requestAccess: "Empieza gratis",
     openMenu: "Abrir menú",
     closeMenu: "Cerrar menú",
   },
@@ -54,9 +57,9 @@ export const es = {
       bodyEmphasis: "alto riesgo",
       bodyAfter:
         " bajo el EU AI Act. Attesta la inventaría, clasifica su riesgo, genera tu evidencia y vigila los cambios normativos. Sin necesitar un equipo GRC.",
-      ctaPrimary: "Solicitar acceso anticipado",
+      ctaPrimary: "Empieza gratis",
       ctaSecondary: "Explora la demo en vivo",
-      ctaNote: "Sin llamada de ventas · sin registro",
+      ctaNote: "Gratis para empezar · sin tarjeta · sin llamada de ventas",
       footnote:
         "Más de 3 de cada 4 empresas van más rápido en IA que en su gobierno. Tú puedes ir por delante.",
     },
@@ -411,7 +414,7 @@ export const es = {
             "1 usuario",
           ],
           limits: "Sin evidencia en PDF, sin vigilancia ni plan de acción.",
-          cta: "Entrar",
+          cta: "Empieza gratis",
         },
         {
           name: "Preparación",
@@ -424,7 +427,7 @@ export const es = {
             "Vigilancia regulatoria continua",
             "Dossier e informe ejecutivo (PDF)",
             "Evidencia y audit-trail verificable",
-            "Policy packs (5 dominios)",
+            "Policy packs (8 packs · UE y EE. UU.)",
             "Equipo y roles",
           ],
           cta: "Suscribirse",
@@ -456,7 +459,7 @@ export const es = {
           "Vigilancia regulatoria continua",
           "Dossier e informe ejecutivo (PDF)",
           "Evidencia y audit-trail verificable",
-          "Policy packs (5 dominios)",
+          "Policy packs (8 packs · UE y EE. UU.)",
           "Multi-organización",
           "SSO y controles avanzados",
           "Soporte prioritario",
@@ -470,7 +473,7 @@ export const es = {
       items: [
         {
           q: "¿Attesta certifica mi cumplimiento del EU AI Act?",
-          a: "No. Attesta es una herramienta de autoevaluación y preparación para auditoría: organiza tu inventario, tu clasificación de riesgo y tu evidencia. La certificación de conformidad, cuando procede, solo la emiten organismos notificados acreditados. No prestamos asesoría legal.",
+          a: "No. Attesta es una herramienta de autoevaluación y preparación para auditoría: organiza tu inventario, tu clasificación de riesgo y tu evidencia. La certificación de conformidad, cuando procede, solo la emiten organismos notificados acreditados. No prestamos asesoría legal.", // attesta-copy-ok: atribuye la certificación a organismos notificados (no a Attesta) — es el descargo, no una promesa.
         },
         {
           q: "¿La IA que filtra o puntúa candidatos es de alto riesgo?",
@@ -958,6 +961,16 @@ export const es = {
       back: "Volver al resumen",
       footer:
         "Inventario y clasificación de riesgo siguen disponibles en el plan gratuito.",
+      // Teaser del muro: cifras reales de la organización, para que el plan
+      // gratuito vea QUÉ se está perdiendo (sin revelar el detalle).
+      teaserIntro: "Con tus datos actuales ya hemos identificado",
+      teaserNote:
+        "Cifras calculadas con lo que tu organización ya ha declarado. Desbloquea para ver el detalle, el responsable y la fecha de cada brecha.",
+      gapTeaser: {
+        openGaps: "brechas abiertas",
+        highSeverity: "de severidad alta",
+        systems: "sistemas afectados",
+      },
     },
 
     organizations: {
@@ -1135,6 +1148,10 @@ export const es = {
 
     gap: {
       title: "Gap assessment",
+      // Muro de plan de la sección (antes estaba hardcodeado en el layout).
+      paywallFeature: "Gap assessment",
+      paywallDesc:
+        "Mide tu preparación frente a cada obligación, genera el informe de brechas y conviértelas en un plan de acción.",
       subtitleOne: "1 brecha abierta frente a los requisitos del EU AI Act.",
       subtitleOtherAfter:
         " brechas abiertas frente a los requisitos del EU AI Act.",
@@ -1563,7 +1580,7 @@ export const es = {
         subtitle:
           "Borradores propuestos por el pipeline. Nada llega al radar de los clientes sin tu validación.",
         nonAdminNotice:
-          "Esta área es para el equipo de compliance de Attesta, que valida los cambios normativos antes de publicarlos en el radar.",
+          "Esta área es para el equipo de compliance de Attesta, que valida los cambios normativos antes de publicarlos en el radar.", // attesta-copy-ok: el objeto es el CAMBIO NORMATIVO (validador humano interno del radar), no el cumplimiento del cliente.
         pendingOne: "candidato pendiente",
         pendingOther: "candidatos pendientes",
         pendingSuffix: " de revisión",

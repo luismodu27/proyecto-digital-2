@@ -38,6 +38,14 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
 
+      # Regla #1 del producto: Attesta NO certifica. Un texto que insinúe
+      # certificación, conformidad garantizada o asesoría legal es un pasivo
+      # legal, no un bug de estilo: aquí deja de depender de la disciplina humana.
+      # El script se autoprueba (MUST_CATCH / MUST_PASS) antes de escanear, así
+      # que también falla si alguien debilita una de sus reglas.
+      - name: Copy prohibido (Attesta NO certifica)
+        run: npm run check:copy
+
       # Build sin credenciales → modo demo (self-contained, sin red). Verifica que
       # el bundle compila. El build real de producción lo hace Vercel con las vars
       # NEXT_PUBLIC_* reales; aquí solo comprobamos que no hay errores de build.

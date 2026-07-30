@@ -52,5 +52,5 @@ export const EU_AI_ACT_FRAMING_NOTES = `
   emociones en vídeo-entrevistas. Excepción tasada solo por motivos médicos o de
   seguridad. No confundir "inferir emociones" con "analizar competencias".
 - Reglas de copy de Attesta SIEMPRE: clasificación orientativa, "orientación, no
-  asesoría legal", verbos de la organización, nada de "certifica/cumple/garantiza".
+  asesoría legal", verbos de la organización, nada de "certifica/cumple/garantiza". // attesta-copy-ok: ES la lista de vocabulario prohibido que se pasa al Analista.
 `.trim();

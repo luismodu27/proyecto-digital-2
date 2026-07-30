@@ -42,7 +42,17 @@ export function Hero({
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
-            <ButtonLink href="#waitlist" variant="primary" className="px-6 py-3">
+            {/* El plan Diagnóstico es gratuito y el registro + checkout están
+                activos: el CTA principal lleva al registro real, no a la lista de
+                espera. Mandar a #waitlist contradecía a la sección de precios
+                ("Empieza gratis" → /login) y hacía dudar de si el producto ya
+                está disponible. La lista de espera sigue existiendo para
+                Enterprise y para quien no quiere registrarse aún. */}
+            <ButtonLink
+              href="/login?signup=1"
+              variant="primary"
+              className="px-6 py-3"
+            >
               {t.ctaPrimary}
             </ButtonLink>
             <ButtonLink href="/demo" variant="outline" className="px-6 py-3">
