@@ -127,6 +127,34 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 3 · pack de servicios públicos esenciales (Anexo III.5.a + III.5.d).** Décimo pack,
+  25 controles ES+EN. Cierra el callejón sin salida que motivaba el ítem: el clasificador mandaba "alto riesgo"
+  a quien elegía servicios y ayudas públicas y esa persona llegaba al catálogo sin pack propio. **El enrutado
+  no estaba roto** —se comprobó: el clasificador ya distingue `public_services` de `credit` e `insurance`—, así
+  que lo único que faltaba era el contenido.
+  **Corrección de alcance que la ficha del roadmap tenía mal:** decía "utilities, aseguradoras de salud", y los
+  **servicios esenciales PRIVADOS no entran** por el III.5.a. Ese punto es público y exige cuatro elementos a la
+  vez (uso por o en nombre de autoridad pública, prestación pública de asistencia esencial, evaluar
+  elegibilidad o conceder/reducir/revocar, personas físicas). El Reglamento protege el acceso a luz, agua y
+  telecomunicaciones **a través** del scoring crediticio (III.5.b, Recital 58), que ya cubre `credito-seguros`.
+  Por eso el pack se llama **`servicios-publicos` y no `servicios-esenciales`**: el nombre es la primera línea
+  de defensa contra el error nº 1 del punto, que es leer "electricidad" en un recital y concluir que cualquier
+  decisión de una eléctrica es alto riesgo.
+  **Dos controles `prohibited: true`, no uno** (a diferencia de `educacion`). Es deliberado: el Art. 5.1.c
+  (puntuación social) y el Art. 5.1.d (predecir delito) son las dos prácticas que una administración puede
+  cometer **sin mala fe**. La frontera del 5.1.c no es de intensidad sino de **estructura** —verificar los
+  requisitos de una prestación concreta vs. puntuar transversalmente al ciudadano y reutilizar esa puntuación
+  entre departamentos— y el control la resuelve haciendo contestar tres preguntas por escrito. La del 5.1.d
+  separa el control antifraude documental sobre hechos objetivos de la predicción de delito por perfilado.
+  **III.5.d (emergencias) entra como bloque condicional, no como pack aparte ni diluido en el tronco:** mismo
+  deployer y mismo tronco de deberes, pero el modo de fallo es distinto (daño físico inmediato en vez de
+  denegación recurrible) y la ventana de supervisión son segundos, así que sus dos controles hablan de anular
+  con un gesto, registrar la anulación y tener procedimiento de degradación — no de revisar un expediente.
+  **Deuda declarada en el propio fichero:** la fecha de aplicación del Art. 49 (registro en la BD de la UE) es
+  incierta —el aplazamiento del Omnibus alcanza a otras secciones del capítulo y el 49 podría exigirse antes—,
+  así que el control pide verificarlo en vez de afirmar 2027; y no se consultaron las Directrices de la
+  Comisión sobre prácticas prohibidas, que son la mejor fuente para afinar el 5.1.c.
+
 - **2026-07-30** · **El Digital Omnibus se publicó y nuestro copy llevaba tres días diciendo lo contrario.**
   Salió como hallazgo colateral de la investigación del Anexo III.5.a y se verificó de forma independiente
   contra la ficha ELI de EUR-Lex: **Reglamento (UE) 2026/1744**, de 8-jul-2026, **publicado en el DOUE el

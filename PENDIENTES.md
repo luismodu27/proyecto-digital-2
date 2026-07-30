@@ -112,13 +112,23 @@
 > que solo salió al verificar contra el Supabase **real**: `revoke ... from anon` sobre una función no revoca
 > nada, porque `EXECUTE` se concede a **PUBLIC** por defecto (→ migración 0028, §1.1-nonies).
 
-### 0.C · SPRINT 3 — monetización + compliance EE. UU. ⬅️ EN CURSO (2 de 4)
-> **Dónde retomar.** Metering ✅ y pack de Colorado ✅. Quedan los **dos packs restantes**: Anexo III.5.a
-> (servicios esenciales) y educación EE. UU. Sus investigaciones se relanzaron el 2026-07-30 escribiendo el
-> memo **de forma incremental dentro del repo** (`docs/research/eu-anexo-iii-5a.md` y
-> `docs/research/us-educacion.md`), después de que el primer intento se perdiera entero por un error de API
-> justo antes de volcar el resultado — lección aplicada: **el trabajo largo se guarda mientras se hace, no al
-> final**.
+### 0.C · SPRINT 3 — monetización + compliance EE. UU. ⬅️ EN CURSO (3 de 4)
+> **Dónde retomar.** Metering ✅, pack de Colorado ✅ y pack de servicios públicos ✅. Queda **el pack de
+> educación de EE. UU.**, con su investigación ya terminada y guardada en `docs/research/us-educacion.md`
+> (28 controles definidos, mapa de aplicabilidad FERPA/COPPA/SOPIPA/antidiscriminación).
+>
+> Las dos investigaciones se relanzaron escribiendo el memo **de forma incremental dentro del repo** después de
+> que el primer intento se perdiera entero por un error de API justo antes de volcar el resultado — lección
+> aplicada: **el trabajo largo se guarda mientras se hace, no al final**.
+>
+> ⚠️ **Dos hallazgos del memo de educación EE. UU. que hay que tratar con cuidado al construirlo:** (1) la regla
+> COPPA revisada está **plenamente exigible desde el 22-abr-2026**, y su punto más citable es que la FTC declaró
+> que **entrenar IA no es "integral" al servicio** → exige consentimiento parental separado; pero cuidado,
+> **decir "COPPA prohíbe entrenar IA con datos de menores" es falso**, porque la regla se construye sobre la
+> divulgación a un tercero y no alcanza el entrenamiento interno. (2) El Departamento de Educación **rescindió
+> el impacto dispar del Title VI el 24-jul-2026** (regla final sin trámite de comentarios), así que ese control
+> baja de severidad y **no se debe citar `34 CFR § 100.3(b)(2)`**; Section 504, ADA y Title IX no están tocados
+> y ahí sigue el grueso de la exposición real.
 >
 > ⚠️ **Migración 0029 pendiente de aplicar** (§1.1-decies): sin ella el metering funciona con los cupos del
 > plan, pero no se pueden pactar topes a medida para un Enterprise.
@@ -151,9 +161,19 @@
       Donde hubo discrepancia (la vía FERPA y la cláusula de acción privada) se cita **la sección sin
       subsección**, que sí está confirmada. Hay que leer el PDF enrolado con los ojos y afinar. Igual que los
       demás packs, necesita revisión de abogado —de Colorado— antes de GA.
-- [ ] **Pack Anexo III.5.a (servicios esenciales y ayudas públicas)** — hoy el clasificador manda "alto riesgo"
-      ahí y el usuario llega a `/packs` **sin pack**: cul-de-sac. Utilities, aseguradoras de salud, prestaciones;
-      FRIA (Art. 27) clara. `alto · M`
+- [x] **Pack Anexo III.5.a (prestaciones y servicios públicos esenciales)** — ✅ **HECHO (2026-07-30)**.
+      `servicios-publicos`, 25 controles ES+EN, décimo pack. Cierra el callejón sin salida: el clasificador ya
+      distinguía `public_services` de `credit`/`insurance` (comprobado), así que el enrutado era correcto y lo
+      que faltaba era el pack. **Corrección de alcance importante frente a como estaba escrita esta ficha:** los
+      **servicios esenciales PRIVADOS (utilities) NO entran** por el III.5.a, que es público y exige cuatro
+      elementos simultáneos; el Reglamento los protege **a través** del scoring crediticio (III.5.b, Recital 58),
+      que ya cubre `credito-seguros`. Por eso el pack se llama "servicios públicos" y no "servicios esenciales":
+      el nombre evita el error nº 1 de este punto. Incluye bloque condicional para **III.5.d** (triaje de
+      llamadas de emergencia), donde el modo de fallo es distinto —daño físico inmediato, supervisión en
+      segundos— y por eso son controles propios y no el tronco reutilizado. **Dos controles `prohibited`**
+      (Art. 5.1.c puntuación social y Art. 5.1.d predicción de delito): son las dos prácticas que una
+      administración puede cometer **sin mala fe**, y la frontera del 5.1.c no es de intensidad sino de
+      estructura. `alto · M`
 - [ ] **Pack US de educación (FERPA / COPPA / SOPIPA)** — empareja el pack UE de educación recién desplegado;
       venta cruzada al mismo comprador en dos jurisdicciones. `medio · M`
 
