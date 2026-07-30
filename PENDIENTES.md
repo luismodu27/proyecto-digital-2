@@ -103,8 +103,8 @@
 
 > **Cierre del Sprint 2 (6/6 ítems).** Todo verificado con lint + tsc + `check:copy` + **274 tests** + build,
 > y los caminos reales por curl contra el Supabase de producción. Las dos migraciones del sprint —**0026** (telemetría)
-> y **0027** (intake compartible)— están **aplicadas y verificadas por API** (§1.1-septies). Queda la **0028**
-> (endurecer permisos, §1.1-nonies): opcional, no bloquea nada. Lo aprendido en cada ítem está en `MEMORY.md §10`.
+> y **0027** (intake compartible)— están **aplicadas y verificadas por API** (§1.1-septies), igual que la
+> **0028** que salió de ellas (§1.1-nonies). Lo aprendido en cada ítem está en `MEMORY.md §10`.
 >
 > Novedad de método que conviene conservar: **toda migración nueva se valida antes en un Postgres desechable**
 > (ver gotcha en `CLAUDE.md`). En este sprint cazó tres bugs que habrían llegado al SQL Editor —`greatest`/`least`
