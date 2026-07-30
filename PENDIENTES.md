@@ -58,8 +58,12 @@
       cruza requests → sin riesgo de compartir sesión.
 
 ### 0.B · SPRINT 2 — activación + red de seguridad del contenido ⬅️ SIGUIENTE
-- [ ] **Import CSV + enlace de intake compartible** — el alta manual uno-a-uno es el muro de activación #1
-      (nadie teclea 30 sistemas); sin inventario, riesgo/gap/dossier quedan vacíos. `alto · M`
+- [x] **Import CSV + enlace de intake compartible** — ✅ **HECHO (2026-07-30)**. Dos caminos, porque son dos
+      problemas: el **CSV** sirve cuando la lista YA existe (parser puro con 25 tests: autodetecta el `;` de
+      Excel español, cabeceras ES/EN, BOM, comas entrecomilladas, valida e informa **por filas**); el
+      **enlace de intake** sirve para construirla preguntando a cada área sin darles cuenta (migración
+      **0027**, token de capacidad, bandeja de revisión, `noindex`). Los dos en
+      `/dashboard/inventario/importar`. **Requiere aplicar 0027** (§1.1-octies). `alto · M`
 - [x] **Tests con Vitest sobre la lógica pura** — ✅ **HECHO (2026-07-30)**. 221 tests en 8 ficheros
       (`npm test`, <1 s, en CI): `risk-assessment`, `recommendations`, `task-reminders`, `regulatory-watch`,
       `audit`, `bias-audit`, `telemetry/events` y **paridad de los 8 policy packs**. Codifican la expectativa
@@ -283,6 +287,20 @@ Para encenderla:
 checkout y pago confirmado. **No** guarda IP, ni user-agent, ni correos, ni nombres de sistemas. El identificador
 anónimo del navegador solo evita contar dos veces la misma visita, y si el visitante activa "Do Not Track" o GPC
 no se emite nada. Pendiente asociado: declararlo en la futura página de **privacidad** (§0.F, medición de audiencia).
+
+### 1.1-octies · Aplicar migración 0027 (enlace de intake compartible) — RÁPIDO
+El enlace para que cada área declare su IA sin tener cuenta **ya está construido**, pero necesita sus tablas.
+Sin aplicarla la pantalla funciona igual y solo muestra su estado vacío (degradación segura, verificada).
+
+1. Pega **`supabase/migrations/0027_intake_links.sql`** en el SQL Editor (solo ese archivo).
+2. Entra en **`/dashboard/inventario/importar`**, crea un enlace con una etiqueta ("RRHH"), cópialo y ábrelo
+   en una ventana privada: deberías ver el formulario público y poder enviar una ficha.
+3. La ficha aparece en la bandeja de esa misma pantalla. Al pulsar **"Añadir al inventario"** se crea el
+   sistema y queda registrado **a tu nombre** en Actividad (el anónimo nunca escribe en el expediente).
+
+**Qué tener en cuenta al compartirlo:** el enlace es una llave — quien lo tenga puede enviar fichas (nada
+más: no puede leer nada). Caduca a los **30 días**, admite hasta **100 envíos** y puedes **revocarlo** en
+cualquier momento. Si sospechas que se filtró, revócalo y crea otro.
 
 ### 1.1-sexies · Migración 0022 (práctica prohibida en brechas) — ✅ APLICADA (2026-07-22)
 Aplicada por el fundador y **verificada por API** (probe con la anon key: `select=prohibited` → HTTP 200; columna

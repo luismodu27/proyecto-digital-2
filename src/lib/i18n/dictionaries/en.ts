@@ -37,6 +37,46 @@ export const en: Dictionary = {
     closeMenu: "Close menu",
   },
 
+  intake: {
+    metaTitle: "Register an AI tool",
+    metaDescription:
+      "Form to declare an AI tool your team uses, as part of your organization's governance inventory.",
+    title: "Which AI tool does your team use?",
+    subtitle:
+      "Your organization is inventorying its AI systems to meet regulatory duties. Tell us what you use: it takes less than a minute and needs no account.",
+    nameLabel: "Tool name *",
+    namePlaceholder: "ChatGPT, an ATS, a support chatbot…",
+    nameHint:
+      "The commercial name is fine. If it is homemade, describe what it does.",
+    ownerLabel: "Team or owner",
+    ownerPlaceholder: "Marketing",
+    domainLabel: "What is it used for?",
+    domainPlaceholder: "Drafting ad copy",
+    vendorLabel: "Vendor",
+    vendorPlaceholder: "OpenAI, HireFlow…",
+    byLabel: "Your name or email (optional)",
+    byPlaceholder: "So we can follow up",
+    notesLabel: "Anything else we should know",
+    notesPlaceholder:
+      "Does it make decisions about people? Is customer or candidate data fed into it?",
+    submit: "Send",
+    sending: "Sending…",
+    thanksTitle: "Thank you!",
+    thanksBody:
+      "Your compliance team will review the entry and add it to the inventory. If you use more tools, add those too.",
+    addAnother: "Add another tool",
+    privacyNote:
+      "What you send goes to your organization's governance inventory. Attesta only processes the data on its behalf.",
+    footerNote: "AI inventory managed with Attesta.",
+    errors: {
+      demo: "This link is not connected to an organization.",
+      "no-name": "Please enter at least the tool name.",
+      "rate-limit": "Too many submissions in a row. Wait a few minutes.",
+      invalid:
+        "This link no longer accepts submissions: it may have expired or been revoked. Ask whoever shared it for a new one.",
+    },
+  },
+
   meta: {
     title: "Attesta — Continuous AI governance for the mid-market",
     description:
@@ -758,6 +798,13 @@ export const en: Dictionary = {
       "system-error": "Couldn't save the system. Please try again.",
       seeded: "Sample data loaded.",
       "seed-error": "Couldn't load the sample data. Please try again.",
+      "intake-created": "Intake link created. Copy it and share it with the team.",
+      "intake-revoked": "Link revoked: it no longer accepts submissions.",
+      "intake-accepted": "Entry added to the inventory.",
+      "intake-discarded": "Entry discarded.",
+      "intake-already": "Someone else had already resolved that entry.",
+      "intake-demo": "The shareable intake needs your organization connected.",
+      "intake-error": "Could not complete the action. Please try again.",
       "pack-applied": "HR policy pack applied to the system.",
       "pack-error": "Couldn't apply the policy pack. Please try again.",
       "gap-created": "Gap added.",
@@ -1105,6 +1152,38 @@ export const en: Dictionary = {
       },
       classify: "Classify",
       dossier: "Dossier",
+      addTitle: "Add systems to the inventory",
+      addSubtitle:
+        "Two paths: ask each team with a link, or upload the list you already have in a spreadsheet.",
+      intake: {
+        title: "Shareable intake link",
+        subtitle:
+          "Send a link to each team and let them declare the AI they use. They need no account, and what they send does not go straight into the inventory: it lands in an inbox you review.",
+        labelLabel: "Who are you sending it to?",
+        labelPlaceholder: "HR, Marketing, Support…",
+        create: "Create link",
+        creating: "Creating…",
+        empty: "You have not created any links yet.",
+        untitled: "Unlabeled link",
+        linkMeta: "{n} of {max} submissions · expires {expires}",
+        copy: "Copy link",
+        copied: "Copied!",
+        copyFallback: "Copy this link:",
+        revoke: "Revoke",
+        revoking: "Revoking…",
+        stateRevoked: "revoked",
+        stateExpired: "expired",
+        inboxTitle: "Entries received ({n})",
+        inboxHint:
+          "Each entry was sent by someone in your organization without an Attesta account. Accepting it creates the system in your inventory and is recorded under your name in the activity log.",
+        accept: "Add to inventory",
+        accepting: "Adding…",
+        discard: "Discard",
+        discarding: "Discarding…",
+        from: "Sent by {who}",
+        fromAnonymous: "Anonymous submission",
+        noDetails: "No further details",
+      },
       import: {
         title: "Import inventory from CSV",
         subtitle:

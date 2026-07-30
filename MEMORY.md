@@ -127,6 +127,31 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 2 · muro de activación: import CSV + enlace de intake compartible.**
+  Eran **dos** problemas, no uno, y por eso hay dos caminos: el CSV sirve cuando la organización YA tiene la
+  lista; el **enlace de intake** sirve para CONSTRUIRLA, porque quien contrata (Legal, Compliance) no sabe
+  qué IA usa cada área — eso lo saben RRHH, Marketing o Soporte, y a esa gente no se le va a dar una cuenta.
+  - **CSV:** el parser es puro y aparte. El detalle que decide si el importador "funciona" o no es que
+    **Excel en español exporta con `;`**: sin autodetección, el fichero entra como una sola columna. También
+    BOM, CRLF, comas entrecomilladas y validación **por filas** (línea + motivo) en vez de abortar el
+    fichero. Y trampa de PostgREST cazada en la verificación: en un insert múltiple **todas las filas deben
+    tener exactamente las mismas claves** (`PGRST102`), así que se enumeran los seis campos con `null`.
+  - **Intake:** es la **única escritura anónima** del producto, así que el diseño gira en torno a contenerla.
+    Lo enviado NO entra en el inventario: cae en una bandeja y un miembro autenticado la acepta, de modo que
+    el expediente y el audit-trail siempre tienen un responsable con nombre. `anon` no tiene ninguna policy
+    de lectura y su única puerta es una RPC que devuelve **el mismo `false`** para token inexistente,
+    caducado, revocado o agotado — no puede usarse como oráculo de tokens. Por lo mismo,
+    `/intake/[token]` **no valida el token al renderizar**: si lo hiciera, la URL revelaría qué enlaces
+    existen (y por tanto quién es cliente). Caduca a 30 días, tope de envíos y revocable.
+  - **El Postgres desechable volvió a pagar el billete**: encontró que `submit_intake` con nombre en blanco
+    devolvía un **500 a un anónimo** en vez de `false`, porque `btrim_safe` devuelve NULL y `NULL = ''` no es
+    cierto. Y de paso: `create policy` no admite `IF NOT EXISTS`, así que 0027 lleva `drop policy if exists`
+    delante de cada una — re-pegar una migración corregida es algo que pasa, y sin eso falla a mitad.
+  - Verificada la matriz de seguridad completa contra el Postgres local: anon no lee nada, no puede insertar
+    directo, la RPC acepta el token válido y rechaza los cuatro casos malos, y un miembro de OTRA
+    organización ve cero. Y contra el Supabase real (sin 0027): la pantalla degrada limpia y el log dice
+    `migration-pending`.
+
 - **2026-07-30** · **SPRINT 2 · el middleware verifica el JWT en local (`getClaims`).**
   Antes, cada clic dentro del dashboard pagaba una ida y vuelta a Supabase Auth en el camino crítico.
   Lo interesante fue **comprobar la premisa en vez de suponerla**: `getClaims` solo verifica en local

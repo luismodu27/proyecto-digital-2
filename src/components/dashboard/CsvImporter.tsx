@@ -61,7 +61,10 @@ export function CsvImporter({ locale }: { locale: Locale }) {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-line bg-paper-raised p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display text-lg font-semibold text-ink">{t.title}</h2>
+        <p className="mt-1 max-w-2xl text-sm text-ink-soft">{t.subtitle}</p>
+
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
           <label htmlFor="csv" className="text-sm font-medium text-ink">
             {t.pasteLabel}
           </label>

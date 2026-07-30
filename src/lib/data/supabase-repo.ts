@@ -36,6 +36,7 @@ import type { BiasAudit } from "@/lib/bias-audit";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { logDataFallback } from "@/lib/observability/log";
 import type { FunnelRow } from "@/lib/telemetry/events";
+import type { IntakeLink, IntakeSubmission } from "@/lib/intake/types";
 
 /** Mapea la severidad de BD (en) a la del modelo de UI (es). */
 const SEVERITY_ES: Record<string, GapItem["severity"]> = {
@@ -941,4 +942,108 @@ export async function getProductFunnel(days = 30): Promise<FunnelRow[]> {
     visitors: Number(row.visitors) || 0,
     lastAt: row.last_at ?? null,
   }));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Intake compartible (migración 0027)                                        */
+/* -------------------------------------------------------------------------- */
+
+type IntakeLinkRow = {
+  id: string;
+  token: string;
+  label: string | null;
+  created_at: string;
+  expires_at: string;
+  revoked_at: string | null;
+  submissions: number;
+  max_submissions: number;
+};
+
+/**
+ * Enlaces de intake de la organización activa. Degradación segura: si la
+ * migración 0027 no está aplicada, devuelve `[]` y la pantalla muestra su estado
+ * vacío en lugar de romperse.
+ */
+export async function getIntakeLinks(): Promise<IntakeLink[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data, error } = await supabase
+    .from("intake_links")
+    .select(
+      "id, token, label, created_at, expires_at, revoked_at, submissions, max_submissions",
+    )
+    .eq("organization_id", org)
+    .order("created_at", { ascending: false });
+  if (error || !data) {
+    logDataFallback("getIntakeLinks", error, "migración 0027 sin aplicar?");
+    return [];
+  }
+  const now = Date.now();
+  return (data as IntakeLinkRow[]).map((r) => ({
+    id: r.id,
+    token: r.token,
+    label: r.label,
+    createdAt: r.created_at,
+    expiresAt: r.expires_at,
+    revokedAt: r.revoked_at,
+    submissions: r.submissions,
+    maxSubmissions: r.max_submissions,
+    // Mismo criterio que la RPC `submit_intake`: si esto dijera "activo" y la RPC
+    // rechazara (o al revés), el usuario mandaría un enlace que no funciona.
+    active:
+      !r.revoked_at &&
+      new Date(r.expires_at).getTime() > now &&
+      r.submissions < r.max_submissions,
+  }));
+}
+
+type IntakeSubmissionRow = {
+  id: string;
+  name: string;
+  owner: string | null;
+  domain: string | null;
+  vendor: string | null;
+  notes: string | null;
+  submitted_by: string | null;
+  status: string;
+  created_at: string;
+  intake_links: { label: string | null } | { label: string | null }[] | null;
+};
+
+/** Bandeja de envíos PENDIENTES de la organización activa (lo ya resuelto no estorba). */
+export async function getIntakeSubmissions(): Promise<IntakeSubmission[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data, error } = await supabase
+    .from("intake_submissions")
+    .select(
+      "id, name, owner, domain, vendor, notes, submitted_by, status, created_at, intake_links(label)",
+    )
+    .eq("organization_id", org)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+  if (error || !data) {
+    logDataFallback("getIntakeSubmissions", error, "migración 0027 sin aplicar?");
+    return [];
+  }
+  const VALID: IntakeSubmission["status"][] = ["pending", "accepted", "discarded"];
+  return (data as unknown as IntakeSubmissionRow[]).map((r) => {
+    const link = Array.isArray(r.intake_links) ? r.intake_links[0] : r.intake_links;
+    return {
+      id: r.id,
+      name: r.name,
+      owner: r.owner,
+      domain: r.domain,
+      vendor: r.vendor,
+      notes: r.notes,
+      submittedBy: r.submitted_by,
+      status: VALID.includes(r.status as IntakeSubmission["status"])
+        ? (r.status as IntakeSubmission["status"])
+        : "pending",
+      createdAt: r.created_at,
+      linkLabel: link?.label ?? null,
+    };
+  });
 }

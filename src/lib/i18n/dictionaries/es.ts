@@ -40,6 +40,48 @@ export const es = {
     closeMenu: "Cerrar menú",
   },
 
+  // Formulario PÚBLICO del enlace de intake: lo rellena alguien de la organización
+  // del cliente que no tiene cuenta en Attesta.
+  intake: {
+    metaTitle: "Registrar una herramienta de IA",
+    metaDescription:
+      "Formulario para declarar una herramienta de IA que usa tu equipo, dentro del inventario de gobernanza de tu organización.",
+    title: "¿Qué herramienta de IA usa tu equipo?",
+    subtitle:
+      "Tu organización está inventariando sus sistemas de IA para cumplir con la normativa. Cuéntanos qué usáis: se tarda menos de un minuto y no necesitas cuenta.",
+    nameLabel: "Nombre de la herramienta *",
+    namePlaceholder: "ChatGPT, un ATS, un chatbot de soporte…",
+    nameHint:
+      "Vale el nombre comercial. Si es algo hecho en casa, describe para qué sirve.",
+    ownerLabel: "Área o responsable",
+    ownerPlaceholder: "Marketing",
+    domainLabel: "¿Para qué se usa?",
+    domainPlaceholder: "Redactar borradores de anuncios",
+    vendorLabel: "Proveedor",
+    vendorPlaceholder: "OpenAI, HireFlow…",
+    byLabel: "Tu nombre o correo (opcional)",
+    byPlaceholder: "Para poder preguntarte dudas",
+    notesLabel: "Algo más que debamos saber",
+    notesPlaceholder:
+      "¿Toma decisiones sobre personas? ¿Se le pasan datos de clientes o candidatos?",
+    submit: "Enviar",
+    sending: "Enviando…",
+    thanksTitle: "¡Gracias!",
+    thanksBody:
+      "Tu equipo de compliance revisará la ficha y la añadirá al inventario. Si usáis más herramientas, añádelas también.",
+    addAnother: "Añadir otra herramienta",
+    privacyNote:
+      "Lo que envías va al inventario de gobernanza de tu organización. Attesta solo procesa los datos por encargo suyo.",
+    footerNote: "Inventario de IA gestionado con Attesta.",
+    errors: {
+      demo: "Este enlace no está conectado a una organización.",
+      "no-name": "Escribe al menos el nombre de la herramienta.",
+      "rate-limit": "Demasiados envíos seguidos. Espera unos minutos.",
+      invalid:
+        "Este enlace ya no acepta envíos: puede haber caducado o haberse revocado. Pídele uno nuevo a quien te lo compartió.",
+    },
+  },
+
   meta: {
     title: "Attesta — Gobernanza continua de IA para el mid-market",
     description:
@@ -761,6 +803,13 @@ export const es = {
       "system-error": "No se pudo guardar el sistema. Inténtalo de nuevo.",
       seeded: "Datos de ejemplo cargados.",
       "seed-error": "No se pudieron cargar los datos de ejemplo. Inténtalo de nuevo.",
+      "intake-created": "Enlace de intake creado. Cópialo y compártelo con el área.",
+      "intake-revoked": "Enlace revocado: deja de aceptar envíos.",
+      "intake-accepted": "Ficha añadida al inventario.",
+      "intake-discarded": "Ficha descartada.",
+      "intake-already": "Esa ficha ya la había resuelto otra persona.",
+      "intake-demo": "El intake compartible requiere conectar tu organización.",
+      "intake-error": "No se pudo completar la acción. Inténtalo de nuevo.",
       "pack-applied": "Policy pack RRHH aplicado al sistema.",
       "pack-error": "No se pudo aplicar el policy pack. Inténtalo de nuevo.",
       "gap-created": "Brecha añadida.",
@@ -1112,6 +1161,38 @@ export const es = {
       },
       classify: "Clasificar",
       dossier: "Dossier",
+      addTitle: "Añadir sistemas al inventario",
+      addSubtitle:
+        "Dos caminos: pregunta a cada área con un enlace, o sube la lista que ya tengas en una hoja de cálculo.",
+      intake: {
+        title: "Enlace de intake compartible",
+        subtitle:
+          "Manda un enlace a cada área y que ellos declaren qué IA usan. No necesitan cuenta y lo que envían no entra directo al inventario: llega a una bandeja que revisas tú.",
+        labelLabel: "¿A quién se lo vas a mandar?",
+        labelPlaceholder: "RRHH, Marketing, Soporte…",
+        create: "Crear enlace",
+        creating: "Creando…",
+        empty: "Todavía no has creado ningún enlace.",
+        untitled: "Enlace sin etiqueta",
+        linkMeta: "{n} de {max} envíos · caduca el {expires}",
+        copy: "Copiar enlace",
+        copied: "¡Copiado!",
+        copyFallback: "Copia este enlace:",
+        revoke: "Revocar",
+        revoking: "Revocando…",
+        stateRevoked: "revocado",
+        stateExpired: "caducado",
+        inboxTitle: "Fichas recibidas ({n})",
+        inboxHint:
+          "Cada ficha la envió alguien de tu organización sin cuenta en Attesta. Al aceptarla se crea el sistema en tu inventario y queda registrado a tu nombre en la actividad.",
+        accept: "Añadir al inventario",
+        accepting: "Añadiendo…",
+        discard: "Descartar",
+        discarding: "Descartando…",
+        from: "Enviado por {who}",
+        fromAnonymous: "Envío anónimo",
+        noDetails: "Sin más detalles",
+      },
       import: {
         title: "Importar inventario desde CSV",
         subtitle:

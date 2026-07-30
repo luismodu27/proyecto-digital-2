@@ -55,6 +55,8 @@ export const getIsPlatformAdmin = () => repo.getIsPlatformAdmin();
 export const getOrgJurisdictions = () => repo.getOrgJurisdictions();
 export const getActionTasks = () => repo.getActionTasks();
 export const getProductFunnel = (days?: number) => repo.getProductFunnel(days);
+export const getIntakeLinks = () => repo.getIntakeLinks();
+export const getIntakeSubmissions = () => repo.getIntakeSubmissions();
 
 export { isSupabaseConfigured };
 export type {

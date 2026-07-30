@@ -101,6 +101,17 @@ pertenecer a N organizaciones. El `audit_log` es **inmutable** (triggers `block_
 rellenan triggers `write_audit` en cada tabla con `organization_id`. `src/lib/audit.ts` traduce
 filas crudas a español legible.
 
+**Intake compartible (migración 0027).** La otra mitad del problema de activación: quien contrata Attesta
+no sabe qué IA usa cada área. Se emite un **enlace con token de capacidad** (24 bytes aleatorios en
+base64url, generados en el servidor) y quien lo recibe rellena una ficha **sin cuenta**. Modelo de
+seguridad, que es lo delicado porque es la ÚNICA escritura anónima del producto: lo enviado NO entra en el
+inventario, cae en `intake_submissions` (bandeja) y un miembro autenticado la acepta —así el expediente y el
+audit-trail siempre tienen un responsable con nombre—; `anon` no tiene NINGUNA policy de lectura y su única
+puerta es la RPC `submit_intake` (`security definer`), que devuelve **el mismo `false`** para token
+inexistente, caducado, revocado o agotado, para no ser un oráculo de tokens; el enlace caduca (30 días), se
+revoca y tiene tope de envíos. Por el mismo motivo, `/intake/[token]` **no valida el token al renderizar**:
+si lo hiciera, la URL diría qué enlaces existen. Va con `noindex`.
+
 **Importación de inventario por CSV.** El parser vive aparte y es **puro**
 (`src/lib/import/csv.ts`, con tests): autodetecta el delimitador (**Excel en español exporta con `;`** — la
 causa nº 1 de "tu importador no funciona"), acepta cabeceras ES/EN con alias, se come el BOM, respeta comas
