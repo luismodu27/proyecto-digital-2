@@ -112,26 +112,25 @@
 > que solo salió al verificar contra el Supabase **real**: `revoke ... from anon` sobre una función no revoca
 > nada, porque `EXECUTE` se concede a **PUBLIC** por defecto (→ migración 0028, §1.1-nonies).
 
-### 0.C · SPRINT 3 — monetización + compliance EE. UU. ⬅️ EN CURSO (3 de 4)
-> **Dónde retomar.** Metering ✅, pack de Colorado ✅ y pack de servicios públicos ✅. Queda **el pack de
-> educación de EE. UU.**, con su investigación ya terminada y guardada en `docs/research/us-educacion.md`
-> (28 controles definidos, mapa de aplicabilidad FERPA/COPPA/SOPIPA/antidiscriminación).
+### 0.C · SPRINT 3 — monetización + compliance EE. UU. — ✅ COMPLETADO (4/4)
+> **Cierre del Sprint 3 (4/4).** Metering por sistemas y asientos + tres packs nuevos: Colorado (SB 26-189),
+> servicios públicos esenciales (Anexo III.5.a + III.5.d) y educación EE. UU. (FERPA/COPPA/SOPIPA). El catálogo
+> pasa de 8 a **11 packs** y la landing lo declara sola (el número se deriva de `POLICY_PACKS.length`).
 >
-> Las dos investigaciones se relanzaron escribiendo el memo **de forma incremental dentro del repo** después de
-> que el primer intento se perdiera entero por un error de API justo antes de volcar el resultado — lección
-> aplicada: **el trabajo largo se guarda mientras se hace, no al final**.
+> **Lo más valioso del sprint no fue lo que se construyó, sino lo que se descartó tras investigar.** En
+> Colorado, seis controles que nuestra propia ficha daba por buenos describían una **ley derogada**. En
+> servicios esenciales, la ficha incluía utilities que **no entran** por ese punto del Anexo. Y en la UE los
+> siete packs llevaban un matiz sobre el Digital Omnibus que **dejó de ser cierto** tres días antes. Tres
+> errores de contenido regulatorio que ninguna herramienta de CI habría detectado, y que se habrían presentado
+> al cliente como deberes legales.
 >
-> ⚠️ **Dos hallazgos del memo de educación EE. UU. que hay que tratar con cuidado al construirlo:** (1) la regla
-> COPPA revisada está **plenamente exigible desde el 22-abr-2026**, y su punto más citable es que la FTC declaró
-> que **entrenar IA no es "integral" al servicio** → exige consentimiento parental separado; pero cuidado,
-> **decir "COPPA prohíbe entrenar IA con datos de menores" es falso**, porque la regla se construye sobre la
-> divulgación a un tercero y no alcanza el entrenamiento interno. (2) El Departamento de Educación **rescindió
-> el impacto dispar del Title VI el 24-jul-2026** (regla final sin trámite de comentarios), así que ese control
-> baja de severidad y **no se debe citar `34 CFR § 100.3(b)(2)`**; Section 504, ADA y Title IX no están tocados
-> y ahí sigue el grueso de la exposición real.
+> **Hábito que conviene conservar:** la investigación de los packs se escribe **de forma incremental dentro del
+> repo** (`docs/research/`), después de perder un memo entero por un fallo de API justo antes de volcarlo. El
+> trabajo largo se guarda mientras se hace.
 >
-> ⚠️ **Migración 0029 pendiente de aplicar** (§1.1-decies): sin ella el metering funciona con los cupos del
-> plan, pero no se pueden pactar topes a medida para un Enterprise.
+> ⚠️ **Pendiente del fundador, sin prisa:** migraciones **0028** (§1.1-nonies) y **0029** (§1.1-decies). Ninguna
+> bloquea nada.
+
 
 - [x] **Metering por nº de sistemas/asientos + Enterprise a medida** — ✅ **HECHO (2026-07-30)**.
       Cupos: **3 sistemas / 1 usuario** (Diagnóstico) · **25 / 5** (Preparación) · **a medida** (Enterprise, por
@@ -174,10 +173,25 @@
       (Art. 5.1.c puntuación social y Art. 5.1.d predicción de delito): son las dos prácticas que una
       administración puede cometer **sin mala fe**, y la frontera del 5.1.c no es de intensidad sino de
       estructura. `alto · M`
-- [ ] **Pack US de educación (FERPA / COPPA / SOPIPA)** — empareja el pack UE de educación recién desplegado;
-      venta cruzada al mismo comprador en dos jurisdicciones. `medio · M`
+- [x] **Pack US de educación (FERPA / COPPA / SOPIPA)** — ✅ **HECHO (2026-07-30)**. `us-educacion`,
+      26 controles ES+EN, undécimo pack. Es el más complejo de los cuatro porque combina **cuatro cuerpos
+      normativos** con ámbitos distintos, y por eso cada control lleva su condición: FERPA solo con fondos
+      federales del ED; COPPA solo si eres **operador** —que normalmente es la EdTech, no el centro, así que
+      para un centro son controles de **diligencia sobre el proveedor**—; SOPIPA obliga al operador con nexo en
+      California, también por contrato; y antidiscriminación según la naturaleza del centro.
+      **Dos hechos recientes que el material del mercado aún no recoge y que cambian el pack:** (1) la regla
+      COPPA revisada es **plenamente exigible desde el 22-abr-2026** y la FTC declaró que divulgar datos de un
+      menor **para entrenar IA no es «integral»** al servicio → consentimiento parental **separado**; el control
+      dice además, en voz alta, que **el entrenamiento estrictamente interno NO lo alcanza** esa subsección —
+      afirmar "COPPA prohíbe entrenar IA con datos de menores" sería inexacto, y decirlo es lo que nos hace
+      creíbles. (2) El Departamento de Educación **rescindió el impacto dispar de Title VI el 24-jul-2026**
+      (regla final sin trámite de comentarios) → el control de equidad baja a severidad **media** y no cita la
+      subsección derogada; Section 504, ADA y Title IX no están tocados y ahí sigue la exposición real.
+      **Dos zonas grises redactadas COMO grises**, no como resueltas: si una inferencia de IA es un *education
+      record* (sin pronunciamiento del ED), y si el colegio puede consentir por los padres bajo COPPA (la FTC
+      propuso codificar esa excepción y **no** la codificó). `medio · M`
 
-### 0.D · SPRINT 4 — producto/UX de profundidad
+### 0.D · SPRINT 4 — producto/UX de profundidad ⬅️ SIGUIENTE
 - [ ] **Búsqueda / filtro / orden en el inventario + vista apilada en móvil** — una tabla plana no escala a
       decenas de sistemas. `medio · M`
 - [ ] **Navegación móvil tipo drawer** — hoy 11 pestañas con scroll horizontal; los ítems Enterprise con candado

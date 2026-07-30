@@ -127,6 +127,37 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 3 CERRADO (4/4). El catálogo pasa de 8 a 11 packs, y lo que más valió fue lo
+  descartado.** Metering por sistemas y asientos + packs de Colorado, servicios públicos esenciales y educación
+  de EE. UU.
+  **El patrón que se repitió tres veces y que conviene no olvidar:** en los tres packs, investigar contra fuente
+  primaria **cambió el contenido antes de escribir una línea**, y siempre en la dirección de quitar, no de
+  añadir. En Colorado, seis controles que nuestra propia hoja de ruta daba por buenos describían una **ley
+  derogada** (incluida la defensa afirmativa por NIST, que además era un argumento comercial que ya no
+  podemos usar). En servicios esenciales, la ficha incluía **utilities que no entran** por ese punto del Anexo.
+  Y en la UE, los siete packs llevaban un matiz sobre el Digital Omnibus que **había dejado de ser cierto tres
+  días antes**. Ninguno de los tres lo habría detectado `tsc`, `lint`, `check:copy` ni los 334 tests: son
+  errores de **contenido regulatorio**, y se habrían presentado al cliente como deberes legales. Es la
+  justificación empírica de la regla de CLAUDE.md de pasar todo contenido regulatorio por el experto **antes**
+  de construir, no después.
+  **El pack de educación de EE. UU. es el más complejo de los cuatro** porque combina cuatro cuerpos normativos
+  con ámbitos distintos, y eso obliga a que cada control lleve su condición: FERPA solo con fondos federales;
+  COPPA solo al *operador* —que normalmente es la EdTech, no el centro, así que para un centro son controles de
+  diligencia contractual—; SOPIPA igual; antidiscriminación según la naturaleza del centro. Dos decisiones de
+  redacción que sostienen la credibilidad: el control estrella de COPPA dice **en voz alta** que el
+  entrenamiento estrictamente interno no lo alcanza esa subsección (afirmar "COPPA prohíbe entrenar IA con
+  datos de menores" sería inexacto, y es justo lo que el mercado dirá), y las dos zonas grises —si una
+  inferencia de IA es *education record*, si el colegio puede consentir por los padres— se redactan **como
+  grises**, con el argumento y su límite, no como resueltas.
+  **La mejor anécdota de método del sprint:** el control de BIPA iba camino de decir **lo contrario de la ley**.
+  El texto **excluye expresamente las fotografías** de la definición de identificador biométrico, así que
+  grabar la webcam no lo activa por sí solo — lo activa **extraer la geometría facial**, y eso cambia entera la
+  pregunta que hay que hacerle al proveedor. Apareció solo al abrir el texto. **Ningún texto legal se da por
+  sabido, ni siquiera los que "todo el mundo conoce".**
+  **Hábito nuevo, nacido de un fallo:** las investigaciones largas se escriben **incrementalmente dentro del
+  repo** (`docs/research/`). Se adoptó tras perder dos memos enteros por errores de API justo antes de volcar
+  el resultado — 30 minutos de trabajo cada uno, irrecuperables. El trabajo largo se guarda mientras se hace.
+
 - **2026-07-30** · **SPRINT 3 · pack de servicios públicos esenciales (Anexo III.5.a + III.5.d).** Décimo pack,
   25 controles ES+EN. Cierra el callejón sin salida que motivaba el ítem: el clasificador mandaba "alto riesgo"
   a quien elegía servicios y ayudas públicas y esa persona llegaba al catálogo sin pack propio. **El enrutado
