@@ -33,10 +33,11 @@
  *
  * Plazos verificados: Art. 4 y Art. 5 vigentes desde 2-feb-2025; Art. 50 el
  * 2-ago-2026; alto riesgo del Anexo III aplazado al 2-dic-2027 por el Digital
- * Omnibus (adoptado por el Consejo 29-jun-2026 y firmado 8-jul-2026; su entrada en
- * vigor depende de la publicación en el DOUE → la `note` pide verificar ese estado
- * antes de basar decisiones en la fecha de 2027, coherente con la regla de marca de
- * no fingir certeza).
+ * Omnibus, que ya es DERECHO FIRME: Reglamento (UE) 2026/1744, publicado en el DOUE
+ * el 24-jul-2026. Hasta esa publicación los packs llevaban un matiz de "confirma su
+ * publicación antes de planificar"; se retiró el 2026-07-30 al verificarse la ficha
+ * ELI de EUR-Lex. El matiz era correcto cuando se escribió y habría sido incorrecto
+ * mantenerlo: la regla de marca es no fingir certeza, pero tampoco fingir duda.
  */
 
 export type { PolicySeverity, PolicyControl, PolicyPack } from "./types";
@@ -49,7 +50,7 @@ export const EDUCACION_PACK: PolicyPack = {
   summary:
     "Controles para IA usada por centros educativos o EdTech en admisión, evaluación del aprendizaje y proctoring (alto riesgo, Anexo III.3). Aplícalo a un sistema para precargar sus brechas.",
   note:
-    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 —incluido el reconocimiento de emociones de estudiantes en centros educativos (Art. 5.1.f)— ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 aplica el 2-ago-2026. Las obligaciones de alto riesgo del Anexo III.3 (admisión, evaluación de aprendizaje, proctoring; Arts. 14/26/27/86) se aplazaron al 2-dic-2027 con el Digital Omnibus, NO el 2-ago-2026 (un error extendido en el mercado); el aplazamiento fue adoptado (Consejo, 29-jun-2026) y firmado (8-jul-2026): confirma su publicación en el DOUE antes de planificar sobre la fecha de 2027. DOS particularidades frente a RRHH: (1) la FRIA (Art. 27) aplica cuando el deployer es organismo de Derecho público o entidad privada que presta un servicio público (la educación se cita como servicio de naturaleza pública) — no a todo EdTech privado; (2) hay menores → protección reforzada del RGPD. Aplica además el RGPD y el derecho educativo nacional. Este pack te deja lista la evidencia con antelación.",
+    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 —incluido el reconocimiento de emociones de estudiantes en centros educativos (Art. 5.1.f)— ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 aplica el 2-ago-2026. Las obligaciones de alto riesgo del Anexo III.3 (admisión, evaluación de aprendizaje, proctoring; Arts. 14/26/27/86) se aplazaron al 2-dic-2027 con el Digital Omnibus, NO el 2-ago-2026 (un error extendido en el mercado); El aplazamiento ya es FIRME: se publicó en el DOUE el 24-jul-2026 como Reglamento (UE) 2026/1744 (Digital Omnibus). DOS particularidades frente a RRHH: (1) la FRIA (Art. 27) aplica cuando el deployer es organismo de Derecho público o entidad privada que presta un servicio público (la educación se cita como servicio de naturaleza pública) — no a todo EdTech privado; (2) hay menores → protección reforzada del RGPD. Aplica además el RGPD y el derecho educativo nacional. Este pack te deja lista la evidencia con antelación.",
   controls: [
     {
       id: "emociones-prohibicion",
@@ -71,7 +72,7 @@ export const EDUCACION_PACK: PolicyPack = {
       article: "Anexo III.3.d (y Art. 5.1.f)",
       severity: "alta",
       conditional:
-        "Alto riesgo del Anexo III aplazado al 2-dic-2027 (Omnibus, sujeto a publicación en el DOUE); la prohibición del Art. 5.1.f (inferencia biométrica de emociones/atención) ya está vigente.",
+        "Alto riesgo del Anexo III aplazado al 2-dic-2027 (Omnibus ya publicado: Reglamento (UE) 2026/1744, DOUE 24-jul-2026); la prohibición del Art. 5.1.f (inferencia biométrica de emociones/atención) ya está vigente.",
     },
     {
       id: "vulnerabilidades-menores",
@@ -92,7 +93,7 @@ export const EDUCACION_PACK: PolicyPack = {
       article: "Art. 27",
       severity: "alta",
       conditional:
-        "Aplica si el deployer es organismo público o presta servicios públicos. Exigible con el régimen de alto riesgo (2-dic-2027, sujeto a publicación del Omnibus).",
+        "Aplica si el deployer es organismo público o presta servicios públicos. Exigible con el régimen de alto riesgo (2-dic-2027, firme desde el Omnibus: Reglamento (UE) 2026/1744).",
     },
     {
       id: "dpia",
@@ -134,7 +135,7 @@ export const EDUCACION_PACK: PolicyPack = {
       article: "Art. 86",
       severity: "alta",
       conditional:
-        "Exigible con el régimen de alto riesgo del Anexo III (2-dic-2027, sujeto a publicación del Omnibus).",
+        "Exigible con el régimen de alto riesgo del Anexo III (2-dic-2027, firme desde el Omnibus: Reglamento (UE) 2026/1744).",
     },
     {
       id: "sesgo",
@@ -156,7 +157,7 @@ export const EDUCACION_PACK: PolicyPack = {
       id: "alfabetizacion-ia",
       title: "Alfabetización en IA del profesorado y administración",
       description:
-        "Adopta medidas para que quienes operan o supervisan la herramienta (profesorado, personal de admisiones, administración) tengan un nivel suficiente de alfabetización en IA —capacidades, límites y riesgos—, proporcionado a su rol. Es un deber PROPIO y directo del deployer, exigible desde el 2 de febrero de 2025. Evidencia = registro de la formación u onboarding impartido (fecha, asistentes y contenidos).",
+        "Adopta medidas para que quienes operan o supervisan la herramienta (profesorado, personal de admisiones, administración) desarrollen su alfabetización en IA —capacidades, límites y riesgos—, proporcionado a su rol. Es un deber PROPIO y directo del deployer, exigible desde el 2 de febrero de 2025. OJO, el estándar CAMBIÓ en 2026: el Digital Omnibus (Reglamento (UE) 2026/1744, DOUE 24-jul-2026) reescribió el Art. 4 — antes había que asegurar un «nivel suficiente» y ahora el deber es adoptar medidas que APOYEN el desarrollo de esa alfabetización; el texto dice expresamente que no obliga a alcanzar ningún nivel concreto. En la práctica cambia poco lo que haces y mucho lo que te pueden reprochar: se te mide por las medidas adoptadas, no por el resultado. Evidencia = registro de la formación u onboarding impartido (fecha, asistentes y contenidos).",
       article: "Art. 4",
       severity: "media",
       conditional: "Exigible desde el 2 de febrero de 2025 (ya vigente).",
@@ -187,7 +188,7 @@ export const EDUCACION_PACK: PolicyPack = {
       article: "Art. 49.4",
       severity: "media",
       conditional:
-        "Solo si el deployer es autoridad/organismo público. Ligado al régimen de alto riesgo (2-dic-2027, sujeto a publicación del Omnibus).",
+        "Solo si el deployer es autoridad/organismo público. Ligado al régimen de alto riesgo (2-dic-2027, firme desde el Omnibus: Reglamento (UE) 2026/1744).",
     },
     {
       id: "documentacion",
@@ -246,7 +247,7 @@ export const EDUCACION_PACK_EN: PolicyPack = {
   summary:
     "Controls for AI used by education providers or EdTech in admission, learning assessment and proctoring (high-risk, Annex III.3). Apply it to a system to preload its gaps.",
   note:
-    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions —including emotion recognition of students in education institutions (Art. 5.1.f)— are already enforceable (since 2 Feb 2025); Art. 50 transparency applies on 2 Aug 2026. The Annex III.3 high-risk obligations (admission, learning assessment, proctoring; Arts. 14/26/27/86) were postponed to 2 Dec 2027 by the Digital Omnibus, NOT 2 Aug 2026 (a widespread misconception in the market); the postponement was adopted (Council, 29 Jun 2026) and signed (8 Jul 2026): confirm its publication in the OJEU before planning around the 2027 date. TWO particularities versus HR: (1) the FRIA (Art. 27) applies when the deployer is a public-law body or a private entity providing a public service (education is cited as a service of a public nature) — not to every private EdTech; (2) there are minors → reinforced GDPR protection. The GDPR and national education law also apply. This pack gets your evidence ready ahead of time.",
+    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions —including emotion recognition of students in education institutions (Art. 5.1.f)— are already enforceable (since 2 Feb 2025); Art. 50 transparency applies on 2 Aug 2026. The Annex III.3 high-risk obligations (admission, learning assessment, proctoring; Arts. 14/26/27/86) were postponed to 2 Dec 2027 by the Digital Omnibus, NOT 2 Aug 2026 (a widespread misconception in the market); the postponement is now SETTLED: it was published in the Official Journal on 24 Jul 2026 as Regulation (EU) 2026/1744 (Digital Omnibus). TWO particularities versus HR: (1) the FRIA (Art. 27) applies when the deployer is a public-law body or a private entity providing a public service (education is cited as a service of a public nature) — not to every private EdTech; (2) there are minors → reinforced GDPR protection. The GDPR and national education law also apply. This pack gets your evidence ready ahead of time.",
   controls: [
     {
       id: "emociones-prohibicion",
@@ -267,7 +268,7 @@ export const EDUCACION_PACK_EN: PolicyPack = {
       article: "Annex III.3.d (and Art. 5.1.f)",
       severity: "alta",
       conditional:
-        "Annex III high-risk postponed to 2 Dec 2027 (Omnibus, subject to OJEU publication); the Art. 5.1.f prohibition (biometric inference of emotions/attention) is already in force.",
+        "Annex III high-risk postponed to 2 Dec 2027 (Omnibus now published: Regulation (EU) 2026/1744, OJ 24 Jul 2026); the Art. 5.1.f prohibition (biometric inference of emotions/attention) is already in force.",
     },
     {
       id: "vulnerabilidades-menores",
@@ -288,7 +289,7 @@ export const EDUCACION_PACK_EN: PolicyPack = {
       article: "Art. 27",
       severity: "alta",
       conditional:
-        "Applies if the deployer is a public body or provides public services. Enforceable under the high-risk regime (2 Dec 2027, subject to Omnibus publication).",
+        "Applies if the deployer is a public body or provides public services. Enforceable under the high-risk regime (2 Dec 2027, settled by the Omnibus: Regulation (EU) 2026/1744).",
     },
     {
       id: "dpia",
@@ -331,7 +332,7 @@ export const EDUCACION_PACK_EN: PolicyPack = {
       article: "Art. 86",
       severity: "alta",
       conditional:
-        "Enforceable under the Annex III high-risk regime (2 Dec 2027, subject to Omnibus publication).",
+        "Enforceable under the Annex III high-risk regime (2 Dec 2027, settled by the Omnibus: Regulation (EU) 2026/1744).",
     },
     {
       id: "sesgo",
@@ -353,7 +354,7 @@ export const EDUCACION_PACK_EN: PolicyPack = {
       id: "alfabetizacion-ia",
       title: "AI literacy of teaching staff and administration",
       description:
-        "Take measures so that those who operate or oversee the tool (teaching staff, admissions personnel, administration) have a sufficient level of AI literacy —capabilities, limits and risks—, proportionate to their role. This is a DIRECT, OWN duty of the deployer, enforceable since 2 February 2025. Evidence = record of the training or onboarding delivered (date, attendees and content).",
+        "Take measures so that those who operate or oversee the tool (teaching staff, admissions personnel, administration) develop their AI literacy —capabilities, limits and risks—, proportionate to their role. This is a DIRECT, OWN duty of the deployer, enforceable since 2 February 2025. NOTE, the standard CHANGED in 2026: the Digital Omnibus (Regulation (EU) 2026/1744, OJ 24 Jul 2026) rewrote Art. 4 — it used to require ensuring a \"sufficient level\" and the duty is now to take measures that SUPPORT the development of that literacy; the text expressly says it does not require achieving any specific level. In practice it changes little about what you do and a lot about what can be held against you: you are measured by the measures taken, not by the outcome. Evidence = record of the training or onboarding delivered (date, attendees and content).",
       article: "Art. 4",
       severity: "media",
       conditional: "Enforceable since 2 February 2025 (already in force).",
@@ -384,7 +385,7 @@ export const EDUCACION_PACK_EN: PolicyPack = {
       article: "Art. 49.4",
       severity: "media",
       conditional:
-        "Only if the deployer is a public authority/body. Tied to the high-risk regime (2 Dec 2027, subject to Omnibus publication).",
+        "Only if the deployer is a public authority/body. Tied to the high-risk regime (2 Dec 2027, settled by the Omnibus: Regulation (EU) 2026/1744).",
     },
     {
       id: "documentacion",

@@ -424,15 +424,15 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     framework: "eu-ai-act",
     title: "Digital Omnibus: se aplaza el plazo de alto riesgo",
     summary:
-      "El paquete Digital Omnibus (adoptado en 2026) reprograma la aplicación de las obligaciones de alto riesgo del Anexo III: de 2 de agosto de 2026 a 2 de diciembre de 2027 (y a 2 de agosto de 2028 para IA embebida en productos del Anexo I).",
+      "El Digital Omnibus YA ES DERECHO PUBLICADO: Reglamento (UE) 2026/1744, de 8 de julio de 2026, publicado en el DOUE el 24 de julio de 2026. Reprograma la aplicación de las obligaciones de alto riesgo del Anexo III: de 2 de agosto de 2026 a 2 de diciembre de 2027 (y a 2 de agosto de 2028 para IA embebida en productos del Anexo I). Reescribe además el Art. 4 (alfabetización en IA).",
     impact:
-      "Buena noticia con matiz: tienes más tiempo para preparar tus sistemas de alto riesgo, pero la obligación es inevitable. Es una ventana para prepararte, no una cancelación.",
+      "Buena noticia con matiz: tienes más tiempo para preparar tus sistemas de alto riesgo, pero la obligación es inevitable. Es una ventana para prepararte, no una cancelación. Hasta el 24 de julio de 2026 el aplazamiento estaba adoptado y firmado pero sin publicar, así que la fecha vinculante nominal seguía siendo agosto de 2026; ya no: la fecha de diciembre de 2027 es firme y se puede planificar sobre ella.",
     action:
-      "Usa la ventana: cierra el gap assessment de tus sistemas de alto riesgo y reúne la evidencia con calma antes de diciembre de 2027.",
-    articles: ["Art. 113", "Anexo III"],
+      "Usa la ventana: cierra el gap assessment de tus sistemas de alto riesgo y reúne la evidencia con calma antes de diciembre de 2027. Revisa también tu evidencia de alfabetización en IA: el Art. 4 pasó de exigir un «nivel suficiente» a exigir medidas que APOYEN su desarrollo, así que se te mide por las medidas adoptadas y no por el resultado.",
+    articles: ["Art. 4", "Art. 113", "Anexo III"],
     source: {
-      label: "Consejo de la UE — luz verde final al Digital Omnibus (29 jun 2026)",
-      url: "https://www.consilium.europa.eu/en/press/press-releases/2026/06/29/artificial-intelligence-council-gives-final-green-light-to-simplify-and-streamline-rules/",
+      label: "EUR-Lex — Reglamento (UE) 2026/1744 (Digital Omnibus sobre IA), DOUE 24 jul 2026",
+      url: "https://eur-lex.europa.eu/eli/reg/2026/1744/oj",
     },
     scope: { riskLevels: ["high"] },
   },
@@ -873,15 +873,15 @@ export const REGULATORY_EVENTS_EN: RegulatoryEvent[] = [
     framework: "eu-ai-act",
     title: "Digital Omnibus: the high-risk deadline is postponed",
     summary:
-      "The Digital Omnibus package (adopted in 2026) reschedules the application of the high-risk obligations in Annex III: from 2 August 2026 to 2 December 2027 (and to 2 August 2028 for AI embedded in Annex I products).",
+      "The Digital Omnibus IS NOW PUBLISHED LAW: Regulation (EU) 2026/1744 of 8 July 2026, published in the Official Journal on 24 July 2026. It reschedules the application of the high-risk obligations in Annex III: from 2 August 2026 to 2 December 2027 (and to 2 August 2028 for AI embedded in Annex I products). It also rewrites Art. 4 (AI literacy).",
     impact:
-      "Good news with a caveat: you have more time to prepare your high-risk systems, but the obligation is unavoidable. It is a window to get ready, not a cancellation.",
+      "Good news with a caveat: you have more time to prepare your high-risk systems, but the obligation is unavoidable. It is a window to get ready, not a cancellation. Until 24 July 2026 the postponement was adopted and signed but unpublished, so the nominal binding date was still August 2026; no longer: the December 2027 date is settled and you can plan around it.",
     action:
-      "Use the window: close the gap assessment for your high-risk systems and gather the evidence calmly before December 2027.",
-    articles: ["Art. 113", "Annex III"],
+      "Use the window: close the gap assessment for your high-risk systems and gather the evidence calmly before December 2027. Also revisit your AI literacy evidence: Art. 4 moved from requiring a \"sufficient level\" to requiring measures that SUPPORT its development, so you are measured by the measures taken, not by the outcome.",
+    articles: ["Art. 4", "Art. 113", "Annex III"],
     source: {
-      label: "Council of the EU — final green light to the Digital Omnibus (29 Jun 2026)",
-      url: "https://www.consilium.europa.eu/en/press/press-releases/2026/06/29/artificial-intelligence-council-gives-final-green-light-to-simplify-and-streamline-rules/",
+      label: "EUR-Lex — Regulation (EU) 2026/1744 (Digital Omnibus on AI), OJ 24 Jul 2026",
+      url: "https://eur-lex.europa.eu/eli/reg/2026/1744/oj",
     },
     scope: { riskLevels: ["high"] },
   },

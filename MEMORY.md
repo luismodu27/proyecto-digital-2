@@ -127,6 +127,27 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **El Digital Omnibus se publicó y nuestro copy llevaba tres días diciendo lo contrario.**
+  Salió como hallazgo colateral de la investigación del Anexo III.5.a y se verificó de forma independiente
+  contra la ficha ELI de EUR-Lex: **Reglamento (UE) 2026/1744**, de 8-jul-2026, **publicado en el DOUE el
+  24-jul-2026**. Los siete packs de la UE llevaban el matiz *"el aplazamiento fue adoptado y firmado pero está
+  pendiente de publicación en el DOUE: confirma su publicación antes de planificar sobre 2027"*. Ese matiz era
+  **correcto cuando se escribió** (2026-07-25) y pasó a ser **falso el 24-jul**. Retirado y sustituido por la
+  cita firme en ES y EN, más el radar de vigilancia.
+  **La lección no es "nos equivocamos", es que una cobertura honesta también caduca.** La regla de marca dice
+  no fingir certeza; su cara B, que no estaba escrita, es **no fingir duda**: mantener un "verifícalo tú" sobre
+  algo ya resuelto le hace perder el tiempo al cliente y nos hace parecer desactualizados justo en lo que
+  vendemos. Los matices de este tipo necesitan **fecha de revisión**, no solo redacción prudente.
+  **Segundo cambio, y es de fondo: el Omnibus reescribió el Art. 4.** Pasó de *asegurar un «nivel suficiente»*
+  de alfabetización en IA a *adoptar medidas que apoyen su desarrollo*, con texto expreso de que no obliga a
+  alcanzar ningún nivel concreto. Nuestro control `alfabetizacion-ia` (en los 5 packs UE, ES+EN) enunciaba el
+  estándar viejo, o sea que le pedía al cliente **más de lo que la ley pide**. Corregido, explicando el cambio
+  en el propio control: cambia poco lo que hay que hacer y mucho lo que te pueden reprochar — se mide por las
+  medidas adoptadas, no por el resultado.
+  Pendiente de aprovechar del mismo memo: el **Art. 27.4** ahora autoriza expresamente **reutilizar la DPIA**
+  dentro de la FRIA (referencias cruzadas o incorporación de partes), que es la respuesta a la pregunta más
+  práctica que hace un cliente con RGPD ya hecho. Ningún pack lo recoge todavía.
+
 - **2026-07-30** · **SPRINT 3 · pack de Colorado: el valor estuvo en lo que NO se construyó.** El noveno pack
   (`us-co-admt`, SB 26-189, 15 controles ES+EN). La investigación previa —obligatoria por la regla de CLAUDE.md
   de pasar todo contenido regulatorio por el experto— cambió el pack de arriba abajo antes de escribir una
@@ -154,6 +175,61 @@ diseño, nombre, features grandes); autónomo en lo demás.
   afirmación numérica, comprobable, en la página de precios, que envejece sola y en silencio.
   **El test de paridad ES/EN volvió a pagar**: cambié las citas del evento de radar en español y no en inglés,
   y saltó solo. Es exactamente para lo que existe.
+
+- **2026-07-30** · **Investigación regulatoria: pack `us-educacion` (FERPA/COPPA/SOPIPA + antidiscriminación).**
+  Memo completo en **`docs/research/us-educacion.md`** (A: mapa de aplicabilidad · B: 28 controles con cita,
+  severidad y condicionalidad · C: 10 trampas · D: contraste con el pack UE `educacion` · E: fuentes con
+  primarias/secundarias separadas · F: notas de implementación). Pareja de EE. UU. del pack UE de educación:
+  **mismo comprador, otra jurisdicción**. ICP sigue siendo **deployer**. Cinco cosas que no se pueden perder:
+  - **Dos hallazgos que mi conocimiento previo tenía MAL y que solo aparecieron verificando.**
+    **(1) El ED rescindió el impacto dispar de Title VI hace SEIS DÍAS**: regla final **91 FR 46733**
+    (24-jul-2026, RIN 1870-AA20), **efectiva el mismo día y sin notice and comment**, que deja
+    `34 CFR § 100.3(b)(2)` **[Reserved]**, cambia "effect" por "purpose" en `(b)(3)` y suprime `(b)(6)`,
+    `(c)(2)`, `(c)(3)` y partes del `§ 100.5`; dictada conforme a la **EO 14281**. → El control de equidad
+    **baja de alta a media en su rama Title VI** (y se recuerda que ya antes no había acción privada,
+    *Alexander v. Sandoval*, 532 U.S. 275 (2001)). **Section 504, ADA y Title IX NO están tocados** y ahí
+    sigue el grueso de la exposición. Por ser regla final sin comentarios, es **candidata a impugnación APA**
+    → vigilancia con revisión corta. **(2) El DOJ prorrogó un año la regla web de ADA Título II**
+    (IFR de 20-abr-2026): WCAG 2.1 AA pasa a **26-abr-2027** (población ≥50.000) y **26-abr-2028** (resto).
+  - **La joya vendible del pack:** la **regla COPPA revisada ya es plenamente exigible** (publicada
+    22-abr-2025, efectiva 23-jun-2025, **cumplimiento pleno desde el 22-abr-2026** — ya pasó). Exige
+    **consentimiento parental verificable SEPARADO** para divulgar datos de menores a terceros no
+    *integrales*, y la FTC declaró en el preámbulo que **entrenar o desarrollar IA no es "integral"**.
+    ⚠️ **Matiz que hay que decir siempre**: la subsección se construye sobre la **divulgación a terceros**;
+    el **entrenamiento interno** del propio operador **no está cubierto por esa letra**. Decir "COPPA prohíbe
+    entrenar IA con datos de menores" sería **falso** y es justo el error que nos costaría credibilidad.
+  - **Zona gris estructural nº 1 del vertical:** la **school authorization exception** de COPPA (que el
+    colegio consienta por los padres) **NO existe en la Regla**. La FTC la propuso en 2024 y **decidió no
+    codificarla** *"to avoid making amendments to the COPPA Rule that may conflict with potential amendments
+    to DOE's FERPA regulations"*. Verificado además **por ausencia**: las excepciones del `§ 312.5(c)` son
+    nueve y ninguna es escolar. La práctica se apoya en **FAQ de personal de la FTC**, no en reglamento.
+  - **Zona gris nº 2 (la pregunta que hará todo cliente):** ¿una inferencia de IA sobre un estudiante es un
+    *education record*? La lectura defendible dice **sí** —`34 CFR § 99.3` define el expediente como el
+    registro directamente relacionado con el estudiante y **mantenido por la institución *o por una parte
+    que actúa por cuenta de ella***, y FERPA **no distingue dato bruto de derivado**; un proveedor amparado
+    por la *school official exception* es por definición esa parte—, pero **no hay pronunciamiento del ED ni
+    del PTAC**. Se redacta como zona gris, nunca como resuelto.
+  - **Lección de método, la más reutilizable:** **no dar por sabido ningún texto legal.** El control de BIPA
+    iba camino de decir lo contrario de la ley: `740 ILCS 14/10` **excluye expresamente las fotografías** de
+    la definición de identificador biométrico (grabar la webcam **no** activa BIPA; lo activa **extraer la
+    geometría facial** — la pregunta correcta al proveedor cambia entera), y existe una **exención
+    Gramm-Leach-Bliley** que un tribunal federal aplicó a **una universidad**. Ambas cosas solo aparecieron
+    al abrir el texto. También de método: **`ecfr.gov` y `federalregister.gov` no son accesibles** desde este
+    entorno (redirigen a `unblock.federalregister.gov`); se leyó el CFR en el **mirror de Cornell LII** y el
+    Federal Register vía **`r.jina.ai`**, que además rescató la cita literal de la FTC de un PDF que no se
+    dejaba extraer. **El mismo truco del memo de Colorado.**
+  - **Encuadre del pack, distinto al UE y a propósito:** EE. UU. **no clasifica sistemas por riesgo** y no
+    tiene ley federal de IA en educación. El pack se estructura por **datos + contrato + equidad**, y el
+    corazón es la **school official exception** (`34 CFR § 99.31(a)(1)(i)(B)`) con sus tres condiciones
+    acumulativas — la que casi ningún contrato estándar de EdTech satisface es el **control directo**.
+    **Sin migración ni cambios de modelo de datos:** la evidencia que se pide (cláusula, consentimiento,
+    retención, acta) es del mismo tipo que ya maneja la app.
+  - **Aviso al implementador:** `check-prohibited-copy.mjs` solo escanea `src`, así que el memo no lo
+    dispara pero `policy-packs/us-educacion.ts` **sí**. Trampas de copy propias del vertical: *"FERPA
+    compliant"* (término de arte del mercado EdTech, **prohibido**), *"certificado bajo SOPIPA"* (SOPIPA
+    **no tiene certificación**) y el *Safe Harbor* del `16 CFR § 312.11`, que es real pero **del operador**.
+  - **Pendiente antes de GA:** revisión por abogado de EE. UU.; contrastar los §§ 99.x y 312.x en eCFR
+    cuando sea accesible; confirmar las letras `(e)`/`(f)` de `Cal. B&P § 22584`.
 
 - **2026-07-30** · **0026/0027 aplicadas por el fundador. Verificar en el Supabase REAL destapó lo que el
   Postgres de pruebas no podía ver → migración 0028.** Las dos migraciones quedaron confirmadas por API
