@@ -57,14 +57,14 @@
 - [x] ✅ **`createClient()` con `cache()`** — un cliente SSR por render en vez de uno por getter. `cache()` no
       cruza requests → sin riesgo de compartir sesión.
 
-### 0.B · SPRINT 2 — activación + red de seguridad del contenido ⬅️ SIGUIENTE
+### 0.B · SPRINT 2 — activación + red de seguridad del contenido ✅ COMPLETADO (2026-07-30)
 - [x] **Import CSV + enlace de intake compartible** — ✅ **HECHO (2026-07-30)**. Dos caminos, porque son dos
       problemas: el **CSV** sirve cuando la lista YA existe (parser puro con 25 tests: autodetecta el `;` de
       Excel español, cabeceras ES/EN, BOM, comas entrecomilladas, valida e informa **por filas**); el
       **enlace de intake** sirve para construirla preguntando a cada área sin darles cuenta (migración
       **0027**, token de capacidad, bandeja de revisión, `noindex`). Los dos en
       `/dashboard/inventario/importar`. **Requiere aplicar 0027** (§1.1-octies). `alto · M`
-- [x] **Tests con Vitest sobre la lógica pura** — ✅ **HECHO (2026-07-30)**. 221 tests en 8 ficheros
+- [x] **Tests con Vitest sobre la lógica pura** — ✅ **HECHO (2026-07-30)**. 274 tests en 10 ficheros (221 al cerrar este ítem; el resto llegó con los ítems siguientes del sprint)
       (`npm test`, <1 s, en CI): `risk-assessment`, `recommendations`, `task-reminders`, `regulatory-watch`,
       `audit`, `bias-audit`, `telemetry/events` y **paridad de los 8 policy packs**. Codifican la expectativa
       REGULATORIA (Art. 5 manda; el perfilado del Art. 6.3 anula excepciones; LL144 = auditoría **y**
@@ -101,7 +101,16 @@
       `/dashboard`→`/login`, con sesión `/login`→`/dashboard`, y una cookie con JWT malformado se trata
       como "sin sesión" (no 500). `alto · M`
 
-### 0.C · SPRINT 3 — monetización + compliance EE. UU.
+> **Cierre del Sprint 2 (6/6 ítems).** Todo verificado con lint + tsc + `check:copy` + **274 tests** + build,
+> y los caminos reales por curl contra el Supabase de producción. Dos migraciones nuevas esperan tu mano:
+> **0026** (telemetría, §1.1-septies) y **0027** (intake compartible, §1.1-octies) — sin ellas la app funciona
+> igual, solo que sin métricas y sin enlaces de intake. Lo aprendido en cada ítem está en `MEMORY.md §10`.
+>
+> Novedad de método que conviene conservar: **toda migración nueva se valida antes en un Postgres desechable**
+> (ver gotcha en `CLAUDE.md`). En este sprint cazó tres bugs que habrían llegado al SQL Editor —`greatest`/`least`
+> cualificados con esquema, un 500 a un anónimo con nombre en blanco, y policies no re-aplicables.
+
+### 0.C · SPRINT 3 — monetización + compliance EE. UU. ⬅️ SIGUIENTE
 - [ ] **Metering por nº de sistemas/asientos + Enterprise a medida** — hoy una org con 2 sistemas y otra con 50
       pagan lo mismo; captura el ACV enterprise (30-50k $/año de referencia vs. los ~120-350 $/mes actuales).
       `alto · M`

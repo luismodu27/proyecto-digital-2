@@ -222,6 +222,20 @@ diseño, nombre, features grandes); autónomo en lo demás.
     `normalizePath` **nunca se activaba** porque `"".split()` devuelve `""` y no `undefined`.
   - Entorno `node`, sin jsdom, <1 s: una suite lenta se acaba desactivando. `npm test` ya está en CI.
 
+- **2026-07-30** · **SPRINT 2 CERRADO (6/6): activación + red de seguridad.** Telemetría de primera parte,
+  274 tests sobre la lógica regulatoria, observabilidad de las degradaciones, import CSV, enlace de intake
+  compartible y verificación local del JWT. Seis commits, cada uno verificado con lint + tsc + `check:copy` +
+  tests + build y, donde tenía sentido, por **curl contra el Supabase real** (usuarios `*@attesta-test.dev`).
+  - **Lo que más va a valer a futuro no es ninguno de los seis ítems, es el ritual nuevo:** validar cada
+    migración en un **Postgres 16 desechable** antes de dársela al fundador. En este sprint cazó tres bugs que
+    habrían fallado en el SQL Editor (`greatest`/`least` no admiten prefijo de esquema; `submit_intake`
+    devolvía un 500 a un anónimo con nombre en blanco; `create policy` no es idempotente). Está documentado en
+    los gotchas de `CLAUDE.md`.
+  - **Segundo hábito nuevo:** los tests se comprueban **rompiendo la lógica a propósito** (6 mutaciones, las 6
+    detectadas). Un test que no falla al invertir la regla no protege nada.
+  - Pendientes del fundador que desbloquean lo construido: migración **0026** (telemetría) y **0027**
+    (intake). Sin ellas todo funciona igual, con degradación verificada, solo que sin métricas ni enlaces.
+
 - **2026-07-30** · **SPRINT 2 · telemetría de producto ADELANTADA (antes que el resto del sprint).**
   Razón: el Sprint 1 optimizó conversión y activación **a ciegas** y el Sprint 2 iba a hacer lo mismo con el
   import CSV. Medir primero, optimizar después. Decisiones que conviene no volver a discutir:
