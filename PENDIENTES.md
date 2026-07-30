@@ -21,9 +21,15 @@
 > las **apuestas grandes** llevan checkpoint del fundador antes de arrancar.
 
 ### 0.A · SPRINT 1 — blindaje de marca + conversión (todo S, bajo riesgo) ⬅️ EMPEZAR AQUÍ
-- [ ] **Guard automático contra copy PROHIBIDO en CI** — test (~40 líneas de regex) que revisa diccionarios,
-      packs y textos de PDF y **rompe el build** si aparece *certificado/aprobado/cumple/garantiza/marcado CE/
-      validado por Attesta…*. Hoy la regla #1 del producto se sostiene solo por disciplina humana. `alto · S`
+- [x] ✅ **Guard automático contra copy PROHIBIDO en CI** (2026-07-30) — `scripts/check-prohibited-copy.mjs`
+      + `npm run check:copy` + paso en `ci.yml`. **20 reglas ES+EN** que detectan el *patrón peligroso*
+      (Attesta como sujeto que certifica, afirmación de cumplimiento del cliente, veredicto de aptitud,
+      `% de cumplimiento`), **no la palabra suelta** — la lista negra simple daba 18 falsos positivos
+      legítimos (marcado CE *del proveedor*, "no como certificador", "garantiza intervención humana" del
+      RGPD 22, "ley aprobada por…") y un guard así se desactiva. Ignora **negaciones** y **preguntas de
+      FAQ**; escape hatch `attesta-copy-ok` (usado en 5 líneas, con motivo). **Se autoprueba** en cada
+      ejecución (muestras con reglas esperadas + cobertura de las 20 reglas) → falla si alguien debilita
+      una regex. Verificado por ambos lados: atrapa 20 infracciones inyectadas y falla al romper una regla.
 - [ ] **Unificar la señal de conversión de la landing** — el Hero manda a `#waitlist` pero Precios manda a
       `/login` (registro+checkout, ya LIVE): el visitante no sabe si puede empezar hoy. `alto · S`
 - [ ] **Teaser de brechas en el plan gratuito** — el "aha" (% listo, brechas, dossier) está todo tras el muro;

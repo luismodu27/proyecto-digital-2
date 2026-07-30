@@ -1555,7 +1555,7 @@ export const en: Dictionary = {
         subtitle:
           "Drafts proposed by the pipeline. Nothing reaches customers' radar without your validation.",
         nonAdminNotice:
-          "This area is for Attesta's compliance team, which validates regulatory changes before publishing them on the radar.",
+          "This area is for Attesta's compliance team, which validates regulatory changes before publishing them on the radar.", // attesta-copy-ok: el objeto es el CAMBIO NORMATIVO (validador humano interno del radar), no el cumplimiento del cliente.
         pendingOne: "candidate pending",
         pendingOther: "candidates pending",
         pendingSuffix: " review",

@@ -34,8 +34,26 @@ npm run start   # servir el build (usa PORT=xxxx para cambiar puerto)
 npm run lint    # ESLint
 ```
 
-No hay framework de tests: la verificación se hace con **build + lint + tsc** y, para el
-backend real, con **curl por API** (usuarios `*@attesta-test.dev`) — ver gotchas.
+```bash
+npm run check:copy   # guard de COPY PROHIBIDO (regla #1: Attesta NO certifica)
+```
+
+No hay framework de tests todavía: la verificación se hace con **build + lint + tsc +
+`check:copy`** y, para el backend real, con **curl por API** (usuarios `*@attesta-test.dev`)
+— ver gotchas. (Vitest está planificado en `PENDIENTES.md §0.B`.)
+
+**Guard de copy prohibido (`scripts/check-prohibited-copy.mjs`, en CI).** Hace verificable la
+regla #1 del producto. NO es una lista negra de palabras: escanear "certificado" o "marcado CE"
+a secas da ~18 falsos positivos legítimos en este repo (*exige al proveedor el marcado CE*,
+*Attesta no es un certificador*, *garantiza intervención humana* del RGPD 22, *ley aprobada
+por…*), y un guard con falsos positivos se acaba desactivando. Detecta el **patrón peligroso**
+(Attesta como sujeto que certifica, afirmaciones de cumplimiento del cliente, veredictos de
+aptitud, `% de cumplimiento`) en **ES y EN**, ignorando **negaciones** ("Attesta NO certifica")
+y **preguntas de FAQ**. Escape hatch: `attesta-copy-ok` en la línea, con motivo. Se
+**autoprueba** en cada ejecución (`MUST_CATCH` con las reglas esperadas por muestra +
+`MUST_PASS` + aserción de cobertura), así que falla también si alguien debilita una regex.
+Complementa a `PROHIBITED_COPY` de `src/lib/analista/llm.ts`, que es el guard de *runtime*
+sobre los borradores del LLM: uno vigila lo que genera la máquina, el otro lo que escribimos.
 
 ## Arquitectura (lo que hay que entender leyendo varios archivos)
 

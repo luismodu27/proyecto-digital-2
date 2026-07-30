@@ -470,7 +470,7 @@ export const es = {
       items: [
         {
           q: "¿Attesta certifica mi cumplimiento del EU AI Act?",
-          a: "No. Attesta es una herramienta de autoevaluación y preparación para auditoría: organiza tu inventario, tu clasificación de riesgo y tu evidencia. La certificación de conformidad, cuando procede, solo la emiten organismos notificados acreditados. No prestamos asesoría legal.",
+          a: "No. Attesta es una herramienta de autoevaluación y preparación para auditoría: organiza tu inventario, tu clasificación de riesgo y tu evidencia. La certificación de conformidad, cuando procede, solo la emiten organismos notificados acreditados. No prestamos asesoría legal.", // attesta-copy-ok: atribuye la certificación a organismos notificados (no a Attesta) — es el descargo, no una promesa.
         },
         {
           q: "¿La IA que filtra o puntúa candidatos es de alto riesgo?",
@@ -1563,7 +1563,7 @@ export const es = {
         subtitle:
           "Borradores propuestos por el pipeline. Nada llega al radar de los clientes sin tu validación.",
         nonAdminNotice:
-          "Esta área es para el equipo de compliance de Attesta, que valida los cambios normativos antes de publicarlos en el radar.",
+          "Esta área es para el equipo de compliance de Attesta, que valida los cambios normativos antes de publicarlos en el radar.", // attesta-copy-ok: el objeto es el CAMBIO NORMATIVO (validador humano interno del radar), no el cumplimiento del cliente.
         pendingOne: "candidato pendiente",
         pendingOther: "candidatos pendientes",
         pendingSuffix: " de revisión",
