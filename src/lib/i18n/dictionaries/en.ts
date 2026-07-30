@@ -958,6 +958,14 @@ export const en: Dictionary = {
       back: "Back to overview",
       footer:
         "Inventory and risk classification remain available on the free plan.",
+      teaserIntro: "With your current data we have already identified",
+      teaserNote:
+        "Figures computed from what your organization has already declared. Unlock to see the detail, owner and due date of each gap.",
+      gapTeaser: {
+        openGaps: "open gaps",
+        highSeverity: "high severity",
+        systems: "systems affected",
+      },
     },
 
     organizations: {
@@ -1133,6 +1141,9 @@ export const en: Dictionary = {
 
     gap: {
       title: "Gap assessment",
+      paywallFeature: "Gap assessment",
+      paywallDesc:
+        "Measure your readiness against each obligation, generate the gap report and turn the gaps into an action plan.",
       subtitleOne: "1 open gap against the EU AI Act requirements.",
       subtitleOtherAfter: " open gaps against the EU AI Act requirements.",
       addGap: "+ Add gap",

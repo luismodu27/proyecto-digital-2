@@ -961,6 +961,16 @@ export const es = {
       back: "Volver al resumen",
       footer:
         "Inventario y clasificación de riesgo siguen disponibles en el plan gratuito.",
+      // Teaser del muro: cifras reales de la organización, para que el plan
+      // gratuito vea QUÉ se está perdiendo (sin revelar el detalle).
+      teaserIntro: "Con tus datos actuales ya hemos identificado",
+      teaserNote:
+        "Cifras calculadas con lo que tu organización ya ha declarado. Desbloquea para ver el detalle, el responsable y la fecha de cada brecha.",
+      gapTeaser: {
+        openGaps: "brechas abiertas",
+        highSeverity: "de severidad alta",
+        systems: "sistemas afectados",
+      },
     },
 
     organizations: {
@@ -1138,6 +1148,10 @@ export const es = {
 
     gap: {
       title: "Gap assessment",
+      // Muro de plan de la sección (antes estaba hardcodeado en el layout).
+      paywallFeature: "Gap assessment",
+      paywallDesc:
+        "Mide tu preparación frente a cada obligación, genera el informe de brechas y conviértelas en un plan de acción.",
       subtitleOne: "1 brecha abierta frente a los requisitos del EU AI Act.",
       subtitleOtherAfter:
         " brechas abiertas frente a los requisitos del EU AI Act.",
