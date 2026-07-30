@@ -6,11 +6,148 @@
 > - **[CLAUDE.md](./CLAUDE.md)** — mapa técnico del código.
 > - **[docs/supabase.md](./docs/supabase.md)** — backend/migraciones.
 >
-> Última actualización: **2026-07-23**.
+> Última actualización: **2026-07-30**.
 
 ---
 
-## ⭐ 0. Sesión 2026-07-23 — Landing, Vigilancia y BLINDAJE DE SEGURIDAD
+## 🗺️ 0. HOJA DE RUTA 360° — PLAN MAESTRO POR SPRINTS (auditoría 2026-07-30)
+
+> **DECISIÓN DEL FUNDADOR (2026-07-30): se hace TODO, por sprints.** Esta sección es el plan maestro:
+> no se descarta nada, solo se ordena. Fuente: auditoría 360° multi-agente (6 lentes en paralelo sobre el
+> código real → 39 hallazgos → síntesis priorizada → crítico de completitud). Marca `[ ]`/`[x]` al avanzar.
+>
+> Reglas que aplican a todo lo de abajo: **Attesta NO certifica** (copy prohibido); **contenido legal
+> determinista, cero LLM**; todo lo de "Foso/compliance" pasa **antes** por el `compliance-domain-expert`;
+> las **apuestas grandes** llevan checkpoint del fundador antes de arrancar.
+
+### 0.A · SPRINT 1 — blindaje de marca + conversión (todo S, bajo riesgo) ⬅️ EMPEZAR AQUÍ
+- [ ] **Guard automático contra copy PROHIBIDO en CI** — test (~40 líneas de regex) que revisa diccionarios,
+      packs y textos de PDF y **rompe el build** si aparece *certificado/aprobado/cumple/garantiza/marcado CE/
+      validado por Attesta…*. Hoy la regla #1 del producto se sostiene solo por disciplina humana. `alto · S`
+- [ ] **Unificar la señal de conversión de la landing** — el Hero manda a `#waitlist` pero Precios manda a
+      `/login` (registro+checkout, ya LIVE): el visitante no sabe si puede empezar hoy. `alto · S`
+- [ ] **Teaser de brechas en el plan gratuito** — el "aha" (% listo, brechas, dossier) está todo tras el muro;
+      mostrar "tienes N brechas abiertas, desbloquea para verlas" con el dato que YA se calcula. `alto · S`
+- [ ] **Interfaz `DataRepo` compartida** (mock-repo + supabase-repo) — que olvidar un getter falle en `tsc`,
+      no en producción/modo demo. `medio · S`
+- [ ] **StatCards navegables** — "Alto riesgo" y "% listo" parecen enlaces y no lo son → enlazar a inventario
+      filtrado. `medio · S`
+- [ ] **JSON-LD** (Organization, SoftwareApplication, FAQPage) — rich snippets sin contenido nuevo; el FAQ ya
+      está estructurado en datos. `medio · S`
+- [ ] **`createClient()` con `cache()`** — deduplica el cliente SSR por render. `bajo · S`
+
+### 0.B · SPRINT 2 — activación + red de seguridad del contenido
+- [ ] **Import CSV + enlace de intake compartible** — el alta manual uno-a-uno es el muro de activación #1
+      (nadie teclea 30 sistemas); sin inventario, riesgo/gap/dossier quedan vacíos. `alto · M`
+- [ ] **Tests con Vitest sobre la lógica pura** — `risk-assessment`, `recommendations`, `task-reminders`,
+      `regulatory-watch`, `audit`, `bias-audit`. Hoy build+lint+tsc **no** detecta una regla legal mal editada:
+      es la red de seguridad del contenido "cero LLM". ROI altísimo. `alto · M`
+- [ ] **Logging / observabilidad de errores** — el patrón `if (error) return []` confunde "migración ausente"
+      con "Supabase caído / RLS rota"; en producción un incidente es indistinguible de "aún no hay datos".
+      Loggear con contexto o integrar Sentry. `alto · M`
+- [ ] **Rama GPAI en el clasificador de riesgo** — GenAI es el caso de IA más común del mid-market y hoy cae en
+      "limitado/mínimo", perdiendo la capa GPAI (Arts. 51-56) y la trampa del **Art. 25** (con fine-tuning
+      sustancial pasas a proveedor). Vigente desde ago-2025. **Validar con el experto.** `alto · M`
+- [ ] **Verificación local del JWT en el middleware (`getClaims`)** — hoy cada navegación paga una llamada de
+      red a Supabase Auth en el camino crítico. `alto · M`
+
+### 0.C · SPRINT 3 — monetización + compliance EE. UU.
+- [ ] **Metering por nº de sistemas/asientos + Enterprise a medida** — hoy una org con 2 sistemas y otra con 50
+      pagan lo mismo; captura el ACV enterprise (30-50k $/año de referencia vs. los ~120-350 $/mes actuales).
+      `alto · M`
+- [ ] **Pack Colorado AI Act (SB 26-189)** — 1ª ley estatal de EE. UU. con deberes reales de *deployer* (gestión
+      de riesgos, evaluaciones de impacto, aviso, notificación al fiscal); reutiliza la mecánica deployer casi
+      1:1. Confirmar nº de bill y secciones tras la reescritura 2026. `alto · M`
+- [ ] **Pack Anexo III.5.a (servicios esenciales y ayudas públicas)** — hoy el clasificador manda "alto riesgo"
+      ahí y el usuario llega a `/packs` **sin pack**: cul-de-sac. Utilities, aseguradoras de salud, prestaciones;
+      FRIA (Art. 27) clara. `alto · M`
+- [ ] **Pack US de educación (FERPA / COPPA / SOPIPA)** — empareja el pack UE de educación recién desplegado;
+      venta cruzada al mismo comprador en dos jurisdicciones. `medio · M`
+
+### 0.D · SPRINT 4 — producto/UX de profundidad
+- [ ] **Búsqueda / filtro / orden en el inventario + vista apilada en móvil** — una tabla plana no escala a
+      decenas de sistemas. `medio · M`
+- [ ] **Navegación móvil tipo drawer** — hoy 11 pestañas con scroll horizontal; los ítems Enterprise con candado
+      (upsell) quedan fuera de vista. `medio · M`
+- [ ] **Registro de incidentes + revisión periódica de la autoevaluación** — cubre obligación real del deployer
+      (Arts. 26.5 / 73) reusando audit-trail + recordatorios; añade recurrencia (retención). `medio · S`
+- [ ] **Registro de proveedores / terceros (Capa 8)** — materializa el reencuadre deployer que ya está en todos
+      los packs (marcado CE, model card, DPA, caducidad); palanca de expansión de plan. `medio · M`
+- [ ] **Streaming con Suspense en el dashboard** — que la query más lenta no bloquee el shell entero. `medio · M`
+- [ ] **Consolidar el onboarding** (modal + checklist + bienvenida compiten hoy en la 1ª sesión). `bajo · M`
+- [ ] **`lang="es"` en bloques regulatorios** — parche WCAG barato mientras el output legal no exista en EN.
+      `medio · S`
+- [ ] **`viewport`/`themeColor` + manifest mínimo + `noindex` en rutas de auth.** `bajo · S`
+- [ ] **Sección "cómo verificamos el contenido legal"** — el mayor diferenciador honesto (determinista, doble
+      pasada del experto, citas verbatim) se afirma pero no se demuestra. `medio · M`
+
+### 0.E · SPRINT 5 — deuda técnica y robustez restante
+- [ ] **Aislar la landing del `headers()` del root layout** — leer headers saca a TODA la app del render
+      estático/CDN, empezando por la página de mayor coste de conversión (route-group propio o locale por ruta).
+      `alto · L`
+- [ ] **Validación con Zod en Server Actions** — hoy es artesanal (enums sin whitelist, sin límites de longitud).
+      `medio · M`
+- [ ] **Rate-limit distribuido (Upstash / Vercel KV)** — el `Map` en memoria no protege en serverless
+      multi-instancia; crítico si se extiende a login/reset/checkout. `medio · M`
+- [ ] **Fail-fast del dominio en build (`NEXT_PUBLIC_APP_URL`)** — sin la var, canonical/hreflang/sitemap apuntan
+      al placeholder de Vercel y rompen la indexación **en silencio**. `medio · S`
+- [ ] **Revisar `force-dynamic` de más y consolidar N queries en RPC** — abre caché con invalidación por tag.
+      `bajo-medio · M/L`
+- [ ] **Adelgazar fuentes (Fraunces / Geist_Mono)** — KB en el critical path del LCP. `bajo · S`
+
+### 0.F · SPRINT 6 — los 8 huecos que el propio panel se dejó fuera (crítico de completitud)
+> Confirmados contra el repo: **no hay** analítica, ni páginas legales/privacidad, ni Sentry, ni rutas de ayuda.
+- [ ] **Telemetría de producto / funnel de activación** — hoy optimizamos conversión y activación **a ciegas**
+      (sin PostHog/Plausible ni evento "clasificó 1er sistema → vio brechas → pagó"). Debería ir **antes** o a la
+      par del Sprint 1 para poder medirlo. `alto · S-M`
+- [ ] **Cumplimiento propio de Attesta** — no existe página de **privacidad**, **DPA**, lista de
+      **subprocesadores** (Supabase UE, Stripe, proveedor de email) ni aviso de cookies. Vender gobernanza de IA
+      a mid-market UE sin tu propio DPA **bloquea la compra** en due-diligence y es incoherente con la marca.
+      `alto · M`
+- [ ] **Ciclo de vida de facturación** (no solo el checkout) — pago fallido, reintentos, degradación de plan,
+      cancelación, **idempotencia del webhook** y reconciliación Stripe↔DB. Es donde se pierde MRR en silencio.
+      `alto · M`
+- [ ] **Borrado / exportación de datos por tenant (GDPR + offboarding)** — no hay derecho de supresión ni
+      portabilidad ni borrado de una org al darse de baja. Obligación legal directa **y** requisito que nuestros
+      propios packs exigen a los clientes. `alto · M`
+- [ ] **Soporte y documentación de usuario** — cero rutas help/docs y ningún canal de contacto in-app; el
+      onboarding cubre el primer minuto, no la retención. `medio · M`
+- [ ] **Backup / DR y runbook de incidentes** — sin política de backups verificados, RPO/RTO ni plan de
+      restauración probado, el audit-log inmutable y la hash-chain son inútiles. `medio · M`
+- [ ] **Motion GTM enterprise + captura de leads** — la landing solo tiene waitlist; el ACV de 30-50k $ no es
+      self-serve (falta "reservar demo", captura cualificada, handoff a venta asistida). `medio · S-M`
+- [ ] **Deliverability de email transaccional (SPF/DKIM/DMARC)** — recordatorios, invitaciones y reset dependen
+      del correo; sin dominio autenticado caen en spam y rompen invitaciones/verificación en silencio. Ligado al
+      SMTP pendiente del fundador (§1.3). `medio · S`
+
+### 0.G · APUESTAS GRANDES — requieren CHECKPOINT del fundador antes de arrancar
+- [ ] **⚠️ Test de sesgo EJECUTABLE (Fairlearn / Evidently)** — hoy solo se *registra* evidencia declarada; el
+      cálculo (regla 4/5, paridad) lo hace un consultor a ~500 $/h. Integrarlo convierte a Attesta de "carpeta de
+      evidencia" en herramienta que **produce** evidencia: la capa pegajosa de la cuña RRHH (NYC LL144 / FEHA).
+      Riesgo: complejidad de integración y de encuadre ("tu organización declara", nunca "certificamos"). `alto · L`
+- [ ] **⚠️ Vault de evidencia + paquete de auditoría firmado** — hoy cada control es un "done" autodeclarado
+      **sin archivo adjunto**; sin el documento real el "% listo" no aguanta una auditoría. Incluye ZIP con
+      manifiesto **SHA-256** verificable (la hash-chain del audit-trail ya existe). **El mayor salto de
+      defensibilidad del producto.** `alto · L`
+- [ ] **⚠️ Crosswalk ISO 42001 / NIST AI RMF** — mapear cada control a otros marcos: una evidencia sirve para N
+      normas. Foso de upsell para equipos GRC; requiere tabla de correspondencias curada por el experto. `alto · L`
+- [ ] **⚠️ Contenido regulatorio en INGLÉS (TAM EE. UU.)** — el chrome ya está traducido, pero el output legal se
+      sirve solo en español por la "frontera legal". **No es traducir**: depende de que el experto valide cada
+      texto legal EN. `alto · L` (cuello de botella = recurso experto)
+- [ ] **⚠️ Ampliar el corpus de vigilancia + pipeline con fuente real** — el radar es el flywheel diferenciador,
+      pero el "Analista" usa embeddings placeholder; ampliar a EBA/EIOPA, transposición nacional, ISO/NIST, donde
+      ya se venden packs. Mantener siempre: la máquina **propone**, el humano **valida**. `medio · L`
+
+### 0.H · Cómo retomar esta hoja de ruta tras un compact
+1. Lee esta sección §0 completa (es el plan maestro; no se descarta nada).
+2. El orden por defecto es **0.A → 0.B → 0.C → 0.D → 0.E → 0.F**, con **0.G** solo tras checkpoint del fundador.
+3. Excepción recomendada: **la telemetría de 0.F** conviene adelantarla (medir antes de optimizar).
+4. Cada ítem de *Foso/compliance* (packs, GPAI, crosswalk, corpus) pasa por el `compliance-domain-expert`
+   **antes** de escribir texto regulatorio, y se registra en `MEMORY.md §10`.
+
+---
+
+## ⭐ 0-bis. Sesión 2026-07-23 — Landing, Vigilancia y BLINDAJE DE SEGURIDAD
 
 **Todo desplegado a `main`.** Resumen para retomar:
 
@@ -376,10 +513,14 @@ El **foso automatizado** (Vigía + Analista + Validador) está completo y verifi
 
 ## 📌 Cómo retomar en la próxima sesión
 
-1. Lee **MEMORY.md** (§11 "RETOMAR AQUÍ") y este archivo.
-2. Pregunta al fundador en qué punto está de los pendientes 🔴 (sobre todo Stripe y dominio).
-3. Rama de trabajo: `claude/init-3bwfhm`; se pushea también a `main` (Vercel redespliega solo).
-4. Verificación: `npm run build` + `npm run lint` + `npx tsc --noEmit` (no hay tests); backend real por curl.
+1. **Lee primero §0 — HOJA DE RUTA 360° (plan maestro por sprints).** Decisión del fundador (2026-07-30):
+   **se hace todo, por sprints**. El orden por defecto es 0.A → 0.B → 0.C → 0.D → 0.E → 0.F; las apuestas
+   grandes (0.G) solo tras checkpoint. Si no hay instrucción nueva, continúa por donde quedó el sprint en curso.
+2. Lee **MEMORY.md** (§11 "RETOMAR AQUÍ") y el resto de este archivo.
+3. Pregunta al fundador en qué punto está de los pendientes 🔴 (sobre todo Stripe y dominio).
+4. Rama de trabajo: `claude/init-3bwfhm`; PR a `main` y merge al pasar CI (`verify`); Vercel redespliega solo.
+5. Verificación: `npm run build` + `npm run lint` + `npx tsc --noEmit`; backend real por curl.
+   (⚠️ Sprint 2 añade **Vitest** — cuando exista, incluir `npm test` en la verificación.)
 
 ---
 
