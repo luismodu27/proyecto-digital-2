@@ -3,9 +3,12 @@ import { Reveal } from "@/components/ui/Reveal";
 import type { Dictionary } from "@/lib/i18n";
 
 // Estructura (estructural) por plan — el texto llega por diccionario.
+// Diagnóstico y Preparación abren el formulario ya en modo REGISTRO (`?signup=1`):
+// son autoservicio y el checkout está activo. Solo Enterprise ("a medida") va a la
+// lista de espera, porque requiere conversación comercial.
 const TIER_META: { href: string; highlight: boolean }[] = [
-  { href: "/login", highlight: false },
-  { href: "/login", highlight: true },
+  { href: "/login?signup=1", highlight: false },
+  { href: "/login?signup=1", highlight: true },
   { href: "#waitlist", highlight: false },
 ];
 

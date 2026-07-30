@@ -43,7 +43,9 @@ export function SiteHeader({
           <ButtonLink href="/login" variant="ghost" className="hidden sm:inline-flex">
             {t.nav.login}
           </ButtonLink>
-          <ButtonLink href="#waitlist" variant="primary">
+          {/* Registro real, no lista de espera: el plan Diagnóstico es gratuito
+              y el checkout está activo (ver comentario en Hero.tsx). */}
+          <ButtonLink href="/login?signup=1" variant="primary">
             {t.nav.requestAccess}
           </ButtonLink>
           <MobileNav

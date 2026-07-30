@@ -26,13 +26,16 @@ type FieldErrors = {
 export function AuthForm({
   t,
   initialError,
+  initialMode = "login",
 }: {
   t: Dictionary["auth"];
   initialError?: string;
+  /** Modo inicial. La landing entra con "signup" vía `/login?signup=1`. */
+  initialMode?: Mode;
 }) {
   const l = t.login;
   const router = useRouter();
-  const [mode, setMode] = useState<Mode>("login");
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [nombre, setNombre] = useState("");
   const [apellido1, setApellido1] = useState("");
   const [apellido2, setApellido2] = useState("");

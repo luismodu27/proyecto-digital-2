@@ -32,7 +32,10 @@ export const es = {
     pricing: "Precios",
     faq: "FAQ",
     login: "Entrar",
-    requestAccess: "Solicitar acceso",
+    // CTA principal de la cabecera. Antes era "Solicitar acceso" → lista de
+    // espera; el plan Diagnóstico es gratuito y el registro está activo, así que
+    // el mensaje coherente es que se puede empezar hoy.
+    requestAccess: "Empieza gratis",
     openMenu: "Abrir menú",
     closeMenu: "Cerrar menú",
   },
@@ -54,9 +57,9 @@ export const es = {
       bodyEmphasis: "alto riesgo",
       bodyAfter:
         " bajo el EU AI Act. Attesta la inventaría, clasifica su riesgo, genera tu evidencia y vigila los cambios normativos. Sin necesitar un equipo GRC.",
-      ctaPrimary: "Solicitar acceso anticipado",
+      ctaPrimary: "Empieza gratis",
       ctaSecondary: "Explora la demo en vivo",
-      ctaNote: "Sin llamada de ventas · sin registro",
+      ctaNote: "Gratis para empezar · sin tarjeta · sin llamada de ventas",
       footnote:
         "Más de 3 de cada 4 empresas van más rápido en IA que en su gobierno. Tú puedes ir por delante.",
     },
@@ -411,7 +414,7 @@ export const es = {
             "1 usuario",
           ],
           limits: "Sin evidencia en PDF, sin vigilancia ni plan de acción.",
-          cta: "Entrar",
+          cta: "Empieza gratis",
         },
         {
           name: "Preparación",
@@ -424,7 +427,7 @@ export const es = {
             "Vigilancia regulatoria continua",
             "Dossier e informe ejecutivo (PDF)",
             "Evidencia y audit-trail verificable",
-            "Policy packs (5 dominios)",
+            "Policy packs (8 packs · UE y EE. UU.)",
             "Equipo y roles",
           ],
           cta: "Suscribirse",
@@ -456,7 +459,7 @@ export const es = {
           "Vigilancia regulatoria continua",
           "Dossier e informe ejecutivo (PDF)",
           "Evidencia y audit-trail verificable",
-          "Policy packs (5 dominios)",
+          "Policy packs (8 packs · UE y EE. UU.)",
           "Multi-organización",
           "SSO y controles avanzados",
           "Soporte prioritario",

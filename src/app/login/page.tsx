@@ -8,11 +8,17 @@ import { getDictionary } from "@/lib/i18n";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; signup?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, signup } = await searchParams;
   const locale = await resolveLocale();
   const t = getDictionary(locale).auth;
+
+  // `?signup=1` abre el formulario ya en modo registro. Lo usa el CTA principal
+  // de la landing ("Empieza gratis"): si cayera en el modo iniciar-sesión, el
+  // visitante nuevo tendría que descubrir el toggle — fricción innecesaria en el
+  // paso de mayor valor del embudo.
+  const startInSignup = signup === "1";
 
   const pageErrors: Record<string, string> = {
     auth_link: t.pageErrors.authLink,
@@ -23,7 +29,11 @@ export default async function LoginPage({
   return (
     <AuthShell locale={locale} t={t}>
       {isSupabaseConfigured ? (
-        <AuthForm t={t} initialError={initialError} />
+        <AuthForm
+          t={t}
+          initialError={initialError}
+          initialMode={startInSignup ? "signup" : "login"}
+        />
       ) : (
         <div className="rounded-2xl border border-line bg-paper-raised p-8 text-center">
           <h1 className="font-display text-2xl font-semibold text-ink">
