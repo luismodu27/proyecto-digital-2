@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
 import { trackServer } from "@/lib/telemetry/server";
+import { checkQuota } from "@/lib/billing/quota";
 import type { MemberRole } from "@/lib/mock-data";
 
 const TEAM = "/dashboard/equipo";
@@ -43,6 +44,12 @@ export async function inviteMember(formData: FormData) {
   const role = String(formData.get("role") ?? "member") as MemberRole;
   if (!email || !email.includes("@")) back("team-bademail");
   if (!VALID_ROLES.includes(role)) back("team-error");
+
+  // Cupo de asientos = miembros + invitaciones pendientes. Se cuentan las
+  // pendientes a propósito: si no, se podría invitar a cuarenta personas con un
+  // plan de un asiento y el tope no significaría nada en cuanto aceptaran.
+  const { blocked } = await checkQuota(ctx.org, "seats");
+  if (blocked) back("quota-seats");
 
   const { data, error } = await ctx.supabase.rpc("invite_member", {
     org: ctx.org,

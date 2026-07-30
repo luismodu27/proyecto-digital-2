@@ -59,6 +59,14 @@ create index if not exists product_events_time_idx
 
 alter table public.product_events enable row level security;
 
+-- `drop policy if exists` antes de cada `create policy` porque `create policy`
+-- NO admite `if not exists`: sin esto, volver a pegar la migración (algo que pasa
+-- de verdad — se re-ejecuta el fichero tras corregir cualquier otra cosa) revienta
+-- con *policy already exists*. Reemplazar la política por la misma definición es
+-- inocuo; dejar el script no idempotente, no.
+drop policy if exists product_events_insert_anyone on public.product_events;
+drop policy if exists product_events_select_admin on public.product_events;
+
 -- INSERT abierto: la landing es pública y sus visitas son anónimas por
 -- definición. El abuso se acota en la API (whitelist de eventos + rate-limit por
 -- IP + recorte de props); el riesgo residual es contaminar nuestras propias

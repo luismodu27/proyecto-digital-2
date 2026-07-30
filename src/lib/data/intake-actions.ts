@@ -10,6 +10,7 @@ import { getActiveOrg } from "./context";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { trackServer } from "@/lib/telemetry/server";
 import { logDataFallback, logIncident } from "@/lib/observability/log";
+import { checkQuota } from "@/lib/billing/quota";
 
 /**
  * Enlace de intake compartible (escrituras).
@@ -142,6 +143,13 @@ export async function acceptIntakeSubmission(formData: FormData) {
   }
   // Ya resuelto por otra persona: no duplicar el sistema.
   if (sub.status !== "pending") redirect(`${IMPORT}?toast=intake-already`);
+
+  // Aceptar una ficha CREA un sistema, así que consume cupo igual que el alta
+  // manual. Si no cabe, la ficha se queda `pending` a propósito: no se descarta ni
+  // se pierde el trabajo de quien la envió — sigue en la bandeja para cuando haya
+  // sitio o se mejore de plan.
+  const { blocked } = await checkQuota(org, "systems");
+  if (blocked) redirect(`${IMPORT}?toast=quota-systems`);
 
   const { error: insertError } = await supabase.from("ai_systems").insert({
     organization_id: org,

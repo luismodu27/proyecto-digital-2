@@ -6,6 +6,10 @@ import {
   policyPacks,
 } from "./index";
 import type { PolicyPack } from "./types";
+import { getDictionary } from "@/lib/i18n";
+
+const es = getDictionary("es");
+const en = getDictionary("en");
 
 /**
  * Invariantes de los policy packs.
@@ -133,6 +137,23 @@ describe.each(ES_EN)("pack %s", (id, es, en) => {
 
   it("si hay aviso (`note`), existe en los dos idiomas", () => {
     expect(!!en.note, id).toBe(!!es.note);
+  });
+});
+
+describe("recuento de packs en la landing", () => {
+  it("el número de packs NO está escrito a mano en el diccionario", () => {
+    // La página de precios dice "N packs". Escribir ahí un número es garantía de
+    // que envejezca en silencio: ya pasó (decía 8 con 9 packs en el catálogo). El
+    // diccionario debe usar el marcador `{packs}` y el número lo pone
+    // `POLICY_PACKS.length` al renderizar. Este test vigila que nadie lo revierta.
+    const stale = /\b\d+\s+packs?\b/i;
+    for (const [name, dict] of [["es", es], ["en", en]] as const) {
+      const json = JSON.stringify(dict.landing.pricing);
+      expect(json, `${name}: hay un recuento de packs escrito a mano`).not.toMatch(
+        stale,
+      );
+      expect(json, `${name}: falta el marcador {packs}`).toContain("{packs}");
+    }
   });
 });
 

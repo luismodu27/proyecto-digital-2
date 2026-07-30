@@ -7,6 +7,7 @@ import { getActiveOrg } from "./context";
 import { trackServer } from "@/lib/telemetry/server";
 import { logIncident } from "@/lib/observability/log";
 import { MAX_IMPORT_ROWS, parseSystemsCsv } from "@/lib/import/csv";
+import { checkQuota } from "@/lib/billing/quota";
 
 /**
  * Importación de inventario por CSV (camino de escritura).
@@ -30,6 +31,13 @@ export type ImportOutcome = {
   skippedExisting: number;
   /** Filas que se quedaron fuera por el tope de la importación. */
   truncated: number;
+  /**
+   * Filas que no entraron por el CUPO del plan (distinto de `truncated`, que es
+   * el tope técnico del fichero). Se separa a propósito: una es "tu fichero es
+   * enorme" y la otra "tu plan da para N sistemas", y llevan a acciones
+   * distintas — partir el CSV en un caso, mejorar de plan en el otro.
+   */
+  skippedQuota: number;
   /** Clave de error para traducir en la UI (solo si `ok` es false). */
   error?: "demo" | "no-org" | "empty" | "too-large" | "write-failed";
 };
@@ -43,6 +51,7 @@ export async function importSystemsCsv(csv: string): Promise<ImportOutcome> {
     rejected: 0,
     skippedExisting: 0,
     truncated: 0,
+    skippedQuota: 0,
   };
 
   if (!isSupabaseConfigured) return { ok: false, ...empty, error: "demo" };
@@ -96,13 +105,32 @@ export async function importSystemsCsv(csv: string): Promise<ImportOutcome> {
     };
   }
 
+  // Cupo del plan. Se importa lo que CABE en vez de rechazar el fichero entero:
+  // quien sube 40 filas con 20 huecos preferiría tener 20 sistemas dentro y saber
+  // exactamente cuántos faltan, no un error y su hoja de cálculo intacta. Las que
+  // no entran se cuentan aparte para poder decírselo con precisión.
+  const { allowed } = await checkQuota(org, "systems", fresh.length);
+  const toInsert = fresh.slice(0, Math.min(allowed, MAX_IMPORT_ROWS));
+  const skippedQuota = fresh.length - toInsert.length;
+
+  if (toInsert.length === 0) {
+    return {
+      ok: true,
+      ...empty,
+      rejected: parsed.errors.length,
+      skippedExisting,
+      truncated: parsed.truncated,
+      skippedQuota,
+    };
+  }
+
   // OJO: en un insert múltiple, PostgREST exige que TODAS las filas tengan
   // EXACTAMENTE las mismas claves; si no, responde 400 `PGRST102 All object keys
   // must match`. Por eso se enumeran los seis campos siempre, con `null` cuando el
   // CSV no traía el dato. No "optimizar" omitiendo los nulos: rompería la
   // importación en cuanto una fila del fichero venga incompleta (o sea, siempre).
   const { error } = await supabase.from("ai_systems").insert(
-    fresh.slice(0, MAX_IMPORT_ROWS).map((r) => ({
+    toInsert.map((r) => ({
       organization_id: org,
       name: r.name,
       owner: r.owner,
@@ -128,7 +156,7 @@ export async function importSystemsCsv(csv: string): Promise<ImportOutcome> {
   // inventario", no cada fila. `source` permite comparar CSV vs alta manual.
   await trackServer("system_created", {
     organizationId: org,
-    props: { source: "csv", count: fresh.length },
+    props: { source: "csv", count: toInsert.length },
   });
 
   revalidatePath("/dashboard/inventario");
@@ -137,9 +165,13 @@ export async function importSystemsCsv(csv: string): Promise<ImportOutcome> {
 
   return {
     ok: true,
-    imported: fresh.length,
+    // `toInsert.length`, no `fresh.length`: son distintos en cuanto el cupo
+    // recorta, y reportar de más haría que la UI dijera "12 importados" cuando
+    // entraron 8.
+    imported: toInsert.length,
     rejected: parsed.errors.length,
     skippedExisting,
     truncated: parsed.truncated,
+    skippedQuota,
   };
 }

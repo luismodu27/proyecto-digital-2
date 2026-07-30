@@ -21,9 +21,15 @@ import {
   CREDITO_SEGUROS_PACK_EN,
 } from "./credito-seguros";
 import { EDUCACION_PACK, EDUCACION_PACK_EN } from "./educacion";
+import {
+  SERVICIOS_PUBLICOS_PACK,
+  SERVICIOS_PUBLICOS_PACK_EN,
+} from "./servicios-publicos";
 import { US_HIRING_PACK, US_HIRING_PACK_EN } from "./us-hiring";
 import { US_CA_FEHA_PACK, US_CA_FEHA_PACK_EN } from "./us-ca-feha";
 import { US_CA_ADMT_PACK, US_CA_ADMT_PACK_EN } from "./us-ca-admt";
+import { US_CO_ADMT_PACK, US_CO_ADMT_PACK_EN } from "./us-co-admt";
+import { US_EDUCACION_PACK, US_EDUCACION_PACK_EN } from "./us-educacion";
 
 export { RRHH_PACK, RRHH_PACK_EN } from "./rrhh";
 export {
@@ -36,9 +42,15 @@ export {
 } from "./atencion-cliente-genai";
 export { CREDITO_SEGUROS_PACK, CREDITO_SEGUROS_PACK_EN } from "./credito-seguros";
 export { EDUCACION_PACK, EDUCACION_PACK_EN } from "./educacion";
+export {
+  SERVICIOS_PUBLICOS_PACK,
+  SERVICIOS_PUBLICOS_PACK_EN,
+} from "./servicios-publicos";
 export { US_HIRING_PACK, US_HIRING_PACK_EN } from "./us-hiring";
 export { US_CA_FEHA_PACK, US_CA_FEHA_PACK_EN } from "./us-ca-feha";
 export { US_CA_ADMT_PACK, US_CA_ADMT_PACK_EN } from "./us-ca-admt";
+export { US_CO_ADMT_PACK, US_CO_ADMT_PACK_EN } from "./us-co-admt";
+export { US_EDUCACION_PACK, US_EDUCACION_PACK_EN } from "./us-educacion";
 
 /** Catálogo canónico (ES) — orden estable. Retrocompatible. */
 export const POLICY_PACKS: PolicyPack[] = [
@@ -47,9 +59,12 @@ export const POLICY_PACKS: PolicyPack[] = [
   ATENCION_CLIENTE_GENAI_PACK,
   CREDITO_SEGUROS_PACK,
   EDUCACION_PACK,
+  SERVICIOS_PUBLICOS_PACK,
   US_HIRING_PACK,
   US_CA_FEHA_PACK,
   US_CA_ADMT_PACK,
+  US_CO_ADMT_PACK,
+  US_EDUCACION_PACK,
 ];
 
 /** Catálogo en inglés (validado), mismo orden e ids que `POLICY_PACKS`. */
@@ -59,9 +74,12 @@ export const POLICY_PACKS_EN: PolicyPack[] = [
   ATENCION_CLIENTE_GENAI_PACK_EN,
   CREDITO_SEGUROS_PACK_EN,
   EDUCACION_PACK_EN,
+  SERVICIOS_PUBLICOS_PACK_EN,
   US_HIRING_PACK_EN,
   US_CA_FEHA_PACK_EN,
   US_CA_ADMT_PACK_EN,
+  US_CO_ADMT_PACK_EN,
+  US_EDUCACION_PACK_EN,
 ];
 
 /** Selector locale-aware del catálogo de packs (default ES). */

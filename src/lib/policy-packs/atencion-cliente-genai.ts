@@ -35,7 +35,7 @@ export const ATENCION_CLIENTE_GENAI_PACK: PolicyPack = {
   summary:
     "Controles para chatbots de soporte al cliente e IA generativa de contenido público (riesgo limitado / transparencia del Art. 50, GPAI y RGPD; por regla general NO alto riesgo del Anexo III). Aplícalo a un sistema para precargar sus brechas.",
   note:
-    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 (avisos de chatbot, deepfakes, contenido sintético) aplica el 2-ago-2026 y NO fue aplazada por el Digital Omnibus (que solo movió el alto riesgo del Anexo III al 2-dic-2027, aplazamiento adoptado y firmado en 2026 pero pendiente de publicación en el DOUE). Estos sistemas son, por regla general, de riesgo LIMITADO: no confundas transparencia con las obligaciones de alto riesgo. Las obligaciones GPAI (Cap. V) recaen en el proveedor del modelo, no en quien solo lo usa vía API/SaaS. Además del AI Act aplica siempre el RGPD. Este pack te deja lista la evidencia con antelación.",
+    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 (avisos de chatbot, deepfakes, contenido sintético) aplica el 2-ago-2026 y NO fue aplazada por el Digital Omnibus (que solo movió el alto riesgo del Anexo III al 2-dic-2027, ya firme: Reglamento (UE) 2026/1744, DOUE 24-jul-2026). Estos sistemas son, por regla general, de riesgo LIMITADO: no confundas transparencia con las obligaciones de alto riesgo. Las obligaciones GPAI (Cap. V) recaen en el proveedor del modelo, no en quien solo lo usa vía API/SaaS. Además del AI Act aplica siempre el RGPD. Este pack te deja lista la evidencia con antelación.",
   controls: [
     {
       id: "clasificacion-triaje",
@@ -68,7 +68,7 @@ export const ATENCION_CLIENTE_GENAI_PACK: PolicyPack = {
       id: "alfabetizacion-ia",
       title: "Alfabetización en IA del personal",
       description:
-        "Adopta medidas para que los agentes de soporte y quienes operan o supervisan el chatbot o la IA generativa (marketing, comunicación, atención al cliente) tengan un nivel suficiente de alfabetización en IA —capacidades, límites y riesgos como las alucinaciones—, proporcionado a su rol. Es un deber PROPIO y directo del deployer, exigible desde el 2 de febrero de 2025. Evidencia = registro de la formación u onboarding impartido (fecha, asistentes y contenidos).",
+        "Adopta medidas para que los agentes de soporte y quienes operan o supervisan el chatbot o la IA generativa (marketing, comunicación, atención al cliente) desarrollen su alfabetización en IA —capacidades, límites y riesgos como las alucinaciones—, proporcionado a su rol. Es un deber PROPIO y directo del deployer, exigible desde el 2 de febrero de 2025. OJO, el estándar CAMBIÓ en 2026: el Digital Omnibus (Reglamento (UE) 2026/1744, DOUE 24-jul-2026) reescribió el Art. 4 — antes había que asegurar un «nivel suficiente» y ahora el deber es adoptar medidas que APOYEN el desarrollo de esa alfabetización; el texto dice expresamente que no obliga a alcanzar ningún nivel concreto. En la práctica cambia poco lo que haces y mucho lo que te pueden reprochar: se te mide por las medidas adoptadas, no por el resultado. Evidencia = registro de la formación u onboarding impartido (fecha, asistentes y contenidos).",
       article: "Art. 4",
       severity: "media",
       conditional: "Exigible desde el 2 de febrero de 2025 (ya vigente).",
@@ -204,7 +204,7 @@ export const ATENCION_CLIENTE_GENAI_PACK_EN: PolicyPack = {
   summary:
     "Controls for customer-support chatbots and generative AI for public content (limited risk / Art. 50 transparency, GPAI and GDPR; as a general rule NOT high-risk under Annex III). Apply it to a system to preload its gaps.",
   note:
-    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions are already enforceable (since 2 Feb 2025); Art. 50 transparency (chatbot notices, deepfakes, synthetic content) applies on 2 Aug 2026 and was NOT postponed by the Digital Omnibus (which only moved Annex III high-risk to 2 Dec 2027, a postponement adopted and signed in 2026 but pending publication in the OJEU). These systems are, as a general rule, LIMITED risk: do not confuse transparency with the high-risk obligations. The GPAI obligations (Chapter V) fall on the model provider, not on someone who merely uses it via API/SaaS. Beyond the AI Act, the GDPR always applies. This pack gets your evidence ready ahead of time.",
+    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions are already enforceable (since 2 Feb 2025); Art. 50 transparency (chatbot notices, deepfakes, synthetic content) applies on 2 Aug 2026 and was NOT postponed by the Digital Omnibus (which only moved Annex III high-risk to 2 Dec 2027, a postponement adopted and signed in 2026 but already settled: Regulation (EU) 2026/1744, OJ 24 Jul 2026). These systems are, as a general rule, LIMITED risk: do not confuse transparency with the high-risk obligations. The GPAI obligations (Chapter V) fall on the model provider, not on someone who merely uses it via API/SaaS. Beyond the AI Act, the GDPR always applies. This pack gets your evidence ready ahead of time.",
   controls: [
     {
       id: "clasificacion-triaje",
@@ -239,7 +239,7 @@ export const ATENCION_CLIENTE_GENAI_PACK_EN: PolicyPack = {
       id: "alfabetizacion-ia",
       title: "AI literacy of staff",
       description:
-        "Take measures so that support agents and those who operate or oversee the chatbot or generative AI (marketing, communications, customer service) have a sufficient level of AI literacy —capabilities, limits and risks such as hallucinations—, proportionate to their role. This is a DIRECT, OWN duty of the deployer, enforceable since 2 February 2025. Evidence = record of the training or onboarding delivered (date, attendees and content).",
+        "Take measures so that support agents and those who operate or oversee the chatbot or generative AI (marketing, communications, customer service) develop their AI literacy —capabilities, limits and risks such as hallucinations—, proportionate to their role. This is a DIRECT, OWN duty of the deployer, enforceable since 2 February 2025. NOTE, the standard CHANGED in 2026: the Digital Omnibus (Regulation (EU) 2026/1744, OJ 24 Jul 2026) rewrote Art. 4 — it used to require ensuring a \"sufficient level\" and the duty is now to take measures that SUPPORT the development of that literacy; the text expressly says it does not require achieving any specific level. In practice it changes little about what you do and a lot about what can be held against you: you are measured by the measures taken, not by the outcome. Evidence = record of the training or onboarding delivered (date, attendees and content).",
       article: "Art. 4",
       severity: "media",
       conditional: "Enforceable since 2 February 2025 (already in force).",

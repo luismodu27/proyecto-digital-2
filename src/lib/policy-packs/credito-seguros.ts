@@ -37,7 +37,7 @@ export const CREDITO_SEGUROS_PACK: PolicyPack = {
   summary:
     "Controles para IA de scoring crediticio de personas físicas y de evaluación de riesgo y pricing en seguros de vida y salud (alto riesgo, Anexo III.5.b y 5.c). Aplícalo a un sistema para precargar sus brechas.",
   note:
-    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) ya es exigible (desde el 2-feb-2025); las obligaciones de alto riesgo del Anexo III.5.b/5.c (Arts. 26/27/86) se aplazaron al 2-dic-2027 con el Digital Omnibus, NO al 2-ago-2026 (un error extendido en el mercado). El aplazamiento fue adoptado (Consejo, 29-jun-2026) y firmado (8-jul-2026) pero está pendiente de publicación en el DOUE: confirma su publicación antes de planificar sobre la fecha de 2027. A diferencia de los packs de RRHH, aquí la FRIA (Art. 27) SÍ obliga al deployer aunque sea una entidad privada. Además del AI Act sigue aplicando en paralelo tu normativa sectorial (crédito al consumo 2023/2225, crédito hipotecario 2014/17/UE, IDD 2016/97, Solvencia II) y el RGPD, incluida la tarifa unisex en seguros (Test-Achats). Este pack te deja lista la evidencia con antelación.",
+    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) ya es exigible (desde el 2-feb-2025); las obligaciones de alto riesgo del Anexo III.5.b/5.c (Arts. 26/27/86) se aplazaron al 2-dic-2027 con el Digital Omnibus, NO al 2-ago-2026 (un error extendido en el mercado). El aplazamiento ya es FIRME: se publicó en el DOUE el 24-jul-2026 como Reglamento (UE) 2026/1744 (Digital Omnibus). A diferencia de los packs de RRHH, aquí la FRIA (Art. 27) SÍ obliga al deployer aunque sea una entidad privada. Además del AI Act sigue aplicando en paralelo tu normativa sectorial (crédito al consumo 2023/2225, crédito hipotecario 2014/17/UE, IDD 2016/97, Solvencia II) y el RGPD, incluida la tarifa unisex en seguros (Test-Achats). Este pack te deja lista la evidencia con antelación.",
   controls: [
     {
       id: "clasificacion-alcance",
@@ -173,7 +173,7 @@ export const CREDITO_SEGUROS_PACK: PolicyPack = {
       id: "alfabetizacion-ia",
       title: "Alfabetización en IA del personal",
       description:
-        "Adopta medidas para que quienes operan o supervisan el sistema (analistas de riesgo, suscriptores, comité de crédito) tengan un nivel suficiente de alfabetización en IA —capacidades, límites y riesgos—, proporcionado a su rol. Es un deber PROPIO y directo del deployer, exigible desde el 2 de febrero de 2025. Evidencia = registro de la formación u onboarding impartido (fecha, asistentes y contenidos).",
+        "Adopta medidas para que quienes operan o supervisan el sistema (analistas de riesgo, suscriptores, comité de crédito) desarrollen su alfabetización en IA —capacidades, límites y riesgos—, proporcionado a su rol. Es un deber PROPIO y directo del deployer, exigible desde el 2 de febrero de 2025. OJO, el estándar CAMBIÓ en 2026: el Digital Omnibus (Reglamento (UE) 2026/1744, DOUE 24-jul-2026) reescribió el Art. 4 — antes había que asegurar un «nivel suficiente» y ahora el deber es adoptar medidas que APOYEN el desarrollo de esa alfabetización; el texto dice expresamente que no obliga a alcanzar ningún nivel concreto. En la práctica cambia poco lo que haces y mucho lo que te pueden reprochar: se te mide por las medidas adoptadas, no por el resultado. Evidencia = registro de la formación u onboarding impartido (fecha, asistentes y contenidos).",
       article: "Art. 4",
       severity: "media",
       conditional: "Exigible desde el 2 de febrero de 2025 (ya vigente).",
@@ -245,7 +245,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
   summary:
     "Controls for AI used in credit scoring of natural persons and in risk assessment and pricing for life and health insurance (high-risk, Annex III.5.b and 5.c). Apply it to a system to preload its gaps.",
   note:
-    "EU AI Act deadlines (deployer): AI literacy (Art. 4) is already enforceable (since 2 Feb 2025); the Annex III.5.b/5.c high-risk obligations (Arts. 26/27/86) were postponed to 2 Dec 2027 by the Digital Omnibus, NOT to 2 Aug 2026 (a widespread misconception in the market). The postponement was adopted (Council, 29 Jun 2026) and signed (8 Jul 2026) but is pending publication in the OJEU: confirm its publication before planning around the 2027 date. Unlike the HR packs, here the FRIA (Art. 27) DOES bind the deployer even if it is a private entity. Beyond the AI Act, your sectoral rules continue to apply in parallel (consumer credit 2023/2225, mortgage credit 2014/17/EU, IDD 2016/97, Solvency II) and so does the GDPR, including unisex insurance pricing (Test-Achats). This pack gets your evidence ready ahead of time.",
+    "EU AI Act deadlines (deployer): AI literacy (Art. 4) is already enforceable (since 2 Feb 2025); the Annex III.5.b/5.c high-risk obligations (Arts. 26/27/86) were postponed to 2 Dec 2027 by the Digital Omnibus, NOT to 2 Aug 2026 (a widespread misconception in the market). The postponement is now SETTLED: it was published in the Official Journal on 24 Jul 2026 as Regulation (EU) 2026/1744 (Digital Omnibus). Unlike the HR packs, here the FRIA (Art. 27) DOES bind the deployer even if it is a private entity. Beyond the AI Act, your sectoral rules continue to apply in parallel (consumer credit 2023/2225, mortgage credit 2014/17/EU, IDD 2016/97, Solvency II) and so does the GDPR, including unisex insurance pricing (Test-Achats). This pack gets your evidence ready ahead of time.",
   controls: [
     {
       id: "clasificacion-alcance",
@@ -387,7 +387,7 @@ export const CREDITO_SEGUROS_PACK_EN: PolicyPack = {
       id: "alfabetizacion-ia",
       title: "AI literacy of staff",
       description:
-        "Take measures so that those who operate or oversee the system (risk analysts, underwriters, credit committee) have a sufficient level of AI literacy —capabilities, limits and risks—, proportionate to their role. This is a DIRECT, OWN duty of the deployer, enforceable since 2 February 2025. Evidence = record of the training or onboarding delivered (date, attendees and content).",
+        "Take measures so that those who operate or oversee the system (risk analysts, underwriters, credit committee) develop their AI literacy —capabilities, limits and risks—, proportionate to their role. This is a DIRECT, OWN duty of the deployer, enforceable since 2 February 2025. NOTE, the standard CHANGED in 2026: the Digital Omnibus (Regulation (EU) 2026/1744, OJ 24 Jul 2026) rewrote Art. 4 — it used to require ensuring a \"sufficient level\" and the duty is now to take measures that SUPPORT the development of that literacy; the text expressly says it does not require achieving any specific level. In practice it changes little about what you do and a lot about what can be held against you: you are measured by the measures taken, not by the outcome. Evidence = record of the training or onboarding delivered (date, attendees and content).",
       article: "Art. 4",
       severity: "media",
       conditional: "Enforceable since 2 February 2025 (already in force).",

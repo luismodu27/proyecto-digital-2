@@ -1,6 +1,23 @@
 import { CtaLink } from "@/components/telemetry/CtaLink";
 import { Reveal } from "@/components/ui/Reveal";
+import { POLICY_PACKS } from "@/lib/policy-packs";
 import type { Dictionary } from "@/lib/i18n";
+
+/**
+ * El número de policy packs se DERIVA del catálogo, no se escribe a mano.
+ *
+ * Estaba escrito ("8 packs") en cuatro cadenas del diccionario y ya se había
+ * quedado corto al añadir el noveno. Es la peor clase de error de copy: una
+ * afirmación numérica y comprobable, en la página de precios, que envejece sola y
+ * en silencio. Ahora el diccionario escribe `{packs}` y el número lo pone el
+ * catálogo, así que un pack nuevo actualiza la landing sin que nadie se acuerde.
+ *
+ * Este es un componente de servidor, así que importar el catálogo entero no añade
+ * nada al bundle del navegador.
+ */
+function fill(text: string): string {
+  return text.replace("{packs}", String(POLICY_PACKS.length));
+}
 
 // Estructura (estructural) por plan — el texto llega por diccionario.
 // Diagnóstico y Preparación abren el formulario ya en modo REGISTRO (`?signup=1`):
@@ -15,13 +32,18 @@ const TIER_META: { href: string; highlight: boolean; cta: string }[] = [
   { href: "#waitlist", highlight: false, cta: "pricing_enterprise" },
 ];
 
-// Matriz de comparación: cada fila = una capacidad; celdas true/false o un
-// marcador de texto ("one"/"team") que se resuelve con el diccionario.
-type Cell = boolean | "one" | "team";
+// Matriz de comparación: cada fila = una capacidad. Una celda es `true`/`false`
+// (incluido / no incluido) o un TEXTO. Los textos que son cifras van literales
+// aquí porque no se traducen ("3" es "3" en los dos idiomas) y así los cupos del
+// producto quedan en un solo sitio visible; los que sí se traducen ("Equipo",
+// "A medida") van por el marcador `team`/`custom`, que resuelve el diccionario.
+type Cell = boolean | string;
 const COMPARE_CELLS: [Cell, Cell, Cell][] = [
   [true, true, true],
   [true, true, true],
-  ["one", "team", "team"],
+  // Sistemas de IA en el inventario y asientos: son los dos cupos que se miden.
+  ["3", "25", "custom"],
+  ["1", "5", "custom"],
   [false, true, true],
   [false, true, true],
   [false, true, true],
@@ -59,7 +81,9 @@ export function Pricing({ t }: { t: Dictionary["landing"]["pricing"] }) {
           —
         </span>
       );
-    const text = value === "one" ? "1" : t.compare.team;
+    // `team`/`custom` se traducen; cualquier otra cosa (una cifra) va tal cual.
+    const text =
+      value === "team" ? t.compare.team : value === "custom" ? t.compare.custom : value;
     return <span className="text-sm font-medium text-ink">{text}</span>;
   }
 
@@ -128,7 +152,7 @@ export function Pricing({ t }: { t: Dictionary["landing"]["pricing"] }) {
                             strokeLinejoin="round"
                           />
                         </svg>
-                        {f}
+                        {fill(f)}
                       </li>
                     ))}
                   </ul>
@@ -180,7 +204,7 @@ export function Pricing({ t }: { t: Dictionary["landing"]["pricing"] }) {
             <tbody>
               {t.compare.rows.map((label, r) => (
                 <tr key={label} className="border-b border-line">
-                  <td className="py-3 pr-4 text-sm text-ink">{label}</td>
+                  <td className="py-3 pr-4 text-sm text-ink">{fill(label)}</td>
                   {COMPARE_CELLS[r].map((cell, i) => (
                     <td
                       key={i}

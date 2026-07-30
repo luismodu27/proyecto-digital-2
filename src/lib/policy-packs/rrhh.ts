@@ -23,13 +23,13 @@ export const RRHH_PACK: PolicyPack = {
   summary:
     "Controles típicos para IA de selección de personal (alto riesgo, Anexo III). Aplícalo a un sistema para precargar sus brechas.",
   note:
-    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 aplica el 2-ago-2026. Las obligaciones de alto riesgo del Anexo III (empleo, Arts. 14/26/27) se aplazaron al 2-dic-2027 con el Digital Omnibus — NO el 2-ago-2026, un error extendido en el mercado. El aplazamiento fue adoptado (Consejo, 29-jun-2026) y firmado (8-jul-2026) pero está pendiente de publicación en el DOUE: confirma su publicación antes de planificar sobre la fecha de 2027. Este pack te deja lista la evidencia con antelación.",
+    "Plazos del EU AI Act (deployer): la alfabetización en IA (Art. 4) y las prohibiciones del Art. 5 ya son exigibles (desde el 2-feb-2025); la transparencia del Art. 50 aplica el 2-ago-2026. Las obligaciones de alto riesgo del Anexo III (empleo, Arts. 14/26/27) se aplazaron al 2-dic-2027 con el Digital Omnibus — NO el 2-ago-2026, un error extendido en el mercado. El aplazamiento ya es FIRME: se publicó en el DOUE el 24-jul-2026 como Reglamento (UE) 2026/1744 (Digital Omnibus). Este pack te deja lista la evidencia con antelación.",
   controls: [
     {
       id: "alfabetizacion-ia",
       title: "Alfabetización en IA del personal",
       description:
-        "Adopta medidas para que las personas que operan o supervisan la herramienta de selección tengan un nivel suficiente de alfabetización en IA (sus capacidades, límites y riesgos), proporcionado a su rol y contexto. Es un deber PROPIO y directo del deployer, exigible desde el 2 de febrero de 2025. Evidencia = registro de la formación u onboarding impartido (fecha, asistentes y contenidos).",
+        "Adopta medidas para que las personas que operan o supervisan la herramienta de selección desarrollen su alfabetización en IA (sus capacidades, límites y riesgos), proporcionado a su rol y contexto. Es un deber PROPIO y directo del deployer, exigible desde el 2 de febrero de 2025. OJO, el estándar CAMBIÓ en 2026: el Digital Omnibus (Reglamento (UE) 2026/1744, DOUE 24-jul-2026) reescribió el Art. 4 — antes había que asegurar un «nivel suficiente» y ahora el deber es adoptar medidas que APOYEN el desarrollo de esa alfabetización; el texto dice expresamente que no obliga a alcanzar ningún nivel concreto. En la práctica cambia poco lo que haces y mucho lo que te pueden reprochar: se te mide por las medidas adoptadas, no por el resultado. Evidencia = registro de la formación u onboarding impartido (fecha, asistentes y contenidos).",
       article: "Art. 4",
       severity: "media",
       conditional: "Exigible desde el 2 de febrero de 2025 (ya vigente).",
@@ -165,13 +165,13 @@ export const RRHH_PACK_EN: PolicyPack = {
   summary:
     "Typical controls for personnel-selection AI (high-risk, Annex III). Apply it to a system to preload its gaps.",
   note:
-    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions are already enforceable (since 2 Feb 2025); Art. 50 transparency applies on 2 Aug 2026. The Annex III high-risk obligations (employment, Arts. 14/26/27) were postponed to 2 Dec 2027 by the Digital Omnibus — NOT 2 Aug 2026, a widespread misconception in the market. The postponement was adopted (Council, 29 Jun 2026) and signed (8 Jul 2026) but is pending publication in the OJEU: confirm its publication before planning around the 2027 date. This pack gets your evidence ready ahead of time.",
+    "EU AI Act deadlines (deployer): AI literacy (Art. 4) and the Art. 5 prohibitions are already enforceable (since 2 Feb 2025); Art. 50 transparency applies on 2 Aug 2026. The Annex III high-risk obligations (employment, Arts. 14/26/27) were postponed to 2 Dec 2027 by the Digital Omnibus — NOT 2 Aug 2026, a widespread misconception in the market. The postponement is now SETTLED: it was published in the Official Journal on 24 Jul 2026 as Regulation (EU) 2026/1744 (Digital Omnibus). This pack gets your evidence ready ahead of time.",
   controls: [
     {
       id: "alfabetizacion-ia",
       title: "AI literacy of staff",
       description:
-        "Take measures so that the people who operate or oversee the selection tool have a sufficient level of AI literacy (its capabilities, limits and risks), proportionate to their role and context. This is a DIRECT, OWN duty of the deployer, enforceable since 2 February 2025. Evidence = record of the training or onboarding delivered (date, attendees and content).",
+        "Take measures so that the people who operate or oversee the selection tool develop their AI literacy (its capabilities, limits and risks), proportionate to their role and context. This is a DIRECT, OWN duty of the deployer, enforceable since 2 February 2025. NOTE, the standard CHANGED in 2026: the Digital Omnibus (Regulation (EU) 2026/1744, OJ 24 Jul 2026) rewrote Art. 4 — it used to require ensuring a \"sufficient level\" and the duty is now to take measures that SUPPORT the development of that literacy; the text expressly says it does not require achieving any specific level. In practice it changes little about what you do and a lot about what can be held against you: you are measured by the measures taken, not by the outcome. Evidence = record of the training or onboarding delivered (date, attendees and content).",
       article: "Art. 4",
       severity: "media",
       conditional: "Enforceable since 2 February 2025 (already in force).",

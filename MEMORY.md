@@ -127,6 +127,225 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 3 CERRADO (4/4). El catálogo pasa de 8 a 11 packs, y lo que más valió fue lo
+  descartado.** Metering por sistemas y asientos + packs de Colorado, servicios públicos esenciales y educación
+  de EE. UU.
+  **El patrón que se repitió tres veces y que conviene no olvidar:** en los tres packs, investigar contra fuente
+  primaria **cambió el contenido antes de escribir una línea**, y siempre en la dirección de quitar, no de
+  añadir. En Colorado, seis controles que nuestra propia hoja de ruta daba por buenos describían una **ley
+  derogada** (incluida la defensa afirmativa por NIST, que además era un argumento comercial que ya no
+  podemos usar). En servicios esenciales, la ficha incluía **utilities que no entran** por ese punto del Anexo.
+  Y en la UE, los siete packs llevaban un matiz sobre el Digital Omnibus que **había dejado de ser cierto tres
+  días antes**. Ninguno de los tres lo habría detectado `tsc`, `lint`, `check:copy` ni los 334 tests: son
+  errores de **contenido regulatorio**, y se habrían presentado al cliente como deberes legales. Es la
+  justificación empírica de la regla de CLAUDE.md de pasar todo contenido regulatorio por el experto **antes**
+  de construir, no después.
+  **El pack de educación de EE. UU. es el más complejo de los cuatro** porque combina cuatro cuerpos normativos
+  con ámbitos distintos, y eso obliga a que cada control lleve su condición: FERPA solo con fondos federales;
+  COPPA solo al *operador* —que normalmente es la EdTech, no el centro, así que para un centro son controles de
+  diligencia contractual—; SOPIPA igual; antidiscriminación según la naturaleza del centro. Dos decisiones de
+  redacción que sostienen la credibilidad: el control estrella de COPPA dice **en voz alta** que el
+  entrenamiento estrictamente interno no lo alcanza esa subsección (afirmar "COPPA prohíbe entrenar IA con
+  datos de menores" sería inexacto, y es justo lo que el mercado dirá), y las dos zonas grises —si una
+  inferencia de IA es *education record*, si el colegio puede consentir por los padres— se redactan **como
+  grises**, con el argumento y su límite, no como resueltas.
+  **La mejor anécdota de método del sprint:** el control de BIPA iba camino de decir **lo contrario de la ley**.
+  El texto **excluye expresamente las fotografías** de la definición de identificador biométrico, así que
+  grabar la webcam no lo activa por sí solo — lo activa **extraer la geometría facial**, y eso cambia entera la
+  pregunta que hay que hacerle al proveedor. Apareció solo al abrir el texto. **Ningún texto legal se da por
+  sabido, ni siquiera los que "todo el mundo conoce".**
+  **Hábito nuevo, nacido de un fallo:** las investigaciones largas se escriben **incrementalmente dentro del
+  repo** (`docs/research/`). Se adoptó tras perder dos memos enteros por errores de API justo antes de volcar
+  el resultado — 30 minutos de trabajo cada uno, irrecuperables. El trabajo largo se guarda mientras se hace.
+
+- **2026-07-30** · **SPRINT 3 · pack de servicios públicos esenciales (Anexo III.5.a + III.5.d).** Décimo pack,
+  25 controles ES+EN. Cierra el callejón sin salida que motivaba el ítem: el clasificador mandaba "alto riesgo"
+  a quien elegía servicios y ayudas públicas y esa persona llegaba al catálogo sin pack propio. **El enrutado
+  no estaba roto** —se comprobó: el clasificador ya distingue `public_services` de `credit` e `insurance`—, así
+  que lo único que faltaba era el contenido.
+  **Corrección de alcance que la ficha del roadmap tenía mal:** decía "utilities, aseguradoras de salud", y los
+  **servicios esenciales PRIVADOS no entran** por el III.5.a. Ese punto es público y exige cuatro elementos a la
+  vez (uso por o en nombre de autoridad pública, prestación pública de asistencia esencial, evaluar
+  elegibilidad o conceder/reducir/revocar, personas físicas). El Reglamento protege el acceso a luz, agua y
+  telecomunicaciones **a través** del scoring crediticio (III.5.b, Recital 58), que ya cubre `credito-seguros`.
+  Por eso el pack se llama **`servicios-publicos` y no `servicios-esenciales`**: el nombre es la primera línea
+  de defensa contra el error nº 1 del punto, que es leer "electricidad" en un recital y concluir que cualquier
+  decisión de una eléctrica es alto riesgo.
+  **Dos controles `prohibited: true`, no uno** (a diferencia de `educacion`). Es deliberado: el Art. 5.1.c
+  (puntuación social) y el Art. 5.1.d (predecir delito) son las dos prácticas que una administración puede
+  cometer **sin mala fe**. La frontera del 5.1.c no es de intensidad sino de **estructura** —verificar los
+  requisitos de una prestación concreta vs. puntuar transversalmente al ciudadano y reutilizar esa puntuación
+  entre departamentos— y el control la resuelve haciendo contestar tres preguntas por escrito. La del 5.1.d
+  separa el control antifraude documental sobre hechos objetivos de la predicción de delito por perfilado.
+  **III.5.d (emergencias) entra como bloque condicional, no como pack aparte ni diluido en el tronco:** mismo
+  deployer y mismo tronco de deberes, pero el modo de fallo es distinto (daño físico inmediato en vez de
+  denegación recurrible) y la ventana de supervisión son segundos, así que sus dos controles hablan de anular
+  con un gesto, registrar la anulación y tener procedimiento de degradación — no de revisar un expediente.
+  **Deuda declarada en el propio fichero:** la fecha de aplicación del Art. 49 (registro en la BD de la UE) es
+  incierta —el aplazamiento del Omnibus alcanza a otras secciones del capítulo y el 49 podría exigirse antes—,
+  así que el control pide verificarlo en vez de afirmar 2027; y no se consultaron las Directrices de la
+  Comisión sobre prácticas prohibidas, que son la mejor fuente para afinar el 5.1.c.
+
+- **2026-07-30** · **El Digital Omnibus se publicó y nuestro copy llevaba tres días diciendo lo contrario.**
+  Salió como hallazgo colateral de la investigación del Anexo III.5.a y se verificó de forma independiente
+  contra la ficha ELI de EUR-Lex: **Reglamento (UE) 2026/1744**, de 8-jul-2026, **publicado en el DOUE el
+  24-jul-2026**. Los siete packs de la UE llevaban el matiz *"el aplazamiento fue adoptado y firmado pero está
+  pendiente de publicación en el DOUE: confirma su publicación antes de planificar sobre 2027"*. Ese matiz era
+  **correcto cuando se escribió** (2026-07-25) y pasó a ser **falso el 24-jul**. Retirado y sustituido por la
+  cita firme en ES y EN, más el radar de vigilancia.
+  **La lección no es "nos equivocamos", es que una cobertura honesta también caduca.** La regla de marca dice
+  no fingir certeza; su cara B, que no estaba escrita, es **no fingir duda**: mantener un "verifícalo tú" sobre
+  algo ya resuelto le hace perder el tiempo al cliente y nos hace parecer desactualizados justo en lo que
+  vendemos. Los matices de este tipo necesitan **fecha de revisión**, no solo redacción prudente.
+  **Segundo cambio, y es de fondo: el Omnibus reescribió el Art. 4.** Pasó de *asegurar un «nivel suficiente»*
+  de alfabetización en IA a *adoptar medidas que apoyen su desarrollo*, con texto expreso de que no obliga a
+  alcanzar ningún nivel concreto. Nuestro control `alfabetizacion-ia` (en los 5 packs UE, ES+EN) enunciaba el
+  estándar viejo, o sea que le pedía al cliente **más de lo que la ley pide**. Corregido, explicando el cambio
+  en el propio control: cambia poco lo que hay que hacer y mucho lo que te pueden reprochar — se mide por las
+  medidas adoptadas, no por el resultado.
+  Pendiente de aprovechar del mismo memo: el **Art. 27.4** ahora autoriza expresamente **reutilizar la DPIA**
+  dentro de la FRIA (referencias cruzadas o incorporación de partes), que es la respuesta a la pregunta más
+  práctica que hace un cliente con RGPD ya hecho. Ningún pack lo recoge todavía.
+
+- **2026-07-30** · **SPRINT 3 · pack de Colorado: el valor estuvo en lo que NO se construyó.** El noveno pack
+  (`us-co-admt`, SB 26-189, 15 controles ES+EN). La investigación previa —obligatoria por la regla de CLAUDE.md
+  de pasar todo contenido regulatorio por el experto— cambió el pack de arriba abajo antes de escribir una
+  línea: **la ley de 2024 que casi todo el mercado sigue citando está DEROGADA**. La reescritura de 2026 eliminó
+  el programa de gestión de riesgos, la evaluación de impacto, el aviso al fiscal en 90 días, la exención de
+  pequeña empresa y la **defensa afirmativa por NIST AI RMF / ISO 42001**. Nuestra propia ficha en PENDIENTES
+  describía el régimen derogado, o sea que sin investigar habríamos construido seis controles inventados y los
+  habríamos vendido como deberes legales. **Consecuencia comercial que hay que recordar: "cumplimos NIST" ya NO
+  es escudo legal en Colorado** (sigue siendo buena forma de trabajar, y sigue siendo nuestro land-and-expand,
+  pero no se vende como puerto seguro).
+  Tres decisiones de redacción que sostienen la regla de marca: (1) donde la extracción del PDF dio dos
+  numeraciones distintas para la misma subsección, se cita **la sección sin subsección** en vez de elegir una
+  —una cita legal falsa es peor que una cita menos precisa—; (2) el control de documentación del proveedor dice
+  **textualmente** que la ley no obliga al deployer a obtenerla, que es preparación de evidencia, no obligación;
+  (3) el control de trazabilidad avisa de que **no** reintroduce por la puerta de atrás el programa de riesgos
+  que la ley eliminó. La deuda (leer el PDF enrolado con los ojos) queda declarada en el propio fichero del pack
+  y en PENDIENTES, no escondida.
+  **Corrección de rumbo propia:** al mover Colorado de "en el radar" a cobertura declarada en la landing, metí
+  también el bill de chatbots (HB 26-1263) que el memo marcaba con fuente **secundaria**. Lo saqué antes de
+  comitear: un número de ley mal citado **en público** por una empresa de compliance cuesta más credibilidad
+  que la que gana un ítem de más en una lista.
+  **Mejora colateral con vida propia:** la landing decía "8 packs" a mano en cuatro cadenas y ya mentía. Ahora
+  el diccionario escribe `{packs}` y el número lo pone `POLICY_PACKS.length`, con un test que **falla si alguien
+  vuelve a escribirlo a mano** (verificado inyectando la regresión). Es la peor clase de error de copy: una
+  afirmación numérica, comprobable, en la página de precios, que envejece sola y en silencio.
+  **El test de paridad ES/EN volvió a pagar**: cambié las citas del evento de radar en español y no en inglés,
+  y saltó solo. Es exactamente para lo que existe.
+
+- **2026-07-30** · **Investigación regulatoria: pack `us-educacion` (FERPA/COPPA/SOPIPA + antidiscriminación).**
+  Memo completo en **`docs/research/us-educacion.md`** (A: mapa de aplicabilidad · B: 28 controles con cita,
+  severidad y condicionalidad · C: 10 trampas · D: contraste con el pack UE `educacion` · E: fuentes con
+  primarias/secundarias separadas · F: notas de implementación). Pareja de EE. UU. del pack UE de educación:
+  **mismo comprador, otra jurisdicción**. ICP sigue siendo **deployer**. Cinco cosas que no se pueden perder:
+  - **Dos hallazgos que mi conocimiento previo tenía MAL y que solo aparecieron verificando.**
+    **(1) El ED rescindió el impacto dispar de Title VI hace SEIS DÍAS**: regla final **91 FR 46733**
+    (24-jul-2026, RIN 1870-AA20), **efectiva el mismo día y sin notice and comment**, que deja
+    `34 CFR § 100.3(b)(2)` **[Reserved]**, cambia "effect" por "purpose" en `(b)(3)` y suprime `(b)(6)`,
+    `(c)(2)`, `(c)(3)` y partes del `§ 100.5`; dictada conforme a la **EO 14281**. → El control de equidad
+    **baja de alta a media en su rama Title VI** (y se recuerda que ya antes no había acción privada,
+    *Alexander v. Sandoval*, 532 U.S. 275 (2001)). **Section 504, ADA y Title IX NO están tocados** y ahí
+    sigue el grueso de la exposición. Por ser regla final sin comentarios, es **candidata a impugnación APA**
+    → vigilancia con revisión corta. **(2) El DOJ prorrogó un año la regla web de ADA Título II**
+    (IFR de 20-abr-2026): WCAG 2.1 AA pasa a **26-abr-2027** (población ≥50.000) y **26-abr-2028** (resto).
+  - **La joya vendible del pack:** la **regla COPPA revisada ya es plenamente exigible** (publicada
+    22-abr-2025, efectiva 23-jun-2025, **cumplimiento pleno desde el 22-abr-2026** — ya pasó). Exige
+    **consentimiento parental verificable SEPARADO** para divulgar datos de menores a terceros no
+    *integrales*, y la FTC declaró en el preámbulo que **entrenar o desarrollar IA no es "integral"**.
+    ⚠️ **Matiz que hay que decir siempre**: la subsección se construye sobre la **divulgación a terceros**;
+    el **entrenamiento interno** del propio operador **no está cubierto por esa letra**. Decir "COPPA prohíbe
+    entrenar IA con datos de menores" sería **falso** y es justo el error que nos costaría credibilidad.
+  - **Zona gris estructural nº 1 del vertical:** la **school authorization exception** de COPPA (que el
+    colegio consienta por los padres) **NO existe en la Regla**. La FTC la propuso en 2024 y **decidió no
+    codificarla** *"to avoid making amendments to the COPPA Rule that may conflict with potential amendments
+    to DOE's FERPA regulations"*. Verificado además **por ausencia**: las excepciones del `§ 312.5(c)` son
+    nueve y ninguna es escolar. La práctica se apoya en **FAQ de personal de la FTC**, no en reglamento.
+  - **Zona gris nº 2 (la pregunta que hará todo cliente):** ¿una inferencia de IA sobre un estudiante es un
+    *education record*? La lectura defendible dice **sí** —`34 CFR § 99.3` define el expediente como el
+    registro directamente relacionado con el estudiante y **mantenido por la institución *o por una parte
+    que actúa por cuenta de ella***, y FERPA **no distingue dato bruto de derivado**; un proveedor amparado
+    por la *school official exception* es por definición esa parte—, pero **no hay pronunciamiento del ED ni
+    del PTAC**. Se redacta como zona gris, nunca como resuelto.
+  - **Lección de método, la más reutilizable:** **no dar por sabido ningún texto legal.** El control de BIPA
+    iba camino de decir lo contrario de la ley: `740 ILCS 14/10` **excluye expresamente las fotografías** de
+    la definición de identificador biométrico (grabar la webcam **no** activa BIPA; lo activa **extraer la
+    geometría facial** — la pregunta correcta al proveedor cambia entera), y existe una **exención
+    Gramm-Leach-Bliley** que un tribunal federal aplicó a **una universidad**. Ambas cosas solo aparecieron
+    al abrir el texto. También de método: **`ecfr.gov` y `federalregister.gov` no son accesibles** desde este
+    entorno (redirigen a `unblock.federalregister.gov`); se leyó el CFR en el **mirror de Cornell LII** y el
+    Federal Register vía **`r.jina.ai`**, que además rescató la cita literal de la FTC de un PDF que no se
+    dejaba extraer. **El mismo truco del memo de Colorado.**
+  - **Encuadre del pack, distinto al UE y a propósito:** EE. UU. **no clasifica sistemas por riesgo** y no
+    tiene ley federal de IA en educación. El pack se estructura por **datos + contrato + equidad**, y el
+    corazón es la **school official exception** (`34 CFR § 99.31(a)(1)(i)(B)`) con sus tres condiciones
+    acumulativas — la que casi ningún contrato estándar de EdTech satisface es el **control directo**.
+    **Sin migración ni cambios de modelo de datos:** la evidencia que se pide (cláusula, consentimiento,
+    retención, acta) es del mismo tipo que ya maneja la app.
+  - **Aviso al implementador:** `check-prohibited-copy.mjs` solo escanea `src`, así que el memo no lo
+    dispara pero `policy-packs/us-educacion.ts` **sí**. Trampas de copy propias del vertical: *"FERPA
+    compliant"* (término de arte del mercado EdTech, **prohibido**), *"certificado bajo SOPIPA"* (SOPIPA
+    **no tiene certificación**) y el *Safe Harbor* del `16 CFR § 312.11`, que es real pero **del operador**.
+  - **Pendiente antes de GA:** revisión por abogado de EE. UU.; contrastar los §§ 99.x y 312.x en eCFR
+    cuando sea accesible; confirmar las letras `(e)`/`(f)` de `Cal. B&P § 22584`.
+
+- **2026-07-30** · **0026/0027 aplicadas por el fundador. Verificar en el Supabase REAL destapó lo que el
+  Postgres de pruebas no podía ver → migración 0028.** Las dos migraciones quedaron confirmadas por API
+  (insert anónimo de telemetría **201**, RPC del embudo **200**, y `submit_intake` devolviendo el mismo
+  `false` a token inexistente / demasiado corto / falso / nombre en blanco). Pero al comparar esa verificación
+  con la que se había hecho en local aparecieron **dos diferencias entre lo que el SQL parecía hacer y lo que
+  hace**, y las dos importan como método:
+  **(1) `revoke ... from anon` sobre una FUNCIÓN es casi siempre un no-op.** Postgres concede `EXECUTE` a
+  **PUBLIC** por defecto en cada función nueva y `anon` lo hereda por ahí; para revocar de verdad hay que
+  revocar **de PUBLIC**. Se comprobó empíricamente: un anónimo **sí puede ejecutar** `product_funnel`; lo
+  único que lo detiene es el guard `is_platform_admin()` que va **dentro**. No hay fuga —el guard funciona—
+  pero la línea `revoke` era decorativa, y el mismo defecto arrastraba desde la **0011**.
+  **(2) El Postgres de pruebas mintió por omisión.** Allí `anon` no tenía grants, así que un SELECT anónimo
+  daba *permission denied* y se registró eso como prueba de aislamiento. En **Supabase**, `anon` tiene
+  `SELECT` por defecto sobre `public`, así que la misma consulta da `200 []`: seguro, pero por la **RLS
+  sola**. Si alguien añade una policy permisiva por error, en producción eso sí filtra y en pruebas no.
+  **Aprendizaje de método, más valioso que el parche:** el Postgres desechable valida **sintaxis, CHECKs y
+  lógica**, pero **no reproduce los grants por defecto de Supabase**. Para afirmar algo sobre *permisos* hay
+  que replicar esos grants en el scaffold (`grant select on all tables in schema public to anon`) o
+  verificarlo contra el proyecto real — si no, se concluye "dos cerraduras" donde hay una. Se hizo lo
+  primero: el scaffold ahora imita a Supabase, y con él **0028** se validó de verdad (antes: `anon` podía las
+  8 cosas; después: pierde los 3 `SELECT` y los 2 `execute` internos, **conserva** el insert de telemetría y
+  `submit_intake`, y `authenticated` no pierde nada; idempotente en dos pasadas; el intake anónimo sigue
+  funcionando entero).
+  **Decisión: migración NUEVA (0028), no editar 0026/0027.** Ya están aplicadas en producción; retocarlas
+  dejaría el fichero y la base de datos divergiendo en silencio. Es la misma convención que 0016, 0024 y 0025.
+  0028 **no arregla ninguna fuga** y se le dijo así al fundador —cierra una segunda cerradura— para que no
+  la trate como urgente ni pierda la confianza en lo ya aplicado.
+
+- **2026-07-30** · **`sk_live` rotada + 0018 confirmada aplicada + 0026/0027 empaquetadas.** Tres cosas del
+  fundador, y dos aprendizajes que conviene no perder.
+  **(1)** El fundador **rotó la `sk_live`** de Stripe que se había pegado en el chat. §1.1 pasa de tarea urgente
+  a nota histórica con la regla permanente: ninguna clave secreta se pega en el chat, van solo a variables de
+  entorno. **(2)** El fundador creía haber aplicado ya la **0018** y tenía razón: `GET
+  organizations?select=plan` → **200 `[]`**, mientras una columna inventada da `42703 does not exist` (la
+  **prueba de contraste importa**: un `[]` a secas también lo devuelve la RLS, así que sin el control no se
+  distingue "columna existe pero no veo filas" de "columna no existe"). Consecuencia que había que decir en
+  voz alta, no solo tachar la tarea: **el gating por plan está ACTIVO** — el fundador conserva todo por ser
+  `platform_admin`, pero cualquier org sin suscripción Stripe ni `plan` elevado a mano está en `free` y solo
+  ve Inventario + Riesgo. **(3)** Se le entregó un **único archivo** con 0026 + 0027 en orden y con
+  instrucciones dentro, en vez de dos ficheros y una explicación en el chat: pegar SQL en un editor es el
+  paso con más fricción que hace el fundador, y cada decisión que le ahorramos ahí es una migración que no
+  se queda a medias.
+  **El ritual del Postgres desechable volvió a pagar** — y esta vez encontró algo que las pruebas
+  individuales no podían encontrar: **0026 no era idempotente**. Sus dos políticas se creaban sin
+  `drop policy if exists`, y `create policy` **no admite** `if not exists`; la segunda pasada moría con
+  *policy already exists*. Que 0027 sí lo tuviera (se corrigió al construirla) no salvaba a 0026: el bug solo
+  aparece **re-aplicando** el fichero, algo que pasa de verdad porque el fundador re-pega el script tras
+  corregir cualquier otra cosa. Corregido en la migración y en `setup.sql`, y validado con **tres pasadas
+  seguidas** sobre base limpia. **Regla nueva: validar cada migración aplicándola DOS veces, no una** — la
+  primera prueba que el SQL es correcto; la segunda, que es re-ejecutable, que es la propiedad que el fundador
+  usa de verdad.
+  Se aprovechó para probar el camino anónimo de 0027 end-to-end en local: token válido → guarda y suma 1 al
+  contador; token inexistente / revocado / caducado / agotado / nombre en blanco → **los cinco devuelven el
+  mismo `false`** (no es oráculo de tokens), y `anon` recibe *permission denied* al leer las tablas — el corte
+  ocurre en los `grant`, antes de llegar a la RLS, que es donde se quiere que ocurra.
+
 - **2026-07-30** · **SPRINT 2 · capa GPAI en el clasificador (cierra el Sprint 2).**
   GenAI es el caso de IA más común del mid-market y caía en "limitado/mínimo" sin más. La decisión de diseño
   clave —y la que hay que defender si alguien propone lo contrario— es que la capa GPAI **no cambia el nivel

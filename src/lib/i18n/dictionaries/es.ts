@@ -296,9 +296,14 @@ export const es = {
           body: "Reúne la evidencia declarada de tus sistemas de decisión automatizada y conserva los registros que el empleo exige.",
           tag: "ADS (FEHA) · ADMT (CPPA)",
         },
+        {
+          name: "Colorado (decisiones automatizadas)",
+          body: "Prepara el aviso previo, la explicación tras un resultado adverso y el expediente de cada decisión, antes de 2027.",
+          tag: "ADMT · SB 26-189",
+        },
       ],
       radarLabel: "En el radar de vigilancia",
-      radar: ["Colorado AI Act (SB 26-189 · 2027)", "Texas TRAIGA"],
+      radar: ["Texas TRAIGA"],
       note: "Preparación para auditoría y clasificación orientativa — no es certificación ni asesoría legal.",
     },
 
@@ -451,7 +456,7 @@ export const es = {
           price: "Gratis",
           note: "Una muestra para empezar hoy",
           features: [
-            "Inventario de sistemas de IA",
+            "Hasta 3 sistemas de IA en el inventario",
             "Clasificación de riesgo (EU AI Act + EE. UU.)",
             "1 usuario",
           ],
@@ -465,11 +470,12 @@ export const es = {
           note: "El sistema de registro de tu gobernanza",
           lead: "Todo lo del plan gratis, y además desbloqueas:",
           features: [
+            "Hasta 25 sistemas de IA y 5 usuarios",
             "Gap assessment + plan de acción",
             "Vigilancia regulatoria continua",
             "Dossier e informe ejecutivo (PDF)",
             "Evidencia y audit-trail verificable",
-            "Policy packs (8 packs · UE y EE. UU.)",
+            "Policy packs ({packs} packs · UE y EE. UU.)",
             "Equipo y roles",
           ],
           cta: "Suscribirse",
@@ -480,6 +486,7 @@ export const es = {
           note: "Para varias entidades y necesidades avanzadas",
           lead: "Todo lo de Preparación, y además:",
           features: [
+            "Sistemas y usuarios a medida",
             "Multi-organización",
             "SSO y controles avanzados",
             "Soporte prioritario",
@@ -491,17 +498,19 @@ export const es = {
         title: "Compara los planes",
         capability: "Capacidad",
         team: "Equipo",
+        custom: "A medida",
         includedLabel: "Incluido",
         notIncludedLabel: "No incluido",
         rows: [
           "Inventario de sistemas de IA",
           "Clasificación de riesgo (EU AI Act + EE. UU.)",
+          "Sistemas de IA incluidos",
           "Usuarios",
           "Gap assessment + plan de acción",
           "Vigilancia regulatoria continua",
           "Dossier e informe ejecutivo (PDF)",
           "Evidencia y audit-trail verificable",
-          "Policy packs (8 packs · UE y EE. UU.)",
+          "Policy packs ({packs} packs · UE y EE. UU.)",
           "Multi-organización",
           "SSO y controles avanzados",
           "Soporte prioritario",
@@ -796,6 +805,21 @@ export const es = {
 
     toastClose: "Cerrar notificación",
 
+    // Cupos del plan (metering). `{used}`/`{max}` los sustituye el componente.
+    quota: {
+      systems: "{used} de {max} sistemas de tu plan",
+      seats: "{used} de {max} asientos de tu plan",
+      nearSystems:
+        "Te quedan pocos huecos. Lo que ya tienes se conserva siempre; el tope solo afecta a añadir nuevos.",
+      nearSeats:
+        "Te quedan pocos asientos. Cuentan los miembros y las invitaciones aún sin aceptar.",
+      atSystems:
+        "Has llegado al tope de tu plan: no se pueden añadir más sistemas. Nada de lo registrado se oculta ni se borra.",
+      atSeats:
+        "Has llegado al tope de asientos de tu plan: no se pueden enviar más invitaciones.",
+      upgrade: "Ver planes",
+    },
+
     toasts: {
       "system-created": "Sistema registrado en el inventario.",
       "system-updated": "Sistema actualizado.",
@@ -810,6 +834,12 @@ export const es = {
       "intake-already": "Esa ficha ya la había resuelto otra persona.",
       "intake-demo": "El intake compartible requiere conectar tu organización.",
       "intake-error": "No se pudo completar la acción. Inténtalo de nuevo.",
+      // Cupos del plan. El mensaje dice el LÍMITE y la SALIDA, no solo que no
+      // se puede: un tope sin siguiente paso es una puerta cerrada sin timbre.
+      "quota-systems":
+        "Has alcanzado el número de sistemas de tu plan. Mejora de plan para seguir añadiendo; lo que ya tienes se conserva intacto.",
+      "quota-seats":
+        "Has alcanzado el número de asientos de tu plan (miembros e invitaciones pendientes). Mejora de plan para invitar a más gente.",
       "pack-applied": "Policy pack RRHH aplicado al sistema.",
       "pack-error": "No se pudo aplicar el policy pack. Inténtalo de nuevo.",
       "gap-created": "Brecha añadida.",
@@ -1234,6 +1264,10 @@ export const es = {
         resultSkipped: "{n} ya existían con el mismo nombre y no se duplicaron.",
         resultRejected: "{n} filas descartadas por datos incompletos.",
         resultTruncated: "{n} filas fuera del tope de esta importación.",
+        // Distinto de `resultTruncated`: ahí sobraban filas del fichero, aquí
+        // sobran para el PLAN. La acción que resuelve cada caso es distinta.
+        resultQuota:
+          "{n} no entraron porque tu plan llegó a su tope de sistemas. Se importó todo lo que cabía.",
         failures: {
           demo: "La importación necesita una organización conectada.",
           "no-org": "No encontramos tu organización. Vuelve a entrar e inténtalo de nuevo.",

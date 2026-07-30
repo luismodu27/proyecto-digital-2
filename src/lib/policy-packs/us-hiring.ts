@@ -6,9 +6,12 @@
  * empleador es el OBLIGADO DIRECTO (no hay reencuadre provider/deployer).
  *
  * Alcance: NYC Local Law 144 (AEDT) e Illinois (Human Rights Act enmendada por
- * HB 3773 + Artificial Intelligence Video Interview Act). Colorado (aplazada a
- * 2027) y la orientación federal EEOC (retirada en 2025) se siguen solo en el
- * radar de vigilancia, no como controles aquí.
+ * HB 3773 + Artificial Intelligence Video Interview Act). **Colorado tiene pack
+ * propio desde 2026-07-30** (`us-co-admt`, SB 26-189, exigible 1-ene-2027): no se
+ * mezcla aquí porque su régimen no es de auditoría de sesgo sino de aviso,
+ * explicación y revisión humana, y porque el empleo es solo uno de sus siete
+ * dominios cubiertos. La orientación federal EEOC (retirada en 2025) se sigue solo
+ * en el radar de vigilancia, no como controles.
  *
  * ⚠️ IMPORTANTE (regla dura del producto): Attesta NO realiza ni valida la
  * auditoría de sesgo; la ejecuta un AUDITOR INDEPENDIENTE. Attesta solo REGISTRA

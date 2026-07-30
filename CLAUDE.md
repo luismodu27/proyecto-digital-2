@@ -236,3 +236,18 @@ docs/{supabase.md,thesis.md}
   levantando un Postgres 16 desechable y aplicando la migración 0026 antes de dársela al fundador; **merece la
   pena hacerlo con cada migración nueva** (`initdb` + un scaffold con `auth.users`, `organizations`, los roles
   `anon`/`authenticated` y `is_platform_admin()` basta para validar sintaxis, CHECKs y policies).
+- **Aplica cada migración DOS veces en el Postgres desechable, no una.** La primera pasada prueba que el SQL
+  es correcto; la segunda, que es **re-ejecutable**, que es la propiedad que el fundador usa de verdad (re-pega
+  el fichero tras corregir cualquier otra cosa). `create policy` **no admite `if not exists`**: cada una va
+  precedida de `drop policy if exists`. Así se cazó que 0026 moría en la segunda pasada con *policy already
+  exists*.
+- **`revoke ... from anon` sobre una FUNCIÓN es casi siempre un no-op.** Postgres concede `EXECUTE` a **PUBLIC**
+  por defecto en cada función nueva, y `anon` lo hereda por ahí. Si una función no debe ser pública:
+  `revoke all on function f(args) from public;` + `grant execute ... to <rol que sí>;` — y el guard de
+  autorización va **además** dentro de la función, nunca en su lugar. Corregido en 0028 para `product_funnel`
+  y `is_platform_admin()`.
+- **El Postgres desechable NO reproduce los grants por defecto de Supabase**, y por eso no sirve para concluir
+  nada sobre *permisos*: allí `anon` no tiene nada, así que un SELECT anónimo da *permission denied*, mientras
+  en Supabase (`grant select on all tables in schema public to anon` por defecto) da `200 []` — protegido por
+  la **RLS sola**. Para afirmar algo sobre aislamiento hay que **replicar esos grants en el scaffold** o
+  verificarlo contra el proyecto real; si no, se concluye "dos cerraduras" donde hay una.

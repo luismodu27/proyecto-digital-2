@@ -63,7 +63,7 @@
       Excel español, cabeceras ES/EN, BOM, comas entrecomilladas, valida e informa **por filas**); el
       **enlace de intake** sirve para construirla preguntando a cada área sin darles cuenta (migración
       **0027**, token de capacidad, bandeja de revisión, `noindex`). Los dos en
-      `/dashboard/inventario/importar`. **Requiere aplicar 0027** (§1.1-octies). `alto · M`
+      `/dashboard/inventario/importar`. 0027 **aplicada** ✅. `alto · M`
 - [x] **Tests con Vitest sobre la lógica pura** — ✅ **HECHO (2026-07-30)**. 274 tests en 10 ficheros (221 al cerrar este ítem; el resto llegó con los ítems siguientes del sprint)
       (`npm test`, <1 s, en CI): `risk-assessment`, `recommendations`, `task-reminders`, `regulatory-watch`,
       `audit`, `bias-audit`, `telemetry/events` y **paridad de los 8 policy packs**. Codifican la expectativa
@@ -102,28 +102,96 @@
       como "sin sesión" (no 500). `alto · M`
 
 > **Cierre del Sprint 2 (6/6 ítems).** Todo verificado con lint + tsc + `check:copy` + **274 tests** + build,
-> y los caminos reales por curl contra el Supabase de producción. Dos migraciones nuevas esperan tu mano:
-> **0026** (telemetría, §1.1-septies) y **0027** (intake compartible, §1.1-octies) — sin ellas la app funciona
-> igual, solo que sin métricas y sin enlaces de intake. Lo aprendido en cada ítem está en `MEMORY.md §10`.
+> y los caminos reales por curl contra el Supabase de producción. Las dos migraciones del sprint —**0026** (telemetría)
+> y **0027** (intake compartible)— están **aplicadas y verificadas por API** (§1.1-septies). Queda la **0028**
+> (endurecer permisos, §1.1-nonies): opcional, no bloquea nada. Lo aprendido en cada ítem está en `MEMORY.md §10`.
 >
 > Novedad de método que conviene conservar: **toda migración nueva se valida antes en un Postgres desechable**
 > (ver gotcha en `CLAUDE.md`). En este sprint cazó tres bugs que habrían llegado al SQL Editor —`greatest`/`least`
-> cualificados con esquema, un 500 a un anónimo con nombre en blanco, y policies no re-aplicables.
+> cualificados con esquema, un 500 a un anónimo con nombre en blanco, y policies no re-aplicables. Y una cuarta,
+> que solo salió al verificar contra el Supabase **real**: `revoke ... from anon` sobre una función no revoca
+> nada, porque `EXECUTE` se concede a **PUBLIC** por defecto (→ migración 0028, §1.1-nonies).
 
-### 0.C · SPRINT 3 — monetización + compliance EE. UU. ⬅️ SIGUIENTE
-- [ ] **Metering por nº de sistemas/asientos + Enterprise a medida** — hoy una org con 2 sistemas y otra con 50
-      pagan lo mismo; captura el ACV enterprise (30-50k $/año de referencia vs. los ~120-350 $/mes actuales).
-      `alto · M`
-- [ ] **Pack Colorado AI Act (SB 26-189)** — 1ª ley estatal de EE. UU. con deberes reales de *deployer* (gestión
-      de riesgos, evaluaciones de impacto, aviso, notificación al fiscal); reutiliza la mecánica deployer casi
-      1:1. Confirmar nº de bill y secciones tras la reescritura 2026. `alto · M`
-- [ ] **Pack Anexo III.5.a (servicios esenciales y ayudas públicas)** — hoy el clasificador manda "alto riesgo"
-      ahí y el usuario llega a `/packs` **sin pack**: cul-de-sac. Utilities, aseguradoras de salud, prestaciones;
-      FRIA (Art. 27) clara. `alto · M`
-- [ ] **Pack US de educación (FERPA / COPPA / SOPIPA)** — empareja el pack UE de educación recién desplegado;
-      venta cruzada al mismo comprador en dos jurisdicciones. `medio · M`
+### 0.C · SPRINT 3 — monetización + compliance EE. UU. — ✅ COMPLETADO (4/4)
+> **Cierre del Sprint 3 (4/4).** Metering por sistemas y asientos + tres packs nuevos: Colorado (SB 26-189),
+> servicios públicos esenciales (Anexo III.5.a + III.5.d) y educación EE. UU. (FERPA/COPPA/SOPIPA). El catálogo
+> pasa de 8 a **11 packs** y la landing lo declara sola (el número se deriva de `POLICY_PACKS.length`).
+>
+> **Lo más valioso del sprint no fue lo que se construyó, sino lo que se descartó tras investigar.** En
+> Colorado, seis controles que nuestra propia ficha daba por buenos describían una **ley derogada**. En
+> servicios esenciales, la ficha incluía utilities que **no entran** por ese punto del Anexo. Y en la UE los
+> siete packs llevaban un matiz sobre el Digital Omnibus que **dejó de ser cierto** tres días antes. Tres
+> errores de contenido regulatorio que ninguna herramienta de CI habría detectado, y que se habrían presentado
+> al cliente como deberes legales.
+>
+> **Hábito que conviene conservar:** la investigación de los packs se escribe **de forma incremental dentro del
+> repo** (`docs/research/`), después de perder un memo entero por un fallo de API justo antes de volcarlo. El
+> trabajo largo se guarda mientras se hace.
+>
+> ⚠️ **Pendiente del fundador, sin prisa:** migraciones **0028** (§1.1-nonies) y **0029** (§1.1-decies). Ninguna
+> bloquea nada.
 
-### 0.D · SPRINT 4 — producto/UX de profundidad
+
+- [x] **Metering por nº de sistemas/asientos + Enterprise a medida** — ✅ **HECHO (2026-07-30)**.
+      Cupos: **3 sistemas / 1 usuario** (Diagnóstico) · **25 / 5** (Preparación) · **a medida** (Enterprise, por
+      SQL con las columnas `max_systems`/`max_seats` de la migración 0029). Aritmética pura y con tests en
+      `billing/limits.ts` (26 tests, 6 mutaciones inyectadas y las 6 detectadas); resolución contra la BD en
+      `billing/quota.ts`. Bloquea en los **cuatro** caminos que crean cosas (alta manual, CSV, aceptar ficha de
+      intake, invitar) y avisa al 80 % con `QuotaMeter`. Tres decisiones que conviene no revertir sin pensarlo:
+      (1) los cupos limitan **crear**, nunca **ver** — bajar de plan no oculta ni borra nada; (2) ante un error
+      de la base de datos se **deja pasar** (al revés que en los entitlements: bloquear a quien paga por un
+      fallo transitorio es peor que un sistema de más); (3) el CSV importa **lo que cabe** en vez de rechazar el
+      fichero entero. Señal nueva `quota_blocked` en el embudo — mide intentos reales, no intenciones. `alto · M`
+- [x] **Pack Colorado ADMT Act (SB 26-189)** — ✅ **HECHO (2026-07-30)**. `us-co-admt`, 15 controles ES+EN,
+      noveno pack del catálogo. Investigación contra fuente primaria en `docs/research/colorado-sb26-189.md`.
+      **Lo que más valor tuvo fue lo que NO se construyó**: la reescritura de 2026 eliminó el programa de gestión
+      de riesgos, la evaluación de impacto, el aviso al fiscal en 90 días, la exención de pequeña empresa
+      (<50 empleados) y la **defensa afirmativa por NIST AI RMF / ISO 42001** — el acto no menciona NIST ni ISO
+      en ninguna parte. Casi todo el material publicado describe esa ley derogada, así que incluir cualquiera
+      de esos seis habría generado trabajo inútil al cliente y se habría caído en la primera revisión de un
+      abogado. **Consecuencia comercial: no podemos vender "NIST = puerto seguro en Colorado".** Lo que queda:
+      aviso previo, explicación en 30 días tras resultado adverso, corrección de datos (con el límite de que no
+      hay deber de corregir puntuaciones), revisión humana significativa, expediente por decisión 3 años y
+      evidencia exigida al proveedor. Se actualizó además el radar (etiqueta → "Colorado ADMT Act"; el consejo
+      pasó de "espera a saber el contenido" a "aplica el pack y no montes gestión de riesgos") y Colorado subió
+      de "en el radar" a **cobertura declarada** en la landing. `alto · M`
+      ⚠️ **Deuda declarada antes de GA:** el texto oficial solo existe en PDF y la investigación se hizo por
+      extracción de texto — alta confianza en el contenido, **media en la numeración fina de subsecciones**.
+      Donde hubo discrepancia (la vía FERPA y la cláusula de acción privada) se cita **la sección sin
+      subsección**, que sí está confirmada. Hay que leer el PDF enrolado con los ojos y afinar. Igual que los
+      demás packs, necesita revisión de abogado —de Colorado— antes de GA.
+- [x] **Pack Anexo III.5.a (prestaciones y servicios públicos esenciales)** — ✅ **HECHO (2026-07-30)**.
+      `servicios-publicos`, 25 controles ES+EN, décimo pack. Cierra el callejón sin salida: el clasificador ya
+      distinguía `public_services` de `credit`/`insurance` (comprobado), así que el enrutado era correcto y lo
+      que faltaba era el pack. **Corrección de alcance importante frente a como estaba escrita esta ficha:** los
+      **servicios esenciales PRIVADOS (utilities) NO entran** por el III.5.a, que es público y exige cuatro
+      elementos simultáneos; el Reglamento los protege **a través** del scoring crediticio (III.5.b, Recital 58),
+      que ya cubre `credito-seguros`. Por eso el pack se llama "servicios públicos" y no "servicios esenciales":
+      el nombre evita el error nº 1 de este punto. Incluye bloque condicional para **III.5.d** (triaje de
+      llamadas de emergencia), donde el modo de fallo es distinto —daño físico inmediato, supervisión en
+      segundos— y por eso son controles propios y no el tronco reutilizado. **Dos controles `prohibited`**
+      (Art. 5.1.c puntuación social y Art. 5.1.d predicción de delito): son las dos prácticas que una
+      administración puede cometer **sin mala fe**, y la frontera del 5.1.c no es de intensidad sino de
+      estructura. `alto · M`
+- [x] **Pack US de educación (FERPA / COPPA / SOPIPA)** — ✅ **HECHO (2026-07-30)**. `us-educacion`,
+      26 controles ES+EN, undécimo pack. Es el más complejo de los cuatro porque combina **cuatro cuerpos
+      normativos** con ámbitos distintos, y por eso cada control lleva su condición: FERPA solo con fondos
+      federales del ED; COPPA solo si eres **operador** —que normalmente es la EdTech, no el centro, así que
+      para un centro son controles de **diligencia sobre el proveedor**—; SOPIPA obliga al operador con nexo en
+      California, también por contrato; y antidiscriminación según la naturaleza del centro.
+      **Dos hechos recientes que el material del mercado aún no recoge y que cambian el pack:** (1) la regla
+      COPPA revisada es **plenamente exigible desde el 22-abr-2026** y la FTC declaró que divulgar datos de un
+      menor **para entrenar IA no es «integral»** al servicio → consentimiento parental **separado**; el control
+      dice además, en voz alta, que **el entrenamiento estrictamente interno NO lo alcanza** esa subsección —
+      afirmar "COPPA prohíbe entrenar IA con datos de menores" sería inexacto, y decirlo es lo que nos hace
+      creíbles. (2) El Departamento de Educación **rescindió el impacto dispar de Title VI el 24-jul-2026**
+      (regla final sin trámite de comentarios) → el control de equidad baja a severidad **media** y no cita la
+      subsección derogada; Section 504, ADA y Title IX no están tocados y ahí sigue la exposición real.
+      **Dos zonas grises redactadas COMO grises**, no como resueltas: si una inferencia de IA es un *education
+      record* (sin pronunciamiento del ED), y si el colegio puede consentir por los padres bajo COPPA (la FTC
+      propuso codificar esa excepción y **no** la codificó). `medio · M`
+
+### 0.D · SPRINT 4 — producto/UX de profundidad ⬅️ SIGUIENTE
 - [ ] **Búsqueda / filtro / orden en el inventario + vista apilada en móvil** — una tabla plana no escala a
       decenas de sistemas. `medio · M`
 - [ ] **Navegación móvil tipo drawer** — hoy 11 pestañas con scroll horizontal; los ítems Enterprise con candado
@@ -164,8 +232,7 @@
       De **primera parte** (sin PostHog/Plausible/GA): migración `0026_telemetry.sql` (`product_events` + RPC
       `product_funnel`), catálogo cerrado de 13 eventos (`src/lib/telemetry/events.ts`), API `/api/telemetry`
       (whitelist de eventos de cliente + rate-limit + cuerpo acotado), y panel `/dashboard/telemetria` solo para
-      `platform_admins`. Sin IP, sin user-agent, sin PII, y se respetan GPC/DNT. **Requiere aplicar 0026**
-      (§1.1-septies); sin ella la app funciona igual pero no mide.
+      `platform_admins`. Sin IP, sin user-agent, sin PII, y se respetan GPC/DNT. 0026 **aplicada** ✅ (2026-07-30): ya mide.
 - [ ] **Cumplimiento propio de Attesta** — no existe página de **privacidad**, **DPA**, lista de
       **subprocesadores** (Supabase UE, Stripe, proveedor de email) ni aviso de cookies. Vender gobernanza de IA
       a mid-market UE sin tu propio DPA **bloquea la compra** en due-diligence y es incoherente con la marca.
@@ -256,65 +323,142 @@ El fundador las pegó en el SQL Editor. Con esto las 2 fallas HIGH quedan **cerr
 
 ## 🔴 1. Pendiente TUYO (acciones manuales del fundador)
 
-### 1.1 · Seguridad — rotar la clave de Stripe (URGENTE)
-En una sesión anterior se pegó una **clave secreta LIVE de Stripe (`sk_live_…`) en el chat** →
-tratarla como comprometida. **Rótala**: Stripe → *Developers → API keys* → en la Secret key →
-**Roll key**. La nueva NUNCA se pega en el chat; va solo a variables de entorno de Vercel.
+### 1.1 · Seguridad — clave `sk_live` de Stripe — ✅ ROTADA (2026-07-30)
+En una sesión anterior se pegó una **clave secreta LIVE de Stripe (`sk_live_…`) en el chat**. El fundador
+la **rotó** (Stripe → *Developers → API keys* → Secret key → *Roll key*) y puso la nueva en las variables
+de entorno de Vercel. La clave expuesta ya no sirve para nada.
 
-### 1.1-bis · Aplicar migración 0018 (diferenciación de planes) — RÁPIDO ⚠️ BLOQUEA EL GATING ENTERPRISE
-La diferenciación de planes (free / preparación / enterprise) **ya está construida**, pero el
-bloqueo por plan **solo se activa al aplicar la migración**. Sin aplicarla, la app sigue con acceso
-completo (degradación segura). **Esto incluye las nuevas funciones Enterprise** (Multi-organización
-`/dashboard/organizaciones` y SSO/controles avanzados `/dashboard/seguridad`, desplegadas 2026-07-22):
-mientras 0018 no esté aplicada, `getOrgPlan` devuelve `enterprise` por defecto y **nadie queda
-bloqueado**. Para que el gating por-organización que pidió el fundador surta efecto real:
-aplicar 0018 **y** poner `organizations.plan = 'enterprise'` en las orgs que sí pagan Enterprise.
-Para encenderla:
-1. Pega **`supabase/migrations/0018_org_plan.sql`** en el SQL Editor de Supabase (solo ese archivo).
-2. A partir de ahí, las cuentas nuevas entran como **gratis** (solo Inventario + Riesgo). Tu cuenta,
-   al ser `platform_admin`, **conserva acceso completo** automáticamente.
-3. Para dar acceso de pago a un cliente **sin Stripe** (cortesía o Enterprise), en el SQL Editor:
+**Regla que queda para siempre:** ninguna clave secreta (`sk_live`, `sk_test`, `service_role`, contraseñas)
+se pega en el chat **nunca**. Van solo a variables de entorno. Si alguna vez se cuela una, se rota igual que
+esta — el coste de rotar es un redeploy; el de no rotar, cobros ajenos en tu cuenta.
+
+### 1.1-bis · Migración 0018 (diferenciación de planes) — ✅ APLICADA (verificada 2026-07-30)
+**Verificada por API** con la anon key: `GET /rest/v1/organizations?select=plan` → **HTTP 200 `[]`**, mientras
+que una columna inventada devuelve `42703 column … does not exist` (prueba de contraste, para no dar por
+aplicado algo que solo devolvía vacío por RLS). La columna `organizations.plan` **existe**.
+
+**Consecuencia importante: el gating por plan está ACTIVO.** Ya no se degrada a acceso completo. Ahora mismo:
+- Tu cuenta es `platform_admin` → `getOrgPlan` devuelve `enterprise`, **conservas acceso completo**.
+- Cualquier organización **sin** suscripción Stripe activa y **sin** `plan` elevado a mano está en **`free`**:
+  solo ve **Inventario + Riesgo**; gap, plan, packs, vigilancia, dossier, informe, equipo y actividad
+  quedan detrás del muro de pago.
+- Una suscripción Stripe `active`/`trialing` sube la org a **preparación** automáticamente (§1.2, ya en LIVE).
+
+Para dar acceso de pago a un cliente **sin Stripe** (cortesía o Enterprise), en el SQL Editor:
+```sql
+-- ver de un golpe qué plan tiene cada organización y quién está dentro:
+select o.id, o.name, o.plan, u.email
+from public.organizations o
+join public.memberships m on m.organization_id = o.id
+join auth.users u on u.id = m.user_id
+order by o.name;
+
+-- elevar el plan de una org:
+update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
+-- o 'enterprise'
+```
+
+### 1.1-decies · Aplicar migración 0029 (topes a medida para Enterprise) — RÁPIDO, no urgente
+El metering **ya funciona sin ella**: los cupos por plan (3/1 · 25/5 · sin tope) viven en el código. Lo que
+añade 0029 son dos columnas (`max_systems`, `max_seats`) en la organización para poder pactar los números de
+un Enterprise concreto ("hasta 200 sistemas y 40 asientos"). Sin aplicarla, la app lo detecta, lo registra
+como `migration-pending` y usa los cupos del plan — nadie se queda bloqueado.
+
+1. Pega **`supabase/migrations/0029_org_limits.sql`** en el SQL Editor (solo ese archivo).
+2. Al cerrar un Enterprise, fija sus topes (el SQL está también dentro del propio archivo):
    ```sql
-   -- hallar el id de la org por el email de un miembro:
-   select o.id, o.name, o.plan from public.organizations o
-   join public.memberships m on m.organization_id = o.id
-   join auth.users u on u.id = m.user_id
-   where u.email = '<correo>';
-   -- elevar el plan:
-   update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
-   -- o 'enterprise'
-   ```
-4. Cuando Stripe esté activo (§1.2), una suscripción activa sube la org a **preparación** sola.
+   -- ver el consumo real de cada organización antes de pactar:
+   select o.id, o.name, o.plan, o.max_systems, o.max_seats,
+          (select count(*) from public.ai_systems s  where s.organization_id = o.id) as sistemas,
+          (select count(*) from public.memberships m where m.organization_id = o.id) as miembros
+     from public.organizations o order by sistemas desc;
 
-### 1.1-septies · Aplicar migración 0026 (telemetría de producto) — RÁPIDO ⚠️ SIN ELLA NO HAY MÉTRICAS
-El embudo de activación **ya está instrumentado en el código**, pero no guarda nada hasta que exista la tabla.
-Sin aplicarla la app funciona **exactamente igual** (degradación segura: cada intento de medir es un no-op).
-
-Para encenderla:
-1. Pega **`supabase/migrations/0026_telemetry.sql`** en el SQL Editor de Supabase (solo ese archivo).
-2. Entra en **`/dashboard/telemetria`** (aparece en el menú lateral solo para tu cuenta, que es `platform_admin`).
-   Al principio verá pocas visitas: solo cuenta desde el momento en que se aplica.
-3. Comprobación rápida por API (con la anon key), si quieres confirmar que la tabla existe:
-   ```bash
-   curl -s -o /dev/null -w "%{http_code}\n" \
-     -X POST "$SUPABASE_URL/rest/v1/product_events" \
-     -H "apikey: $ANON_KEY" -H "Content-Type: application/json" \
-     -d '{"event":"page_view"}'    # 201 = tabla lista · 404 = migración sin aplicar
+   update public.organizations
+      set plan = 'enterprise', max_systems = 200, max_seats = 40
+    where id = '<org-uuid>';
    ```
+3. **Al terminar un contrato, limpia el pacto** (`set max_systems = null, max_seats = null`): el número
+   pactado gana sobre el plan, así que si se queda puesto seguirá aplicándose bajo un plan que ya no toca.
+
+### 1.1-nonies · Aplicar migración 0028 (endurecer permisos) — RÁPIDO, no urgente
+**No arregla ninguna fuga: cierra una segunda cerradura que 0026/0027 dejaron sin echar.** Todo funciona
+igual con o sin ella; conviene aplicarla, pero no bloquea nada.
+
+Salió al verificar 0026/0027 contra el Supabase **real** (no contra el Postgres de pruebas), y son dos
+diferencias entre lo que el SQL *parecía* hacer y lo que hace:
+
+1. **`revoke ... from anon` sobre una FUNCIÓN casi nunca revoca nada.** Postgres concede `EXECUTE` a
+   **PUBLIC** por defecto en cada función nueva, y `anon` lo hereda por ahí. Comprobado: un anónimo **sí
+   puede ejecutar** `product_funnel`; lo único que lo detiene es el guard `is_platform_admin()` que lleva
+   **dentro** (le devuelve 0 filas). O sea: la protección real está, pero la línea `revoke` era decorativa.
+   El mismo defecto estaba en `is_platform_admin()` desde la 0011.
+2. **En Supabase, `anon` tiene `SELECT` por defecto sobre las tablas de `public`.** En el Postgres de
+   pruebas no lo tiene, y por eso allí un SELECT anónimo daba *permission denied* y en producción da
+   `200 []`. Las dos son seguras —la RLS no le concede ni una fila— pero **en producción la única capa es
+   la RLS**. Si algún día alguien añade una policy permisiva por error, ahí sí habría fuga. Revocando el
+   SELECT hacen falta **dos** errores para filtrar, no uno.
+
+Lo que hace 0028: revoca de **PUBLIC** el `execute` de `product_funnel` e `is_platform_admin()` (y lo
+reconcede a `authenticated`), y le quita a `anon` el `SELECT` sobre `intake_links`, `intake_submissions` y
+`product_events`. **Lo que NO toca:** el `INSERT` anónimo en `product_events` (sin él no se miden las
+visitas de la landing) ni el `EXECUTE` de `submit_intake` (es la puerta pública del intake, a propósito).
+
+Validado en el Postgres desechable con los grants **imitando a Supabase** (`grant select on all tables to
+anon` primero, para que el revoke tenga algo que revocar): antes → `anon` podía las 8 cosas; después → pierde
+los 3 SELECT y los 2 `execute` internos, **conserva** el insert de telemetría y el `submit_intake`, y
+`authenticated` no pierde nada. Aplicada dos veces sin error, y el camino anónimo del intake sigue
+funcionando entero (token válido guarda y suma 1; los cinco casos malos devuelven el mismo `false`).
+
+1. Pega **`supabase/migrations/0028_grant_hardening.sql`** en el SQL Editor (solo ese archivo).
+2. No hay nada que comprobar en la UI: si todo sigue igual, funcionó. La telemetría debe seguir contando
+   visitas de la landing (`/dashboard/telemetria`) y el formulario público de intake debe seguir enviando.
+
+### 1.1-septies + octies · Migraciones 0026 y 0027 — ✅ APLICADAS (verificadas 2026-07-30)
+**Verificadas por API contra tu Supabase real**, no solo dadas por buenas:
+`product_events` → insert anónimo **201**; RPC `product_funnel` → **200**; `intake_links` e
+`intake_submissions` → existen; y `submit_intake` con token inexistente, token demasiado corto, otro token
+falso y nombre en blanco → **los cuatro devuelven el mismo `false` con HTTP 200** (no delata qué enlaces
+existen). Queda una fila de sonda en `product_events` (`path = '/probe-migracion'`) de la propia
+verificación; si te molesta en el panel, bórrala con:
+`delete from public.product_events where path = '/probe-migracion';`
+
+<details><summary>Cómo se aplicaron (referencia)</summary>
+
+> **📎 Se entregó `attesta-migraciones-0026-0027.sql`** — un único archivo con las **dos** migraciones
+> en orden, con instrucciones dentro. Pégalo completo en el SQL Editor y pulsa *Run*. También puedes
+> pegar los dos ficheros por separado (`0026_telemetry.sql` y luego `0027_intake_links.sql`): es lo mismo.
+>
+> **Validado antes de entregártelo** en un Postgres 16 desechable: se aplicó **tres veces seguidas** sobre
+> una base limpia sin un solo error, se comprobaron los objetos creados (3 tablas, 3 funciones, 9 políticas)
+> y se probó el camino anónimo de 0027 — token válido → guarda y suma 1 al contador; token inexistente,
+> revocado, caducado, agotado y nombre en blanco → **todos devuelven exactamente el mismo `false`**.
+>
+> **Corrección de esa validación:** allí se dijo que `anon` "ni siquiera puede leer las tablas
+> (*permission denied*)". Eso era cierto **en el Postgres de pruebas**, pero **no en Supabase**, donde `anon`
+> tiene `SELECT` por defecto sobre `public` y recibe `200 []` (cero filas por la RLS). Sigue siendo seguro,
+> pero con **una** capa en vez de dos. Eso es lo que arregla la **0028** (§1.1-nonies).
+>
+> **Bug corregido en el momento** (por eso hacemos este ritual): 0026 no era **idempotente** — sus dos
+> políticas se creaban sin `drop policy if exists`, y `create policy` no admite `if not exists`. Si hubieras
+> pegado el archivo dos veces (cosa normal: se re-pega tras corregir cualquier otra cosa), la segunda habría
+> muerto con *policy already exists*. Ya está arreglado en la migración y en `setup.sql`.
+
+</details>
+
+#### 0026 · Telemetría de producto
+Panel en **`/dashboard/telemetria`** (en el menú lateral solo para tu cuenta, que es `platform_admin`).
+Mide **desde el momento en que se aplicó**: no rellena el pasado, así que al principio hay pocos datos.
+
 **Qué mide y qué NO:** mide visitas, clics en CTA, altas, primer sistema, evaluación de riesgo, muro de pago,
 checkout y pago confirmado. **No** guarda IP, ni user-agent, ni correos, ni nombres de sistemas. El identificador
 anónimo del navegador solo evita contar dos veces la misma visita, y si el visitante activa "Do Not Track" o GPC
 no se emite nada. Pendiente asociado: declararlo en la futura página de **privacidad** (§0.F, medición de audiencia).
 
-### 1.1-octies · Aplicar migración 0027 (enlace de intake compartible) — RÁPIDO
-El enlace para que cada área declare su IA sin tener cuenta **ya está construido**, pero necesita sus tablas.
-Sin aplicarla la pantalla funciona igual y solo muestra su estado vacío (degradación segura, verificada).
-
-1. Pega **`supabase/migrations/0027_intake_links.sql`** en el SQL Editor (solo ese archivo).
-2. Entra en **`/dashboard/inventario/importar`**, crea un enlace con una etiqueta ("RRHH"), cópialo y ábrelo
-   en una ventana privada: deberías ver el formulario público y poder enviar una ficha.
-3. La ficha aparece en la bandeja de esa misma pantalla. Al pulsar **"Añadir al inventario"** se crea el
-   sistema y queda registrado **a tu nombre** en Actividad (el anónimo nunca escribe en el expediente).
+#### 0027 · Enlace de intake compartible
+Vive en **`/dashboard/inventario/importar`**. Prueba de humo cuando quieras: crea un enlace con etiqueta
+("RRHH"), cópialo y ábrelo en una ventana privada — debes ver el formulario público y poder enviar una ficha.
+La ficha aparece en la bandeja de esa misma pantalla; al pulsar **"Añadir al inventario"** se crea el sistema
+y queda registrado **a tu nombre** en Actividad (el anónimo nunca escribe en el expediente).
 
 **Qué tener en cuenta al compartirlo:** el enlace es una llave — quien lo tenga puede enviar fichas (nada
 más: no puede leer nada). Caduca a los **30 días**, admite hasta **100 envíos** y puedes **revocarlo** en
@@ -358,9 +502,8 @@ auditor/URL de su auditoría → verás el estado y la cuenta atrás ("vence en 
 > **Falta comprobar el flujo de pago end-to-end** (cuando el fundador quiera): crear un **cupón 100% off** en
 > Stripe Live y pasar por *Suscribirse* → "Add promotion code" → total $0 → suscripción `active` sin cobrar.
 >
-> **⚠️ Seguridad pendiente:** si el `sk_live` que está ahora en Vercel es **el mismo** que se expuso en el chat
-> en una sesión anterior, **rótalo**: Stripe → *Developers → API keys* → Secret key → **Roll key** → pon el
-> nuevo `sk_live` en `STRIPE_SECRET_KEY` (Vercel, Production) → **Redeploy**. La nueva nunca se pega en el chat.
+> **✅ Seguridad resuelta (2026-07-30):** la `sk_live` que se expuso en el chat fue **rotada** y la nueva está
+> en `STRIPE_SECRET_KEY` (Vercel). Ver §1.1.
 >
 > ---
 > **Historial (modo Test, 2026-07-18):** verificado e2e con tarjeta `4242…` → webhook 200 → suscripción
@@ -377,9 +520,8 @@ auditor/URL de su auditoría → verás el estado y la cuenta atrás ("vence en 
 > **Diagnóstico rápido** (por si se rompe): `curl -sS -X POST https://attesta-io.vercel.app/api/stripe/webhook
 > -d '{}'` → `firma inválida`/400 = configurado ✅ · `stripe no configurado`/503 = las llaves no están vivas.
 
-**PENDIENTE (cuando quieras cobrar de verdad):** repetir la configuración con llaves **LIVE** de Stripe
-(producto/precio live, `sk_live`/`pk_live`, webhook live → sus variables en Vercel) y **rotar** la `sk_live`
-que se expuso en el chat. Mientras, en Test no se cobra dinero real.
+*(Nota histórica: este bloque describía la configuración en modo Test. Ya está en **LIVE** y la `sk_live`
+expuesta está **rotada** — ver arriba y §1.1.)*
 
 <details><summary>Pasos originales de configuración (referencia)</summary>
 
@@ -600,8 +742,8 @@ con config del fundador → §1.6). Futuro opcional: SAML empresarial (requiere 
 (`/dashboard/organizaciones` — portfolio de entidades + crear entidad) y SSO/controles avanzados
 (`/dashboard/seguridad` — placeholder honesto) como funciones **exclusivas de Enterprise**, gateadas
 `requires="enterprise"`. El plan se resuelve por org activa → se aplica a todos los miembros y solo en
-esa org; al cambiar a otra org sin Enterprise se bloquean. ⚠️ **Solo bloquea de verdad con la migración
-0018 aplicada** (ver §1.1-bis). La página de Seguridad es un placeholder; el SSO corporativo real (SAML/
+esa org; al cambiar a otra org sin Enterprise se bloquean. ✅ **Bloquea de verdad: la migración 0018 está
+aplicada** (verificada 2026-07-30, §1.1-bis). La página de Seguridad es un placeholder; el SSO corporativo real (SAML/
 OIDC) aún no está cableado — el SSO **social** (Google/Microsoft) es cosa aparte (§1.6).
 
 **Construido pero inactivo hasta configurar**: cobro por suscripción Stripe (migración 0017 + webhook +

@@ -10,7 +10,9 @@ import {
   getCurrentMemberRole,
   isSupabaseConfigured,
 } from "@/lib/data";
-import { getCurrentUser } from "@/lib/data/context";
+import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
+import { QuotaMeter } from "@/components/dashboard/QuotaMeter";
+import { getQuota } from "@/lib/billing/quota";
 import { inviteMember } from "@/lib/data/team-actions";
 import { type MemberRole } from "@/lib/mock-data";
 import { resolveLocale } from "@/lib/i18n/resolve";
@@ -38,7 +40,14 @@ export default async function EquipoPage() {
   ]);
 
   const locale = await resolveLocale();
-  const t = getDictionary(locale).dashboard.team;
+  const dict = getDictionary(locale).dashboard;
+  const t = dict.team;
+
+  // Cupo de asientos (miembros + invitaciones pendientes). Se pinta arriba, antes
+  // del formulario de invitación, para que quien está a punto de invitar vea el
+  // tope ANTES de escribir el correo y no después de que se lo rechacen.
+  const org = connected ? await getActiveOrg() : null;
+  const quota = org ? await getQuota(org, "seats") : null;
 
   const isOwner = connected && role === "owner";
   const canManage = connected && (role === "owner" || role === "admin");
@@ -47,6 +56,18 @@ export default async function EquipoPage() {
   return (
     <>
       <PageHeader title={t.title} subtitle={t.subtitle} />
+
+      {quota && (
+        <QuotaMeter
+          state={quota}
+          label={dict.quota.seats
+            .replace("{used}", String(quota.used))
+            .replace("{max}", String(quota.max ?? "∞"))}
+          nearText={dict.quota.nearSeats}
+          atText={dict.quota.atSeats}
+          upgradeText={dict.quota.upgrade}
+        />
+      )}
 
       {!connected && (
         <div className="mb-6 rounded-2xl border border-[var(--tone-info-bd)] bg-[var(--tone-info-bg)] px-5 py-4 text-sm text-[var(--tone-info-fg)]">
