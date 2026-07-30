@@ -127,6 +127,31 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 1 completado (blindaje de marca + conversión) — 7 ítems, 5 commits.**
+  Primer sprint de la hoja de ruta 360° (`PENDIENTES.md §0.A`). Lo relevante para el futuro:
+  - **Guard de copy prohibido en CI** (`scripts/check-prohibited-copy.mjs` + `npm run check:copy`). La regla #1
+    ("Attesta NO certifica") ya no depende de disciplina humana. **Lección de diseño:** la lista negra de
+    palabras es inservible — daba **18 falsos positivos legítimos** (marcado CE *del proveedor*, "no como
+    certificador", "garantiza intervención humana" del RGPD 22, "ley aprobada por…") y un guard así se
+    desactiva. Se detecta el **patrón** (Attesta como sujeto que certifica, afirmación de cumplimiento del
+    cliente, `% de cumplimiento`), ignorando negaciones y preguntas de FAQ, con escape hatch `attesta-copy-ok`.
+    **Se autoprueba** (muestras con reglas esperadas + cobertura de las 20 reglas) → falla si alguien debilita
+    una regex. Verificado por ambos lados. Complementa a `PROHIBITED_COPY` de `analista/llm.ts` (runtime, LLM).
+  - **Conversión:** el Hero mandaba a la lista de espera mientras Precios mandaba a registro+checkout **ya
+    LIVE** → el propio CTA enfriaba el embudo. Ahora "Empieza gratis" → `/login?signup=1` (nuevo: abre el
+    formulario en modo registro). Enterprise sigue en waitlist a propósito (venta asistida).
+  - **El muro de pago ahora enseña valor:** teaser con cifras reales de la org (brechas abiertas/severidad
+    alta/sistemas). `PaidGate` recibe las stats como **función** y solo las resuelve si bloquea.
+  - **CORRECCIÓN a un diagnóstico mío:** dije que el gating de planes no se aplicaba en el servidor. **Falso:**
+    existe `PaidGate` (`src/lib/billing/gate.tsx`) montado vía `layout.tsx` en las 8 rutas de pago; mi grep
+    buscaba `orgHasTier` en las páginas y no lo vio. **No hay hueco de monetización.**
+  - **Matiz honesto sobre `DataRepo`:** la auditoría decía que olvidar un getter del repo demo "falla en
+    producción, no en tsc". Comprobado: **sí fallaba tsc**, pero con diagnósticos engañosos (tipos degradados a
+    `any`, error como *"implicitly any"* en páginas del dashboard). El contrato explícito arregla el
+    diagnóstico, no una ausencia de detección.
+  - **Deuda descubierta:** varios `layout.tsx` de secciones de pago tienen el copy del muro **hardcodeado en
+    español** (se corrigió el de `gap`; quedan los otros 7) → anotado para el sprint de UX.
+
 - **2026-07-30** · **Auditoría 360° de la app + HOJA DE RUTA MAESTRA. Decisión del fundador: "hay que hacer
   todo, por sprints".** A petición del fundador ("investigación completa en loop constante: cómo ampliar/mejorar
   la página en distintas áreas o aspectos técnicos"), se corrió un **panel multi-agente de 6 lentes en paralelo**

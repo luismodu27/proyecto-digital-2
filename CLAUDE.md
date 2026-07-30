@@ -67,6 +67,11 @@ de `src/lib/data`** y no saben qué backend hay detrás. `src/lib/data/index.ts`
   el middleware exige sesión + organización.
 
 Al añadir un getter nuevo, decláralo en **los tres**: `index.ts`, `mock-repo.ts`, `supabase-repo.ts`.
+El contrato está tipado: `index.ts` define `DataRepo = typeof supabaseRepo` (el repo real es la fuente
+de verdad) y afirma que `mock-repo` lo implementa. Si olvidas un getter en el repo demo, `tsc` falla
+señalando `data/index.ts` con *"Property 'getX' is missing"* — antes también fallaba, pero los tipos
+degradaban a `any` y el error salía como *"implicitly has an 'any' type"* en páginas del dashboard,
+lejos de la causa.
 Los **write-paths** son Server Actions en `src/lib/data/*-actions.ts` (guardan modo demo; validan
 uuid/fecha/enum; `revalidatePath`; toasts vía `?toast=`). Cada repo de supabase debe tener
 **fallback seguro** si una tabla/columna aún no existe (devolver `[]`/base curada) para no romper

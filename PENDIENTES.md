@@ -20,7 +20,9 @@
 > determinista, cero LLM**; todo lo de "Foso/compliance" pasa **antes** por el `compliance-domain-expert`;
 > las **apuestas grandes** llevan checkpoint del fundador antes de arrancar.
 
-### 0.A · SPRINT 1 — blindaje de marca + conversión (todo S, bajo riesgo) ⬅️ EMPEZAR AQUÍ
+### 0.A · SPRINT 1 — blindaje de marca + conversión ✅ COMPLETADO (2026-07-30)
+> Los 7 ítems hechos y desplegados. Verificación de cada uno: `tsc + lint + build + check:copy`.
+> **Siguiente sprint → 0.B.**
 - [x] ✅ **Guard automático contra copy PROHIBIDO en CI** (2026-07-30) — `scripts/check-prohibited-copy.mjs`
       + `npm run check:copy` + paso en `ci.yml`. **20 reglas ES+EN** que detectan el *patrón peligroso*
       (Attesta como sujeto que certifica, afirmación de cumplimiento del cliente, veredicto de aptitud,
@@ -30,19 +32,32 @@
       FAQ**; escape hatch `attesta-copy-ok` (usado en 5 líneas, con motivo). **Se autoprueba** en cada
       ejecución (muestras con reglas esperadas + cobertura de las 20 reglas) → falla si alguien debilita
       una regex. Verificado por ambos lados: atrapa 20 infracciones inyectadas y falla al romper una regla.
-- [ ] **Unificar la señal de conversión de la landing** — el Hero manda a `#waitlist` pero Precios manda a
-      `/login` (registro+checkout, ya LIVE): el visitante no sabe si puede empezar hoy. `alto · S`
-- [ ] **Teaser de brechas en el plan gratuito** — el "aha" (% listo, brechas, dossier) está todo tras el muro;
-      mostrar "tienes N brechas abiertas, desbloquea para verlas" con el dato que YA se calcula. `alto · S`
-- [ ] **Interfaz `DataRepo` compartida** (mock-repo + supabase-repo) — que olvidar un getter falle en `tsc`,
-      no en producción/modo demo. `medio · S`
-- [ ] **StatCards navegables** — "Alto riesgo" y "% listo" parecen enlaces y no lo son → enlazar a inventario
-      filtrado. `medio · S`
-- [ ] **JSON-LD** (Organization, SoftwareApplication, FAQPage) — rich snippets sin contenido nuevo; el FAQ ya
-      está estructurado en datos. `medio · S`
-- [ ] **`createClient()` con `cache()`** — deduplica el cliente SSR por render. `bajo · S`
+- [x] ✅ **Unificar la señal de conversión de la landing** — Hero y cabecera pasan a `/login?signup=1`
+      (registro real) con copy "Empieza gratis"; Precios: Diagnóstico y Preparación al registro, Enterprise
+      sigue en waitlist (requiere venta asistida). Nuevo `?signup=1` abre el formulario ya en modo registro
+      (`AuthForm.initialMode`). De paso se corrigió un dato obsoleto: "Policy packs (5 dominios)" → "(8 packs
+      · UE y EE. UU.)".
+- [x] ✅ **Teaser de brechas en el plan gratuito** — el muro de Gap assessment ahora muestra cifras REALES
+      (brechas abiertas · de severidad alta · sistemas afectados) sin revelar el detalle. `Paywall` acepta
+      `stats`; `PaidGate` las recibe como **función** y solo las resuelve si bloquea (el usuario de pago no
+      paga queries de un teaser que no verá), con try/catch. Excluye las prácticas prohibidas del Art. 5.
+      De paso: el layout tenía el copy del muro **hardcodeado en español** → ahora sale del diccionario.
+- [x] ✅ **Interfaz `DataRepo` compartida** — `index.ts` define `DataRepo = typeof supabaseRepo` (el repo real
+      es la fuente de verdad, sin duplicar 22 firmas) y afirma que `mock-repo` lo implementa. **Matiz honesto:**
+      `tsc` ya fallaba antes, pero con diagnósticos engañosos (los tipos degradaban a `any` y el error salía
+      como *"implicitly has an 'any' type"* en páginas del dashboard). Ahora dice *"Property 'getActionTasks'
+      is missing"* en `data/index.ts`. Verificado provocando ambos fallos: getter ausente y firma divergente.
+- [x] ✅ **StatCards navegables** — "Alto riesgo" → `/dashboard/riesgo`; "% listo" → `/dashboard/gap`.
+      El destino ideal (inventario **filtrado** por riesgo) espera al filtro del Sprint 4: no se enlaza a un
+      parámetro que hoy se ignoraría.
+- [x] ✅ **JSON-LD** — un `@graph` con Organization + SoftwareApplication + FAQPage, todo desde el diccionario
+      (bilingüe gratis, sin duplicar copy); precio desde `PLAN_PRICE_LABEL`. Verificado sobre el **HTML
+      servido**: 3 nodos, 8 preguntas, 2 ofertas (0/120) y `inLanguage=en` en `/en`. `ld+json` no es
+      ejecutable → no necesita nonce de la CSP; se escapa `<` para que ningún texto pueda inyectar marcado.
+- [x] ✅ **`createClient()` con `cache()`** — un cliente SSR por render en vez de uno por getter. `cache()` no
+      cruza requests → sin riesgo de compartir sesión.
 
-### 0.B · SPRINT 2 — activación + red de seguridad del contenido
+### 0.B · SPRINT 2 — activación + red de seguridad del contenido ⬅️ SIGUIENTE
 - [ ] **Import CSV + enlace de intake compartible** — el alta manual uno-a-uno es el muro de activación #1
       (nadie teclea 30 sistemas); sin inventario, riesgo/gap/dossier quedan vacíos. `alto · M`
 - [ ] **Tests con Vitest sobre la lógica pura** — `risk-assessment`, `recommendations`, `task-reminders`,
@@ -83,6 +98,10 @@
 - [ ] **Consolidar el onboarding** (modal + checklist + bienvenida compiten hoy en la 1ª sesión). `bajo · M`
 - [ ] **`lang="es"` en bloques regulatorios** — parche WCAG barato mientras el output legal no exista en EN.
       `medio · S`
+- [ ] **i18n de los muros de pago restantes** (descubierto en el Sprint 1) — 7 `layout.tsx` de secciones de pago
+      (`plan`, `packs`, `vigilancia`, `equipo`, `actividad`, `organizaciones`, `seguridad`) tienen
+      `feature`/`description` **hardcodeados en español**; en `/en` el muro sale mezclado. El de `gap` ya se
+      migró al diccionario en el Sprint 1: replicar ese patrón. `medio · S`
 - [ ] **`viewport`/`themeColor` + manifest mínimo + `noindex` en rutas de auth.** `bajo · S`
 - [ ] **Sección "cómo verificamos el contenido legal"** — el mayor diferenciador honesto (determinista, doble
       pasada del experto, citas verbatim) se afirma pero no se demuestra. `medio · M`
