@@ -127,6 +127,24 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 2 · observabilidad: las degradaciones ya no son mudas.**
+  El patrón `if (error) return []` de la fachada es correcto (la app no puede caerse porque falte una
+  migración) pero **borraba la causa**: en producción, "la tabla aún no existe", "la RLS está mal" y
+  "Supabase está caído" se veían idénticos — una pantalla vacía. Ahora cada degradación se clasifica
+  (`migration-pending` → warn, `permission` → error, `incident` → error) y deja **una línea JSON**.
+  - Dos decisiones conscientes: (1) **antirruido de 5 min** por sitio+código, porque una migración
+    pendiente escribiría una línea por render y un log ruidoso se deja de leer, que es como muere la
+    observabilidad; (2) **nada de Sentry todavía** — el enganche está listo (sustituir `emit`), pero
+    sumar un subprocesador es decisión del fundador (coste + DPA), no algo que se cuele en un commit
+    de alguien que vende gobernanza de datos.
+  - El caso que más valor añade y no estaba en el plan: **`getOrgPlan`**. Degradar a `free` una org que
+    paga era un incidente de facturación completamente invisible; ahora se distingue de "0018 sin
+    aplicar", que es el caso benigno.
+  - Verificado de punta a punta contra el Supabase real (que aún no tiene 0026): la telemetría emite
+    `{"kind":"migration-pending","code":"PGRST205"}` y la app responde igual. **Nota de higiene:** la
+    verificación dejó una fila de prueba en `waitlist` (`probe@attesta-test.dev`); sin service-role key
+    en local no pude borrarla — el fundador puede eliminarla desde el SQL Editor cuando quiera.
+
 - **2026-07-30** · **SPRINT 2 · red de seguridad del contenido: 221 tests con Vitest.**
   Por qué importaba tanto: el producto promete contenido legal **determinista y sin LLM**, pero nada
   impedía que una edición desafortunada invirtiera una regla del AI Act — `build`, `lint` y `tsc`

@@ -2,6 +2,7 @@ import "server-only";
 
 import { createServiceClient } from "@/lib/supabase/service";
 import { sanitizeProps, type ProductEvent } from "./events";
+import { logDataFallback } from "@/lib/observability/log";
 
 /**
  * Telemetría desde contextos SIN sesión de usuario: webhooks de Stripe, crons.
@@ -24,12 +25,13 @@ export async function trackService(
   try {
     const db = createServiceClient();
     if (!db) return;
-    await db.from("product_events").insert({
+    const { error } = await db.from("product_events").insert({
       event,
       organization_id: options.organizationId ?? null,
       props: sanitizeProps(options.props),
     });
-  } catch {
-    // best-effort
+    if (error) logDataFallback("telemetry.service", error);
+  } catch (err) {
+    logDataFallback("telemetry.service", err);
   }
 }

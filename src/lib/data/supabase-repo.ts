@@ -34,6 +34,7 @@ import {
 } from "@/lib/regulatory-watch";
 import type { BiasAudit } from "@/lib/bias-audit";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import { logDataFallback } from "@/lib/observability/log";
 import type { FunnelRow } from "@/lib/telemetry/events";
 
 /** Mapea la severidad de BD (en) a la del modelo de UI (es). */
@@ -67,7 +68,10 @@ export async function getAiSystems(): Promise<AiSystem[]> {
     .eq("organization_id", org)
     .order("created_at", { ascending: true });
 
-  if (error || !data) return [];
+  if (error || !data) {
+    logDataFallback("getAiSystems", error);
+    return [];
+  }
 
   return data.map((row) => ({
     id: row.code ?? row.id,
@@ -211,7 +215,12 @@ export async function getSystemBiasAudit(
     .eq("organization_id", org)
     .eq("id", id)
     .maybeSingle();
-  if (error || !data) return null;
+  if (error || !data) {
+    // Sin fila no hay incidente (el sistema puede no tener datos de sesgo aún);
+    // solo se registra si Supabase devolvió error.
+    if (error) logDataFallback("getSystemBiasAudit", error);
+    return null;
+  }
   return mapBiasRow(data as BiasRow);
 }
 
@@ -476,7 +485,10 @@ export async function getRegulatoryEvents(): Promise<RegulatoryEvent[]> {
     .select(
       "id, event_date, kind, framework, title, summary, impact, action, articles, source, scope",
     );
-  if (error || !data) return mergeCatalog([], undefined, locale);
+  if (error || !data) {
+    logDataFallback("getRegulatoryEvents", error, "cae al catálogo curado");
+    return mergeCatalog([], undefined, locale);
+  }
   return mergeCatalog(
     (data as RegEventRow[]).map(rowToRegEvent),
     undefined,
@@ -541,7 +553,10 @@ export async function getRegCandidates(): Promise<RegCandidate[]> {
       "id, proposed_event_id, event_date, kind, framework, title, summary, impact, action, articles, source, scope, status, provenance, created_at, reviewed_at, review_note, reg_sources(label)",
     )
     .order("created_at", { ascending: false });
-  if (error || !data) return [];
+  if (error || !data) {
+    logDataFallback("getRegCandidates", error);
+    return [];
+  }
   return (data as unknown as RegCandidateRow[]).map(rowToCandidate);
 }
 
@@ -589,7 +604,10 @@ export async function getRegSources(): Promise<RegSource[]> {
     )
     .order("framework", { ascending: true })
     .order("label", { ascending: true });
-  if (error || !data) return [];
+  if (error || !data) {
+    logDataFallback("getRegSources", error);
+    return [];
+  }
   return (data as RegSourceRow[]).map(rowToSource);
 }
 
@@ -672,7 +690,10 @@ export async function getActionTasks(): Promise<ActionTask[]> {
 export const getIsPlatformAdmin = cache(async (): Promise<boolean> => {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("is_platform_admin");
-  if (error) return false;
+  if (error) {
+    logDataFallback("getIsPlatformAdmin", error);
+    return false;
+  }
   return data === true;
 });
 
@@ -682,7 +703,8 @@ export async function getAuditLog(): Promise<AuditEntry[]> {
   const org = await getActiveOrg();
   if (!org) return [];
   const locale = await resolveLocale();
-  const { data } = await supabase.rpc("list_audit_log", { org, lim: 100 });
+  const { data, error } = await supabase.rpc("list_audit_log", { org, lim: 100 });
+  if (error) logDataFallback("getAuditLog", error);
   return ((data ?? []) as RawAudit[]).map((r) => toAuditEntry(r, locale));
 }
 
@@ -696,7 +718,12 @@ export async function verifyAuditChain(): Promise<AuditChainStatus | null> {
   const org = await getActiveOrg();
   if (!org) return null;
   const { data, error } = await supabase.rpc("verify_audit_chain", { org });
-  if (error) return null;
+  if (error) {
+    // Distingue "migración 0020 sin aplicar" de "la verificación de integridad
+    // del audit-trail está fallando", que es un incidente de primer orden.
+    logDataFallback("verifyAuditChain", error);
+    return null;
+  }
   const row = ((data ?? []) as {
     total: number;
     ok: boolean;
@@ -845,12 +872,20 @@ export async function getGapItems(): Promise<GapItem[]> {
     .order("created_at", { ascending: true });
   let data = primary.data as RawGap[] | null;
   if (primary.error) {
+    logDataFallback(
+      "getGapItems",
+      primary.error,
+      "reintento sin la columna prohibited (0022)",
+    );
     const fb = await supabase
       .from("gap_items")
       .select(COLS_BASE)
       .eq("organization_id", org)
       .order("created_at", { ascending: true });
-    if (fb.error || !fb.data) return [];
+    if (fb.error || !fb.data) {
+      logDataFallback("getGapItems", fb.error, "también falló el reintento");
+      return [];
+    }
     data = fb.data as RawGap[];
   }
   if (!data) return [];
@@ -888,7 +923,10 @@ export async function getGapItems(): Promise<GapItem[]> {
 export async function getProductFunnel(days = 30): Promise<FunnelRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("product_funnel", { days });
-  if (error || !Array.isArray(data)) return [];
+  if (error || !Array.isArray(data)) {
+    logDataFallback("getProductFunnel", error, "migración 0026 sin aplicar?");
+    return [];
+  }
 
   type Raw = {
     event: string;

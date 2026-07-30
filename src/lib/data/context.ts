@@ -2,6 +2,7 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { logDataFallback } from "@/lib/observability/log";
 
 /** Nombre de la cookie que guarda la organización activa elegida por el usuario. */
 export const ACTIVE_ORG_COOKIE = "attesta_org";
@@ -57,8 +58,9 @@ export const getActiveOrg = cache(async (): Promise<string | null> => {
       .in("status", ["active", "trialing"]);
     const subOrg = (subs ?? [])[0]?.organization_id as string | undefined;
     if (subOrg && orgIds.includes(subOrg)) return subOrg;
-  } catch {
-    // Tabla ausente u otro fallo → seguimos con la primera.
+  } catch (err) {
+    // Tabla ausente (0017 sin aplicar) u otro fallo → seguimos con la primera.
+    logDataFallback("getActiveOrg", err, "no se pudo priorizar la org con suscripción");
   }
 
   // 3) Por defecto, la primera (orden estable).

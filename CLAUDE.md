@@ -113,6 +113,18 @@ para webhooks/crons sin sesión) y `telemetry/client.ts` (`track`, `sendBeacon` 
 un correo sin darse cuenta. Nunca lanza: si 0026 no está aplicada, medir es un no-op y la app funciona igual.
 El panel `/dashboard/telemetria` es interno (solo `platform_admins`, y en demo devuelve vacío a propósito).
 
+**Observabilidad de las degradaciones (`src/lib/observability/log.ts`).** La fachada está llena de
+`if (error) return []` deliberados —la app no puede romperse porque falte una migración—, pero borraban
+la causa: "la tabla no existe", "la RLS está mal" y "Supabase está caído" se veían igual, una pantalla
+vacía. `logDataFallback(at, error, detail?)` clasifica en **`migration-pending`** (códigos 42P01/42703/
+42883/PGRST20x o el mensaje de *schema cache* → `warn`, es el estado esperado antes de aplicar una
+migración), **`permission`** (42501, RLS) e **`incident`** (todo lo demás → `error`), y emite **una línea
+JSON** (`{"src":"attesta","at":"getGapItems",…}`) que Vercel parsea sin configurar nada. Hay antirruido
+de 5 min por (sitio + código) para que una migración pendiente no escriba una línea por render.
+`logIncident` es para los `catch` de escritura. **Aquí NO entran datos de cliente**: solo el sitio, el
+código y el mensaje de Postgres. No manda nada a terceros a propósito: enchufar Sentry es sustituir
+`emit`, y sumar un subprocesador es decisión del fundador (coste + DPA), no un detalle de un commit.
+
 **Contenido legal = 100% determinista, cero LLM.** Las rutas que emiten texto regulatorio (dossier,
 informe, radar de vigilancia, clasificación de riesgo, recomendaciones) se ensamblan solo con datos
 reales del cliente + texto del AI Act ya verificado por el experto. Un texto legal alucinado es un

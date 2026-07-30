@@ -68,9 +68,15 @@
       regresiones con **6 mutaciones inyectadas** (las 6 fallaron). Encontraron 3 cosas reales: el campo
       `article` sí se traduce en parte (comparar por números, no literal), `minimal: []` es correcto y no un
       hueco, y un `?? "/"` que nunca se activaba en `normalizePath`.
-- [ ] **Logging / observabilidad de errores** — el patrón `if (error) return []` confunde "migración ausente"
-      con "Supabase caído / RLS rota"; en producción un incidente es indistinguible de "aún no hay datos".
-      Loggear con contexto o integrar Sentry. `alto · M`
+- [x] **Logging / observabilidad de errores** — ✅ **HECHO (2026-07-30)**. `src/lib/observability/log.ts`
+      clasifica cada degradación en `migration-pending` (warn), `permission` (RLS, error) o `incident`
+      (error) y emite **una línea JSON** por evento, con antirruido de 5 min. Instrumentados los 10
+      caminos degradados de `supabase-repo`, más `getOrgPlan` (degradar a `free` una org que paga era un
+      incidente de facturación invisible), `getActiveOrg`, las escrituras de `actions.ts` y la telemetría.
+      Verificado contra el Supabase real: la telemetría sin migración 0026 emite
+      `{"kind":"migration-pending","code":"PGRST205"}` y la app sigue funcionando.
+      **Sentry NO se integró a propósito**: sumar un subprocesador es decisión tuya (coste + DPA);
+      el enganche está listo (sustituir `emit`). `alto · M`
 - [ ] **Rama GPAI en el clasificador de riesgo** — GenAI es el caso de IA más común del mid-market y hoy cae en
       "limitado/mínimo", perdiendo la capa GPAI (Arts. 51-56) y la trampa del **Art. 25** (con fine-tuning
       sustancial pasas a proveedor). Vigente desde ago-2025. **Validar con el experto.** `alto · M`

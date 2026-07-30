@@ -4,6 +4,7 @@ import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
+import { logDataFallback } from "@/lib/observability/log";
 import {
   normalizePath,
   sanitizeProps,
@@ -57,8 +58,13 @@ type Inserter = Awaited<ReturnType<typeof createClient>>;
 async function insertWith(supabase: Inserter, row: EventRow): Promise<boolean> {
   try {
     const { error } = await supabase.from("product_events").insert(row);
+    // Se registra (con antirruido) para que una telemetría muda no pase por
+    // silenciosa: si 0026 no está aplicada aparece como `migration-pending`, y si
+    // fuera otra cosa, como incidente.
+    if (error) logDataFallback("telemetry.insert", error);
     return !error;
-  } catch {
+  } catch (err) {
+    logDataFallback("telemetry.insert", err);
     return false;
   }
 }
