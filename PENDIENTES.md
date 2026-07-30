@@ -80,8 +80,13 @@
 - [ ] **Rama GPAI en el clasificador de riesgo** — GenAI es el caso de IA más común del mid-market y hoy cae en
       "limitado/mínimo", perdiendo la capa GPAI (Arts. 51-56) y la trampa del **Art. 25** (con fine-tuning
       sustancial pasas a proveedor). Vigente desde ago-2025. **Validar con el experto.** `alto · M`
-- [ ] **Verificación local del JWT en el middleware (`getClaims`)** — hoy cada navegación paga una llamada de
-      red a Supabase Auth en el camino crítico. `alto · M`
+- [x] **Verificación local del JWT en el middleware (`getClaims`)** — ✅ **HECHO (2026-07-30)**. El
+      middleware ya no pregunta a Supabase Auth por red en cada navegación: verifica la firma del JWT en
+      local con WebCrypto. **Comprobado que aplica de verdad**: el proyecto ya firma con llaves
+      asimétricas (`alg: ES256`, JWKS público), que es la condición para que sea local — no hace falta
+      que toques nada. Verificado por curl con un usuario real `*@attesta-test.dev`: sin sesión
+      `/dashboard`→`/login`, con sesión `/login`→`/dashboard`, y una cookie con JWT malformado se trata
+      como "sin sesión" (no 500). `alto · M`
 
 ### 0.C · SPRINT 3 — monetización + compliance EE. UU.
 - [ ] **Metering por nº de sistemas/asientos + Enterprise a medida** — hoy una org con 2 sistemas y otra con 50

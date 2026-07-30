@@ -127,6 +127,16 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 2 · el middleware verifica el JWT en local (`getClaims`).**
+  Antes, cada clic dentro del dashboard pagaba una ida y vuelta a Supabase Auth en el camino crítico.
+  Lo interesante fue **comprobar la premisa en vez de suponerla**: `getClaims` solo verifica en local
+  si el proyecto firma con llaves **asimétricas**. Miré el JWT real de un usuario de prueba y llegaba
+  con `alg: ES256` + JWKS público en `/auth/v1/.well-known/jwks.json` → la mejora está activa hoy, sin
+  que el fundador tenga que migrar nada (si hubiera sido el secreto simétrico heredado, el cambio
+  habría sido correcto pero sin ganancia, y habría hecho falta una acción suya en el panel).
+  Verificado por curl con sesión real: sin cookie `/dashboard`→`/login`; con sesión `/login`→`/dashboard`;
+  y con una cookie de JWT malformado se trata como "sin sesión" en vez de romper con un 500.
+
 - **2026-07-30** · **SPRINT 2 · observabilidad: las degradaciones ya no son mudas.**
   El patrón `if (error) return []` de la fachada es correcto (la app no puede caerse porque falte una
   migración) pero **borraba la causa**: en producción, "la tabla aún no existe", "la RLS está mal" y
