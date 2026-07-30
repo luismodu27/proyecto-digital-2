@@ -127,6 +127,34 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **`sk_live` rotada + 0018 confirmada aplicada + 0026/0027 empaquetadas.** Tres cosas del
+  fundador, y dos aprendizajes que conviene no perder.
+  **(1)** El fundador **rotó la `sk_live`** de Stripe que se había pegado en el chat. §1.1 pasa de tarea urgente
+  a nota histórica con la regla permanente: ninguna clave secreta se pega en el chat, van solo a variables de
+  entorno. **(2)** El fundador creía haber aplicado ya la **0018** y tenía razón: `GET
+  organizations?select=plan` → **200 `[]`**, mientras una columna inventada da `42703 does not exist` (la
+  **prueba de contraste importa**: un `[]` a secas también lo devuelve la RLS, así que sin el control no se
+  distingue "columna existe pero no veo filas" de "columna no existe"). Consecuencia que había que decir en
+  voz alta, no solo tachar la tarea: **el gating por plan está ACTIVO** — el fundador conserva todo por ser
+  `platform_admin`, pero cualquier org sin suscripción Stripe ni `plan` elevado a mano está en `free` y solo
+  ve Inventario + Riesgo. **(3)** Se le entregó un **único archivo** con 0026 + 0027 en orden y con
+  instrucciones dentro, en vez de dos ficheros y una explicación en el chat: pegar SQL en un editor es el
+  paso con más fricción que hace el fundador, y cada decisión que le ahorramos ahí es una migración que no
+  se queda a medias.
+  **El ritual del Postgres desechable volvió a pagar** — y esta vez encontró algo que las pruebas
+  individuales no podían encontrar: **0026 no era idempotente**. Sus dos políticas se creaban sin
+  `drop policy if exists`, y `create policy` **no admite** `if not exists`; la segunda pasada moría con
+  *policy already exists*. Que 0027 sí lo tuviera (se corrigió al construirla) no salvaba a 0026: el bug solo
+  aparece **re-aplicando** el fichero, algo que pasa de verdad porque el fundador re-pega el script tras
+  corregir cualquier otra cosa. Corregido en la migración y en `setup.sql`, y validado con **tres pasadas
+  seguidas** sobre base limpia. **Regla nueva: validar cada migración aplicándola DOS veces, no una** — la
+  primera prueba que el SQL es correcto; la segunda, que es re-ejecutable, que es la propiedad que el fundador
+  usa de verdad.
+  Se aprovechó para probar el camino anónimo de 0027 end-to-end en local: token válido → guarda y suma 1 al
+  contador; token inexistente / revocado / caducado / agotado / nombre en blanco → **los cinco devuelven el
+  mismo `false`** (no es oráculo de tokens), y `anon` recibe *permission denied* al leer las tablas — el corte
+  ocurre en los `grant`, antes de llegar a la RLS, que es donde se quiere que ocurra.
+
 - **2026-07-30** · **SPRINT 2 · capa GPAI en el clasificador (cierra el Sprint 2).**
   GenAI es el caso de IA más común del mid-market y caía en "limitado/mínimo" sin más. La decisión de diseño
   clave —y la que hay que defender si alguien propone lo contrario— es que la capa GPAI **no cambia el nivel

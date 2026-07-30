@@ -63,7 +63,7 @@
       Excel español, cabeceras ES/EN, BOM, comas entrecomilladas, valida e informa **por filas**); el
       **enlace de intake** sirve para construirla preguntando a cada área sin darles cuenta (migración
       **0027**, token de capacidad, bandeja de revisión, `noindex`). Los dos en
-      `/dashboard/inventario/importar`. **Requiere aplicar 0027** (§1.1-octies). `alto · M`
+      `/dashboard/inventario/importar`. **Requiere aplicar 0027** (§1.1-septies). `alto · M`
 - [x] **Tests con Vitest sobre la lógica pura** — ✅ **HECHO (2026-07-30)**. 274 tests en 10 ficheros (221 al cerrar este ítem; el resto llegó con los ítems siguientes del sprint)
       (`npm test`, <1 s, en CI): `risk-assessment`, `recommendations`, `task-reminders`, `regulatory-watch`,
       `audit`, `bias-audit`, `telemetry/events` y **paridad de los 8 policy packs**. Codifican la expectativa
@@ -103,7 +103,7 @@
 
 > **Cierre del Sprint 2 (6/6 ítems).** Todo verificado con lint + tsc + `check:copy` + **274 tests** + build,
 > y los caminos reales por curl contra el Supabase de producción. Dos migraciones nuevas esperan tu mano:
-> **0026** (telemetría, §1.1-septies) y **0027** (intake compartible, §1.1-octies) — sin ellas la app funciona
+> **0026** (telemetría) y **0027** (intake compartible) — ambas en **§1.1-septies**, ya empaquetadas en un solo archivo — sin ellas la app funciona
 > igual, solo que sin métricas y sin enlaces de intake. Lo aprendido en cada ítem está en `MEMORY.md §10`.
 >
 > Novedad de método que conviene conservar: **toda migración nueva se valida antes en un Postgres desechable**
@@ -256,37 +256,58 @@ El fundador las pegó en el SQL Editor. Con esto las 2 fallas HIGH quedan **cerr
 
 ## 🔴 1. Pendiente TUYO (acciones manuales del fundador)
 
-### 1.1 · Seguridad — rotar la clave de Stripe (URGENTE)
-En una sesión anterior se pegó una **clave secreta LIVE de Stripe (`sk_live_…`) en el chat** →
-tratarla como comprometida. **Rótala**: Stripe → *Developers → API keys* → en la Secret key →
-**Roll key**. La nueva NUNCA se pega en el chat; va solo a variables de entorno de Vercel.
+### 1.1 · Seguridad — clave `sk_live` de Stripe — ✅ ROTADA (2026-07-30)
+En una sesión anterior se pegó una **clave secreta LIVE de Stripe (`sk_live_…`) en el chat**. El fundador
+la **rotó** (Stripe → *Developers → API keys* → Secret key → *Roll key*) y puso la nueva en las variables
+de entorno de Vercel. La clave expuesta ya no sirve para nada.
 
-### 1.1-bis · Aplicar migración 0018 (diferenciación de planes) — RÁPIDO ⚠️ BLOQUEA EL GATING ENTERPRISE
-La diferenciación de planes (free / preparación / enterprise) **ya está construida**, pero el
-bloqueo por plan **solo se activa al aplicar la migración**. Sin aplicarla, la app sigue con acceso
-completo (degradación segura). **Esto incluye las nuevas funciones Enterprise** (Multi-organización
-`/dashboard/organizaciones` y SSO/controles avanzados `/dashboard/seguridad`, desplegadas 2026-07-22):
-mientras 0018 no esté aplicada, `getOrgPlan` devuelve `enterprise` por defecto y **nadie queda
-bloqueado**. Para que el gating por-organización que pidió el fundador surta efecto real:
-aplicar 0018 **y** poner `organizations.plan = 'enterprise'` en las orgs que sí pagan Enterprise.
-Para encenderla:
-1. Pega **`supabase/migrations/0018_org_plan.sql`** en el SQL Editor de Supabase (solo ese archivo).
-2. A partir de ahí, las cuentas nuevas entran como **gratis** (solo Inventario + Riesgo). Tu cuenta,
-   al ser `platform_admin`, **conserva acceso completo** automáticamente.
-3. Para dar acceso de pago a un cliente **sin Stripe** (cortesía o Enterprise), en el SQL Editor:
-   ```sql
-   -- hallar el id de la org por el email de un miembro:
-   select o.id, o.name, o.plan from public.organizations o
-   join public.memberships m on m.organization_id = o.id
-   join auth.users u on u.id = m.user_id
-   where u.email = '<correo>';
-   -- elevar el plan:
-   update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
-   -- o 'enterprise'
-   ```
-4. Cuando Stripe esté activo (§1.2), una suscripción activa sube la org a **preparación** sola.
+**Regla que queda para siempre:** ninguna clave secreta (`sk_live`, `sk_test`, `service_role`, contraseñas)
+se pega en el chat **nunca**. Van solo a variables de entorno. Si alguna vez se cuela una, se rota igual que
+esta — el coste de rotar es un redeploy; el de no rotar, cobros ajenos en tu cuenta.
 
-### 1.1-septies · Aplicar migración 0026 (telemetría de producto) — RÁPIDO ⚠️ SIN ELLA NO HAY MÉTRICAS
+### 1.1-bis · Migración 0018 (diferenciación de planes) — ✅ APLICADA (verificada 2026-07-30)
+**Verificada por API** con la anon key: `GET /rest/v1/organizations?select=plan` → **HTTP 200 `[]`**, mientras
+que una columna inventada devuelve `42703 column … does not exist` (prueba de contraste, para no dar por
+aplicado algo que solo devolvía vacío por RLS). La columna `organizations.plan` **existe**.
+
+**Consecuencia importante: el gating por plan está ACTIVO.** Ya no se degrada a acceso completo. Ahora mismo:
+- Tu cuenta es `platform_admin` → `getOrgPlan` devuelve `enterprise`, **conservas acceso completo**.
+- Cualquier organización **sin** suscripción Stripe activa y **sin** `plan` elevado a mano está en **`free`**:
+  solo ve **Inventario + Riesgo**; gap, plan, packs, vigilancia, dossier, informe, equipo y actividad
+  quedan detrás del muro de pago.
+- Una suscripción Stripe `active`/`trialing` sube la org a **preparación** automáticamente (§1.2, ya en LIVE).
+
+Para dar acceso de pago a un cliente **sin Stripe** (cortesía o Enterprise), en el SQL Editor:
+```sql
+-- ver de un golpe qué plan tiene cada organización y quién está dentro:
+select o.id, o.name, o.plan, u.email
+from public.organizations o
+join public.memberships m on m.organization_id = o.id
+join auth.users u on u.id = m.user_id
+order by o.name;
+
+-- elevar el plan de una org:
+update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
+-- o 'enterprise'
+```
+
+### 1.1-septies + octies · Aplicar 0026 y 0027 — un solo archivo listo para pegar (2026-07-30)
+> **📎 Te entregué `attesta-migraciones-0026-0027.sql`** — un único archivo con las **dos** migraciones
+> en orden, con instrucciones dentro. Pégalo completo en el SQL Editor y pulsa *Run*. También puedes
+> pegar los dos ficheros por separado (`0026_telemetry.sql` y luego `0027_intake_links.sql`): es lo mismo.
+>
+> **Validado antes de entregártelo** en un Postgres 16 desechable: se aplicó **tres veces seguidas** sobre
+> una base limpia sin un solo error, se comprobaron los objetos creados (3 tablas, 3 funciones, 9 políticas)
+> y se probó el camino anónimo de 0027 — token válido → guarda y suma 1 al contador; token inexistente,
+> revocado, caducado, agotado y nombre en blanco → **todos devuelven exactamente el mismo `false`**;
+> el rol `anon` ni siquiera puede leer las tablas (*permission denied*, antes de llegar a la RLS).
+>
+> **Bug corregido en el momento** (por eso hacemos este ritual): 0026 no era **idempotente** — sus dos
+> políticas se creaban sin `drop policy if exists`, y `create policy` no admite `if not exists`. Si hubieras
+> pegado el archivo dos veces (cosa normal: se re-pega tras corregir cualquier otra cosa), la segunda habría
+> muerto con *policy already exists*. Ya está arreglado en la migración y en `setup.sql`.
+
+#### 0026 · Telemetría de producto — ⚠️ SIN ELLA NO HAY MÉTRICAS
 El embudo de activación **ya está instrumentado en el código**, pero no guarda nada hasta que exista la tabla.
 Sin aplicarla la app funciona **exactamente igual** (degradación segura: cada intento de medir es un no-op).
 
@@ -306,7 +327,7 @@ checkout y pago confirmado. **No** guarda IP, ni user-agent, ni correos, ni nomb
 anónimo del navegador solo evita contar dos veces la misma visita, y si el visitante activa "Do Not Track" o GPC
 no se emite nada. Pendiente asociado: declararlo en la futura página de **privacidad** (§0.F, medición de audiencia).
 
-### 1.1-octies · Aplicar migración 0027 (enlace de intake compartible) — RÁPIDO
+#### 0027 · Enlace de intake compartible
 El enlace para que cada área declare su IA sin tener cuenta **ya está construido**, pero necesita sus tablas.
 Sin aplicarla la pantalla funciona igual y solo muestra su estado vacío (degradación segura, verificada).
 
@@ -358,9 +379,8 @@ auditor/URL de su auditoría → verás el estado y la cuenta atrás ("vence en 
 > **Falta comprobar el flujo de pago end-to-end** (cuando el fundador quiera): crear un **cupón 100% off** en
 > Stripe Live y pasar por *Suscribirse* → "Add promotion code" → total $0 → suscripción `active` sin cobrar.
 >
-> **⚠️ Seguridad pendiente:** si el `sk_live` que está ahora en Vercel es **el mismo** que se expuso en el chat
-> en una sesión anterior, **rótalo**: Stripe → *Developers → API keys* → Secret key → **Roll key** → pon el
-> nuevo `sk_live` en `STRIPE_SECRET_KEY` (Vercel, Production) → **Redeploy**. La nueva nunca se pega en el chat.
+> **✅ Seguridad resuelta (2026-07-30):** la `sk_live` que se expuso en el chat fue **rotada** y la nueva está
+> en `STRIPE_SECRET_KEY` (Vercel). Ver §1.1.
 >
 > ---
 > **Historial (modo Test, 2026-07-18):** verificado e2e con tarjeta `4242…` → webhook 200 → suscripción
@@ -377,9 +397,8 @@ auditor/URL de su auditoría → verás el estado y la cuenta atrás ("vence en 
 > **Diagnóstico rápido** (por si se rompe): `curl -sS -X POST https://attesta-io.vercel.app/api/stripe/webhook
 > -d '{}'` → `firma inválida`/400 = configurado ✅ · `stripe no configurado`/503 = las llaves no están vivas.
 
-**PENDIENTE (cuando quieras cobrar de verdad):** repetir la configuración con llaves **LIVE** de Stripe
-(producto/precio live, `sk_live`/`pk_live`, webhook live → sus variables en Vercel) y **rotar** la `sk_live`
-que se expuso en el chat. Mientras, en Test no se cobra dinero real.
+*(Nota histórica: este bloque describía la configuración en modo Test. Ya está en **LIVE** y la `sk_live`
+expuesta está **rotada** — ver arriba y §1.1.)*
 
 <details><summary>Pasos originales de configuración (referencia)</summary>
 
@@ -600,8 +619,8 @@ con config del fundador → §1.6). Futuro opcional: SAML empresarial (requiere 
 (`/dashboard/organizaciones` — portfolio de entidades + crear entidad) y SSO/controles avanzados
 (`/dashboard/seguridad` — placeholder honesto) como funciones **exclusivas de Enterprise**, gateadas
 `requires="enterprise"`. El plan se resuelve por org activa → se aplica a todos los miembros y solo en
-esa org; al cambiar a otra org sin Enterprise se bloquean. ⚠️ **Solo bloquea de verdad con la migración
-0018 aplicada** (ver §1.1-bis). La página de Seguridad es un placeholder; el SSO corporativo real (SAML/
+esa org; al cambiar a otra org sin Enterprise se bloquean. ✅ **Bloquea de verdad: la migración 0018 está
+aplicada** (verificada 2026-07-30, §1.1-bis). La página de Seguridad es un placeholder; el SSO corporativo real (SAML/
 OIDC) aún no está cableado — el SSO **social** (Google/Microsoft) es cosa aparte (§1.6).
 
 **Construido pero inactivo hasta configurar**: cobro por suscripción Stripe (migración 0017 + webhook +
