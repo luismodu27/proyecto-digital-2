@@ -82,6 +82,18 @@ pertenecer a N organizaciones. El `audit_log` es **inmutable** (triggers `block_
 rellenan triggers `write_audit` en cada tabla con `organization_id`. `src/lib/audit.ts` traduce
 filas crudas a español legible.
 
+**Telemetría de producto = primera parte, catálogo cerrado, cero PII.** No hay PostHog/GA/Plausible: los
+eventos se escriben en `product_events` (migración **0026**, misma BD en la UE) y el embudo se lee con la RPC
+`product_funnel`, que lleva el guard de `is_platform_admin()` **dentro**. El catálogo de eventos vive en
+`src/lib/telemetry/events.ts` y es **cerrado** (un nombre nuevo no compila); `CLIENT_EVENTS` marca los pocos que
+el navegador puede emitir — los hechos de negocio (pago, alta de sistema) se emiten en el servidor, donde son
+comprobables, para que nadie pueda falsear el embudo desde la consola. Tres emisores según el contexto:
+`telemetry/server.ts` (`trackServer`, aplaza el insert con `after()`), `telemetry/service.ts` (`trackService`,
+para webhooks/crons sin sesión) y `telemetry/client.ts` (`track`, `sendBeacon` + respeto de GPC/DNT).
+`sanitizeProps` acota los metadatos y **descarta cualquier valor con `@`**: la fuga de PII más probable es colar
+un correo sin darse cuenta. Nunca lanza: si 0026 no está aplicada, medir es un no-op y la app funciona igual.
+El panel `/dashboard/telemetria` es interno (solo `platform_admins`, y en demo devuelve vacío a propósito).
+
 **Contenido legal = 100% determinista, cero LLM.** Las rutas que emiten texto regulatorio (dossier,
 informe, radar de vigilancia, clasificación de riesgo, recomendaciones) se ensamblan solo con datos
 reales del cliente + texto del AI Act ya verificado por el experto. Un texto legal alucinado es un
@@ -107,6 +119,7 @@ src/
     mock-data.ts   # datos demo + TIPOS canónicos (AiSystem, GapItem, ...)
     risk-assessment.ts regulatory-watch.ts recommendations.ts audit.ts
     policy-packs/rrhh.ts  task-reminders.ts
+    telemetry/     # events (catálogo cerrado) + server/service/client + actions
 supabase/
   migrations/*.sql   # 0001..0013 (esquema, RLS, audit, RPCs)
   setup.sql          # todas las migraciones concatenadas (el fundador las pega en SQL Editor)
@@ -157,3 +170,9 @@ docs/{supabase.md,thesis.md}
   dinámico usa un **mapa de hex** en el componente, no `var(--color-...)` de un token no referenciado.
   Todo color semántico nuevo va por **token/tono** (`--tone-*`), nunca hex hardcodeado en clases.
 - **Rutas con datos frescos** (countdown de vigilancia, audit-trail) llevan `export const dynamic = "force-dynamic"`.
+- **`greatest`/`least` NO se pueden cualificar con esquema.** Son construcciones del lenguaje SQL, no funciones:
+  `pg_catalog.least(...)` da *"function does not exist"*. Tampoco les afecta `search_path = ''`, así que en
+  `security definer` van **sin** prefijo (a diferencia de `make_interval`, `now()`, casts, tablas…). Se detectó
+  levantando un Postgres 16 desechable y aplicando la migración 0026 antes de dársela al fundador; **merece la
+  pena hacerlo con cada migración nueva** (`initdb` + un scaffold con `auth.users`, `organizations`, los roles
+  `anon`/`authenticated` y `is_platform_admin()` basta para validar sintaxis, CHECKs y policies).

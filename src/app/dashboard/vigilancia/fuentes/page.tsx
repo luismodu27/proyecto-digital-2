@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
 import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { VigiaRunButton } from "@/components/dashboard/VigiaRunButton";
+import { formatDateTime } from "@/lib/date";
 import { getRegSources, getIsPlatformAdmin, isSupabaseConfigured } from "@/lib/data";
 import {
   regSourceStatusLabel,
@@ -40,16 +41,6 @@ function Pill({
       {children}
     </span>
   );
-}
-
-function relTime(iso: string | null, locale: Locale, never: string): string {
-  if (!iso) return never;
-  return new Date(iso).toLocaleString(locale === "en" ? "en-GB" : "es-ES", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 function SourceRow({
@@ -93,10 +84,10 @@ function SourceRow({
         )}
       </td>
       <td className="py-3 pr-4 whitespace-nowrap text-xs text-muted">
-        {relTime(s.lastCheckedAt, locale, tf.never)}
+        {formatDateTime(s.lastCheckedAt, locale, tf.never)}
       </td>
       <td className="py-3 whitespace-nowrap text-xs text-muted">
-        {relTime(s.lastChangeAt, locale, tf.never)}
+        {formatDateTime(s.lastChangeAt, locale, tf.never)}
       </td>
     </tr>
   );

@@ -122,9 +122,12 @@
 
 ### 0.F · SPRINT 6 — los 8 huecos que el propio panel se dejó fuera (crítico de completitud)
 > Confirmados contra el repo: **no hay** analítica, ni páginas legales/privacidad, ni Sentry, ni rutas de ayuda.
-- [ ] **Telemetría de producto / funnel de activación** — hoy optimizamos conversión y activación **a ciegas**
-      (sin PostHog/Plausible ni evento "clasificó 1er sistema → vio brechas → pagó"). Debería ir **antes** o a la
-      par del Sprint 1 para poder medirlo. `alto · S-M`
+- [x] **Telemetría de producto / funnel de activación** — ✅ **HECHO (2026-07-30, adelantado antes del Sprint 2)**.
+      De **primera parte** (sin PostHog/Plausible/GA): migración `0026_telemetry.sql` (`product_events` + RPC
+      `product_funnel`), catálogo cerrado de 13 eventos (`src/lib/telemetry/events.ts`), API `/api/telemetry`
+      (whitelist de eventos de cliente + rate-limit + cuerpo acotado), y panel `/dashboard/telemetria` solo para
+      `platform_admins`. Sin IP, sin user-agent, sin PII, y se respetan GPC/DNT. **Requiere aplicar 0026**
+      (§1.1-septies); sin ella la app funciona igual pero no mide.
 - [ ] **Cumplimiento propio de Attesta** — no existe página de **privacidad**, **DPA**, lista de
       **subprocesadores** (Supabase UE, Stripe, proveedor de email) ni aviso de cookies. Vender gobernanza de IA
       a mid-market UE sin tu propio DPA **bloquea la compra** en due-diligence y es incoherente con la marca.
@@ -244,6 +247,26 @@ Para encenderla:
    -- o 'enterprise'
    ```
 4. Cuando Stripe esté activo (§1.2), una suscripción activa sube la org a **preparación** sola.
+
+### 1.1-septies · Aplicar migración 0026 (telemetría de producto) — RÁPIDO ⚠️ SIN ELLA NO HAY MÉTRICAS
+El embudo de activación **ya está instrumentado en el código**, pero no guarda nada hasta que exista la tabla.
+Sin aplicarla la app funciona **exactamente igual** (degradación segura: cada intento de medir es un no-op).
+
+Para encenderla:
+1. Pega **`supabase/migrations/0026_telemetry.sql`** en el SQL Editor de Supabase (solo ese archivo).
+2. Entra en **`/dashboard/telemetria`** (aparece en el menú lateral solo para tu cuenta, que es `platform_admin`).
+   Al principio verá pocas visitas: solo cuenta desde el momento en que se aplica.
+3. Comprobación rápida por API (con la anon key), si quieres confirmar que la tabla existe:
+   ```bash
+   curl -s -o /dev/null -w "%{http_code}\n" \
+     -X POST "$SUPABASE_URL/rest/v1/product_events" \
+     -H "apikey: $ANON_KEY" -H "Content-Type: application/json" \
+     -d '{"event":"page_view"}'    # 201 = tabla lista · 404 = migración sin aplicar
+   ```
+**Qué mide y qué NO:** mide visitas, clics en CTA, altas, primer sistema, evaluación de riesgo, muro de pago,
+checkout y pago confirmado. **No** guarda IP, ni user-agent, ni correos, ni nombres de sistemas. El identificador
+anónimo del navegador solo evita contar dos veces la misma visita, y si el visitante activa "Do Not Track" o GPC
+no se emite nada. Pendiente asociado: declararlo en la futura página de **privacidad** (§0.F, medición de audiencia).
 
 ### 1.1-sexies · Migración 0022 (práctica prohibida en brechas) — ✅ APLICADA (2026-07-22)
 Aplicada por el fundador y **verificada por API** (probe con la anon key: `select=prohibited` → HTTP 200; columna

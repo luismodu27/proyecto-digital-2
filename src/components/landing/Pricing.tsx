@@ -1,4 +1,4 @@
-import { ButtonLink } from "@/components/ui/Button";
+import { CtaLink } from "@/components/telemetry/CtaLink";
 import { Reveal } from "@/components/ui/Reveal";
 import type { Dictionary } from "@/lib/i18n";
 
@@ -6,10 +6,13 @@ import type { Dictionary } from "@/lib/i18n";
 // Diagnóstico y Preparación abren el formulario ya en modo REGISTRO (`?signup=1`):
 // son autoservicio y el checkout está activo. Solo Enterprise ("a medida") va a la
 // lista de espera, porque requiere conversación comercial.
-const TIER_META: { href: string; highlight: boolean }[] = [
-  { href: "/login?signup=1", highlight: false },
-  { href: "/login?signup=1", highlight: true },
-  { href: "#waitlist", highlight: false },
+// `cta` es el identificador de telemetría del clic: identifica el PLAN elegido
+// (no el texto del botón, que cambia con el idioma), así se puede ver cuál de los
+// tres convierte de verdad.
+const TIER_META: { href: string; highlight: boolean; cta: string }[] = [
+  { href: "/login?signup=1", highlight: false, cta: "pricing_free" },
+  { href: "/login?signup=1", highlight: true, cta: "pricing_preparacion" },
+  { href: "#waitlist", highlight: false, cta: "pricing_enterprise" },
 ];
 
 // Matriz de comparación: cada fila = una capacidad; celdas true/false o un
@@ -136,13 +139,14 @@ export function Pricing({ t }: { t: Dictionary["landing"]["pricing"] }) {
                   )}
                 </div>
 
-                <ButtonLink
+                <CtaLink
+                  cta={meta.cta}
                   href={meta.href}
                   variant={meta.highlight ? "primary" : "outline"}
                   className="mt-7 w-full py-2.5"
                 >
                   {tier.cta}
-                </ButtonLink>
+                </CtaLink>
               </div>
             </Reveal>
           );

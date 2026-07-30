@@ -731,6 +731,7 @@ export const es = {
       activity: "Actividad",
       organizations: "Organizaciones",
       security: "Seguridad",
+      telemetry: "Telemetría",
       lockedTitle: "Función del plan Preparación",
       lockedTitleEnterprise: "Función del plan Enterprise",
       lockedLabel: "Bloqueado",
@@ -1659,6 +1660,45 @@ export const es = {
         never: "nunca",
         failOne: "fallo",
         failOther: "fallos",
+      },
+
+      telemetry: {
+        title: "Telemetría de producto",
+        subtitle:
+          "Embudo de activación de los últimos 30 días: de la visita al pago. Datos de primera parte, sin herramientas de terceros y sin datos personales.",
+        subtitleNonAdmin: "Métricas internas de producto de Attesta.",
+        nonAdminNotice:
+          "Esta área es del equipo de Attesta: mide cómo se usa el producto y no contiene datos de tu organización.",
+        empty:
+          "Todavía no hay eventos registrados. Si el despliegue es reciente, comprueba que la migración 0026 esté aplicada: sin ella la app funciona igual, pero no guarda métricas.",
+        funnelTitle: "Embudo de activación",
+        funnelHint:
+          "Cada paso se cuenta por visitantes distintos. La conversión compara con el paso anterior. No es una secuencia obligatoria: se puede pagar sin haber aplicado un pack.",
+        othersTitle: "Otros eventos",
+        colStep: "Paso",
+        colEvent: "Evento",
+        colVisitors: "Visitantes",
+        colEvents: "Eventos",
+        colConversion: "Conversión",
+        colLast: "Último",
+        never: "nunca",
+        privacyNote:
+          "Sin IP, sin user-agent y sin datos personales. El identificador anónimo solo evita contar dos veces la misma visita, y se respetan las señales GPC/DNT del navegador.",
+        events: {
+          page_view: "Visitas",
+          cta_click: "Clic en un CTA",
+          waitlist_submit: "Solicitud de acceso",
+          signup_submitted: "Registro enviado",
+          org_created: "Organización creada",
+          system_created: "Sistema dado de alta",
+          risk_assessed: "Riesgo evaluado",
+          pack_applied: "Policy pack aplicado",
+          paywall_viewed: "Muro de pago visto",
+          checkout_started: "Checkout iniciado",
+          checkout_completed: "Pago confirmado",
+          export_downloaded: "Evidencia exportada",
+          invite_sent: "Invitación enviada",
+        },
       },
 
       // Chrome de los documentos PDF: SOLO botón de descarga + paywall. El cuerpo

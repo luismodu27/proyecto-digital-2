@@ -36,6 +36,7 @@ import {
 } from "@/lib/mock-data";
 import { mergeCatalog, type RegulatoryEvent } from "@/lib/regulatory-watch";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import type { FunnelRow } from "@/lib/telemetry/events";
 
 /**
  * Repositorio de datos de ejemplo (modo demo).
@@ -208,4 +209,16 @@ export async function getSystemDossier(
     assessments: (en ? SAMPLE_ASSESSMENTS_EN : SAMPLE_ASSESSMENTS)[system.id] ?? [],
     biasAudit: (en ? SAMPLE_BIAS_AUDITS_EN : SAMPLE_BIAS_AUDITS)[system.id] ?? null,
   };
+}
+
+/**
+ * Embudo de activación (modo demo): SIEMPRE vacío, a propósito.
+ *
+ * Es un panel de métricas internas de Attesta, no una pantalla de producto: unos
+ * números de ejemplo aquí solo servirían para que alguien tomara una decisión de
+ * negocio con datos inventados. El panel muestra su estado vacío.
+ */
+export async function getProductFunnel(_days = 30): Promise<FunnelRow[]> {
+  void _days;
+  return [];
 }

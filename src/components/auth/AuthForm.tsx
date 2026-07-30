@@ -9,6 +9,7 @@ import { SsoButtons } from "@/components/auth/SsoButtons";
 import { createClient } from "@/lib/supabase/client";
 import { isAnySsoEnabled } from "@/lib/supabase/config";
 import { friendlyError } from "@/lib/friendly-error";
+import { track } from "@/lib/telemetry/client";
 import type { Dictionary } from "@/lib/i18n";
 
 type Mode = "login" | "signup";
@@ -106,6 +107,9 @@ export function AuthForm({
           },
         });
         if (error) throw error;
+        // Paso del embudo: intención de alta consumada (el registro se aceptó).
+        // El evento no lleva correo ni nombre — solo el hecho.
+        track("signup_submitted");
         if (data.session) {
           router.push("/onboarding");
           router.refresh();

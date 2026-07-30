@@ -127,6 +127,30 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-07-30** · **SPRINT 2 · telemetría de producto ADELANTADA (antes que el resto del sprint).**
+  Razón: el Sprint 1 optimizó conversión y activación **a ciegas** y el Sprint 2 iba a hacer lo mismo con el
+  import CSV. Medir primero, optimizar después. Decisiones que conviene no volver a discutir:
+  - **De primera parte, no PostHog/GA/Plausible.** Vendemos gobernanza de IA y transparencia de datos a
+    mid-market europeo: enviar la navegación de nuestros clientes a un tercero exigiría DPA, subprocesador
+    declarado y aviso de cookies, y contradice el discurso. Los eventos se quedan en la misma BD (UE). Además
+    no toca la CSP ni añade scripts de terceros, y sale gratis.
+  - **Catálogo cerrado de eventos** (`src/lib/telemetry/events.ts`): un nombre nuevo no compila. La telemetría
+    de texto libre se degrada en semanas (`cta_click` / `click_cta` / `ctaClick`) y deja de poder responder la
+    única pregunta que importa. `CLIENT_EVENTS` limita lo que puede emitir el navegador: `checkout_completed`
+    solo lo escribe el webhook de Stripe, así que el embudo de ingresos no se puede falsear desde la consola.
+  - **Privacidad como decisión de producto, no como adorno:** sin IP, sin user-agent, sin PII (`sanitizeProps`
+    tira cualquier valor con `@`), se respetan GPC/DNT, y el `anon_id` es un aleatorio de primera parte que
+    solo evita contar dos veces la misma visita. Queda pendiente declararlo en la página de privacidad (§0.F).
+  - **Hallazgo técnico reutilizable:** levanté un **Postgres 16 desechable** con un scaffold mínimo
+    (`auth.users`, `organizations`, roles `anon`/`authenticated`, `is_platform_admin()`) y apliqué la migración
+    antes de dársela al fundador. Cazó un bug real que habría fallado en el SQL Editor: **`greatest`/`least` son
+    construcciones SQL y no admiten prefijo de esquema** (`pg_catalog.least(...)` → *does not exist*), al
+    contrario que `make_interval` o los casts. También verifiqué las policies de verdad: `anon` inserta pero no
+    lee; `authenticated` no admin ve 0 filas; admin ve todo; UPDATE/DELETE son no-op silencioso (append-only).
+    **Repetir este ritual con cada migración nueva** — está documentado en los gotchas de `CLAUDE.md`.
+  - Un no-obvio: el panel interno en **modo demo devuelve vacío a propósito** (`mock-repo`). Poner números de
+    ejemplo en un marcador de negocio invita a decidir con datos inventados.
+
 - **2026-07-30** · **SPRINT 1 completado (blindaje de marca + conversión) — 7 ítems, 5 commits.**
   Primer sprint de la hoja de ruta 360° (`PENDIENTES.md §0.A`). Lo relevante para el futuro:
   - **Guard de copy prohibido en CI** (`scripts/check-prohibited-copy.mjs` + `npm run check:copy`). La regla #1

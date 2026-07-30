@@ -728,6 +728,7 @@ export const en: Dictionary = {
       activity: "Activity",
       organizations: "Organizations",
       security: "Security",
+      telemetry: "Telemetry",
       lockedTitle: "Readiness plan feature",
       lockedTitleEnterprise: "Enterprise plan feature",
       lockedLabel: "Locked",
@@ -1644,6 +1645,45 @@ export const en: Dictionary = {
         never: "never",
         failOne: "failure",
         failOther: "failures",
+      },
+
+      telemetry: {
+        title: "Product telemetry",
+        subtitle:
+          "Activation funnel for the last 30 days: from visit to payment. First-party data, no third-party tools and no personal data.",
+        subtitleNonAdmin: "Attesta's internal product metrics.",
+        nonAdminNotice:
+          "This area belongs to the Attesta team: it measures how the product is used and holds no data from your organization.",
+        empty:
+          "No events recorded yet. If this deployment is recent, check that migration 0026 has been applied: without it the app works the same, but stores no metrics.",
+        funnelTitle: "Activation funnel",
+        funnelHint:
+          "Each step is counted by distinct visitors. Conversion compares against the previous step. It is not a mandatory sequence: someone can pay without having applied a pack.",
+        othersTitle: "Other events",
+        colStep: "Step",
+        colEvent: "Event",
+        colVisitors: "Visitors",
+        colEvents: "Events",
+        colConversion: "Conversion",
+        colLast: "Last",
+        never: "never",
+        privacyNote:
+          "No IP, no user-agent and no personal data. The anonymous identifier only prevents counting the same visit twice, and the browser's GPC/DNT signals are honored.",
+        events: {
+          page_view: "Page views",
+          cta_click: "CTA click",
+          waitlist_submit: "Access request",
+          signup_submitted: "Sign-up submitted",
+          org_created: "Organization created",
+          system_created: "System registered",
+          risk_assessed: "Risk assessed",
+          pack_applied: "Policy pack applied",
+          paywall_viewed: "Paywall shown",
+          checkout_started: "Checkout started",
+          checkout_completed: "Payment confirmed",
+          export_downloaded: "Evidence exported",
+          invite_sent: "Invitation sent",
+        },
       },
 
       reportExec: {

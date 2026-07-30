@@ -34,6 +34,7 @@ import {
 } from "@/lib/regulatory-watch";
 import type { BiasAudit } from "@/lib/bias-audit";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import type { FunnelRow } from "@/lib/telemetry/events";
 
 /** Mapea la severidad de BD (en) a la del modelo de UI (es). */
 const SEVERITY_ES: Record<string, GapItem["severity"]> = {
@@ -873,4 +874,33 @@ export async function getGapItems(): Promise<GapItem[]> {
       prohibited: row.prohibited === true,
     };
   });
+}
+
+/**
+ * Embudo de activación agregado (telemetría de producto interna, migración 0026).
+ *
+ * Solo devuelve datos si quien consulta es `platform_admin`: el guard está DENTRO
+ * de la RPC, así que no depende de que la página se acuerde de comprobarlo.
+ *
+ * Degradación segura: si la migración 0026 no está aplicada (la RPC no existe),
+ * devuelve `[]` y el panel muestra su estado vacío en lugar de romperse.
+ */
+export async function getProductFunnel(days = 30): Promise<FunnelRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("product_funnel", { days });
+  if (error || !Array.isArray(data)) return [];
+
+  type Raw = {
+    event: string;
+    events: number | string;
+    visitors: number | string;
+    last_at: string | null;
+  };
+  return (data as Raw[]).map((row) => ({
+    event: row.event,
+    // Postgres devuelve `bigint` como string por precisión: normalizar a número.
+    events: Number(row.events) || 0,
+    visitors: Number(row.visitors) || 0,
+    lastAt: row.last_at ?? null,
+  }));
 }

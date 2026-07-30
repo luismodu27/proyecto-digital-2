@@ -10,6 +10,7 @@ import {
   ACTIVE_ORG_COOKIE,
 } from "@/lib/data/context";
 import { getOrgSubscription } from "./subscription";
+import { trackServer } from "@/lib/telemetry/server";
 
 async function baseUrl(): Promise<string> {
   const h = await headers();
@@ -52,6 +53,13 @@ export async function startCheckout() {
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
+  });
+
+  // Intención de pago. El par con `checkout_completed` (webhook de Stripe) da la
+  // tasa de abandono real del checkout, que hoy no se ve por ninguna parte.
+  await trackServer("checkout_started", {
+    organizationId: orgId,
+    props: { returning: !!existing?.stripeCustomerId },
   });
 
   redirect(session.url);

@@ -1,4 +1,4 @@
-import { ButtonLink } from "@/components/ui/Button";
+import { CtaLink } from "@/components/telemetry/CtaLink";
 import { HeroPreview } from "./HeroPreview";
 import type { Dictionary } from "@/lib/i18n";
 
@@ -48,16 +48,22 @@ export function Hero({
                 ("Empieza gratis" → /login) y hacía dudar de si el producto ya
                 está disponible. La lista de espera sigue existiendo para
                 Enterprise y para quien no quiere registrarse aún. */}
-            <ButtonLink
+            <CtaLink
+              cta="hero_signup"
               href="/login?signup=1"
               variant="primary"
               className="px-6 py-3"
             >
               {t.ctaPrimary}
-            </ButtonLink>
-            <ButtonLink href="/demo" variant="outline" className="px-6 py-3">
+            </CtaLink>
+            <CtaLink
+              cta="hero_demo"
+              href="/demo"
+              variant="outline"
+              className="px-6 py-3"
+            >
               {t.ctaSecondary}
-            </ButtonLink>
+            </CtaLink>
           </div>
 
           <p className="mt-3 flex items-center justify-center gap-2 text-xs font-medium text-brand-strong lg:justify-start">

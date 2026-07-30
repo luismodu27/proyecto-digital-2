@@ -28,3 +28,27 @@ export function daysUntilDate(dateIso: string | null, now: Date): number | null 
   );
   return Math.round((d.getTime() - today) / 86_400_000);
 }
+
+/**
+ * Sello de fecha y hora corto y localizado (`12 feb, 09:41`), para las columnas
+ * de "última vez" de los paneles internos. `fallback` cubre el valor nulo
+ * ("nunca"), porque una celda vacía se lee como un fallo de carga.
+ *
+ * Vivía duplicado como helper local en `vigilancia/fuentes`; al necesitarlo el
+ * panel de telemetría se unifica aquí.
+ */
+export function formatDateTime(
+  iso: string | null,
+  locale: "es" | "en",
+  fallback: string,
+): string {
+  if (!iso) return fallback;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return fallback;
+  return d.toLocaleString(locale === "en" ? "en-GB" : "es-ES", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}

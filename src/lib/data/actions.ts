@@ -9,6 +9,7 @@ import type { Answers, ClassificationResult } from "@/lib/risk-assessment";
 import { AI_SYSTEMS, GAP_ITEMS, RISK_ORDER } from "@/lib/mock-data";
 import { policyPackById } from "@/lib/policy-packs";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import { trackServer } from "@/lib/telemetry/server";
 
 const SEVERITY_EN: Record<string, string> = {
   alta: "high",
@@ -155,6 +156,12 @@ export async function applyPolicyPack(formData: FormData) {
   // El pack añadió controles como brechas ⇒ recalcula el "% listo" del sistema.
   await recomputeReadiness(supabase, org, systemId);
 
+  // Hito de activación: la cuenta ya tiene brechas reales que cerrar.
+  await trackServer("pack_applied", {
+    organizationId: org,
+    props: { pack: pack.id, controls: rows.length },
+  });
+
   revalidatePath("/dashboard/gap");
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard/plan");
@@ -188,6 +195,8 @@ export async function createAiSystem(formData: FormData) {
     created_by: user?.id,
   });
   if (error) redirect("/dashboard/inventario/nuevo?toast=system-error");
+
+  await trackServer("system_created", { organizationId: org });
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard");
@@ -530,6 +539,13 @@ export async function saveRiskAssessment(
     })
     .eq("organization_id", org)
     .eq("id", aiSystemId);
+
+  // `level` es un enum cerrado (ya validado arriba), no un dato personal: sirve
+  // para ver si las cuentas que llegan a "alto riesgo" son las que convierten.
+  await trackServer("risk_assessed", {
+    organizationId: org,
+    props: { level: result.level, evidence: evidenceState },
+  });
 
   revalidatePath("/dashboard/inventario");
   revalidatePath("/dashboard/riesgo");
