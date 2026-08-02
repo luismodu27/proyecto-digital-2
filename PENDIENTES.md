@@ -192,8 +192,21 @@
       propuso codificar esa excepción y **no** la codificó). `medio · M`
 
 ### 0.D · SPRINT 4 — producto/UX de profundidad ⬅️ SIGUIENTE
-- [ ] **Búsqueda / filtro / orden en el inventario + vista apilada en móvil** — una tabla plana no escala a
-      decenas de sistemas. `medio · M`
+- [x] **Búsqueda / filtro / orden en el inventario + vista apilada en móvil** — ✅ **HECHO (2026-08-02)**.
+      El estado vive en la **URL** (`?q=&risk=&evidence=&sort=&dir=`) y no en el cliente: el enlace es
+      compartible ("mándame los de alto riesgo sin clasificar"), el botón «atrás» hace lo que uno espera y todo
+      funciona **sin JavaScript** (la caja es un `<form method="GET">` y los chips son enlaces). Eso desbloquea
+      además que la tarjeta «Alto riesgo» del resumen lleve por fin al inventario **ya filtrado**, que era el
+      destino que esperaba a este sprint.
+      Decisiones que no se ven pero mandan: la búsqueda **pliega acentos** (en un inventario español, teclear
+      "seleccion" y no encontrar "Selección" se lee como buscador roto) y combina términos con **Y** ("cribado
+      ats" encuentra "Cribado de CVs — ATS"); el orden por riesgo usa el **orden regulatorio** y no el
+      alfabético (por enum, `minimal` iría antes que `unacceptable` y lo prohibido acabaría el último de la
+      lista); un parámetro **inválido enseña el inventario entero**, nunca cero filas —una pantalla vacía en una
+      herramienta de expediente se lee como pérdida de datos—; y el vacío por filtro es una pantalla **distinta**
+      del vacío por inventario. Lógica pura en `src/lib/inventory/filter.ts`, 35 tests, 6 mutaciones inyectadas
+      y 6 detectadas. Se filtra en memoria a propósito (topes de 3/25/pactado ⇒ decenas de filas): bajarlo a
+      Postgres duplicaría la lógica en los dos repos a cambio de nada medible.
 - [ ] **Navegación móvil tipo drawer** — hoy 11 pestañas con scroll horizontal; los ítems Enterprise con candado
       (upsell) quedan fuera de vista. `medio · M`
 - [ ] **Registro de incidentes + revisión periódica de la autoevaluación** — cubre obligación real del deployer
