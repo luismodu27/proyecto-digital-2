@@ -1361,6 +1361,9 @@ export const es = {
     team: {
       title: "Equipo",
       subtitle: "Invita a tu equipo (RRHH, Legal, auditoría) y gestiona sus roles.",
+      paywallFeature: "Equipo y roles",
+      paywallDesc:
+        "Invita a tu equipo, asigna roles (owner/admin/member) y gestiona quién ve y atesta la evidencia de tu organización.",
       demoBefore: "Estás en ",
       demoMode: "modo demo",
       demoAfter:
@@ -1628,6 +1631,9 @@ export const es = {
         title: "Plan de acción",
         subtitle:
           "Tareas priorizadas para cerrar tus brechas: asigna responsable, fecha y estado.",
+        paywallFeature: "Plan de acción",
+        paywallDesc:
+          "Convierte las brechas en tareas con responsables y fechas, y sigue su avance hasta cerrarlas.",
         exportEvidence: "⬇ Exportar evidencia",
         statOpen: "abiertas",
         statInProgress: "en curso",
@@ -1659,6 +1665,9 @@ export const es = {
         title: "Registro de actividad",
         subtitle:
           "Cada cambio queda registrado y encadenado con SHA-256: cualquier alteración posterior es detectable. Quién hizo qué y cuándo.",
+        paywallFeature: "Registro de actividad",
+        paywallDesc:
+          "El audit-trail inmutable de tu organización: quién creó, cambió o atestó cada sistema, evaluación y brecha, con fecha y autor.",
         chainOk: "Cadena íntegra",
         chainBroken: "Integridad rota",
         filterAll: "Todo",
@@ -1696,6 +1705,9 @@ export const es = {
         title: "Vigilancia regulatoria",
         subtitle:
           "Radar de plazos y cambios normativos que afectan a tus sistemas de IA.",
+        paywallFeature: "Vigilancia regulatoria",
+        paywallDesc:
+          "El radar que vigila las fuentes oficiales y te avisa de cada plazo y cambio del EU AI Act antes de que te afecte.",
         watchedSources: "Fuentes vigiladas →",
         validationInbox: "Bandeja de validación →",
         jurisdictionFilter: "Jurisdicción",
@@ -1986,6 +1998,9 @@ export const es = {
         title: "Policy packs",
         subtitle:
           "Plantillas de controles por caso de uso y marco. Aplícalas para precargar las brechas de un sistema.",
+        paywallFeature: "Policy packs",
+        paywallDesc:
+          "Plantillas de políticas listas para tu vertical (empezando por RRHH) para acelerar tu evidencia.",
         controlsUnit: "controles",
         applies: "Aplica:",
         applyToSystem: "Aplicar a un sistema",

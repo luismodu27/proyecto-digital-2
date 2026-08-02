@@ -1350,6 +1350,9 @@ export const en: Dictionary = {
     team: {
       title: "Team",
       subtitle: "Invite your team (HR, Legal, audit) and manage their roles.",
+      paywallFeature: "Team and roles",
+      paywallDesc:
+        "Invite your team, assign roles (owner/admin/member) and manage who sees and attests your organization's evidence.",
       demoBefore: "You're in ",
       demoMode: "demo mode",
       demoAfter:
@@ -1612,6 +1615,9 @@ export const en: Dictionary = {
         title: "Action plan",
         subtitle:
           "Prioritized tasks to close your gaps: assign an owner, date and status.",
+        paywallFeature: "Action plan",
+        paywallDesc:
+          "Turn gaps into tasks with owners and due dates, and track their progress until they are closed.",
         exportEvidence: "⬇ Export evidence",
         statOpen: "open",
         statInProgress: "in progress",
@@ -1643,6 +1649,9 @@ export const en: Dictionary = {
         title: "Activity log",
         subtitle:
           "Every change is recorded and chained with SHA-256: any later alteration is detectable. Who did what and when.",
+        paywallFeature: "Activity log",
+        paywallDesc:
+          "Your organization's immutable audit trail: who created, changed or attested each system, assessment and gap, with date and author.",
         chainOk: "Chain intact",
         chainBroken: "Integrity broken",
         filterAll: "All",
@@ -1680,6 +1689,9 @@ export const en: Dictionary = {
         title: "Regulatory monitoring",
         subtitle:
           "A radar of deadlines and regulatory changes affecting your AI systems.",
+        paywallFeature: "Regulatory monitoring",
+        paywallDesc:
+          "The radar that watches official sources and warns you about every EU AI Act deadline and change before it affects you.",
         watchedSources: "Watched sources →",
         validationInbox: "Validation inbox →",
         jurisdictionFilter: "Jurisdiction",
@@ -1967,6 +1979,9 @@ export const en: Dictionary = {
         title: "Policy packs",
         subtitle:
           "Control templates by use case and framework. Apply one to preload a system's gaps.",
+        paywallFeature: "Policy packs",
+        paywallDesc:
+          "Ready-made policy templates for your vertical (starting with HR) to speed up your evidence.",
         controlsUnit: "controls",
         applies: "Applies:",
         applyToSystem: "Apply to a system",

@@ -1,11 +1,15 @@
 import { PaidGate } from "@/lib/billing/gate";
+import { getDictionary } from "@/lib/i18n";
+import { resolveLocale } from "@/lib/i18n/resolve";
 
-export default function EquipoLayout({ children }: { children: React.ReactNode }) {
+export default async function EquipoLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const t = getDictionary(await resolveLocale()).dashboard.team;
   return (
-    <PaidGate
-      feature="Equipo y roles"
-      description="Invita a tu equipo, asigna roles (owner/admin/member) y gestiona quién ve y atesta la evidencia de tu organización."
-    >
+    <PaidGate feature={t.paywallFeature} description={t.paywallDesc}>
       {children}
     </PaidGate>
   );
