@@ -286,7 +286,7 @@ export const US_CA_FEHA_PACK_EN: PolicyPack = {
       title: "Keep a traceable file of tests, records and verifications (indicative)",
       description:
         "Maintain a record per tool and per decision: ADS inventory and why it qualifies, date/scope/results of anti-bias testing, selection criteria and features, provider/agent evidence, ADS records kept (4 years), medical-inquiry verifications and reasonable-accommodation policies. It is the basis for responding to a claim or to an investigation by the Civil Rights Department. Attesta acts as the system of record for that declared evidence, not as a certifier or auditor.",
-      article: "Transversal · 2 CCR §11013; §11008 y ss.",
+      article: "Cross-cutting · 2 CCR §11013; §11008 et seq.",
       severity: "media",
       conditional:
         "Applies whenever you use an ADS in employment decisions in California.",

@@ -138,6 +138,71 @@ describe.each(ES_EN)("pack %s", (id, es, en) => {
   it("si hay aviso (`note`), existe en los dos idiomas", () => {
     expect(!!en.note, id).toBe(!!es.note);
   });
+
+  it("la prosa del pack EN está traducida (no es el español copiado)", () => {
+    // El espejo EN se escribe copiando el pack ES y traduciendo campo a campo.
+    // Saltarse uno no rompe NADA: compila, pasa el resto de la paridad (mismos
+    // ids, mismos números de artículo, misma severidad) y el control aparece en
+    // español dentro de una página inglesa. Así se habían quedado dos
+    // `conditional` y un `article` del pack de California.
+    //
+    // La regla es la identidad literal, no un detector de idioma: si un texto EN
+    // es byte a byte el ES, es que no se tradujo. `tag` queda fuera (chips como
+    // "GenAI" coinciden de verdad) y `article` también, porque una cita pura
+    // ("CCPA · Cal. Code Regs. tit. 11 §§7120-7124") es idéntica en ambas — para
+    // ese campo vale el escaneo de marcadores del test siguiente.
+    // Se acumulan y se afirman de una vez: si el test cortara en el primero,
+    // arreglar un pack a medio traducir sería un juego de topos.
+    const untranslated: string[] = [];
+    const same = (field: string, a: string, b?: string) => {
+      if (a === b) untranslated.push(field);
+    };
+    same(`${id}.name`, es.name, en.name);
+    same(`${id}.summary`, es.summary, en.summary);
+    if (es.note) same(`${id}.note`, es.note, en.note);
+
+    for (const [i, c] of es.controls.entries()) {
+      const t = en.controls[i]!;
+      same(`${id}/${c.id}.title`, c.title, t.title);
+      same(`${id}/${c.id}.description`, c.description, t.description);
+      if (c.conditional) {
+        same(`${id}/${c.id}.conditional`, c.conditional, t.conditional);
+      }
+    }
+    expect(untranslated).toEqual([]);
+  });
+
+  it("ningún campo del pack EN arrastra palabras en español", () => {
+    // Complemento del anterior para los textos que SÍ pueden coincidir: la cita
+    // legal. Un `article` mayormente numérico puede llevar una coletilla en prosa
+    // ("(y transversal §§7150-7222)") que se traduce y se olvida. Se buscan solo
+    // palabras funcionales inequívocas del español: nada de ellas es una palabra
+    // inglesa, así que no hay falsos positivos con "Annex", "Art." o los nombres
+    // propios de las leyes.
+    // Lista de palabras funcionales del español que **no existen en inglés**, de
+    // modo que no hay falsos positivos con "Annex", "Art." ni con los nombres de
+    // las leyes. Se dejan fuera a propósito las cortas y ambiguas (`de`, `la`,
+    // `en`, `no`, `es`, `un`) y `usa`, que con `/i` chocaría con "USA".
+    const SPANISH =
+      /\b(del|los|las|según|para|que|una|uno|con|sólo|solo|siempre|cuando|sobre|desde|hasta|cada|sus|tus|este|esta|más|aún|así|entre|hacia|sin|sino|aunque|porque|pero|también|además|debe|deben|puede|pueden|tienen|hay|toda|todo|todos|todas|Anexo|Reglamento|transversal|riesgo|evidencia|organización)\b/i;
+    const fields = (p: PolicyPack) => [
+      ["name", p.name],
+      ["tag", p.tag],
+      ["summary", p.summary],
+      ...(p.note ? [["note", p.note] as const] : []),
+      ...p.controls.flatMap((c) => [
+        [`${c.id}.title`, c.title],
+        [`${c.id}.description`, c.description],
+        [`${c.id}.article`, c.article],
+        ...(c.conditional ? [[`${c.id}.conditional`, c.conditional] as const] : []),
+      ]),
+    ];
+
+    const offenders = fields(en)
+      .filter(([, value]) => SPANISH.test(value))
+      .map(([field, value]) => `${id} · ${field} → "${value}"`);
+    expect(offenders).toEqual([]);
+  });
 });
 
 describe("recuento de packs en la landing", () => {

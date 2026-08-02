@@ -179,7 +179,7 @@ export const US_CA_ADMT_PACK_EN: PolicyPack = {
       article: "CCPA · Cal. Code Regs. tit. 11 §7001; Cal. Civ. Code §1798.100",
       severity: "alta",
       conditional:
-        "Solo si usas ADMT en decisiones de empleo sobre residentes de California.",
+        "Only if you use ADMT in employment decisions about California residents.",
     },
     {
       id: "aviso-previo",
@@ -190,7 +190,7 @@ export const US_CA_ADMT_PACK_EN: PolicyPack = {
       article: "CCPA · Cal. Code Regs. tit. 11 §7220",
       severity: "alta",
       conditional:
-        "Solo si usas ADMT en decisiones de empleo sobre residentes de California.",
+        "Only if you use ADMT in employment decisions about California residents.",
     },
     {
       id: "evaluacion-riesgo",
@@ -201,7 +201,7 @@ export const US_CA_ADMT_PACK_EN: PolicyPack = {
       article: "CCPA · Cal. Code Regs. tit. 11 §§7150–7157",
       severity: "alta",
       conditional:
-        "Solo si usas ADMT en decisiones de empleo sobre residentes de California.",
+        "Only if you use ADMT in employment decisions about California residents.",
     },
     {
       id: "opt-out",
@@ -212,7 +212,7 @@ export const US_CA_ADMT_PACK_EN: PolicyPack = {
       article: "CCPA · Cal. Code Regs. tit. 11 §7221",
       severity: "alta",
       conditional:
-        "Solo si usas ADMT en decisiones de empleo sobre residentes de California.",
+        "Only if you use ADMT in employment decisions about California residents.",
     },
     {
       id: "acceso-logica",
@@ -223,7 +223,7 @@ export const US_CA_ADMT_PACK_EN: PolicyPack = {
       article: "CCPA · Cal. Code Regs. tit. 11 §7222",
       severity: "media",
       conditional:
-        "Solo si usas ADMT en decisiones de empleo sobre residentes de California.",
+        "Only if you use ADMT in employment decisions about California residents.",
     },
     {
       id: "contrato-proveedor",
@@ -234,7 +234,7 @@ export const US_CA_ADMT_PACK_EN: PolicyPack = {
       article: "CCPA · Cal. Code Regs. tit. 11 §§7050–7051",
       severity: "alta",
       conditional:
-        "Solo si usas ADMT en decisiones de empleo sobre residentes de California.",
+        "Only if you use ADMT in employment decisions about California residents.",
     },
     {
       id: "politica-privacidad",
@@ -245,7 +245,7 @@ export const US_CA_ADMT_PACK_EN: PolicyPack = {
       article: "CCPA · Cal. Code Regs. tit. 11 §7011",
       severity: "media",
       conditional:
-        "Solo si usas ADMT en decisiones de empleo sobre residentes de California.",
+        "Only if you use ADMT in employment decisions about California residents.",
     },
     {
       id: "revision-humana-appeal",
@@ -256,7 +256,7 @@ export const US_CA_ADMT_PACK_EN: PolicyPack = {
       article: "CCPA · Cal. Code Regs. tit. 11 §§7001, 7221",
       severity: "media",
       conditional:
-        "Solo si usas ADMT en decisiones de empleo sobre residentes de California.",
+        "Only if you use ADMT in employment decisions about California residents.",
     },
     {
       id: "auditoria-ciberseguridad",
@@ -267,7 +267,7 @@ export const US_CA_ADMT_PACK_EN: PolicyPack = {
       article: "CCPA · Cal. Code Regs. tit. 11 §§7120–7124",
       severity: "media",
       conditional:
-        "Solo si superas los umbrales de \"riesgo significativo para la seguridad\" del §7120 (por ingresos o volumen de datos).",
+        "Only if you exceed the \"significant risk to security\" thresholds of §7120 (by revenue or data volume).",
     },
     {
       id: "conservacion-registros",
@@ -275,10 +275,10 @@ export const US_CA_ADMT_PACK_EN: PolicyPack = {
         "Keep records of notices, opt-outs, access requests and assessments (indicative)",
       description:
         "Maintain a traceable record per tool and per person: pre-use notice templates and deliveries, opt-out and access requests and responses, risk assessment versions and attestations, vendor contracts and the reasoning for any exception invoked. It is the basis for responding to a query or investigation by the CPPA. The CCPA also requires keeping records of consumers' requests. Attesta acts as the system of record for that declared evidence, not as a certifier.",
-      article: "CCPA · Cal. Code Regs. tit. 11 §7101 (y transversal §§7150–7222)",
+      article: "CCPA · Cal. Code Regs. tit. 11 §7101 (and cross-cutting §§7150–7222)",
       severity: "media",
       conditional:
-        "Aplica siempre que uses ADMT en decisiones de empleo sobre residentes de California.",
+        "Applies whenever you use ADMT in employment decisions about California residents.",
     },
   ],
 };

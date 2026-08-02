@@ -202,17 +202,43 @@
       los packs (marcado CE, model card, DPA, caducidad); palanca de expansión de plan. `medio · M`
 - [ ] **Streaming con Suspense en el dashboard** — que la query más lenta no bloquee el shell entero. `medio · M`
 - [ ] **Consolidar el onboarding** (modal + checklist + bienvenida compiten hoy en la 1ª sesión). `bajo · M`
-- [ ] **`lang="es"` en bloques regulatorios** — parche WCAG barato mientras el output legal no exista en EN.
-      `medio · S`
-- [ ] **i18n de los muros de pago restantes** (descubierto en el Sprint 1) — 7 `layout.tsx` de secciones de pago
-      (`plan`, `packs`, `vigilancia`, `equipo`, `actividad`, `organizaciones`, `seguridad`) tienen
-      `feature`/`description` **hardcodeados en español**; en `/en` el muro sale mezclado. El de `gap` ya se
-      migró al diccionario en el Sprint 1: replicar ese patrón. `medio · S`
-- [ ] **`viewport`/`themeColor` + manifest mínimo + `noindex` en rutas de auth.** `bajo · S`
+- [x] **~~`lang="es"` en bloques regulatorios~~ → 11 textos del pack de California sin traducir** —
+      ✅ **HECHO (2026-08-02)**. **La premisa del ticket había caducado**: se escribió cuando el output legal
+      solo existía en español, y desde entonces packs, clasificador, vigilancia, recomendaciones y audit-trail
+      se tradujeron. Comprobado sirviendo un build de producción en modo demo y barriendo el **texto renderizado**
+      (no el payload RSC, que engaña: lleva el `<title>` español del root layout) de 12 rutas del dashboard con
+      la cookie `NEXT_LOCALE=en`: todo salía en inglés **salvo el pack de California**. Poner `lang="es"` a ciegas
+      habría sido *peor* que no hacer nada — etiquetar como español un texto que ya es inglés estropea el lector
+      de pantalla en la dirección contraria.
+      Lo que sí había: **8 `conditional` + 2 `article` de `us-ca-admt` y 1 `article` de `us-ca-feha`** con el
+      español copiado tal cual en el espejo EN. Traducidos, y **guard nuevo en `packs.test.ts`** con dos reglas
+      —identidad literal ES/EN en `title`/`description`/`conditional`, y barrido de palabras funcionales
+      españolas en TODOS los campos EN (incluido `article`, donde la identidad es legítima)—. Validado con
+      3 mutaciones. Queda fuera, y es lo único que aún justificaría un `lang`: los **datos persistidos** del
+      cliente (brechas aplicadas desde un pack, notas, evidencia), cuyo idioma no consta en la BD; arreglarlo
+      de verdad es guardar el locale al escribir → **ticket propio, no un parche**.
+- [x] **i18n de los muros de pago restantes** (descubierto en el Sprint 1) — ✅ **HECHO (2026-08-02)**. Los 5 que
+      quedaban (`plan`, `packs`, `vigilancia`, `equipo`, `actividad`) ya leen del diccionario, replicando el
+      patrón de `gap`; `organizaciones` y `seguridad` ya estaban migrados. Con guard
+      (`src/lib/i18n/paywall.test.ts`): `tsc` solo cubre media regresión —deriva `Dictionary` de `es`, así que
+      falta una clave no compila, pero **pegar el español dentro de `en.ts` sí compila**—, de modo que el test
+      exige que las descripciones **difieran** entre lenguas y escanea los `layout.tsx` para que ningún muro
+      nuevo vuelva a llevar el copy a mano. 3 mutaciones, 3 detectadas.
+- [x] **`viewport`/`themeColor` + manifest mínimo + `noindex` en rutas de auth** — ✅ **HECHO (2026-08-02)**.
+      Lo no obvio fue el `noindex`: al ponerlo hubo que **sacar esas rutas de `Disallow` en robots.txt**, porque
+      `Disallow` prohíbe *rastrear* y no *indexar*, así que bloquearlas impedía que el buscador viera el propio
+      `noindex` (las dos directivas se estorbaban). Siguen bloqueados `/auth` y `/api`, que son route handlers
+      sin HTML donde colgar un meta. Verificado sobre el build servido en local.
 - [ ] **Sección "cómo verificamos el contenido legal"** — el mayor diferenciador honesto (determinista, doble
       pasada del experto, citas verbatim) se afirma pero no se demuestra. `medio · M`
 
 ### 0.E · SPRINT 5 — deuda técnica y robustez restante
+- [ ] **Guardar el idioma de lo que se escribe (`locale` en `gap_items` / autoevaluaciones)** — descubierto al
+      cerrar el ticket del `lang` en el Sprint 4. Una brecha creada aplicando el pack ES se sigue viendo en
+      español cuando el usuario cambia a inglés, y al revés: el texto está congelado en la BD y **nadie sabe en
+      qué idioma está**. Sin ese dato no se puede ni traducir ni etiquetar con `lang` (etiquetar a ciegas
+      empeora el lector de pantalla). Migración de una columna + escribirla en `applyPolicyPack` y al guardar
+      la clasificación. `medio · S`
 - [ ] **Aislar la landing del `headers()` del root layout** — leer headers saca a TODA la app del render
       estático/CDN, empezando por la página de mayor coste de conversión (route-group propio o locale por ruta).
       `alto · L`
