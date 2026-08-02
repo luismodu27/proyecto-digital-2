@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { OnboardingForm } from "@/components/auth/OnboardingForm";
@@ -6,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function OnboardingPage() {
   if (!isSupabaseConfigured) redirect("/dashboard");

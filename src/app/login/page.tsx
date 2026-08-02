@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function LoginPage({
   searchParams,

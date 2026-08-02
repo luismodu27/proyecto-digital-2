@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import { localeFromHeader } from "@/lib/i18n/resolve";
@@ -60,6 +60,29 @@ export const metadata: Metadata = {
     title: "Attesta — Gobernanza continua de IA",
     description: OG_DESC,
   },
+};
+
+/**
+ * `themeColor` pinta la barra del navegador (Safari iOS, Chrome Android) con el
+ * papel de la app en vez del blanco por defecto: sin esto, la cabecera choca
+ * con el tema oscuro y la app parece rota en móvil antes de renderizar nada.
+ *
+ * Se declara por `prefers-color-scheme` y NO sigue al toggle manual
+ * (`data-theme` en localStorage): el meta se resuelve antes de que corra
+ * ningún script, así que un usuario en tema claro dentro de un SO oscuro verá
+ * la barra oscura. Corregirlo exigiría mover el `theme-color` a JS en cada
+ * cambio de tema; no compensa por una franja de 40 px.
+ *
+ * `colorScheme` le dice al navegador que hay ambos, para que los controles
+ * nativos (scrollbars, selects, autofill) hereden el tema en lugar de salir
+ * siempre en claro.
+ */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf8f2" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e1512" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default async function RootLayout({

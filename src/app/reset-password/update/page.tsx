@@ -7,7 +7,10 @@ import { getDictionary } from "@/lib/i18n";
 
 export async function generateMetadata() {
   const locale = await resolveLocale();
-  return { title: getDictionary(locale).auth.meta.resetUpdateTitle };
+  return {
+    title: getDictionary(locale).auth.meta.resetUpdateTitle,
+    robots: { index: false, follow: false },
+  };
 }
 
 export default async function ResetPasswordUpdatePage() {
