@@ -214,10 +214,10 @@ export async function updateReviewCadence(formData: FormData) {
     redirect(INCIDENTS);
   }
 
-  const { error } = await supabase
-    .from("organizations")
-    .update({ review_cadence_days: days })
-    .eq("id", org);
+  // Vía RPC y no `update` directo: 0025 dejó `organizations` con el UPDATE
+  // restringido a (name, slug) para que nadie pudiera escribirse su propia
+  // columna `plan`. La autorización (owner/admin) la impone la función SQL.
+  const { error } = await supabase.rpc("set_review_cadence", { org, days });
 
   if (error) {
     logIncident("updateReviewCadence", error);

@@ -253,6 +253,19 @@
       norma exija más»* y el texto legal dice *«salvo disposición en contrario»* — estrechaba la norma en una
       sola dirección. Y **un sistema de la demo pasa a tener la revisión de hace más de un año**
       (`SYS-003`, el peor preparado), porque si no la sección de revisión salía vacía en la demo.
+      **Corrección posterior (misma fecha), encontrada verificando contra el Supabase real:** guardar la
+      cadencia daba **42501 permission denied**. No era la RLS: la migración **0025** había restringido a
+      propósito el `UPDATE` de `organizations` a una lista blanca de columnas (`name, slug`) para que ningún
+      cliente pudiera escribirse su propia columna `plan` y ascenderse solo — y 0030 escribía por fuera de esa
+      lista. Arreglado con la migración **0031**: RPC `set_review_cadence` `security definer` con el guard de
+      owner/admin dentro, el mismo patrón que ya usaba `set_org_jurisdictions`. **El Postgres desechable no
+      podía cazarlo** (no reproduce los grants por defecto de Supabase, así que no puede concluir nada sobre
+      permisos); es la segunda vez que da un falso verde sobre permisos, después de 0026/0027 → 0028.
+      Queda como **`npm run verify:backend`** (`scripts/verify/incidents.mjs`, fuera de CI porque necesita
+      credenciales reales): 16 comprobaciones por API con dos usuarios `*@attesta-test.dev` en dos
+      organizaciones, centradas en el **aislamiento** —que B no alcance el expediente de A ni leyendo, ni por
+      id, ni escribiendo, ni por el audit-trail—. De paso destapó un test propio que **pasaba por el motivo
+      equivocado**: el rechazo de una cadencia inválida venía del 42501, no del CHECK.
       **Deuda declarada del experto, antes de GA:** leer el **Art. 113 modificado** por el Reglamento (UE)
       2026/1744 palabra por palabra para confirmar que el Art. 73 queda **fuera** del aplazamiento (hoy es
       inferencia estructural, el mismo patrón ya abierto con el Art. 49); leer el **Art. 27.1 verbatim** para

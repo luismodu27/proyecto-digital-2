@@ -12,7 +12,8 @@
     "lint": "eslint",
     "check:copy": "node scripts/check-prohibited-copy.mjs",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "verify:backend": "node scripts/verify/incidents.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",
