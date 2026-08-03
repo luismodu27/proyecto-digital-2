@@ -207,8 +207,20 @@
       del vacío por inventario. Lógica pura en `src/lib/inventory/filter.ts`, 35 tests, 6 mutaciones inyectadas
       y 6 detectadas. Se filtra en memoria a propósito (topes de 3/25/pactado ⇒ decenas de filas): bajarlo a
       Postgres duplicaría la lógica en los dos repos a cambio de nada medible.
-- [ ] **Navegación móvil tipo drawer** — hoy 11 pestañas con scroll horizontal; los ítems Enterprise con candado
-      (upsell) quedan fuera de vista. `medio · M`
+- [x] **Navegación móvil tipo drawer** — ✅ **HECHO (2026-08-03)**. Barra superior `sticky` + cajón lateral en un
+      **`<dialog>` nativo con `showModal()`**, que regala sin una línea de JS la trampa de foco, la inertización
+      del fondo, Escape, la devolución del foco, el bloqueo de scroll y la capa superior (que de paso deshace el
+      empate de cuatro `z-50` del repo). El upsell deja de depender del scroll: cabecera con el plan y «N
+      secciones requieren un plan superior», e insignia **visible** con el nombre del plan en cada destino
+      bloqueado. Siguen navegando al muro a propósito —ahí se emite `paywall_viewed` y vive el teaser con las
+      cifras reales—, con un test que congela esa decisión. El catálogo y las reglas de bloqueo salen a
+      `lib/dashboard/nav.ts` (puro) para poder probarlas: son reglas COMERCIALES y dentro de un componente
+      `"use client"` no se podían. Revisado después con 5 lentes adversariales (32 candidatos → 18 confirmados
+      tras doble verificación) y corregido todo; 18 mutaciones en total, 18 detectadas.
+      **Cambio visible en escritorio que conviene saber:** el candado del rail ya no tiene `title=` (tooltip al
+      pasar el ratón). Se quitó porque `title` no existe en táctil ni con teclado y duplicaba el anuncio del
+      lector de pantalla; el texto sigue estando, en `sr-only`. Si prefieres recuperar el tooltip para el
+      usuario de ratón, es una línea.
 - [ ] **Registro de incidentes + revisión periódica de la autoevaluación** — cubre obligación real del deployer
       (Arts. 26.5 / 73) reusando audit-trail + recordatorios; añade recurrencia (retención). `medio · S`
 - [ ] **Registro de proveedores / terceros (Capa 8)** — materializa el reencuadre deployer que ya está en todos
