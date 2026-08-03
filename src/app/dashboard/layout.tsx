@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { WelcomeGuide } from "@/components/dashboard/WelcomeGuide";
+import { shouldShowGuide } from "@/lib/dashboard/onboarding";
+import { getAiSystems } from "@/lib/data";
 import { Toaster } from "@/components/ui/Toast";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
@@ -52,8 +54,15 @@ export default async function DashboardLayout({
       (typeof meta.nombre === "string" && meta.nombre) ||
       "";
     userName = rawName.trim() || undefined;
-    // La guía se muestra solo la primera vez (hasta que se marca vista).
-    showGuide = meta.guide_seen !== true;
+    // La guía se muestra solo la primera vez (hasta que se marca vista) Y solo
+    // si hay algo por lo que guiar: con el inventario vacío manda la pantalla
+    // de bienvenida, y el modal encima sería la segunda bienvenida simultánea.
+    // `getAiSystems` lleva `cache()`, así que en la portada esta consulta es
+    // gratis (la página ya la hace).
+    showGuide = shouldShowGuide({
+      guideSeen: meta.guide_seen === true,
+      systemCount: (await getAiSystems()).length,
+    });
   }
 
   const locale = await resolveLocale();

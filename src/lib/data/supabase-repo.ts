@@ -62,7 +62,14 @@ const SEVERITY_ES: Record<string, GapItem["severity"]> = {
 const AI_SYSTEM_LIST_COLS =
   "id, code, name, owner, domain, vendor, risk_level, compliance_pct, last_reviewed_at, evidence_state";
 
-export async function getAiSystems(): Promise<AiSystem[]> {
+/**
+ * Inventario de la organización activa.
+ *
+ * `cache()` (por request) porque desde que el layout decide si enseña el
+ * recorrido guiado, lo miran DOS sitios: el layout y la propia portada. Sin
+ * esto, gatear el modal habría costado una consulta extra en cada ruta.
+ */
+async function getAiSystemsUncached(): Promise<AiSystem[]> {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return [];
@@ -95,6 +102,8 @@ export async function getAiSystems(): Promise<AiSystem[]> {
       | undefined,
   }));
 }
+
+export const getAiSystems = cache(getAiSystemsUncached);
 
 /** Historial de evaluaciones de un sistema (más recientes primero). */
 /** Columnas de `risk_assessments` que consumen el dossier y la exportación. */

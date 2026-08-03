@@ -326,7 +326,14 @@
       de avisos, que no se renderizan cuando no hay nada que avisar y dejarían un hueco permanente; y el `now`
       baja por props para que dos `new Date()` no caigan a distinto lado de la medianoche y se contradigan en
       la misma pantalla.
-- [ ] **Consolidar el onboarding** (modal + checklist + bienvenida compiten hoy en la 1ª sesión). `bajo · M`
+- [x] **Consolidar el onboarding** — ✅ **HECHO (2026-08-03)**. El choque real era peor de lo que decía el
+      ticket: quien entraba por primera vez tenía **cero sistemas**, así que recibía la **bienvenida a pantalla
+      completa Y el modal del recorrido encima**. Dos bienvenidas simultáneas, una tapando a la otra, en el
+      momento en que menos se toleran. Regla nueva —**una a la vez**— en `src/lib/dashboard/onboarding.ts`
+      (pura, con tests y 3 mutaciones detectadas): con el inventario vacío manda la pantalla de bienvenida, que
+      ya dice lo mismo y además ofrece los caminos para empezar; el recorrido guiado espera a que haya algo por
+      lo que guiar, y ahí sí convive con el checklist, que no compite (uno explica, el otro sigue el avance).
+      `getAiSystems` pasa a llevar `cache()` para que gatear el modal no cueste una consulta extra por ruta.
 - [x] **~~`lang="es"` en bloques regulatorios~~ → 11 textos del pack de California sin traducir** —
       ✅ **HECHO (2026-08-02)**. **La premisa del ticket había caducado**: se escribió cuando el output legal
       solo existía en español, y desde entonces packs, clasificador, vigilancia, recomendaciones y audit-trail
