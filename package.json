@@ -13,7 +13,7 @@
     "check:copy": "node scripts/check-prohibited-copy.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify:backend": "node scripts/verify/incidents.mjs"
+    "verify:backend": "node scripts/verify/backend.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",

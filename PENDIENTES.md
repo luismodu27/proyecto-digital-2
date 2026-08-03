@@ -261,8 +261,8 @@
       owner/admin dentro, el mismo patrón que ya usaba `set_org_jurisdictions`. **El Postgres desechable no
       podía cazarlo** (no reproduce los grants por defecto de Supabase, así que no puede concluir nada sobre
       permisos); es la segunda vez que da un falso verde sobre permisos, después de 0026/0027 → 0028.
-      Queda como **`npm run verify:backend`** (`scripts/verify/incidents.mjs`, fuera de CI porque necesita
-      credenciales reales): 16 comprobaciones por API con dos usuarios `*@attesta-test.dev` en dos
+      Queda como **`npm run verify:backend`** (`scripts/verify/backend.mjs`, fuera de CI porque necesita
+      credenciales reales): comprobaciones por API con dos usuarios `*@attesta-test.dev` en dos
       organizaciones, centradas en el **aislamiento** —que B no alcance el expediente de A ni leyendo, ni por
       id, ni escribiendo, ni por el audit-trail—. De paso destapó un test propio que **pasaba por el motivo
       equivocado**: el rechazo de una cadencia inválida venía del 42501, no del CHECK.

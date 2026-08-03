@@ -1,5 +1,5 @@
 /**
- * Verificación del registro de incidentes contra el BACKEND REAL, por API.
+ * Verificación del BACKEND REAL por API: incidentes (0030/0031) y proveedores (0032).
  *
  *   npm run verify:backend
  *
@@ -257,6 +257,97 @@ const auditB = await api(`/rest/v1/audit_log?select=row_id&table_name=eq.inciden
 check(
   "B no ve el audit-trail de A",
   Array.isArray(auditB.json) && !auditB.json.some((r) => r.row_id === incId),
+);
+
+// ===========================================================================
+// Registro de proveedores (migración 0032)
+// ===========================================================================
+const sup = await api("/rest/v1/suppliers", {
+  token: tokenA,
+  method: "POST",
+  prefer: "return=representation",
+  body: {
+    organization_id: idA,
+    name: `HireFlow ${stamp}`,
+    ai_act_role: "provider",
+    outside_eu: true,
+    gdpr_role: "processor",
+    excludes_high_risk_use: true,
+  },
+});
+const supId = sup.json?.[0]?.id;
+check("A da de alta un proveedor", sup.status === 201 && Boolean(supId), sup.text.slice(0, 160));
+
+const supBad = await api("/rest/v1/suppliers", {
+  token: tokenA,
+  method: "POST",
+  body: { organization_id: idA, name: "malo", ai_act_role: "inventado" },
+});
+check("rechaza un papel inventado en el Reglamento", supBad.status >= 400, String(supBad.status));
+
+const evOk = await api("/rest/v1/supplier_evidence", {
+  token: tokenA,
+  method: "POST",
+  prefer: "return=representation",
+  body: {
+    organization_id: idA,
+    supplier_id: supId,
+    kind: "technicalDocumentation",
+    status: "refused",
+    note: "Responden que el Anexo IV es para autoridades.",
+  },
+});
+const evId = evOk.json?.[0]?.id;
+check("A registra una negativa del proveedor como evidencia", evOk.status === 201 && Boolean(evId), evOk.text.slice(0, 160));
+
+const evBad = await api("/rest/v1/supplier_evidence", {
+  token: tokenA,
+  method: "POST",
+  body: { organization_id: idA, supplier_id: supId, kind: "x", status: "conforme" },
+});
+check("rechaza un estado inventado ('conforme')", evBad.status >= 400, String(evBad.status));
+
+const supB = await api("/rest/v1/suppliers?select=id", { token: tokenB });
+check(
+  "B NO ve el proveedor de A (RLS)",
+  Array.isArray(supB.json) && !supB.json.some((r) => r.id === supId),
+  JSON.stringify(supB.json)?.slice(0, 160),
+);
+
+const evB = await api(`/rest/v1/supplier_evidence?select=id&id=eq.${evId}`, { token: tokenB });
+check(
+  "B tampoco alcanza su evidencia pidiéndola por id",
+  Array.isArray(evB.json) && evB.json.length === 0,
+  JSON.stringify(evB.json)?.slice(0, 160),
+);
+
+const supCross = await api("/rest/v1/suppliers", {
+  token: tokenB,
+  method: "POST",
+  body: { organization_id: idA, name: "inyectado" },
+});
+check("B no puede dar de alta un proveedor EN la organización de A", supCross.status >= 400, String(supCross.status));
+
+const auditSup = await api(
+  "/rest/v1/audit_log?select=table_name,row_id&table_name=in.(suppliers,supplier_evidence)&order=at.desc&limit=10",
+  { token: tokenA },
+);
+check(
+  "el audit-trail registró el proveedor y su evidencia",
+  Array.isArray(auditSup.json) &&
+    auditSup.json.some((r) => r.row_id === supId) &&
+    auditSup.json.some((r) => r.row_id === evId),
+  JSON.stringify(auditSup.json)?.slice(0, 200),
+);
+
+// Borrar el proveedor debe arrastrar su evidencia: un expediente huérfano de
+// proveedor no significa nada, y dejarlo colgando ensucia los recuentos.
+await api(`/rest/v1/suppliers?id=eq.${supId}`, { token: tokenA, method: "DELETE" });
+const evAfter = await api(`/rest/v1/supplier_evidence?select=id&id=eq.${evId}`, { token: tokenA });
+check(
+  "al borrar el proveedor su evidencia cae en cascada",
+  Array.isArray(evAfter.json) && evAfter.json.length === 0,
+  JSON.stringify(evAfter.json)?.slice(0, 160),
 );
 
 console.log(`\n${pass} correctas · ${fail} fallos`);
