@@ -127,6 +127,22 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-03** · **SPRINT 4 CERRADO (10/10).** Filtro de inventario, cajón móvil, registro de incidentes,
+  registro de proveedores, streaming con Suspense, i18n de muros, viewport/manifest, packs de California,
+  sección de «cómo verificamos» y consolidación del onboarding.
+  **Lo que más valió, otra vez, fue lo que se quitó.** Las dos consultas al experto de dominio no añadieron
+  features: cambiaron el **verbo**. En incidentes, quitaron una cuenta atrás que habría sido falsa para casi
+  todos los casos (los plazos del Art. 73 son del proveedor). En proveedores, quitaron el «exige» de media
+  docena de documentos que la norma dirige a las autoridades. Las citas siempre estaban bien; lo que fallaba
+  era la promesa que las acompañaba, y ese tipo de error no lo caza ningún test: se descubre delante de un
+  cliente.
+  **Dos lecciones de método que conviene no volver a aprender:** (1) el **payload RSC lleva el diccionario
+  serializado**, así que medir o buscar texto renderizado por coincidencia de cadena da falsos positivos —pasó
+  con el `lang` en julio y volvió a pasar midiendo el streaming—; hay que anclar en algo que solo exista en el
+  HTML. (2) el **Postgres desechable no dice nada sobre permisos** —no reproduce los grants por defecto de
+  Supabase—, y por segunda vez dio un verde falso: la cadencia de revisión era inescribible en producción por
+  el endurecimiento de 0025. Queda `npm run verify:backend` para no repetirlo.
+
 - **2026-08-03** · **El deployer puede exigir mucho menos de lo que decíamos.** Al investigar el registro de
   proveedores salió que el AI Act dirige al responsable del despliegue **un solo documento**: las instrucciones
   de uso (Art. 13). El Anexo IV (Art. 11), el sistema de gestión de la calidad (Art. 17) y el de gestión de

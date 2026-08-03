@@ -191,7 +191,7 @@
       record* (sin pronunciamiento del ED), y si el colegio puede consentir por los padres bajo COPPA (la FTC
       propuso codificar esa excepción y **no** la codificó). `medio · M`
 
-### 0.D · SPRINT 4 — producto/UX de profundidad ⬅️ SIGUIENTE
+### 0.D · SPRINT 4 — producto/UX de profundidad ✅ CERRADO (2026-08-03)
 - [x] **Búsqueda / filtro / orden en el inventario + vista apilada en móvil** — ✅ **HECHO (2026-08-02)**.
       El estado vive en la **URL** (`?q=&risk=&evidence=&sort=&dir=`) y no en el cliente: el enlace es
       compartible ("mándame los de alto riesgo sin clasificar"), el botón «atrás» hace lo que uno espera y todo
@@ -390,7 +390,7 @@
       proveedor del SISTEMA que integra el modelo**, no el deployer — así que se bifurca según si el cliente
       integra el modelo él mismo o usa un producto de terceros.
 
-### 0.E · SPRINT 5 — deuda técnica y robustez restante
+### 0.E · SPRINT 5 — deuda técnica y robustez restante ⬅️ SIGUIENTE
 - [ ] **Guardar el idioma de lo que se escribe (`locale` en `gap_items` / autoevaluaciones)** — descubierto al
       cerrar el ticket del `lang` en el Sprint 4. Una brecha creada aplicando el pack ES se sigue viendo en
       español cuando el usuario cambia a inglés, y al revés: el texto está congelado en la BD y **nadie sabe en
