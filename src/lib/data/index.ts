@@ -57,6 +57,8 @@ export const getActionTasks = () => repo.getActionTasks();
 export const getProductFunnel = (days?: number) => repo.getProductFunnel(days);
 export const getIntakeLinks = () => repo.getIntakeLinks();
 export const getIntakeSubmissions = () => repo.getIntakeSubmissions();
+export const getIncidents = () => repo.getIncidents();
+export const getReviewCadenceDays = () => repo.getReviewCadenceDays();
 
 export { isSupabaseConfigured };
 export type {

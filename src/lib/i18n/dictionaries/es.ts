@@ -776,6 +776,7 @@ export const es = {
       risk: "Riesgo",
       gap: "Gap assessment",
       plan: "Plan de acción",
+      incidents: "Incidentes",
       packs: "Policy packs",
       monitoring: "Vigilancia",
       team: "Equipo",
@@ -887,6 +888,11 @@ export const es = {
       "vigia-demo": "El Vigía requiere conectar tu organización.",
       "vigia-denied": "Solo el equipo de validación de Attesta puede ejecutar el Vigía.",
       "vigia-error": "El Vigía no pudo completar la revisión. Inténtalo de nuevo.",
+      "incident-created": "Incidente registrado en el expediente.",
+      "incident-updated": "Expediente del incidente actualizado.",
+      "incident-demo": "El registro de incidentes requiere conectar tu organización.",
+      "incident-error": "No se pudo completar la acción. Inténtalo de nuevo.",
+      "cadence-updated": "Cadencia de revisión actualizada.",
     },
 
     units: {
@@ -1690,6 +1696,176 @@ export const es = {
         suggestionsBody:
           "Generadas a partir de tus brechas abiertas y niveles de riesgo. Añádelas al plan para asignarles responsable y fecha.",
         addSuggestionToPlan: "+ Añadir al plan",
+      },
+
+      // Registro de incidentes (Art. 26.5) + revisión periódica.
+      // Ojo al redactar aquí: los plazos numéricos (15/10/2 días) son del
+      // Art. 73 y son DEL PROVEEDOR; el 26.5 solo dice "sin demora
+      // injustificada" e "inmediatamente". Y la cadencia de revisión es buena
+      // práctica, no una obligación: hay un test que rompe si se reescribe como
+      // obligatoria.
+      incidents: {
+        title: "Incidentes",
+        subtitle:
+          "Expediente de lo ocurrido, de lo que tu organización declara haber informado y de cuándo. Art. 26.5 del Reglamento de IA.",
+        paywallFeature: "Registro de incidentes",
+        paywallDesc:
+          "Abre un expediente por cada incidencia, registra a quién informaste y cuándo, y conserva la fecha de conocimiento que arranca los plazos.",
+        legalFrame:
+          "El Art. 26 es exigible para el alto riesgo del Anexo III desde el 2 de diciembre de 2027. Registrar incidentes hoy es preparación, no una obligación vencida.",
+
+        statOpen: "abiertos",
+        statSerious: "calificados como graves",
+        statAttention: "con avisos por registrar",
+        statUnsuspended: "con riesgo y sin suspensión registrada",
+
+        newIncident: "+ Abrir expediente",
+        newIncidentHint: "Registra una incidencia",
+        fieldTitle: "Qué ha pasado",
+        fieldTitlePlaceholder: "Resume el hecho en una línea",
+        fieldDetail: "Detalle (opcional)",
+        fieldSystem: "Sistema afectado",
+        fieldOccurredOn: "Fecha del hecho",
+        fieldAwareOn: "Fecha de conocimiento",
+        fieldAwareOnHint:
+          "La más importante del expediente: el Art. 73 cuenta sus plazos desde que el proveedor —o, en su caso, tu organización— tiene conocimiento.",
+        fieldCausalLinkOn: "Nexo causal establecido",
+        fieldCausalLinkOnHint:
+          "Cuándo se estableció el nexo con el sistema, o su probabilidad razonable. La definición admite causalidad directa o indirecta.",
+        fieldSeriousness: "Calificación",
+        fieldCategories: "Categorías del Art. 3, punto 49",
+        categoriesHint:
+          "Solo si lo has calificado como grave. Marca todas las que apliquen: cuando concurren varias, el plazo de referencia es el más corto.",
+        create: "Abrir expediente",
+        saveAssessment: "Guardar calificación",
+
+        emptyTitle: "Todavía no hay expedientes",
+        emptyBody:
+          "Abre uno en cuanto detectes una incidencia, aunque aún no sepas si es grave. Casi todos empiezan en evaluación.",
+
+        seriousnessLabel: {
+          under_assessment: "En evaluación",
+          serious: "Incidente grave",
+          not_serious: "No es incidente grave",
+        },
+        seriousnessHint:
+          "Se puede empezar en evaluación y escalar después: el expediente conserva las dos fechas.",
+
+        categoryLabel: {
+          death: "Muerte de una persona",
+          serious_health_harm: "Daño grave para la salud",
+          critical_infrastructure:
+            "Perturbación grave e irreversible de infraestructuras críticas",
+          fundamental_rights:
+            "Incumplimiento de obligaciones del Derecho de la Unión que protegen derechos fundamentales",
+          property_or_environment: "Daños graves a la propiedad o al medio ambiente",
+        },
+
+        stageLabel: {
+          attention: "Avisos por registrar",
+          notified: "Avisos registrados",
+          logged: "Registrado",
+          closed: "Cerrado",
+        },
+
+        targetLabel: {
+          provider: "Proveedor",
+          distributor: "Importador o distribuidor",
+          authority: "Autoridad de vigilancia del mercado",
+        },
+
+        notifyTitle: "A quién informar",
+        notifyOrderedNote:
+          "Incidente grave: el Art. 26.5 fija el orden — primero al proveedor y después al importador o distribuidor y a las autoridades, inmediatamente.",
+        notifySimultaneousNote:
+          "Riesgo del Art. 79.1: informa al proveedor o distribuidor y a la autoridad de vigilancia del mercado, sin demora injustificada.",
+        notifyNothing:
+          "Mientras el expediente esté en evaluación y no haya riesgo declarado del Art. 79.1, el Art. 26.5 no activa todavía ningún aviso.",
+        notifyDisclaimer:
+          "Attesta no transmite nada a ninguna autoridad ni a ningún proveedor: aquí se registra lo que tu organización declara haber hecho.",
+        notifyDeclared: "Declarado el",
+        notifyPending: "Sin registrar",
+        markNotified: "Registrar aviso",
+        undoNotified: "Deshacer",
+
+        elapsedPrefix: "Conocido hace ",
+        elapsedToday: "Conocido hoy",
+
+        flagRisk79: "Hay motivos para considerar un riesgo del Art. 79.1",
+        flagRisk79Hint:
+          "Riesgo para la salud, la seguridad o los derechos fundamentales. Cuenta aunque el sistema se esté usando conforme a las instrucciones: no hace falta mal uso.",
+        flagSuspended: "Tu organización ha suspendido el uso",
+        flagSuspendedHint:
+          "El Art. 26.5 manda suspender el uso en la rama del riesgo del Art. 79.1 — no por el hecho de que el incidente sea grave.",
+        flagProviderUnreachable: "No se ha podido contactar con el proveedor",
+        flagProviderUnreachableHint:
+          "Solo en ese caso el Art. 26.5 remite al Art. 73 «mutatis mutandis» y sus plazos pasan a ser de tu organización.",
+        flagPersonalData: "Afecta además a datos personales",
+        flagPersonalDataHint:
+          "Bandera aparte a propósito: los plazos del RGPD (72 h a la autoridad de protección de datos) corren en paralelo y ninguno sustituye al otro.",
+
+        suspendRequired: "Suspensión de uso pendiente de registrar",
+        suspendDone: "Uso suspendido, según lo declarado",
+
+        deadlineProviderTitle: "Plazo del proveedor (Art. 73)",
+        deadlineProviderBody:
+          "El Art. 73 obliga al proveedor, no a tu organización. Se cuenta desde tu fecha de conocimiento, así que tu expediente es la prueba de cuándo empezó a correr.",
+        deadlineSelfTitle: "Plazo aplicable a tu organización (Art. 73)",
+        deadlineSelfBody:
+          "Al declarar que no has podido contactar con el proveedor, el Art. 26.5 remite al Art. 73 y el plazo pasa a ser tuyo. El canal lo define tu autoridad nacional de vigilancia del mercado.",
+        deadlineRef: "Referencia: ",
+        deadlineDaysSuffix: " días desde el conocimiento",
+
+        gdprTitle: "Dos relojes distintos",
+        gdprBody:
+          "Un incidente grave del Reglamento de IA no es una violación de seguridad de datos personales, ni al revés. Si además lo es, corren en paralelo los plazos del RGPD (arts. 33 y 34) con otros destinatarios.",
+
+        close: "Cerrar expediente",
+        reopen: "Reabrir",
+        openBadge: "Abierto",
+        closedBadge: "Cerrado",
+        detailsToggle: "Calificación y avisos",
+
+        // --- Revisión periódica de la autoevaluación ---
+        reviewTitle: "Revisión de la autoevaluación",
+        reviewSubtitle:
+          "Sistemas cuya autoevaluación conviene volver a mirar, según la cadencia que ha fijado tu organización.",
+        cadenceLabel: "Cadencia",
+        cadenceNote:
+          "Buena práctica: el Reglamento no fija periodicidad de revisión para el responsable del despliegue. El Art. 26.5 pide supervisión continua y el Art. 27.2 se dispara por cambios, no por calendario; ISO/IEC 42001 habla de «intervalos planificados» y NIST AI RMF (GOVERN 1.5) deja la frecuencia a criterio de la organización.",
+        cadence180: "Cada 6 meses",
+        cadence365: "Cada 12 meses",
+        cadence730: "Cada 24 meses",
+        saveCadence: "Guardar",
+        reviewEmpty: "Ningún sistema entra todavía en la ventana de revisión.",
+        reviewStateLabel: {
+          overdue: "Pasada la fecha",
+          unknown: "Sin revisión registrada",
+          due_soon: "Próxima",
+          ok: "Al día",
+        },
+        reviewViewAll: "Ver revisiones",
+        reviewMorePrefix: "Y ",
+        reviewMoreSuffix: " sistemas más en la ventana de revisión.",
+        reviewLastPrefix: "Última revisión: ",
+        reviewNever: "sin registrar",
+        reviewDuePrefix: "Toca el ",
+
+        triggersTitle: "Qué debería disparar una revisión",
+        triggersNote:
+          "Estos son los disparadores que la norma sí reconoce. La cadencia de arriba es solo la red de seguridad.",
+        art27Note:
+          "Los marcados con Art. 27 solo obligan a quien está sujeto a la evaluación de impacto en derechos fundamentales: organismos públicos, entidades privadas que prestan servicios públicos y los puntos 5.b y 5.c del Anexo III. Una empresa privada de RRHH no debe esa evaluación.",
+        triggers: {
+          incident: "Se ha registrado un incidente en este sistema",
+          substantialChange: "Modificación sustancial del sistema",
+          vendorOrModel: "Cambio de proveedor o de versión del modelo",
+          purpose: "Cambian los procesos o la finalidad de uso",
+          affectedGroups: "Cambian las personas o los grupos afectados",
+          newRisks: "Aparecen riesgos de perjuicio que antes no constaban",
+          humanOversight: "Cambian las medidas de supervisión humana",
+          regulatory: "Novedad regulatoria del radar de vigilancia",
+        },
       },
 
       activity: {

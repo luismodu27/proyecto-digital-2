@@ -127,6 +127,29 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-03** · **Registro de incidentes (Art. 26.5): tres reglas que el producto habría escrito al revés.**
+  La consulta al experto de dominio antes de tocar código cambió el diseño tres veces, y las tres son
+  reutilizables más allá de esta pantalla:
+  1. **El Art. 73 obliga al PROVEEDOR, no al deployer.** Sus plazos (15 / 10 / 2 días) solo pasan a ser del
+     cliente cuando **no consigue contactar con el proveedor** («mutatis mutandis», último inciso del 26.5).
+     Lo que sí aporta el deployer es la **fecha de conocimiento**, que arranca un reloj que corre para otro —
+     y eso, además de ser lo cierto, es mejor argumento: su expediente prueba cuándo empezó el plazo ajeno.
+     El Art. 26.5 **no tiene ni un solo plazo numérico**: dice «sin demora injustificada» e «inmediatamente».
+  2. **Suspender el uso lo obliga la rama del riesgo del Art. 79.1, no la del incidente grave.** Contraintuitivo
+     y protegido por test: quien lo «arregle» con un `|| seriousness === "serious"` rompe la suite.
+  3. **No existe cadencia de revisión obligatoria** para el deployer en el Reglamento (el 26.5 es continuo, el
+     27.2 dispara por cambio). Cualquier periodicidad que ofrezcamos es **buena práctica**, y así se etiqueta,
+     con guard que lee el diccionario. Ojo también con el **ámbito del Art. 27.1**: la evaluación de impacto en
+     derechos fundamentales **no** la debe una empresa privada de RRHH, así que no se le programa.
+  **Deuda de verificación bloqueante, heredada y ampliada:** sigue sin leerse el **Art. 113 tal como queda tras
+  el Reglamento (UE) 2026/1744**. De esa lectura depende si el Art. 73 (y el 79) quedan fuera del aplazamiento
+  —hoy es inferencia estructural—, exactamente el mismo patrón ya abierto con el **Art. 49**. Dos artículos
+  esperando la misma lectura: conviene hacerla de una vez.
+  **Aviso permanente:** la premisa *«Colorado obliga a avisar al AG en 90 días»* **volvió a aparecer** en la
+  redacción de este ticket. Ese régimen (SB 24-205) está **derogado** por la SB 26-189 y con él murieron el
+  aviso al AG, la evaluación de impacto y **la defensa afirmativa por NIST/ISO**. Es la segunda vez que
+  reaparece; que nadie la reintroduzca en un modelo de datos.
+
 - **2026-07-30** · **SPRINT 3 CERRADO (4/4). El catálogo pasa de 8 a 11 packs, y lo que más valió fue lo
   descartado.** Metering por sistemas y asientos + packs de Colorado, servicios públicos esenciales y educación
   de EE. UU.

@@ -12,6 +12,8 @@ import {
   SAMPLE_MEMBERS,
   SAMPLE_ACTION_TASKS,
   SAMPLE_ACTION_TASKS_EN,
+  SAMPLE_INCIDENTS,
+  SAMPLE_INCIDENTS_EN,
   SAMPLE_REG_ACKS,
   SAMPLE_REG_ACKS_EN,
   SAMPLE_REG_CANDIDATES,
@@ -38,6 +40,8 @@ import { mergeCatalog, type RegulatoryEvent } from "@/lib/regulatory-watch";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import type { FunnelRow } from "@/lib/telemetry/events";
 import type { IntakeLink, IntakeSubmission } from "@/lib/intake/types";
+import type { Incident } from "@/lib/incidents/incidents";
+import { REVIEW_CADENCE_DEFAULT_DAYS } from "@/lib/incidents/review";
 
 /**
  * Repositorio de datos de ejemplo (modo demo).
@@ -237,4 +241,15 @@ export async function getIntakeLinks(): Promise<IntakeLink[]> {
 
 export async function getIntakeSubmissions(): Promise<IntakeSubmission[]> {
   return [];
+}
+
+/** Expedientes de incidente de ejemplo (modo demo). */
+export async function getIncidents(): Promise<Incident[]> {
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_INCIDENTS_EN : SAMPLE_INCIDENTS;
+}
+
+/** En demo la cadencia no es configurable: se enseña el defecto del producto. */
+export async function getReviewCadenceDays(): Promise<number> {
+  return REVIEW_CADENCE_DEFAULT_DAYS;
 }

@@ -4,6 +4,7 @@
  */
 import type { BiasAudit } from "./bias-audit";
 import type { Locale } from "./i18n/config";
+import type { Incident } from "./incidents/incidents";
 
 export type RiskLevel = "unacceptable" | "high" | "limited" | "minimal";
 
@@ -113,7 +114,7 @@ export const AI_SYSTEMS: AiSystem[] = [
     vendor: "VidAssess",
     risk: "high",
     compliance: 35,
-    lastReviewed: "2026-05-30",
+    lastReviewed: "2025-06-18",
   },
   {
     id: "SYS-004",
@@ -186,7 +187,7 @@ export const AI_SYSTEMS_EN: AiSystem[] = [
     vendor: "VidAssess",
     risk: "high",
     compliance: 35,
-    lastReviewed: "2026-05-30",
+    lastReviewed: "2025-06-18",
   },
   {
     id: "SYS-004",
@@ -1503,3 +1504,118 @@ export const AUDIT_READY_THRESHOLD = 80;
 export function isAuditReady(pct: number): boolean {
   return pct >= AUDIT_READY_THRESHOLD;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Registro de incidentes (Art. 26.5) — datos de ejemplo                       */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Tres expedientes de ejemplo elegidos para enseñar los tres estados que de
+ * verdad se dan, no tres variaciones del mismo:
+ *
+ *  1. Un evento **en evaluación**: todavía no se sabe si es grave. Es el estado
+ *     en el que nace casi todo incidente real.
+ *  2. Un caso con **riesgo del Art. 79.1**: uso suspendido, sin ser (aún) un
+ *     incidente grave. Enseña la regla contraintuitiva —quien obliga a
+ *     suspender es esta rama, no la del incidente grave—.
+ *  3. Un **incidente grave** ya notificado y cerrado, con las tres fechas en el
+ *     orden que manda el artículo (proveedor primero).
+ */
+export const SAMPLE_INCIDENTS: Incident[] = [
+  {
+    id: "inc-demo-1",
+    systemId: "SYS-003",
+    systemName: "Entrevistas por vídeo con IA",
+    title: "Transcripción errónea en entrevistas con acento no nativo",
+    detail:
+      "Dos personas candidatas reportan que la transcripción automática omitió partes de sus respuestas. Pendiente de comprobar si afectó a la puntuación.",
+    occurredOn: "2026-07-21",
+    awareOn: "2026-07-23",
+    causalLinkOn: null,
+    categories: [],
+    seriousness: "under_assessment",
+    riskArt79: false,
+    useSuspended: false,
+    providerUnreachable: false,
+    notifiedProviderOn: null,
+    notifiedDistributorOn: null,
+    notifiedAuthorityOn: null,
+    personalDataBreach: false,
+    status: "open",
+    createdAt: "2026-07-23T09:15:00Z",
+  },
+  {
+    id: "inc-demo-2",
+    systemId: "SYS-001",
+    systemName: "Cribado de CVs — ATS",
+    title: "Tasa de descarte anómala tras la actualización del proveedor",
+    detail:
+      "Tras la versión 4.2 el descarte automático sube del 38 % al 71 % en un perfil concreto. Uso suspendido mientras el proveedor investiga.",
+    occurredOn: "2026-07-15",
+    awareOn: "2026-07-16",
+    causalLinkOn: "2026-07-18",
+    categories: [],
+    seriousness: "under_assessment",
+    riskArt79: true,
+    useSuspended: true,
+    providerUnreachable: false,
+    notifiedProviderOn: "2026-07-16",
+    notifiedDistributorOn: null,
+    notifiedAuthorityOn: "2026-07-17",
+    personalDataBreach: false,
+    status: "open",
+    createdAt: "2026-07-16T11:40:00Z",
+  },
+  {
+    id: "inc-demo-3",
+    systemId: "SYS-005",
+    systemName: "Test psicométrico automatizado",
+    title: "Puntuaciones sesgadas por edad en una campaña de junio",
+    detail:
+      "Revisión interna confirma diferencia sistemática de puntuación por franja de edad. Se rehízo la evaluación de las 214 personas afectadas.",
+    occurredOn: "2026-06-02",
+    awareOn: "2026-06-09",
+    causalLinkOn: "2026-06-12",
+    categories: ["fundamental_rights"],
+    seriousness: "serious",
+    riskArt79: true,
+    useSuspended: true,
+    providerUnreachable: false,
+    notifiedProviderOn: "2026-06-09",
+    notifiedDistributorOn: "2026-06-10",
+    notifiedAuthorityOn: "2026-06-10",
+    personalDataBreach: false,
+    status: "closed",
+    createdAt: "2026-06-09T08:00:00Z",
+  },
+];
+
+/**
+ * Espejo INGLÉS de los incidentes de ejemplo. Solo se traduce el texto libre
+ * (título y detalle) y el nombre del sistema; fechas, categorías y banderas son
+ * idénticas: sostienen los mismos recuentos y el mismo semáforo en los dos
+ * idiomas, que es justo lo que un espejo debe garantizar.
+ */
+export const SAMPLE_INCIDENTS_EN: Incident[] = [
+  {
+    ...SAMPLE_INCIDENTS[0],
+    systemName: "AI video interviews",
+    title: "Faulty transcription in interviews with non-native accents",
+    detail:
+      "Two candidates report that the automatic transcription dropped parts of their answers. Pending checks on whether it affected scoring.",
+  },
+  {
+    ...SAMPLE_INCIDENTS[1],
+    systemName: "CV screening — ATS",
+    title: "Anomalous rejection rate after the provider's update",
+    detail:
+      "After release 4.2 automatic rejection rises from 38% to 71% for one profile. Use suspended while the provider investigates.",
+  },
+  {
+    ...SAMPLE_INCIDENTS[2],
+    systemName: "Automated psychometric test",
+    title: "Age-skewed scores in a June campaign",
+    detail:
+      "An internal review confirms a systematic score difference by age bracket. The assessment was redone for the 214 people affected.",
+  },
+];

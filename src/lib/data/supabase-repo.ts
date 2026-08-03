@@ -37,6 +37,8 @@ import { resolveLocale } from "@/lib/i18n/resolve";
 import { logDataFallback } from "@/lib/observability/log";
 import type { FunnelRow } from "@/lib/telemetry/events";
 import type { IntakeLink, IntakeSubmission } from "@/lib/intake/types";
+import type { Incident, IncidentCategory, Seriousness } from "@/lib/incidents/incidents";
+import { REVIEW_CADENCE_DEFAULT_DAYS, normalizeCadenceDays } from "@/lib/incidents/review";
 
 /** Mapea la severidad de BD (en) a la del modelo de UI (es). */
 const SEVERITY_ES: Record<string, GapItem["severity"]> = {
@@ -1046,4 +1048,98 @@ export async function getIntakeSubmissions(): Promise<IntakeSubmission[]> {
       linkLabel: link?.label ?? null,
     };
   });
+}
+
+/**
+ * Expedientes de incidente de la organización activa (Art. 26.5).
+ *
+ * Fallback seguro: si la migración 0030 aún no está aplicada devuelve `[]` y lo
+ * registra como `migration-pending`. La sección se ve vacía; nada se rompe.
+ */
+export async function getIncidents(): Promise<Incident[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data, error } = await supabase
+    .from("incidents")
+    .select(
+      "id, title, detail, occurred_on, aware_on, causal_link_on, categories, seriousness, risk_art79, use_suspended, provider_unreachable, notified_provider_on, notified_distributor_on, notified_authority_on, personal_data_breach, status, ai_system_id, created_at, ai_systems(name)",
+    )
+    .eq("organization_id", org)
+    .order("aware_on", { ascending: false });
+
+  if (error) {
+    logDataFallback("getIncidents", error);
+    return [];
+  }
+
+  type Row = {
+    id: string;
+    title: string;
+    detail: string | null;
+    occurred_on: string | null;
+    aware_on: string;
+    causal_link_on: string | null;
+    categories: string[] | null;
+    seriousness: Seriousness;
+    risk_art79: boolean;
+    use_suspended: boolean;
+    provider_unreachable: boolean;
+    notified_provider_on: string | null;
+    notified_distributor_on: string | null;
+    notified_authority_on: string | null;
+    personal_data_breach: boolean;
+    status: "open" | "closed";
+    ai_system_id: string | null;
+    created_at: string;
+    ai_systems: { name: string } | { name: string }[] | null;
+  };
+
+  return ((data ?? []) as Row[]).map((r) => {
+    const sys = Array.isArray(r.ai_systems) ? r.ai_systems[0] : r.ai_systems;
+    return {
+      id: r.id,
+      systemId: r.ai_system_id,
+      systemName: sys?.name ?? null,
+      title: r.title,
+      detail: r.detail,
+      occurredOn: r.occurred_on,
+      awareOn: String(r.aware_on).slice(0, 10),
+      causalLinkOn: r.causal_link_on,
+      categories: (r.categories ?? []) as IncidentCategory[],
+      seriousness: r.seriousness,
+      riskArt79: r.risk_art79,
+      useSuspended: r.use_suspended,
+      providerUnreachable: r.provider_unreachable,
+      notifiedProviderOn: r.notified_provider_on,
+      notifiedDistributorOn: r.notified_distributor_on,
+      notifiedAuthorityOn: r.notified_authority_on,
+      personalDataBreach: r.personal_data_breach,
+      status: r.status,
+      createdAt: String(r.created_at),
+    };
+  });
+}
+
+/**
+ * Cadencia de revisión elegida por la organización. Si la columna aún no existe
+ * (0030 sin aplicar) se usa el defecto del producto: una cadencia ausente no
+ * puede dejar el inventario sin avisos ni marcarlo entero como vencido.
+ */
+export async function getReviewCadenceDays(): Promise<number> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return REVIEW_CADENCE_DEFAULT_DAYS;
+  const { data, error } = await supabase
+    .from("organizations")
+    .select("review_cadence_days")
+    .eq("id", org)
+    .maybeSingle();
+  if (error) {
+    logDataFallback("getReviewCadenceDays", error);
+    return REVIEW_CADENCE_DEFAULT_DAYS;
+  }
+  return data?.review_cadence_days == null
+    ? REVIEW_CADENCE_DEFAULT_DAYS
+    : normalizeCadenceDays(data.review_cadence_days);
 }

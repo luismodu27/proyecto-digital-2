@@ -96,7 +96,7 @@ const REMEDIATION: Record<string, CatalogEntry> = {
   "Art. 12": {
     title: "Registro y trazabilidad (logging)",
     action:
-      "El proveedor diseña el registro automático de eventos (por diseño). Como deployer, mantén el sistema con el logging activo y conserva los logs que estén bajo tu control durante al menos 6 meses (Art. 26.6), salvo que otra norma exija más.",
+      "El proveedor diseña el registro automático de eventos (por diseño). Como deployer, mantén el sistema con el logging activo y conserva los logs que estén bajo tu control durante un período adecuado a la finalidad prevista y de al menos 6 meses (Art. 26.6), salvo que otra norma aplicable —en particular la de protección de datos— disponga otra cosa.",
     article: "Art. 12",
     priority: "media",
     effort: "medio",
@@ -210,7 +210,7 @@ export const REMEDIATION_EN: Record<string, CatalogEntry> = {
   "Art. 12": {
     title: "Record-keeping and traceability (logging)",
     action:
-      "The provider designs the automatic logging of events (by design). As a deployer, keep the system running with logging enabled and retain the logs under your control for at least 6 months (Art. 26.6), unless other law requires longer.",
+      "The provider designs the automatic logging of events (by design). As a deployer, keep the system running with logging enabled and retain the logs under your control for a period appropriate to the intended purpose and of at least 6 months (Art. 26.6), unless other applicable law —in particular data protection law— provides otherwise.",
     article: "Art. 12",
     priority: "media",
     effort: "medio",

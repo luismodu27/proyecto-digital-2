@@ -5,6 +5,7 @@ import { RiskBadge } from "@/components/ui/RiskBadge";
 import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
 import { DeadlineReminders } from "@/components/dashboard/DeadlineReminders";
+import { ReviewReminders } from "@/components/dashboard/ReviewReminders";
 import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 import { DashboardWelcome } from "@/components/dashboard/DashboardWelcome";
 import {
@@ -16,6 +17,7 @@ import {
   getOrganizationName,
   getRegulatoryEvents,
   getRegulatoryAcks,
+  getReviewCadenceDays,
   isSupabaseConfigured,
 } from "@/lib/data";
 import { getCurrentUser } from "@/lib/data/context";
@@ -53,18 +55,29 @@ const ACK_CHIP: Record<RegAckStatus, string> = {
 };
 
 export default async function DashboardOverview() {
-  const [systems, orgJur, tasks, gaps, members, user, orgName, regEvents, regAcks] =
-    await Promise.all([
-      getAiSystems(),
-      getOrgJurisdictions(),
-      getActionTasks(),
-      getGapItems(),
-      getOrgMembers(),
-      getCurrentUser(),
-      getOrganizationName(),
-      getRegulatoryEvents(),
-      getRegulatoryAcks(),
-    ]);
+  const [
+    systems,
+    orgJur,
+    tasks,
+    gaps,
+    members,
+    user,
+    orgName,
+    regEvents,
+    regAcks,
+    cadenceDays,
+  ] = await Promise.all([
+    getAiSystems(),
+    getOrgJurisdictions(),
+    getActionTasks(),
+    getGapItems(),
+    getOrgMembers(),
+    getCurrentUser(),
+    getOrganizationName(),
+    getRegulatoryEvents(),
+    getRegulatoryAcks(),
+    getReviewCadenceDays(),
+  ]);
 
   const locale = await resolveLocale();
   const d = getDictionary(locale).dashboard;
@@ -72,7 +85,9 @@ export default async function DashboardOverview() {
 
   // Nombre de pila para el saludo (solo si hay un nombre real en el perfil; no
   // usamos el prefijo del email para no mostrar algo poco natural).
-  const meta = user?.user_metadata as { full_name?: string; name?: string } | undefined;
+  const meta = user?.user_metadata as
+    | { full_name?: string; name?: string }
+    | undefined;
   const firstName =
     (meta?.full_name ?? meta?.name)?.trim().split(/\s+/)[0] ?? null;
 
@@ -217,7 +232,10 @@ export default async function DashboardOverview() {
       </section>
 
       <p className="mt-3 flex items-center gap-2 text-xs text-muted">
-        <span className="inline-block h-3 w-0.5 rounded-full bg-ink/45" aria-hidden />
+        <span
+          className="inline-block h-3 w-0.5 rounded-full bg-ink/45"
+          aria-hidden
+        />
         {o.meterNoteBefore}
         <span className="font-medium text-ink-soft">
           {AUDIT_READY_THRESHOLD}
@@ -233,7 +251,12 @@ export default async function DashboardOverview() {
         >
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand-strong">
-              <svg viewBox="0 0 24 24" className="size-4.5" fill="none" aria-hidden>
+              <svg
+                viewBox="0 0 24 24"
+                className="size-4.5"
+                fill="none"
+                aria-hidden
+              >
                 <path
                   d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                   stroke="currentColor"
@@ -269,7 +292,9 @@ export default async function DashboardOverview() {
           </div>
           <div className="flex shrink-0 items-center gap-4">
             <div className="text-right">
-              <p className={`text-sm font-semibold tabular-nums ${nextDaysTone}`}>
+              <p
+                className={`text-sm font-semibold tabular-nums ${nextDaysTone}`}
+              >
                 {nextDays === 0
                   ? o.today
                   : `${o.inDaysPrefix}${nextDays} ${nextDays === 1 ? d.units.dayOne : d.units.dayOther}`}
@@ -286,7 +311,19 @@ export default async function DashboardOverview() {
         </Link>
       )}
 
-      <DeadlineReminders tasks={tasks} now={now} t={d.deadlines} locale={locale} />
+      <DeadlineReminders
+        tasks={tasks}
+        now={now}
+        t={d.deadlines}
+        locale={locale}
+      />
+
+      <ReviewReminders
+        systems={systems}
+        cadenceDays={cadenceDays}
+        now={now}
+        t={d.pages.incidents}
+      />
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">
@@ -332,16 +369,27 @@ export default async function DashboardOverview() {
           ) : (
             <ul className="mt-4 divide-y divide-line">
               {recent.map((s) => (
-                <li key={s.id} className="flex items-center justify-between gap-3 py-3">
+                <li
+                  key={s.id}
+                  className="flex items-center justify-between gap-3 py-3"
+                >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-ink">{s.name}</p>
+                    <p className="truncate text-sm font-medium text-ink">
+                      {s.name}
+                    </p>
                     <p className="text-xs text-muted">{s.owner}</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
                     <div className="w-24">
-                      <Meter value={s.compliance} target={AUDIT_READY_THRESHOLD} />
+                      <Meter
+                        value={s.compliance}
+                        target={AUDIT_READY_THRESHOLD}
+                      />
                     </div>
-                    <RiskBadge level={s.risk} label={riskLabel(s.risk, locale)} />
+                    <RiskBadge
+                      level={s.risk}
+                      label={riskLabel(s.risk, locale)}
+                    />
                   </div>
                 </li>
               ))}

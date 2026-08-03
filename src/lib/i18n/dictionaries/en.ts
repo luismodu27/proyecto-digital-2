@@ -771,6 +771,7 @@ export const en: Dictionary = {
       risk: "Risk",
       gap: "Gap assessment",
       plan: "Action plan",
+      incidents: "Incidents",
       packs: "Policy packs",
       monitoring: "Monitoring",
       team: "Team",
@@ -879,6 +880,11 @@ export const en: Dictionary = {
       "vigia-demo": "The Watcher requires connecting your organization.",
       "vigia-denied": "Only Attesta's review team can run the Watcher.",
       "vigia-error": "The Watcher couldn't complete the review. Please try again.",
+      "incident-created": "Incident recorded in the register.",
+      "incident-updated": "Incident record updated.",
+      "incident-demo": "The incident register requires connecting your organization.",
+      "incident-error": "The action couldn't be completed. Please try again.",
+      "cadence-updated": "Review cadence updated.",
     },
 
     units: {
@@ -1671,6 +1677,175 @@ export const en: Dictionary = {
         suggestionsBody:
           "Generated from your open gaps and risk levels. Add them to the plan to assign an owner and date.",
         addSuggestionToPlan: "+ Add to plan",
+      },
+
+      // Incident register (Art. 26(5)) + periodic review.
+      // Careful when editing: the numeric deadlines (15/10/2 days) belong to
+      // Art. 73 and are the PROVIDER's; Art. 26(5) only says "without undue
+      // delay" and "immediately". And the review cadence is good practice, not
+      // an obligation — a test breaks if it is rewritten as mandatory.
+      incidents: {
+        title: "Incidents",
+        subtitle:
+          "A record of what happened, of whom your organization states it informed, and when. Art. 26(5) of the AI Act.",
+        paywallFeature: "Incident register",
+        paywallDesc:
+          "Open a record for every incident, log whom you informed and when, and preserve the date of knowledge that starts the deadlines.",
+        legalFrame:
+          "Art. 26 becomes enforceable for Annex III high-risk systems on 2 December 2027. Recording incidents today is preparation, not an overdue obligation.",
+
+        statOpen: "open",
+        statSerious: "classified as serious",
+        statAttention: "with notifications to record",
+        statUnsuspended: "at risk with no suspension recorded",
+
+        newIncident: "+ Open a record",
+        newIncidentHint: "Log an incident",
+        fieldTitle: "What happened",
+        fieldTitlePlaceholder: "Summarise the event in one line",
+        fieldDetail: "Detail (optional)",
+        fieldSystem: "System affected",
+        fieldOccurredOn: "Date of occurrence",
+        fieldAwareOn: "Date of knowledge",
+        fieldAwareOnHint:
+          "The most important date in the record: Art. 73 counts its deadlines from the moment the provider —or, where applicable, your organization— becomes aware.",
+        fieldCausalLinkOn: "Causal link established",
+        fieldCausalLinkOnHint:
+          "When the link to the system was established, or its reasonable likelihood. The definition covers direct and indirect causation.",
+        fieldSeriousness: "Classification",
+        fieldCategories: "Categories under Art. 3(49)",
+        categoriesHint:
+          "Only if you have classified it as serious. Tick every one that applies: when several concur, the reference deadline is the shortest.",
+        create: "Open the record",
+        saveAssessment: "Save classification",
+
+        emptyTitle: "No records yet",
+        emptyBody:
+          "Open one as soon as you spot something, even if you don't yet know whether it is serious. Almost all of them start under assessment.",
+
+        seriousnessLabel: {
+          under_assessment: "Under assessment",
+          serious: "Serious incident",
+          not_serious: "Not a serious incident",
+        },
+        seriousnessHint:
+          "You can start under assessment and escalate later: the record keeps both dates.",
+
+        categoryLabel: {
+          death: "Death of a person",
+          serious_health_harm: "Serious harm to health",
+          critical_infrastructure:
+            "Serious and irreversible disruption of critical infrastructure",
+          fundamental_rights:
+            "Infringement of Union law obligations intended to protect fundamental rights",
+          property_or_environment: "Serious harm to property or the environment",
+        },
+
+        stageLabel: {
+          attention: "Notifications to record",
+          notified: "Notifications recorded",
+          logged: "Recorded",
+          closed: "Closed",
+        },
+
+        targetLabel: {
+          provider: "Provider",
+          distributor: "Importer or distributor",
+          authority: "Market surveillance authority",
+        },
+
+        notifyTitle: "Whom to inform",
+        notifyOrderedNote:
+          "Serious incident: Art. 26(5) sets the order — first the provider, then the importer or distributor and the authorities, immediately.",
+        notifySimultaneousNote:
+          "Art. 79(1) risk: inform the provider or distributor and the market surveillance authority, without undue delay.",
+        notifyNothing:
+          "While the record is under assessment and no Art. 79(1) risk is stated, Art. 26(5) does not trigger any notification yet.",
+        notifyDisclaimer:
+          "Attesta transmits nothing to any authority or provider: what is stored here is what your organization states it has done.",
+        notifyDeclared: "Stated on",
+        notifyPending: "Not recorded",
+        markNotified: "Record notification",
+        undoNotified: "Undo",
+
+        elapsedPrefix: "Known for ",
+        elapsedToday: "Known today",
+
+        flagRisk79: "There are grounds to consider an Art. 79(1) risk",
+        flagRisk79Hint:
+          "A risk to health, safety or fundamental rights. It counts even when the system is used in accordance with the instructions: misuse is not required.",
+        flagSuspended: "Your organization has suspended use",
+        flagSuspendedHint:
+          "Art. 26(5) requires suspending use in the Art. 79(1) risk branch — not because the incident is serious.",
+        flagProviderUnreachable: "The provider could not be reached",
+        flagProviderUnreachableHint:
+          "Only then does Art. 26(5) apply Art. 73 «mutatis mutandis» and its deadlines become your organization's.",
+        flagPersonalData: "It also involves personal data",
+        flagPersonalDataHint:
+          "A separate flag on purpose: the GDPR clocks (72 h to the data protection authority) run in parallel and neither replaces the other.",
+
+        suspendRequired: "Suspension of use still to be recorded",
+        suspendDone: "Use suspended, as stated",
+
+        deadlineProviderTitle: "The provider's deadline (Art. 73)",
+        deadlineProviderBody:
+          "Art. 73 binds the provider, not your organization. It runs from your date of knowledge, so your record is the proof of when it started.",
+        deadlineSelfTitle: "Deadline applicable to your organization (Art. 73)",
+        deadlineSelfBody:
+          "By stating that you could not reach the provider, Art. 26(5) applies Art. 73 and the deadline becomes yours. The channel is defined by your national market surveillance authority.",
+        deadlineRef: "Reference: ",
+        deadlineDaysSuffix: " days from knowledge",
+
+        gdprTitle: "Two separate clocks",
+        gdprBody:
+          "A serious incident under the AI Act is not a personal data breach, nor the other way round. If it is also one, the GDPR deadlines (Arts. 33 and 34) run in parallel with different recipients.",
+
+        close: "Close the record",
+        reopen: "Reopen",
+        openBadge: "Open",
+        closedBadge: "Closed",
+        detailsToggle: "Classification and notifications",
+
+        // --- Periodic review of the self-assessment ---
+        reviewTitle: "Self-assessment review",
+        reviewSubtitle:
+          "Systems whose self-assessment is worth revisiting, according to the cadence your organization has set.",
+        cadenceLabel: "Cadence",
+        cadenceNote:
+          "Good practice: the AI Act sets no review frequency for the deployer. Art. 26(5) calls for continuous monitoring and Art. 27(2) is triggered by change, not by the calendar; ISO/IEC 42001 speaks of «planned intervals» and NIST AI RMF (GOVERN 1.5) leaves the frequency to the organization.",
+        cadence180: "Every 6 months",
+        cadence365: "Every 12 months",
+        cadence730: "Every 24 months",
+        saveCadence: "Save",
+        reviewEmpty: "No system is in the review window yet.",
+        reviewStateLabel: {
+          overdue: "Past the date",
+          unknown: "No review recorded",
+          due_soon: "Coming up",
+          ok: "Up to date",
+        },
+        reviewViewAll: "See reviews",
+        reviewMorePrefix: "And ",
+        reviewMoreSuffix: " more systems in the review window.",
+        reviewLastPrefix: "Last review: ",
+        reviewNever: "not recorded",
+        reviewDuePrefix: "Due on ",
+
+        triggersTitle: "What should trigger a review",
+        triggersNote:
+          "These are the triggers the law does recognise. The cadence above is only the safety net.",
+        art27Note:
+          "Those marked Art. 27 only bind those subject to the fundamental rights impact assessment: public bodies, private entities providing public services and points 5(b) and 5(c) of Annex III. A private HR company does not owe that assessment.",
+        triggers: {
+          incident: "An incident has been recorded for this system",
+          substantialChange: "Substantial modification of the system",
+          vendorOrModel: "Change of provider or of model version",
+          purpose: "The processes or the intended purpose change",
+          affectedGroups: "The persons or groups affected change",
+          newRisks: "Risks of harm appear that were not previously recorded",
+          humanOversight: "Human oversight measures change",
+          regulatory: "Regulatory news from the monitoring radar",
+        },
       },
 
       activity: {

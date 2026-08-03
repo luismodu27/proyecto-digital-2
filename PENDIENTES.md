@@ -221,8 +221,43 @@
       pasar el ratón). Se quitó porque `title` no existe en táctil ni con teclado y duplicaba el anuncio del
       lector de pantalla; el texto sigue estando, en `sr-only`. Si prefieres recuperar el tooltip para el
       usuario de ratón, es una línea.
-- [ ] **Registro de incidentes + revisión periódica de la autoevaluación** — cubre obligación real del deployer
-      (Arts. 26.5 / 73) reusando audit-trail + recordatorios; añade recurrencia (retención). `medio · S`
+- [x] **Registro de incidentes + revisión periódica de la autoevaluación** — ✅ **HECHO (2026-08-03)**.
+      Sección nueva `/dashboard/incidentes` (plan Preparación) + migración **0030** (`incidents` + columna
+      `organizations.review_cadence_days`), lógica pura en `src/lib/incidents/` con 46 tests y **13 mutaciones
+      inyectadas, 13 detectadas**.
+      **La consulta al experto de dominio cambió el diseño tres veces, y las tres importan:**
+      1. **Los plazos del Art. 73 (15 / 10 / 2 días) son DEL PROVEEDOR, no tuyos.** El deployer solo los asume
+         cuando **no consigue contactar con el proveedor** (el «mutatis mutandis» del último inciso del 26.5).
+         Un badge genérico de «te quedan 12 días» habría sido falso para casi todos los casos. Lo que hay: un
+         **cronómetro ascendente** desde la fecha de conocimiento (el 26.5 dice «inmediatamente», no da días) y,
+         cuando el incidente es grave, una referencia etiquetada **de quién es el plazo**. Solo al marcar
+         «no se ha podido contactar con el proveedor» pasa a presentarse como propio.
+      2. **La obligación de suspender el uso NO está en la rama del incidente grave**, sino en la del riesgo del
+         Art. 79.1. Suena al revés y es el error fácil; `suspensionRequired()` mira `riskArt79` y no mira la
+         gravedad, con test que rompe si alguien lo «arregla».
+      3. **No existe cadencia de revisión obligatoria** en el Reglamento: el 26.5 es deber continuo y el 27.2
+         dispara por cambio, no por calendario. La cadencia (6/12/24 meses, 12 por defecto) se presenta como
+         **buena práctica** citando ISO/IEC 42001 y NIST AI RMF GOVERN 1.5 — y hay un guard que **lee el
+         diccionario** y falla si ese copy se reescribe como obligación. Los **disparadores por evento** van en
+         primer plano porque son los que la norma sí reconoce; los que citan el Art. 27 llevan su condicional
+         (esa evaluación **no** la debe una empresa privada de RRHH).
+      Otras decisiones que no se ven: **tres fechas separadas** (hecho, conocimiento, nexo causal) porque la del
+      medio es la que arranca el reloj ajeno y es el dato de más valor probatorio; **cinco categorías** del
+      Art. 3.49 y no cuatro (la letra (a) se parte en muerte / daño a la salud porque el 73 les da plazos
+      distintos); `personal_data_breach` como bandera **independiente** para que nadie pierda las 72 h del RGPD
+      creyendo que el aviso al proveedor valía por el de protección de datos; `ai_system_id` con `on delete set
+      null` para que dar de baja la herramienta **no borre** el expediente. Encuadre temporal arriba del todo:
+      el Art. 26 no es exigible para el Anexo III hasta **2-dic-2027**, así que esto es preparación y no una
+      obligación vencida.
+      De paso, **corregido el copy del Art. 26.6** en `recommendations.ts` (ES y EN): decía *«salvo que otra
+      norma exija más»* y el texto legal dice *«salvo disposición en contrario»* — estrechaba la norma en una
+      sola dirección. Y **un sistema de la demo pasa a tener la revisión de hace más de un año**
+      (`SYS-003`, el peor preparado), porque si no la sección de revisión salía vacía en la demo.
+      **Deuda declarada del experto, antes de GA:** leer el **Art. 113 modificado** por el Reglamento (UE)
+      2026/1744 palabra por palabra para confirmar que el Art. 73 queda **fuera** del aplazamiento (hoy es
+      inferencia estructural, el mismo patrón ya abierto con el Art. 49); leer el **Art. 27.1 verbatim** para
+      confirmar el ámbito subjetivo de la evaluación de impacto; y comprobar si la guía de la Comisión sobre el
+      Art. 73 ya se adoptó (borrador de sep-2025, redactado solo para proveedores).
 - [ ] **Registro de proveedores / terceros (Capa 8)** — materializa el reencuadre deployer que ya está en todos
       los packs (marcado CE, model card, DPA, caducidad); palanca de expansión de plan. `medio · M`
 - [ ] **Streaming con Suspense en el dashboard** — que la query más lenta no bloquee el shell entero. `medio · M`
