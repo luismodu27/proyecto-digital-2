@@ -2,12 +2,16 @@ import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/parts";
 import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { IncidentCard } from "@/components/dashboard/IncidentCard";
+import { ReadonlySetting } from "@/components/dashboard/ReadonlySetting";
 import {
   getAiSystems,
+  getCurrentMemberRole,
   getIncidents,
   getReviewCadenceDays,
   getSystemsForSelect,
+  isSupabaseConfigured,
 } from "@/lib/data";
+import { canEditSettings, settingsAccess } from "@/lib/dashboard/settings-access";
 import {
   SERIOUSNESS,
   countIncidents,
@@ -47,20 +51,28 @@ const CADENCE_LABEL_KEY = {
 } as const;
 
 export default async function IncidentesPage() {
-  const [incidents, systems, systemOpts, cadenceDays] = await Promise.all([
+  const [incidents, systems, systemOpts, cadenceDays, role] = await Promise.all([
     getIncidents(),
     getAiSystems(),
     getSystemsForSelect(),
     getReviewCadenceDays(),
+    getCurrentMemberRole(),
   ]);
   const locale = await resolveLocale();
-  const t = getDictionary(locale).dashboard.pages.incidents;
+  const dd = getDictionary(locale).dashboard;
+  const t = dd.pages.incidents;
+  const controls = dd.controls;
 
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
   const counts = countIncidents(incidents);
   const sorted = sortIncidents(incidents);
   const reviewsDue = collectReviewsDue(systems, cadenceDays, now);
+  // La autorización real la impone `set_review_cadence` (security definer, con
+  // el guard de owner/admin dentro). Esto solo evita ofrecer un botón que iba a
+  // fallar con un error genérico.
+  const access = settingsAccess({ role, isConnected: isSupabaseConfigured });
+  const cadenceLabel = t[CADENCE_LABEL_KEY[cadenceDays as 180 | 365 | 730]] ?? t.cadence365;
 
   return (
     <>
@@ -220,30 +232,38 @@ export default async function IncidentesPage() {
               {t.reviewSubtitle}
             </p>
           </div>
-          <form action={updateReviewCadence} className="flex items-end gap-2">
-            <label>
-              <span className="text-xs font-medium text-muted">
-                {t.cadenceLabel}
-              </span>
-              <select
-                name="cadenceDays"
-                defaultValue={String(cadenceDays)}
-                className={FIELD}
+          {canEditSettings(access) ? (
+            <form action={updateReviewCadence} className="flex items-end gap-2">
+              <label>
+                <span className="text-xs font-medium text-muted">
+                  {t.cadenceLabel}
+                </span>
+                <select
+                  name="cadenceDays"
+                  defaultValue={String(cadenceDays)}
+                  className={FIELD}
+                >
+                  {REVIEW_CADENCE_CHOICES.map((d) => (
+                    <option key={d} value={d}>
+                      {t[CADENCE_LABEL_KEY[d]]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="submit"
+                className="rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-brand hover:text-brand"
               >
-                {REVIEW_CADENCE_CHOICES.map((d) => (
-                  <option key={d} value={d}>
-                    {t[CADENCE_LABEL_KEY[d]]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button
-              type="submit"
-              className="rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-brand hover:text-brand"
-            >
-              {t.saveCadence}
-            </button>
-          </form>
+                {t.saveCadence}
+              </button>
+            </form>
+          ) : (
+            <ReadonlySetting
+              label={t.cadenceLabel}
+              value={cadenceLabel}
+              note={controls.ownerAdminOnly}
+            />
+          )}
         </div>
 
         {/* La nota de buena práctica NO es letra pequeña opcional: el

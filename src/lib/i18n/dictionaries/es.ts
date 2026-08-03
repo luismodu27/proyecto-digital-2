@@ -1564,7 +1564,15 @@ export const es = {
         hint: "Dónde contratas · afina el radar",
         body: "Marca los territorios donde tu organización contrata o tiene empleados. El radar priorizará las normas de esas jurisdicciones.",
         save: "Guardar",
+        readonlyTitle: "Jurisdicciones de tu organización",
+        readonlyEmpty: "Sin configurar",
       },
+      // Nota compartida por los ajustes de organización (nexo de jurisdicción y
+      // cadencia de revisión) cuando el usuario no puede cambiarlos. Se enseña
+      // el valor, no solo el candado: sin él, lo que el usuario ve en pantalla
+      // parece arbitrario.
+      ownerAdminOnly:
+        "Solo quien tenga rol de propietario o administrador puede cambiarlo.",
       task: {
         statusAria: "Estado",
         assigneeAria: "Responsable",

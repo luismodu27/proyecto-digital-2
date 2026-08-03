@@ -1549,7 +1549,10 @@ export const en: Dictionary = {
         hint: "Where you operate · tune the radar",
         body: "Check the territories where your organization hires or has employees. The radar will prioritize the rules of those jurisdictions.",
         save: "Save",
+        readonlyTitle: "Your organization's jurisdictions",
+        readonlyEmpty: "Not configured",
       },
+      ownerAdminOnly: "Only an owner or an admin can change this.",
       task: {
         statusAria: "Status",
         assigneeAria: "Assignee",

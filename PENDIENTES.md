@@ -266,6 +266,14 @@
       organizaciones, centradas en el **aislamiento** —que B no alcance el expediente de A ni leyendo, ni por
       id, ni escribiendo, ni por el audit-trail—. De paso destapó un test propio que **pasaba por el motivo
       equivocado**: el rechazo de una cadencia inválida venía del 42501, no del CHECK.
+      **Ajustes de organización unificados (misma fecha).** La regla de "quién puede cambiar esto" vivía suelta
+      en cada pantalla; ahora está en `src/lib/dashboard/settings-access.ts` (pura, con tests y 4 mutaciones
+      detectadas) y la usan la cadencia de revisión y el nexo de jurisdicción. **Cambio de criterio visible:**
+      a quien no puede cambiarlo se le enseña **el valor**, no una pantalla vacía —vigilancia ocultaba el nexo
+      entero y el radar parecía incompleto sin explicación—. Es el mismo patrón que ya usaba el estado interno
+      de cada evento regulatorio. Ojo: esto es **presentación**, no autorización; quien manda son las funciones
+      `security definer` del servidor. Verificado forzando la rama de solo lectura sobre un build real, porque
+      en demo esa rama no se renderiza nunca.
       **Deuda declarada del experto, antes de GA:** leer el **Art. 113 modificado** por el Reglamento (UE)
       2026/1744 palabra por palabra para confirmar que el Art. 73 queda **fuera** del aplazamiento (hoy es
       inferencia estructural, el mismo patrón ya abierto con el Art. 49); leer el **Art. 27.1 verbatim** para
