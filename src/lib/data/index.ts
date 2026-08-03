@@ -59,6 +59,8 @@ export const getIntakeLinks = () => repo.getIntakeLinks();
 export const getIntakeSubmissions = () => repo.getIntakeSubmissions();
 export const getIncidents = () => repo.getIncidents();
 export const getReviewCadenceDays = () => repo.getReviewCadenceDays();
+export const getSuppliers = () => repo.getSuppliers();
+export const getSupplierEvidence = () => repo.getSupplierEvidence();
 
 export { isSupabaseConfigured };
 export type {

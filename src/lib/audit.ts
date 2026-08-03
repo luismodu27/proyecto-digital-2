@@ -35,6 +35,8 @@ export const ENTITY_META: Record<
   regulatory_acks: { label: "revisión regulatoria", article: "la", tone: "info" },
   action_tasks: { label: "tarea del plan", article: "la", tone: "gold" },
   incidents: { label: "incidente", article: "el", tone: "danger" },
+  suppliers: { label: "proveedor", article: "el", tone: "info" },
+  supplier_evidence: { label: "evidencia de proveedor", article: "la", tone: "gold" },
 };
 
 /**
@@ -57,6 +59,8 @@ export const ENTITY_META_EN: Record<
   regulatory_acks: { label: "regulatory review", article: "the", tone: "info" },
   action_tasks: { label: "plan task", article: "the", tone: "gold" },
   incidents: { label: "incident", article: "the", tone: "danger" },
+  suppliers: { label: "supplier", article: "the", tone: "info" },
+  supplier_evidence: { label: "supplier evidence", article: "the", tone: "gold" },
 };
 
 export const ACTION_META: Record<

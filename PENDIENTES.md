@@ -279,8 +279,37 @@
       inferencia estructural, el mismo patrón ya abierto con el Art. 49); leer el **Art. 27.1 verbatim** para
       confirmar el ámbito subjetivo de la evaluación de impacto; y comprobar si la guía de la Comisión sobre el
       Art. 73 ya se adoptó (borrador de sep-2025, redactado solo para proveedores).
-- [ ] **Registro de proveedores / terceros (Capa 8)** — materializa el reencuadre deployer que ya está en todos
-      los packs (marcado CE, model card, DPA, caducidad); palanca de expansión de plan. `medio · M`
+- [x] **Registro de proveedores / terceros (Capa 8)** — ✅ **HECHO (2026-08-03)**. Sección
+      `/dashboard/proveedores` (plan Preparación) + migración **0032** (`suppliers` + `supplier_evidence`),
+      catálogo de evidencia puro con 25 tests y **9 mutaciones inyectadas, 9 detectadas**.
+      **El hallazgo del experto que cambió la feature entera:** el AI Act le da al responsable del despliegue
+      **muchísima menos capacidad de exigir de la que nuestro copy sugería**. El único documento que el
+      Reglamento le dirige son las **instrucciones de uso (Art. 13)** —que ya llevan dentro las métricas del
+      Art. 15, la supervisión humana del Art. 14 y los mecanismos de registro del Art. 12—. El Anexo IV, el
+      sistema de gestión de la calidad y el de gestión de riesgos van dirigidos a **autoridades y organismos
+      notificados**. Por eso cada elemento del catálogo lleva una **base jurídica** de la que sale el verbo de
+      la interfaz, y la pantalla agrupa por ese verbo: **exige** (4 elementos) · **verifica** en fuente pública
+      (4) · **pacta en contrato** (8) · **registra que existe** (2). Agrupar por el verbo *es* el mensaje.
+      **Palanca que no estábamos usando:** la base de datos del Art. 71 es **pública** e incluye copia de la
+      declaración de conformidad y las instrucciones electrónicas (Anexo VIII A.11 y A.12). Hay un canal de
+      verificación que no depende de la buena voluntad del proveedor, y ahora tiene estado propio.
+      **Lo que NO se modela, a propósito:** ninguna caducidad salvo el certificado de organismo notificado
+      (Art. 44) —ni el marcado CE, ni la declaración, ni las instrucciones, ni el registro en la BD de la UE
+      caducan, y los 10 años de los Arts. 18/23.5/47.1 son **conservación del proveedor**, no validez; el campo
+      de caducidad ni siquiera se ofrece donde no aplica, y el servidor lo descarta igual, así que hacen falta
+      dos errores para que salga un aviso falso—; ninguna puntuación ni «% de cumplimiento» de proveedor (sin
+      base normativa y copy prohibido: se cuentan elementos); y el desenlace del **Art. 25** es **texto fijo**
+      —«puede activar el Art. 25, requiere revisión jurídica»— y nunca un veredicto.
+      **Aviso que ahorra una discusión inútil:** para los puntos 2 a 8 del Anexo III (empleo, crédito,
+      educación, servicios públicos) la evaluación de conformidad es por control interno y **no interviene
+      ningún organismo notificado** (Art. 43.2). Si el proveedor no da número de certificado, casi nunca es que
+      lo esconda: es que no existe.
+      **Encuadre temporal:** los Arts. 23 y 24 (importador y distribuidor) también están aplazados a
+      **2-dic-2027**, así que hoy esto es **preparación contractual** — y ese es justo el argumento: hazlo
+      mientras renuevas contratos, que es cuando tienes palanca.
+      **Fuera de alcance, a Sprint 5:** las cuatro banderas del Art. 25 **persistidas por sistema** (aquí van
+      como bloque informativo, sin guardar) y el cruce sistema × proveedor × elemento (hoy la evidencia cuelga
+      del proveedor, con enlace opcional al sistema).
 - [x] **Streaming con Suspense en el dashboard** — ✅ **HECHO (2026-08-03)**. La portada hacía un solo
       `Promise.all` de diez consultas y no pintaba **nada** hasta la última. Ahora solo se espera el camino
       crítico —inventario, usuario y nombre de la organización— y de ahí salen ya la cabecera, tres de los

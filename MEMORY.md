@@ -127,6 +127,29 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-03** · **El deployer puede exigir mucho menos de lo que decíamos.** Al investigar el registro de
+  proveedores salió que el AI Act dirige al responsable del despliegue **un solo documento**: las instrucciones
+  de uso (Art. 13). El Anexo IV (Art. 11), el sistema de gestión de la calidad (Art. 17) y el de gestión de
+  riesgos (Art. 9) van dirigidos a **autoridades y organismos notificados** — «to provide national competent
+  authorities and notified bodies with the necessary information». Nuestro copy decía «exige al proveedor la
+  documentación técnica del Anexo IV» en recomendaciones, dos packs, el clasificador y una tarea de la demo.
+  Las **citas eran correctas**; el error estaba en el **verbo**, que es peor: se descubre en la primera
+  negociación con un proveedor grande y ahí el producto pierde credibilidad entera. Corregido y codificado en
+  `src/lib/suppliers/evidence.ts`, donde cada elemento lleva su **base jurídica** (exige / verifica / pacta en
+  contrato / registra que existe) con tests que rompen si alguien vuelve a mover el Anexo IV a «exigible».
+  **Tres cosas más que conviene no volver a descubrir:**
+  (a) la **base de datos del Art. 71 es pública** e incluye copia de la declaración de conformidad y las
+  instrucciones electrónicas — hay un canal de verificación que no depende del proveedor y no lo estábamos
+  usando; (b) para los **puntos 2 a 8 del Anexo III** (todo nuestro catálogo salvo biometría) **no interviene
+  organismo notificado** (Art. 43.2), así que pedir un número de certificado genera una brecha falsa en casi
+  todos los clientes; (c) el destinatario del **Art. 53.1.b** (documentación GPAI) es el **proveedor del
+  sistema** que integra el modelo, no el deployer.
+  **Y una corrección de método sobre el aplazamiento:** el informe cierra —con fuentes secundarias, no con
+  lectura directa— que ni el Art. 49 ni el Art. 73 están aplazados, pero con un matiz que hay que conservar:
+  que la Sección 5 aplique no significa que haya declaraciones de conformidad desde 2026, porque el **deber**
+  de elaborarla vive en el Art. 16, que sí está aplazado. Sigue pendiente leer el **Art. 113 modificado
+  verbatim**; EUR-Lex aún no publica la versión consolidada.
+
 - **2026-08-03** · **Registro de proveedores (Capa 8): investigación regulatoria previa. Seis cosas que el
   producto tiene HOY escritas de más, y una palanca que no estábamos usando.**
   1. **La documentación técnica del Anexo IV NO es exigible por el deployer.** El Art. 11.1 la dirige, literal, a

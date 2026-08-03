@@ -38,6 +38,8 @@ import { logDataFallback } from "@/lib/observability/log";
 import type { FunnelRow } from "@/lib/telemetry/events";
 import type { IntakeLink, IntakeSubmission } from "@/lib/intake/types";
 import type { Incident, IncidentCategory, Seriousness } from "@/lib/incidents/incidents";
+import type { AiActRole, GdprRole, Supplier } from "@/lib/suppliers/types";
+import type { EvidenceStatus, SupplierEvidence } from "@/lib/suppliers/evidence";
 import { REVIEW_CADENCE_DEFAULT_DAYS, normalizeCadenceDays } from "@/lib/incidents/review";
 
 /** Mapea la severidad de BD (en) a la del modelo de UI (es). */
@@ -1152,4 +1154,103 @@ export async function getReviewCadenceDays(): Promise<number> {
   return data?.review_cadence_days == null
     ? REVIEW_CADENCE_DEFAULT_DAYS
     : normalizeCadenceDays(data.review_cadence_days);
+}
+
+/** Proveedores y terceros de la organización activa (migración 0032). */
+export async function getSuppliers(): Promise<Supplier[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data, error } = await supabase
+    .from("suppliers")
+    .select(
+      "id, name, country, ai_act_role, outside_eu, authorized_rep, authorized_rep_checked_on, gdpr_role, contact, contract_ends_on, dpa_signed, excludes_high_risk_use, note",
+    )
+    .eq("organization_id", org)
+    .order("name", { ascending: true });
+
+  if (error) {
+    logDataFallback("getSuppliers", error);
+    return [];
+  }
+  type Row = {
+    id: string;
+    name: string;
+    country: string | null;
+    ai_act_role: AiActRole;
+    outside_eu: boolean;
+    authorized_rep: string | null;
+    authorized_rep_checked_on: string | null;
+    gdpr_role: GdprRole;
+    contact: string | null;
+    contract_ends_on: string | null;
+    dpa_signed: boolean;
+    excludes_high_risk_use: boolean;
+    note: string | null;
+  };
+  return ((data ?? []) as Row[]).map((r) => ({
+    id: r.id,
+    name: r.name,
+    country: r.country,
+    aiActRole: r.ai_act_role,
+    outsideEu: r.outside_eu,
+    authorizedRep: r.authorized_rep,
+    authorizedRepCheckedOn: r.authorized_rep_checked_on,
+    gdprRole: r.gdpr_role,
+    contact: r.contact,
+    contractEndsOn: r.contract_ends_on,
+    dpaSigned: r.dpa_signed,
+    excludesHighRiskUse: r.excludes_high_risk_use,
+    note: r.note,
+  }));
+}
+
+/** Elementos de evidencia de todos los proveedores de la organización activa. */
+export async function getSupplierEvidence(): Promise<SupplierEvidence[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data, error } = await supabase
+    .from("supplier_evidence")
+    .select(
+      "id, supplier_id, ai_system_id, kind, status, requested_on, received_on, document_version, source_url, expires_on, note, ai_systems(name)",
+    )
+    .eq("organization_id", org)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    logDataFallback("getSupplierEvidence", error);
+    return [];
+  }
+  type Row = {
+    id: string;
+    supplier_id: string;
+    ai_system_id: string | null;
+    kind: string;
+    status: EvidenceStatus;
+    requested_on: string | null;
+    received_on: string | null;
+    document_version: string | null;
+    source_url: string | null;
+    expires_on: string | null;
+    note: string | null;
+    ai_systems: { name: string } | { name: string }[] | null;
+  };
+  return ((data ?? []) as Row[]).map((r) => {
+    const sys = Array.isArray(r.ai_systems) ? r.ai_systems[0] : r.ai_systems;
+    return {
+      id: r.id,
+      supplierId: r.supplier_id,
+      systemId: r.ai_system_id,
+      systemName: sys?.name ?? null,
+      kind: r.kind,
+      status: r.status,
+      requestedOn: r.requested_on,
+      receivedOn: r.received_on,
+      documentVersion: r.document_version,
+      sourceUrl: r.source_url,
+      expiresOn: r.expires_on,
+      note: r.note,
+    };
+  });
 }

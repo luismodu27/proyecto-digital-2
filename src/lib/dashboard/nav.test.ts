@@ -27,10 +27,10 @@ const es = getDictionary("es");
 const en = getDictionary("en");
 
 describe("catálogo de navegación", () => {
-  it("tiene las 13 entradas y ninguna repetida", () => {
+  it("tiene las 14 entradas y ninguna repetida", () => {
     // Guarda anti-vacío: sin ella, un catálogo vacío pasaría todos los `every`
     // de este fichero y el test diría "todo bien" sin haber mirado nada.
-    expect(NAV).toHaveLength(13);
+    expect(NAV).toHaveLength(14);
     expect(new Set(NAV.map((i) => i.key)).size).toBe(NAV.length);
     expect(new Set(NAV.map((i) => i.href)).size).toBe(NAV.length);
   });
@@ -68,12 +68,12 @@ describe("catálogo de navegación", () => {
 describe("visibilidad por rol", () => {
   it("un cliente no ve la telemetría interna", () => {
     expect(visibleNav(false).map((i) => i.key)).not.toContain("telemetry");
-    expect(visibleNav(false)).toHaveLength(12);
+    expect(visibleNav(false)).toHaveLength(13);
   });
 
   it("el equipo de Attesta sí la ve", () => {
     expect(visibleNav(true).map((i) => i.key)).toContain("telemetry");
-    expect(visibleNav(true)).toHaveLength(13);
+    expect(visibleNav(true)).toHaveLength(14);
   });
 });
 
@@ -86,7 +86,7 @@ describe("bloqueo por plan", () => {
   });
 
   const table: [PlanTier, number][] = [
-    ["free", 9],
+    ["free", 10],
     ["preparacion", 2],
     ["enterprise", 0],
   ];

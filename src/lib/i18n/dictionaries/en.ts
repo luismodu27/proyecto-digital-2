@@ -772,6 +772,7 @@ export const en: Dictionary = {
       gap: "Gap assessment",
       plan: "Action plan",
       incidents: "Incidents",
+      suppliers: "Suppliers",
       packs: "Policy packs",
       monitoring: "Monitoring",
       team: "Team",
@@ -885,6 +886,12 @@ export const en: Dictionary = {
       "incident-demo": "The incident register requires connecting your organization.",
       "incident-error": "The action couldn't be completed. Please try again.",
       "cadence-updated": "Review cadence updated.",
+      "supplier-created": "Supplier added to the register.",
+      "supplier-updated": "Supplier updated.",
+      "supplier-deleted": "Supplier removed from the register.",
+      "evidence-updated": "Evidence item updated.",
+      "supplier-demo": "The supplier register requires connecting your organization.",
+      "supplier-error": "The action couldn't be completed. Please try again.",
     },
 
     units: {
@@ -1849,6 +1856,152 @@ export const en: Dictionary = {
           humanOversight: "Human oversight measures change",
           regulatory: "Regulatory news from the monitoring radar",
         },
+      },
+
+      // Supplier and third party register (Layer 8).
+      // When editing: the VERB follows the legal basis of the item
+      // (`src/lib/suppliers/evidence.ts`). Only the instructions for use can be
+      // required; Annex IV, the QMS and risk management are addressed to
+      // authorities and notified bodies. And never score a supplier.
+      suppliers: {
+        title: "Suppliers",
+        subtitle:
+          "Who sells you each AI system, what evidence they have given you and what is missing. The design obligation is theirs; the record is yours.",
+        paywallFeature: "Supplier register",
+        paywallDesc:
+          "Inventory your AI suppliers, track what evidence each one has handed over, and keep at hand what must be negotiated into the next contract.",
+        legalFrame:
+          "Importer and distributor obligations (Arts. 23 and 24) become enforceable for Annex III high-risk systems on 2 December 2027, like those of Art. 26. Until then this is contractual preparation: do it while you renew contracts, which is when you have leverage.",
+
+        statSuppliers: "suppliers",
+        statCovered: "items with evidence",
+        statPending: "pending",
+        statRefused: "refusals recorded",
+
+        addSupplier: "+ Add supplier",
+        addSupplierHint: "Register a third party",
+        fieldName: "Name",
+        fieldNamePlaceholder: "Supplier's legal name",
+        fieldCountry: "Country of establishment",
+        fieldRole: "Role under the Regulation",
+        fieldGdprRole: "Role under data protection law",
+        fieldContact: "Compliance contact",
+        fieldContractEnds: "Contract ends",
+        fieldNote: "Notes",
+        flagOutsideEu: "Established outside the EU",
+        flagOutsideEuHint:
+          "Then it must have an authorised representative in the Union (Art. 22). If the representative steps down it is a warning sign: Art. 22(4) requires them to terminate the mandate when they believe the provider is not complying.",
+        fieldAuthorizedRep: "Authorised representative",
+        fieldAuthorizedRepChecked: "Checked on",
+        flagDpa: "A data processing agreement is in place (GDPR Art. 28)",
+        flagDpaHint:
+          "Only relevant if the supplier processes personal data on your behalf. Many declare themselves controllers in order to train or improve their product: the role is a fact to record, not an assumption.",
+        flagExcludesHighRisk: "The contract excludes high-risk use",
+        flagExcludesHighRiskHint:
+          "Art. 25(2) red flag. If your contract excludes it and you use the tool for a high-risk case anyway, you take on the provider's obligations and lose the right to the initial provider's cooperation.",
+        create: "Add supplier",
+        save: "Save",
+        remove: "Remove supplier",
+
+        emptyTitle: "No suppliers recorded",
+        emptyBody:
+          "Start with whoever sells you the highest-risk system. The evidence you ask for today is what you will not have to improvise when an audit arrives.",
+
+        roles: {
+          provider: "Provider",
+          importer: "Importer",
+          distributor: "Distributor",
+          model_provider: "Model provider",
+          third_party: "Other third party",
+          unknown: "Not determined",
+        },
+        gdprRoles: {
+          controller: "Controller",
+          processor: "Processor",
+          joint: "Joint controller",
+          none: "Does not process personal data",
+          unknown: "Not determined",
+        },
+
+        verbs: {
+          deliverable: "Require",
+          publicSource: "Verify",
+          contractOnly: "Negotiate in the contract",
+          existsNoAccess: "Record that it exists",
+        },
+        verbHints: {
+          deliverable: "The Regulation obliges the provider to hand it to you.",
+          publicSource:
+            "It is public: you can check it without depending on the supplier's goodwill.",
+          contractOnly:
+            "You cannot require it by law. You get it by negotiating, and renewal is the moment.",
+          existsNoAccess:
+            "It must exist, but it is addressed to someone else (authorities or notified bodies).",
+        },
+
+        kinds: {
+          instructions: "Instructions for use",
+          correctiveActions: "Notice of corrective action or withdrawal",
+          authorizedRep: "Authorised representative in the Union",
+          ceMarking: "CE marking",
+          declarationOfConformity: "EU declaration of conformity",
+          euDatabase: "Entry in the EU database",
+          notifiedBodyCertificate: "Notified body certificate",
+          technicalDocumentation: "Technical documentation (Annex IV)",
+          qualityManagement: "Quality management system",
+          riskManagement: "Risk management system",
+          dataGovernance: "Data governance and quality",
+          logAccess: "Access to and export of logs",
+          dataProcessingAgreement: "Data processing agreement",
+          versionChangeNotice: "Version change notice",
+          importerRecords: "Documentation kept by the importer",
+          distributorChecks: "Distributor's verifications",
+          gpaiIntegratorDocs: "Documentation for model integrators",
+          gpaiTrainingSummary: "Public summary of training content",
+        },
+        statuses: {
+          notRequested: "Not requested",
+          requested: "Requested",
+          received: "Received",
+          verifiedPublicly: "Verified in a public source",
+          refused: "The supplier refused",
+          notApplicable: "Not applicable",
+        },
+        statusHintRefused:
+          "Write down what they answered and when: a refusal in writing is evidence, and good evidence.",
+
+        evidenceTitle: "Evidence",
+        fieldVersion: "Document or system version",
+        fieldVersionHint:
+          "More useful than a date: what invalidates a set of instructions is not the passing of time, it is a new version.",
+        fieldSourceUrl: "Link or reference",
+        fieldExpires: "Expires on",
+        fieldExpiresHint:
+          "Only the notified body certificate expires (Art. 44). The CE marking, the declaration of conformity, the instructions for use and the EU database entry do not.",
+        addEvidence: "Add item",
+        certWarning: "Certificate expiring soon",
+        certExpired: "Certificate expired",
+
+        noNotifiedBody:
+          "Worth knowing: for points 2 to 8 of Annex III —employment, credit, education, public services— conformity assessment is based on internal control and NO notified body is involved (Art. 43(2)). If your provider gives you no certificate number, in most cases they are not hiding it: it does not exist.",
+
+        art25Title: "When you stop being a deployer",
+        art25Note:
+          "Four situations turn whoever uses a system into its provider, with every obligation of Art. 16 on top. The third is the most common in the mid-market and requires touching nothing technical.",
+        art25Outcome:
+          "This may trigger Art. 25: it requires legal review. Attesta does not rule on whether you have become a provider.",
+        art25: {
+          whiteLabel:
+            "You put your name or trademark on a high-risk system already placed on the market",
+          substantialModification:
+            "You substantially modify the system, beyond the changes the provider had already foreseen",
+          purposeChange:
+            "You change the intended purpose of a system that was not high-risk —including a general-purpose one— and it becomes high-risk",
+          fineTuning:
+            "You fine-tune a general-purpose model yourself",
+        },
+        art25CarveOut:
+          "The only one with a contractual nuance: Art. 25(1)(a) allows an agreement to allocate the obligations between the parties.",
       },
 
       activity: {

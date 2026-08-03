@@ -5,6 +5,7 @@
 import type { BiasAudit } from "./bias-audit";
 import type { Locale } from "./i18n/config";
 import type { Incident } from "./incidents/incidents";
+import type { Supplier, SupplierEvidence } from "./suppliers/types";
 
 export type RiskLevel = "unacceptable" | "high" | "limited" | "minimal";
 
@@ -1618,4 +1619,176 @@ export const SAMPLE_INCIDENTS_EN: Incident[] = [
     detail:
       "An internal review confirms a systematic score difference by age bracket. The assessment was redone for the 214 people affected.",
   },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Registro de proveedores (Capa 8) — datos de ejemplo                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Tres proveedores elegidos para enseñar los tres casos que de verdad cambian
+ * lo que el cliente puede hacer:
+ *
+ *  1. Uno **de fuera de la UE**, con representante autorizado verificado. Es
+ *     donde vive el Art. 22 y la señal de alarma del 22.4.
+ *  2. Uno **interno** (equipo propio): sin contrato ni representante, y con la
+ *     pregunta incómoda de si al desarrollarlo ya sois proveedores.
+ *  3. Uno con la **bandera roja del Art. 25.2**: el contrato excluye el uso en
+ *     casos de alto riesgo, y aun así se usa para cribar.
+ */
+export const SAMPLE_SUPPLIERS: Supplier[] = [
+  {
+    id: "sup-demo-1",
+    name: "HireFlow Inc.",
+    country: "Estados Unidos",
+    aiActRole: "provider",
+    outsideEu: true,
+    authorizedRep: "HireFlow Europe BV (Ámsterdam)",
+    authorizedRepCheckedOn: "2026-06-12",
+    gdprRole: "processor",
+    contact: "compliance@hireflow.example",
+    contractEndsOn: "2027-03-31",
+    dpaSigned: true,
+    excludesHighRiskUse: false,
+    note: null,
+  },
+  {
+    id: "sup-demo-2",
+    name: "Equipo de datos (interno)",
+    country: "España",
+    aiActRole: "unknown",
+    outsideEu: false,
+    authorizedRep: null,
+    authorizedRepCheckedOn: null,
+    gdprRole: "none",
+    contact: "datos@empresa-demo.com",
+    contractEndsOn: null,
+    dpaSigned: false,
+    excludesHighRiskUse: false,
+    note: "Desarrollo propio: revisar si al construirlo asumimos el papel de proveedor.",
+  },
+  {
+    id: "sup-demo-3",
+    name: "VidAssess",
+    country: "Irlanda",
+    aiActRole: "provider",
+    outsideEu: false,
+    authorizedRep: null,
+    authorizedRepCheckedOn: null,
+    gdprRole: "processor",
+    contact: "legal@vidassess.example",
+    contractEndsOn: "2026-11-15",
+    dpaSigned: true,
+    excludesHighRiskUse: true,
+    note: "Sus condiciones excluyen el uso en decisiones de empleo. Lo estamos usando para eso.",
+  },
+];
+
+export const SAMPLE_SUPPLIERS_EN: Supplier[] = [
+  {
+    ...SAMPLE_SUPPLIERS[0],
+    country: "United States",
+    authorizedRep: "HireFlow Europe BV (Amsterdam)",
+  },
+  {
+    ...SAMPLE_SUPPLIERS[1],
+    name: "Data team (in-house)",
+    country: "Spain",
+    note: "Built in-house: check whether building it makes us the provider.",
+  },
+  {
+    ...SAMPLE_SUPPLIERS[2],
+    country: "Ireland",
+    note: "Their terms exclude use in employment decisions. We are using it for exactly that.",
+  },
+];
+
+/**
+ * Evidencia de ejemplo. Enseña a propósito los cuatro estados que más dicen:
+ * lo entregado, lo verificado en fuente pública, lo que el proveedor **se negó**
+ * a dar (que es evidencia, no un hueco) y lo que sigue sin pedirse.
+ */
+export const SAMPLE_SUPPLIER_EVIDENCE: SupplierEvidence[] = [
+  {
+    id: "sev-1",
+    supplierId: "sup-demo-1",
+    systemId: "SYS-001",
+    systemName: "Cribado de CVs — ATS",
+    kind: "instructions",
+    status: "received",
+    requestedOn: "2026-05-04",
+    receivedOn: "2026-05-11",
+    documentVersion: "v4.2",
+    sourceUrl: null,
+    expiresOn: null,
+    note: null,
+  },
+  {
+    id: "sev-2",
+    supplierId: "sup-demo-1",
+    systemId: "SYS-001",
+    systemName: "Cribado de CVs — ATS",
+    kind: "technicalDocumentation",
+    status: "refused",
+    requestedOn: "2026-05-04",
+    receivedOn: null,
+    documentVersion: null,
+    sourceUrl: null,
+    expiresOn: null,
+    note: "Responden que el Anexo IV es para autoridades y lo cubre su NDA. Pendiente de llevarlo al contrato en la renovación de marzo.",
+  },
+  {
+    id: "sev-3",
+    supplierId: "sup-demo-1",
+    systemId: "SYS-001",
+    systemName: "Cribado de CVs — ATS",
+    kind: "ceMarking",
+    status: "verifiedPublicly",
+    requestedOn: null,
+    receivedOn: "2026-06-12",
+    documentVersion: null,
+    sourceUrl: null,
+    expiresOn: null,
+    note: null,
+  },
+  {
+    id: "sev-4",
+    supplierId: "sup-demo-1",
+    systemId: null,
+    systemName: null,
+    kind: "logAccess",
+    status: "requested",
+    requestedOn: "2026-07-20",
+    receivedOn: null,
+    documentVersion: null,
+    sourceUrl: null,
+    expiresOn: null,
+    note: null,
+  },
+  {
+    id: "sev-5",
+    supplierId: "sup-demo-3",
+    systemId: "SYS-003",
+    systemName: "Entrevistas por vídeo con IA",
+    kind: "instructions",
+    status: "notRequested",
+    requestedOn: null,
+    receivedOn: null,
+    documentVersion: null,
+    sourceUrl: null,
+    expiresOn: null,
+    note: null,
+  },
+];
+
+export const SAMPLE_SUPPLIER_EVIDENCE_EN: SupplierEvidence[] = [
+  { ...SAMPLE_SUPPLIER_EVIDENCE[0], systemName: "CV screening — ATS" },
+  {
+    ...SAMPLE_SUPPLIER_EVIDENCE[1],
+    systemName: "CV screening — ATS",
+    note: "They answer that Annex IV is for authorities and is covered by their NDA. To be taken to the contract at the March renewal.",
+  },
+  { ...SAMPLE_SUPPLIER_EVIDENCE[2], systemName: "CV screening — ATS" },
+  { ...SAMPLE_SUPPLIER_EVIDENCE[3] },
+  { ...SAMPLE_SUPPLIER_EVIDENCE[4], systemName: "AI video interviews" },
 ];

@@ -777,6 +777,7 @@ export const es = {
       gap: "Gap assessment",
       plan: "Plan de acción",
       incidents: "Incidentes",
+      suppliers: "Proveedores",
       packs: "Policy packs",
       monitoring: "Vigilancia",
       team: "Equipo",
@@ -893,6 +894,12 @@ export const es = {
       "incident-demo": "El registro de incidentes requiere conectar tu organización.",
       "incident-error": "No se pudo completar la acción. Inténtalo de nuevo.",
       "cadence-updated": "Cadencia de revisión actualizada.",
+      "supplier-created": "Proveedor añadido al registro.",
+      "supplier-updated": "Proveedor actualizado.",
+      "supplier-deleted": "Proveedor eliminado del registro.",
+      "evidence-updated": "Elemento de evidencia actualizado.",
+      "supplier-demo": "El registro de proveedores requiere conectar tu organización.",
+      "supplier-error": "No se pudo completar la acción. Inténtalo de nuevo.",
     },
 
     units: {
@@ -1874,6 +1881,154 @@ export const es = {
           humanOversight: "Cambian las medidas de supervisión humana",
           regulatory: "Novedad regulatoria del radar de vigilancia",
         },
+      },
+
+      // Registro de proveedores y terceros (Capa 8).
+      // Al redactar aquí: el VERBO depende de la base jurídica del elemento
+      // (`src/lib/suppliers/evidence.ts`). Solo las instrucciones de uso son
+      // exigibles; el Anexo IV, el SGC y la gestión de riesgos van dirigidos a
+      // autoridades y organismos notificados. Y nada de puntuar al proveedor.
+      suppliers: {
+        title: "Proveedores",
+        subtitle:
+          "Quién te vende cada sistema de IA, qué evidencia te ha dado y qué te falta. La obligación de diseño es suya; el expediente es tuyo.",
+        paywallFeature: "Registro de proveedores",
+        paywallDesc:
+          "Inventaría a tus proveedores de IA, lleva la cuenta de qué evidencia te ha entregado cada uno y ten a mano lo que hay que pactar en el próximo contrato.",
+        legalFrame:
+          "Las obligaciones de importador y distribuidor (Arts. 23 y 24) son exigibles para el alto riesgo del Anexo III desde el 2 de diciembre de 2027, igual que las del Art. 26. Hasta entonces esto es preparación contractual: hazlo mientras renuevas contratos, que es cuando tienes palanca.",
+
+        statSuppliers: "proveedores",
+        statCovered: "elementos con evidencia",
+        statPending: "pendientes",
+        statRefused: "negativas registradas",
+
+        addSupplier: "+ Añadir proveedor",
+        addSupplierHint: "Da de alta un tercero",
+        fieldName: "Nombre",
+        fieldNamePlaceholder: "Razón social del proveedor",
+        fieldCountry: "País de establecimiento",
+        fieldRole: "Papel en el Reglamento",
+        fieldGdprRole: "Papel en protección de datos",
+        fieldContact: "Contacto de compliance",
+        fieldContractEnds: "Fin del contrato",
+        fieldNote: "Notas",
+        flagOutsideEu: "Establecido fuera de la UE",
+        flagOutsideEuHint:
+          "Entonces debe tener representante autorizado en la Unión (Art. 22). Si el representante cesa, es señal de alarma: el Art. 22.4 le obliga a poner fin al mandato cuando cree que el proveedor incumple.",
+        fieldAuthorizedRep: "Representante autorizado",
+        fieldAuthorizedRepChecked: "Verificado el",
+        flagDpa: "Hay contrato de encargo de tratamiento (RGPD 28)",
+        flagDpaHint:
+          "Solo aplica si el proveedor trata datos personales por tu cuenta. Muchos se declaran responsables para entrenar o mejorar su producto: el papel es un dato, no una suposición.",
+        flagExcludesHighRisk: "El contrato excluye usarlo en casos de alto riesgo",
+        flagExcludesHighRiskHint:
+          "Bandera roja del Art. 25.2. Si tu contrato lo excluye y aun así lo usas para un caso de alto riesgo, asumes las obligaciones de proveedor y pierdes el derecho a que el proveedor inicial coopere.",
+        create: "Añadir proveedor",
+        save: "Guardar",
+        remove: "Eliminar proveedor",
+
+        emptyTitle: "Sin proveedores registrados",
+        emptyBody:
+          "Empieza por quien te vende el sistema de mayor riesgo. La evidencia que le pidas hoy es la que no tendrás que improvisar cuando llegue una auditoría.",
+
+        roles: {
+          provider: "Proveedor",
+          importer: "Importador",
+          distributor: "Distribuidor",
+          model_provider: "Proveedor del modelo",
+          third_party: "Otro tercero",
+          unknown: "Sin determinar",
+        },
+        gdprRoles: {
+          controller: "Responsable del tratamiento",
+          processor: "Encargado del tratamiento",
+          joint: "Corresponsable",
+          none: "No trata datos personales",
+          unknown: "Sin determinar",
+        },
+
+        // De la base jurídica sale el verbo. Esto es el corazón de la sección.
+        verbs: {
+          deliverable: "Exige",
+          publicSource: "Verifica",
+          contractOnly: "Pacta en contrato",
+          existsNoAccess: "Registra que existe",
+        },
+        verbHints: {
+          deliverable:
+            "El Reglamento obliga al proveedor a hacértelo llegar.",
+          publicSource:
+            "Es público: se comprueba sin depender de la buena voluntad del proveedor.",
+          contractOnly:
+            "No es exigible por ley. Se consigue negociando, y el mejor momento es la renovación.",
+          existsNoAccess:
+            "Debe existir, pero su destinatario es otro (autoridades u organismos notificados).",
+        },
+
+        kinds: {
+          instructions: "Instrucciones de uso",
+          correctiveActions: "Aviso de acciones correctoras o retirada",
+          authorizedRep: "Representante autorizado en la Unión",
+          ceMarking: "Marcado CE",
+          declarationOfConformity: "Declaración UE de conformidad",
+          euDatabase: "Ficha en la base de datos de la UE",
+          notifiedBodyCertificate: "Certificado de organismo notificado",
+          technicalDocumentation: "Documentación técnica (Anexo IV)",
+          qualityManagement: "Sistema de gestión de la calidad",
+          riskManagement: "Sistema de gestión de riesgos",
+          dataGovernance: "Gobernanza y calidad de los datos",
+          logAccess: "Acceso y exportación de los registros",
+          dataProcessingAgreement: "Contrato de encargo de tratamiento",
+          versionChangeNotice: "Aviso de cambio de versión",
+          importerRecords: "Documentación conservada por el importador",
+          distributorChecks: "Verificaciones del distribuidor",
+          gpaiIntegratorDocs: "Documentación para integradores del modelo",
+          gpaiTrainingSummary: "Resumen público del contenido de entrenamiento",
+        },
+        statuses: {
+          notRequested: "Sin solicitar",
+          requested: "Solicitado",
+          received: "Recibido",
+          verifiedPublicly: "Verificado en fuente pública",
+          refused: "El proveedor se negó",
+          notApplicable: "No aplica",
+        },
+        statusHintRefused:
+          "Anota qué te contestó y cuándo: una negativa por escrito es evidencia, y de las mejores.",
+
+        evidenceTitle: "Evidencia",
+        fieldVersion: "Versión del documento o del sistema",
+        fieldVersionHint:
+          "Más útil que una fecha: lo que invalida unas instrucciones no es que pase el tiempo, es que salga una versión nueva.",
+        fieldSourceUrl: "Enlace o referencia",
+        fieldExpires: "Caduca el",
+        fieldExpiresHint:
+          "Solo el certificado de organismo notificado caduca (Art. 44). El marcado CE, la declaración de conformidad, las instrucciones y el registro en la base de datos de la UE no caducan.",
+        addEvidence: "Añadir elemento",
+        certWarning: "Certificado próximo a caducar",
+        certExpired: "Certificado caducado",
+
+        noNotifiedBody:
+          "Aviso útil: para los puntos 2 a 8 del Anexo III —empleo, crédito, educación, servicios públicos— la evaluación de conformidad es por control interno y NO interviene ningún organismo notificado (Art. 43.2). Si tu proveedor no te da un número de certificado, en la mayoría de los casos no es que te lo esconda: es que no existe.",
+
+        art25Title: "Cuándo dejas de ser responsable del despliegue",
+        art25Note:
+          "Cuatro situaciones convierten a quien usa un sistema en su proveedor, con todas las obligaciones del Art. 16 encima. La tercera es la que más se da en el mid-market y no exige tocar nada técnico.",
+        art25Outcome:
+          "Puede activar el Art. 25: requiere revisión jurídica. Attesta no dictamina si te has convertido en proveedor.",
+        art25: {
+          whiteLabel:
+            "Pones tu nombre o tu marca en un sistema de alto riesgo que ya estaba en el mercado",
+          substantialModification:
+            "Modificas sustancialmente el sistema, más allá de los cambios que el proveedor dejó previstos",
+          purposeChange:
+            "Cambias la finalidad de uso de un sistema que no era de alto riesgo —incluido uno de propósito general— y con ello pasa a serlo",
+          fineTuning:
+            "Ajustas (fine-tuning) un modelo de propósito general por tu cuenta",
+        },
+        art25CarveOut:
+          "Único con matiz contractual: el Art. 25.1.a admite que un pacto reparta las obligaciones entre las partes.",
       },
 
       activity: {
