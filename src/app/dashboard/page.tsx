@@ -1,23 +1,27 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { PageHeader, StatCard, Meter } from "@/components/dashboard/parts";
 import { ButtonLink } from "@/components/ui/Button";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { LegalNote, LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import { RiskDonut } from "@/components/dashboard/RiskDonut";
-import { DeadlineReminders } from "@/components/dashboard/DeadlineReminders";
-import { ReviewReminders } from "@/components/dashboard/ReviewReminders";
-import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 import { DashboardWelcome } from "@/components/dashboard/DashboardWelcome";
+import {
+  ActivationChecklist,
+  ChecklistSkeleton,
+  MilestoneSkeleton,
+  NextMilestone,
+  OpenGapsStat,
+  RemindersSkeleton,
+  ReviewSection,
+  StatSkeleton,
+  TaskDeadlines,
+} from "@/components/dashboard/overview/sections";
 import {
   getAiSystems,
   getOrgJurisdictions,
-  getActionTasks,
-  getGapItems,
-  getOrgMembers,
   getOrganizationName,
   getRegulatoryEvents,
-  getRegulatoryAcks,
-  getReviewCadenceDays,
   isSupabaseConfigured,
 } from "@/lib/data";
 import { getCurrentUser } from "@/lib/data/context";
@@ -27,15 +31,11 @@ import {
   AUDIT_READY_THRESHOLD,
   isAuditReady,
   riskLabel,
-  regAckLabel,
-  type RegAckStatus,
 } from "@/lib/mock-data";
 import {
   upcomingDeadlines,
   daysUntil,
-  affectedSystems,
   FRAMEWORK_META,
-  frameworkMeta,
   type RegulatoryEvent,
 } from "@/lib/regulatory-watch";
 import { resolveLocale } from "@/lib/i18n/resolve";
@@ -44,44 +44,33 @@ import { getDictionary } from "@/lib/i18n";
 // El widget de "próximo hito" depende de la fecha actual.
 export const dynamic = "force-dynamic";
 
-// Tono del chip de estado interno en el widget de próximo hito.
-const ACK_CHIP: Record<RegAckStatus, string> = {
-  reviewed:
-    "border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)]",
-  planned:
-    "border-[var(--tone-info-bd)] bg-[var(--tone-info-bg)] text-[var(--tone-info-fg)]",
-  not_applicable:
-    "border-[var(--tone-neutral-bd)] bg-[var(--tone-neutral-bg)] text-[var(--tone-neutral-fg)]",
-};
-
+/**
+ * Resumen del dashboard, en dos velocidades.
+ *
+ * ANTES: un solo `Promise.all` de diez consultas y **nada** en pantalla hasta
+ * que volvía la más lenta. Una brecha lenta retrasaba los KPIs, el donut y la
+ * cabecera, que no dependen de ella.
+ *
+ * AHORA solo se espera el CAMINO CRÍTICO —el inventario, el usuario y el nombre
+ * de la organización— porque de ahí salen la decisión de enseñar la bienvenida,
+ * la cabecera, tres de los cuatro KPIs, el donut de riesgo y "requieren
+ * atención". Todo lo demás baja por `<Suspense>` y aparece cuando llega.
+ *
+ * El inventario **no** se puede transmitir: decide si esta página es un panel o
+ * una bienvenida, y eso no puede resolverse a medias. Los bloques que lo
+ * necesitan lo reciben por props, no lo vuelven a pedir.
+ */
 export default async function DashboardOverview() {
-  const [
-    systems,
-    orgJur,
-    tasks,
-    gaps,
-    members,
-    user,
-    orgName,
-    regEvents,
-    regAcks,
-    cadenceDays,
-  ] = await Promise.all([
+  const [systems, user, orgName] = await Promise.all([
     getAiSystems(),
-    getOrgJurisdictions(),
-    getActionTasks(),
-    getGapItems(),
-    getOrgMembers(),
     getCurrentUser(),
     getOrganizationName(),
-    getRegulatoryEvents(),
-    getRegulatoryAcks(),
-    getReviewCadenceDays(),
   ]);
 
   const locale = await resolveLocale();
   const d = getDictionary(locale).dashboard;
   const o = d.overview;
+  const now = new Date();
 
   // Nombre de pila para el saludo (solo si hay un nombre real en el perfil; no
   // usamos el prefijo del email para no mostrar algo poco natural).
@@ -91,71 +80,22 @@ export default async function DashboardOverview() {
   const firstName =
     (meta?.full_name ?? meta?.name)?.trim().split(/\s+/)[0] ?? null;
 
-  // Pasos de activación (primeros pasos). Se ocultan solos al completarse.
-  const onboardingSteps = [
-    {
-      key: "system",
-      label: d.onboarding.steps.system.label,
-      hint: d.onboarding.steps.system.hint,
-      href: "/dashboard/inventario/nuevo",
-      done: systems.length > 0,
-    },
-    {
-      key: "risk",
-      label: d.onboarding.steps.risk.label,
-      hint: d.onboarding.steps.risk.hint,
-      href: "/dashboard/riesgo/evaluar",
-      done: systems.some((s) => !!s.evidenceState),
-    },
-    {
-      key: "gap",
-      label: d.onboarding.steps.gap.label,
-      hint: d.onboarding.steps.gap.hint,
-      href: "/dashboard/packs",
-      done: gaps.length > 0,
-      paid: true,
-    },
-    {
-      key: "team",
-      label: d.onboarding.steps.team.label,
-      hint: d.onboarding.steps.team.hint,
-      href: "/dashboard/equipo",
-      done: members.length > 1,
-      paid: true,
-    },
-  ];
-  const counts = riskCounts(systems);
-  const avg = avgCompliance(systems);
-  const highRisk = counts.high + counts.unacceptable;
-  const openGaps = gaps.filter((g) => g.status !== "done").length;
-  const recent = [...systems]
-    .sort((a, b) => a.compliance - b.compliance)
-    .slice(0, 4);
-
-  const now = new Date();
-  // Respeta el nexo de jurisdicción: si está configurado, solo hitos de esas
-  // jurisdicciones; si no, todos.
-  const inNexus = (e: RegulatoryEvent) =>
-    orgJur.length === 0 ||
-    orgJur.includes(FRAMEWORK_META[e.framework]?.jurisdiction ?? "");
-  const nextDeadline = upcomingDeadlines(now, regEvents).filter(inNexus)[0];
-  const nextDays = nextDeadline ? daysUntil(nextDeadline.date, now) : 0;
-  const nextAffected = nextDeadline
-    ? affectedSystems(nextDeadline, systems).length
-    : 0;
-  const nextAck = nextDeadline ? regAcks[nextDeadline.id] : undefined;
-  // Tono de urgencia del contador (coherente con el radar: ≤45 días urgente).
-  const nextDaysTone =
-    nextDays <= 45
-      ? "text-[var(--tone-danger-fg)]"
-      : nextDays <= 365
-        ? "text-[var(--tone-gold-fg)]"
-        : "text-ink";
-
   // Cuenta sin sistemas todavía: en vez de widgets en cero (distribución vacía,
   // "requieren atención"), damos una bienvenida cálida con la misión y los
   // caminos para empezar.
+  //
+  // Esta rama SÍ espera el radar: la bienvenida enseña un único dato —el
+  // próximo hito— y transmitirlo dejaría un hueco parpadeando en el centro de
+  // la primera pantalla que ve alguien. Es una consulta, y solo aquí.
   if (systems.length === 0) {
+    const [regEvents, orgJur] = await Promise.all([
+      getRegulatoryEvents(),
+      getOrgJurisdictions(),
+    ]);
+    const inNexus = (e: RegulatoryEvent) =>
+      orgJur.length === 0 ||
+      orgJur.includes(FRAMEWORK_META[e.framework]?.jurisdiction ?? "");
+    const next = upcomingDeadlines(now, regEvents).filter(inNexus)[0];
     return (
       <>
         <PageHeader title={o.title} subtitle={o.subtitleStart} />
@@ -164,7 +104,7 @@ export default async function DashboardOverview() {
           orgName={orgName}
           canSeed={isSupabaseConfigured}
           deadline={
-            nextDeadline ? { title: nextDeadline.title, days: nextDays } : null
+            next ? { title: next.title, days: daysUntil(next.date, now) } : null
           }
           t={d.welcome}
           units={d.units}
@@ -172,6 +112,13 @@ export default async function DashboardOverview() {
       </>
     );
   }
+
+  const counts = riskCounts(systems);
+  const avg = avgCompliance(systems);
+  const highRisk = counts.high + counts.unacceptable;
+  const recent = [...systems]
+    .sort((a, b) => a.compliance - b.compliance)
+    .slice(0, 4);
 
   return (
     <>
@@ -194,7 +141,9 @@ export default async function DashboardOverview() {
         }
       />
 
-      <OnboardingChecklist steps={onboardingSteps} userId={user?.id} />
+      <Suspense fallback={<ChecklistSkeleton />}>
+        <ActivationChecklist systems={systems} userId={user?.id} />
+      </Suspense>
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
@@ -222,13 +171,10 @@ export default async function DashboardOverview() {
           accent={isAuditReady(avg) ? "brand" : "warn"}
           href="/dashboard/gap"
         />
-        <StatCard
-          label={o.stat.openGaps}
-          value={openGaps}
-          hint={o.stat.openGapsHint}
-          accent="warn"
-          href="/dashboard/gap"
-        />
+        {/* La única de las cuatro que no sale del inventario. */}
+        <Suspense fallback={<StatSkeleton />}>
+          <OpenGapsStat />
+        </Suspense>
       </section>
 
       <p className="mt-3 flex items-center gap-2 text-xs text-muted">
@@ -244,86 +190,17 @@ export default async function DashboardOverview() {
         {o.meterNoteAfter}
       </p>
 
-      {nextDeadline && (
-        <Link
-          href="/dashboard/vigilancia"
-          className="card-lift mt-6 flex items-center justify-between gap-4 rounded-2xl border border-line bg-paper-raised px-5 py-4"
-        >
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand-strong">
-              <svg
-                viewBox="0 0 24 24"
-                className="size-4.5"
-                fill="none"
-                aria-hidden
-              >
-                <path
-                  d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="text-xs uppercase tracking-wide text-muted">
-                  {o.nextMilestone} ·{" "}
-                  {frameworkMeta(nextDeadline.framework, locale)?.short ??
-                    nextDeadline.framework}
-                </p>
-                {nextAck ? (
-                  <span
-                    className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${ACK_CHIP[nextAck.status]}`}
-                  >
-                    {regAckLabel(nextAck.status, locale)}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center rounded-full border border-dashed border-line-strong px-2 py-0.5 text-[11px] font-medium text-muted">
-                    {d.pages.monitoring.notMarked}
-                  </span>
-                )}
-              </div>
-              <p className="truncate text-sm font-medium text-ink">
-                {nextDeadline.title}
-              </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-4">
-            <div className="text-right">
-              <p
-                className={`text-sm font-semibold tabular-nums ${nextDaysTone}`}
-              >
-                {nextDays === 0
-                  ? o.today
-                  : `${o.inDaysPrefix}${nextDays} ${nextDays === 1 ? d.units.dayOne : d.units.dayOther}`}
-              </p>
-              <p className="text-xs text-muted">
-                {nextAffected}{" "}
-                {nextAffected === 1 ? d.units.systemOne : d.units.systemOther}
-              </p>
-            </div>
-            <span className="text-brand transition-transform group-hover:translate-x-0.5">
-              →
-            </span>
-          </div>
-        </Link>
-      )}
+      <Suspense fallback={<MilestoneSkeleton />}>
+        <NextMilestone systems={systems} now={now} />
+      </Suspense>
 
-      <DeadlineReminders
-        tasks={tasks}
-        now={now}
-        t={d.deadlines}
-        locale={locale}
-      />
+      <Suspense fallback={<RemindersSkeleton />}>
+        <TaskDeadlines now={now} />
+      </Suspense>
 
-      <ReviewReminders
-        systems={systems}
-        cadenceDays={cadenceDays}
-        now={now}
-        t={d.pages.incidents}
-      />
+      <Suspense fallback={<RemindersSkeleton />}>
+        <ReviewSection systems={systems} now={now} />
+      </Suspense>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         <div className="card-lift rounded-2xl border border-line bg-paper-raised p-6">

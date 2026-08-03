@@ -281,7 +281,22 @@
       Art. 73 ya se adoptó (borrador de sep-2025, redactado solo para proveedores).
 - [ ] **Registro de proveedores / terceros (Capa 8)** — materializa el reencuadre deployer que ya está en todos
       los packs (marcado CE, model card, DPA, caducidad); palanca de expansión de plan. `medio · M`
-- [ ] **Streaming con Suspense en el dashboard** — que la query más lenta no bloquee el shell entero. `medio · M`
+- [x] **Streaming con Suspense en el dashboard** — ✅ **HECHO (2026-08-03)**. La portada hacía un solo
+      `Promise.all` de diez consultas y no pintaba **nada** hasta la última. Ahora solo se espera el camino
+      crítico —inventario, usuario y nombre de la organización— y de ahí salen ya la cabecera, tres de los
+      cuatro KPIs, el donut de riesgo y «requieren atención»; lo demás baja por `<Suspense>`.
+      **Medido, no supuesto:** inyectando una consulta lenta de 1,5 s, el shell pasa de **1742 ms a 321 ms**
+      (respuesta completa igual, ~1,74 s en ambos). La primera medición dio un falso «ya iba rápido antes»
+      porque el marcador que usé —el título de una sección— **también aparece en el diccionario serializado
+      del payload RSC**; hay que medir contra algo que solo exista en el HTML renderizado (se usó el `href` de
+      una tarjeta). Es la segunda vez que ese payload falsea una medición: conviene recordarlo.
+      Decisiones: el **inventario no se transmite** (decide si la página es un panel o una bienvenida, y eso no
+      se resuelve a medias) y baja por props a los bloques que lo necesitan, en vez de que cada uno lo vuelva a
+      pedir; `getGapItems` pasa a llevar `cache()` porque lo miran dos bloques y sin eso el streaming habría
+      duplicado la consulta —saldría más caro que lo que ahorra—; los esqueletos **reservan altura** salvo los
+      de avisos, que no se renderizan cuando no hay nada que avisar y dejarían un hueco permanente; y el `now`
+      baja por props para que dos `new Date()` no caigan a distinto lado de la medianoche y se contradigan en
+      la misma pantalla.
 - [ ] **Consolidar el onboarding** (modal + checklist + bienvenida compiten hoy en la 1ª sesión). `bajo · M`
 - [x] **~~`lang="es"` en bloques regulatorios~~ → 11 textos del pack de California sin traducir** —
       ✅ **HECHO (2026-08-02)**. **La premisa del ticket había caducado**: se escribió cuando el output legal

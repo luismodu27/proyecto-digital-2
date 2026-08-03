@@ -127,6 +127,65 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-03** · **Registro de proveedores (Capa 8): investigación regulatoria previa. Seis cosas que el
+  producto tiene HOY escritas de más, y una palanca que no estábamos usando.**
+  1. **La documentación técnica del Anexo IV NO es exigible por el deployer.** El Art. 11.1 la dirige, literal, a
+     *«national competent authorities and notified bodies»*, y el Art. 18 la pone a disposición de las autoridades
+     10 años. No hay ningún artículo que obligue al proveedor a enseñársela al cliente. Nuestro copy dice «exige al
+     proveedor esa documentación (Anexo IV)» en `recommendations.ts`, `rrhh.ts`, `gestion-trabajadores.ts`,
+     `mock-data.ts` y `risk-assessment.ts`. Es **pacta en contrato**, no «exige». Lo que sí es entregable al
+     deployer son las **instrucciones de uso** (Art. 13.2/13.3), que son el ÚNICO documento que el Reglamento
+     dirige expresamente a él — y dentro van la exactitud y sus métricas (15.3), las medidas de supervisión humana
+     que le tocan implementar (14.3.b vía 13.3.d), los mecanismos de logs (13.3.f), la identidad del proveedor y de
+     su representante autorizado (13.3.a) y los cambios predeterminados (13.3.c). El SGC del Art. 17 tampoco es
+     exigible.
+  2. **El Art. 53.1.b no es del deployer.** Su destinatario literal son *«providers of AI systems who intend to
+     integrate the general-purpose AI model into their AI systems»*. Un deployer que usa ChatGPT **no puede
+     invocarlo** frente a OpenAI; puede su proveedor de sistema. Solo si el cliente integra el modelo por API y
+     construye su propio sistema pasa a ser ese proveedor y sí es destinatario. Hay que precisar el texto de la
+     capa GPAI. Lo único público por norma en el Cap. V es el **resumen de datos de entrenamiento (53.1.d)** y la
+     **lista de modelos con riesgo sistémico (Art. 52.6)**.
+  3. **Palanca no usada: la base de datos de la UE es PÚBLICA (Art. 71.4) y contiene copia de la declaración UE de
+     conformidad (Anexo VIII A.11) y las instrucciones de uso electrónicas (A.12)**, más el tipo, número y **fecha
+     de expiración** del certificado del organismo notificado (A.8) y el representante autorizado (A.3). O sea: hay
+     un canal de verificación que **no depende de la buena voluntad del proveedor**. El registro debe tener un
+     estado `verificado_en_fuente_publica`, no solo `recibido`.
+  4. **La única caducidad real del catálogo UE es el certificado del organismo notificado** (Art. 44.2: ≤4 años
+     Anexo III, ≤5 Anexo I, prorrogable por reevaluación). **Marcado CE, declaración de conformidad, instrucciones
+     de uso y registro en la BD de la UE NO caducan.** Y los **10 años** de los Arts. 18, 23.5 y 47.1 son plazo de
+     **conservación** del proveedor/importador/representante, no de validez: convertirlos en caducidad es el error
+     clásico. Todo lo demás son **disparadores por evento** (nueva versión, modificación sustancial, aviso de acción
+     correctora del Art. 20.1 —que sí obliga al proveedor a informar al deployer—, cambio de representante
+     autorizado del Art. 22.4, cambio de subencargado del RGPD 28.2, suspensión de certificado del 44.3).
+  5. **`numero_organismo_notificado` no puede ser campo requerido.** Art. 43.2: para los puntos **2 a 8 del Anexo
+     III** —o sea RRHH, crédito, educación, servicios públicos: casi todo nuestro catálogo— la evaluación es
+     **control interno (Anexo VI), «which does not provide for the involvement of a notified body»**. Pedirlo
+     generaría una brecha falsa en la mayoría de los casos.
+  6. **El AI Act no impone NINGÚN contrato al deployer.** El Art. 26 no menciona contratos. El único deber
+     contractual de la cadena es el **Art. 25.4**, y obliga al **proveedor** frente a sus terceros suministradores
+     (además encarga a la Oficina de IA unas **cláusulas tipo voluntarias**, gratuitas — verificar si ya existen).
+     El derecho de auditoría sobre el proveedor viene del **RGPD 28.3.h**, no del AI Act. Las **MCC-AI** existen
+     pero son de la *Community of Practice on Public Procurement of AI*, **no vinculantes ni posición oficial de la
+     Comisión**, y pensadas para compradores públicos.
+  **Deuda del Art. 113 — avanzada, no cerrada.** Cuatro fuentes secundarias independientes (FPF, NicFab,
+  ictrechtswijzer, Modulos/HAQQ) coinciden: el Reglamento (UE) 2026/1744 aplaza **solo el Cap. III Secciones 1, 2 y
+  3** (salvo el Art. 6.5) → 2-dic-2027 (Art. 6.2/Anexo III) y 2-ago-2028 (Art. 6.1/Anexo I). **La Sección 5
+  (Arts. 40-49: evaluación de conformidad, certificados, marcado CE, declaración de conformidad, registro) y el
+  Cap. IX (Arts. 72-84, incl. el 73) NO están aplazados: 2-ago-2026.** Eso **cierra en la dirección contraria a la
+  esperada** las dos deudas abiertas (Art. 49 en `servicios-publicos.ts` y Art. 73 en incidentes): no están
+  aplazados. **Matiz que hay que decir siempre:** su efecto práctico es casi nulo antes de 2027, porque los
+  *deberes* de elaborar la declaración (16.g), colocar el marcado CE (16.h) y registrar (16.i) viven en el **Art.
+  16, que es Sección 3 y sí está aplazado**, y la clasificación (Art. 6) también. Y **los Arts. 23 y 24 (importador
+  y distribuidor) también son Sección 3** → hasta 2-dic-2027 **no hay deber legal** de que el sistema vaya
+  acompañado de la declaración de conformidad. **Conclusión de producto: todo el registro de proveedores es hoy
+  preparación CONTRACTUAL, no derecho exigible, y la UI debe decirlo.** Sigue faltando leer el Art. 113 **verbatim**
+  (las fuentes discrepan incluso en qué punto lo reescribe, y dos afirman que el gatillo condicional de decisión de
+  la Comisión del borrador de nov-2025 **desapareció** del texto final).
+  **Regla de copy que sale de aquí:** cada elemento de evidencia lleva un campo **`base_juridica`** con cuatro
+  valores —*entregable al deployer* / *obligación del proveedor sin entrega* / *solo por contrato* / *verificable en
+  fuente pública*— y de él sale el **verbo de la UI**: «exige» / «pacta en contrato» / «verifica». Sin ese campo, el
+  producto acaba diciendo «exige» de cosas que nadie está obligado a darte.
+
 - **2026-08-03** · **Registro de incidentes (Art. 26.5): tres reglas que el producto habría escrito al revés.**
   La consulta al experto de dominio antes de tocar código cambió el diseño tres veces, y las tres son
   reutilizables más allá de esta pantalla:

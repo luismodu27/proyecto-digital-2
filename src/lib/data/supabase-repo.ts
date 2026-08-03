@@ -849,7 +849,15 @@ export async function getCurrentMemberRole(): Promise<MemberRole | null> {
   return (data?.role ?? null) as MemberRole | null;
 }
 
-export async function getGapItems(): Promise<GapItem[]> {
+/**
+ * Brechas de la organización activa.
+ *
+ * `cache()` (por request) porque desde el streaming del resumen la miran DOS
+ * bloques a la vez —la tarjeta de brechas abiertas y el checklist de
+ * activación—, y sin esto partir la página en `<Suspense>` habría duplicado la
+ * consulta: el streaming saldría más caro que lo que ahorra.
+ */
+async function getGapItemsUncached(): Promise<GapItem[]> {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return [];
@@ -913,6 +921,8 @@ export async function getGapItems(): Promise<GapItem[]> {
     };
   });
 }
+
+export const getGapItems = cache(getGapItemsUncached);
 
 /**
  * Embudo de activación agregado (telemetría de producto interna, migración 0026).
