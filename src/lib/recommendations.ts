@@ -88,7 +88,7 @@ const REMEDIATION: Record<string, CatalogEntry> = {
   "Art. 11": {
     title: "Documentación técnica (Anexo IV)",
     action:
-      "Obligación principalmente del proveedor: elaborar la documentación técnica conforme al Anexo IV. Como deployer, exige al proveedor esa documentación (e instrucciones) y consérvala como evidencia de auditoría.",
+      "Obligación del proveedor: elaborar la documentación técnica conforme al Anexo IV. OJO — el Reglamento la dirige a las autoridades y a los organismos notificados, no al responsable del despliegue: no es algo que puedas exigir por ley, así que pacta su acceso en el contrato. Lo que el proveedor sí debe entregarte son las instrucciones de uso (Art. 13); consérvalas como evidencia de auditoría.",
     article: "Art. 11",
     priority: "media",
     effort: "bajo",
@@ -202,7 +202,7 @@ export const REMEDIATION_EN: Record<string, CatalogEntry> = {
   "Art. 11": {
     title: "Technical documentation (Annex IV)",
     action:
-      "Primarily a provider obligation: draw up the technical documentation in accordance with Annex IV. As a deployer, require that documentation (and the instructions for use) from the provider and retain it as audit evidence.",
+      "A provider obligation: draw up the technical documentation in accordance with Annex IV. NOTE — the Regulation directs it to authorities and notified bodies, not to the deployer: it is not something you can require by law, so negotiate access in the contract. What the provider must hand you are the instructions for use (Art. 13); retain them as audit evidence.",
     article: "Art. 11",
     priority: "media",
     effort: "bajo",

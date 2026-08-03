@@ -328,6 +328,21 @@
 - [ ] **Sección "cómo verificamos el contenido legal"** — el mayor diferenciador honesto (determinista, doble
       pasada del experto, citas verbatim) se afirma pero no se demuestra. `medio · M`
 
+- [x] **Corrección de honestidad: el Anexo IV no es exigible** — ✅ **HECHO (2026-08-03)**, salida de la
+      investigación del registro de proveedores. Decíamos *«exige al proveedor la documentación técnica del
+      Anexo IV»* en recomendaciones, en dos packs, en el clasificador y en una tarea de la demo. **El
+      Reglamento dirige esa documentación a autoridades y organismos notificados, no al responsable del
+      despliegue.** Las citas eran correctas; lo que estaba mal era el **verbo**: le prometíamos al cliente una
+      palanca que descubre que no tiene en su primera negociación con un proveedor grande. Reescrito partiendo
+      por lo que se puede hacer de verdad con cada cosa: **exige** las instrucciones de uso (Art. 13, el único
+      documento que la norma le dirige, y que ya lleva dentro las métricas del Art. 15, la supervisión humana
+      del Art. 14 y los mecanismos de registro del Art. 12) · **verifica** lo público (marcado CE del Art. 48 y
+      la ficha en la base de datos de la UE de los Arts. 49 y 71, que incluye copia de la declaración de
+      conformidad) · **pacta en contrato** lo demás (Anexo IV, Arts. 9, 10, 17 y el acceso a los logs si el
+      sistema lo opera el proveedor). Corregida también la capa GPAI: el destinatario del **Art. 53.1.b es el
+      proveedor del SISTEMA que integra el modelo**, no el deployer — así que se bifurca según si el cliente
+      integra el modelo él mismo o usa un producto de terceros.
+
 ### 0.E · SPRINT 5 — deuda técnica y robustez restante
 - [ ] **Guardar el idioma de lo que se escribe (`locale` en `gap_items` / autoevaluaciones)** — descubierto al
       cerrar el ticket del `lang` en el Sprint 4. Una brecha creada aplicando el pack ES se sigue viendo en

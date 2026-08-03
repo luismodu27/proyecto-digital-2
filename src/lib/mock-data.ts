@@ -1372,10 +1372,10 @@ export const SAMPLE_ACTION_TASKS: ActionTask[] = [
   },
   {
     id: "task-demo-2",
-    title: "Exigir al proveedor la documentación técnica (Anexo IV)",
+    title: "Pedir al proveedor las instrucciones de uso (Art. 13)",
     detail:
-      "Pedir al proveedor la documentación técnica e instrucciones de uso y conservarla como evidencia de auditoría.",
-    article: "Art. 11",
+      "Son el único documento que el Reglamento dirige al responsable del despliegue. La documentación técnica del Anexo IV no es exigible: si hace falta, se pacta en el contrato.",
+    article: "Art. 13",
     priority: "media",
     status: "todo",
     assigneeId: "demo-3",
@@ -1433,10 +1433,10 @@ export const SAMPLE_ACTION_TASKS_EN: ActionTask[] = [
   },
   {
     id: "task-demo-2",
-    title: "Require technical documentation from the provider (Annex IV)",
+    title: "Ask the provider for the instructions for use (Art. 13)",
     detail:
-      "Ask the provider for the technical documentation and instructions for use, and keep it as audit evidence.",
-    article: "Art. 11",
+      "They are the only document the Regulation addresses to the deployer. The Annex IV technical documentation is not something you can require: if you need it, negotiate it in the contract.",
+    article: "Art. 13",
     priority: "media",
     status: "todo",
     assigneeId: "demo-3",

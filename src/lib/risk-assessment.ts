@@ -282,7 +282,7 @@ export const GPAI_CITATIONS: Citation[] = [
   },
   {
     article: "Art. 53.1.b",
-    text: "El proveedor del modelo debe facilitar información y documentación a quienes lo integran en sus sistemas, para que puedan cumplir sus propias obligaciones. Es la base para exigirle evidencia por escrito.",
+    text: "El proveedor del modelo debe facilitar información y documentación A LOS PROVEEDORES DE SISTEMAS que integran el modelo, para que puedan cumplir sus propias obligaciones. El destinatario es quien integra el modelo, no el responsable del despliegue: si tu organización integra el modelo por API y construye el sistema, es ella la destinataria; si usa un producto de un tercero, la vía es contractual con ese tercero.",
   },
   {
     article: "Art. 25",
@@ -293,7 +293,7 @@ export const GPAI_CITATIONS: Citation[] = [
 /** Deberes del DEPLOYER cuando por debajo hay un modelo de propósito general. */
 export const GPAI_OBLIGATIONS: string[] = [
   "Deber propio: identifica y documenta qué modelo de propósito general hay por debajo, de qué proveedor y en qué versión. Sin eso no se puede exigir nada ni acreditar nada.",
-  "Exige al proveedor del modelo la documentación del Art. 53.1.b (información para integradores), su política de derechos de autor y el resumen público del contenido de entrenamiento; conserva copia como evidencia declarada.",
+  "Consigue la documentación del Art. 53.1.b (información para integradores): si tu organización integra el modelo, exígesela al proveedor del modelo, porque es su destinataria; si usas un producto de terceros, pacta con ese tercero que te la repercuta. Lo que sí es público sin pedir nada es el resumen del contenido de entrenamiento (Art. 53.1.d). Conserva copia como evidencia declarada.",
   "Pregunta por escrito si el modelo está designado como de riesgo sistémico (Art. 51): cambia las obligaciones del proveedor y, por tanto, la evidencia que puedes exigirle.",
   "Deber propio: alfabetización en IA de quien lo usa (Art. 4) y límites de uso escritos — para qué sí y para qué no, con quién revisa las salidas.",
   "Deber propio: si el sistema interactúa con personas o genera contenido sintético, cumple la transparencia del Art. 50 (avisar de que es IA y marcar el contenido generado).",
@@ -358,8 +358,13 @@ export const OBLIGATIONS_BY_LEVEL: Record<RiskLevel, string[]> = {
     "Deber propio: supervisión humana efectiva en la decisión (Art. 26.2, apoyada en el diseño del proveedor del Art. 14).",
     "Deber propio: obligaciones del responsable del despliegue (Art. 26) — uso conforme a instrucciones, información a personas afectadas y a trabajadores, conservación de logs y monitoreo del funcionamiento.",
     "Deber propio: transparencia frente a las personas afectadas (Art. 50) y, cuando aplique, registro en la base de datos de la UE (Art. 49) y evaluación de impacto en derechos fundamentales (Art. 27).",
-    // Obligaciones del PROVEEDOR: el deployer las exige y conserva como evidencia.
-    "Exige y conserva evidencia del proveedor: sistema de gestión de riesgos (Art. 9), gobernanza y calidad de datos (Art. 10), documentación técnica del Anexo IV (Art. 11), logging (Art. 12), instrucciones de uso (Art. 13), exactitud/robustez/ciberseguridad (Art. 15) y el marcado CE / Declaración UE de Conformidad.",
+    // Obligaciones del PROVEEDOR, partidas por lo que el deployer puede hacer de
+    // verdad con cada una. Iban en un solo bloque de "exige y conserva", y eso
+    // prometía una palanca que el Reglamento no da: de todo esto, lo único que
+    // la norma dirige al responsable del despliegue son las instrucciones de uso.
+    "Exige y conserva las instrucciones de uso (Art. 13): es el único documento que el Reglamento dirige al responsable del despliegue, y dentro van la exactitud y sus métricas (Art. 15), las medidas de supervisión humana previstas (Art. 14) y los mecanismos de registro (Art. 12).",
+    "Verifica por tu cuenta lo que es público: el marcado CE en el sistema o su documentación (Art. 48) y la ficha del sistema en la base de datos de la UE (Arts. 49 y 71), que incluye copia de la declaración UE de conformidad.",
+    "Pacta en contrato lo que NO es exigible: documentación técnica del Anexo IV (Art. 11), sistema de gestión de riesgos (Art. 9), gobernanza de datos (Art. 10), sistema de gestión de la calidad (Art. 17) y el acceso y exportación de los logs si el sistema lo opera el proveedor. El Reglamento dirige esos documentos a autoridades y organismos notificados, no a ti.",
   ],
   limited: [
     "Informar a las personas de que interactúan con un sistema de IA (Art. 50).",
@@ -852,7 +857,9 @@ export const OBLIGATIONS_BY_LEVEL_EN: Record<RiskLevel, string[]> = {
     "Own duty: deployer obligations (Art. 26) — use in accordance with the instructions for use, information to affected persons and to workers, keeping of logs and monitoring of operation.",
     "Own duty: transparency towards affected persons (Art. 50) and, where applicable, registration in the EU database (Art. 49) and a fundamental rights impact assessment (Art. 27).",
     // PROVIDER obligations: the deployer requires and retains them as evidence.
-    "Require and retain provider evidence: risk-management system (Art. 9), data governance and quality (Art. 10), Annex IV technical documentation (Art. 11), logging (Art. 12), instructions for use (Art. 13), accuracy/robustness/cybersecurity (Art. 15) and the CE marking / EU Declaration of Conformity.",
+    "Require and retain the instructions for use (Art. 13): they are the only document the Regulation addresses to the deployer, and they carry accuracy and its metrics (Art. 15), the human oversight measures foreseen (Art. 14) and the logging mechanisms (Art. 12).",
+    "Verify for yourself what is public: the CE marking on the system or its documentation (Art. 48) and the system's entry in the EU database (Arts. 49 and 71), which includes a copy of the EU declaration of conformity.",
+    "Negotiate in the contract what you cannot require: Annex IV technical documentation (Art. 11), the risk-management system (Art. 9), data governance (Art. 10), the quality management system (Art. 17) and access to and export of the logs where the provider operates the system. The Regulation addresses those documents to authorities and notified bodies, not to you.",
   ],
   limited: [
     "Inform people that they are interacting with an AI system (Art. 50).",
@@ -930,7 +937,7 @@ export const GPAI_CITATIONS_EN: Citation[] = [
   },
   {
     article: "Art. 53(1)(b)",
-    text: "The model provider must supply information and documentation to those who integrate it into their systems, so they can meet their own obligations. This is the basis for demanding written evidence from them.",
+    text: "The model provider must supply information and documentation TO PROVIDERS OF AI SYSTEMS that integrate the model, so they can meet their own obligations. The recipient is whoever integrates the model, not the deployer: if your organisation integrates the model via API and builds the system, it is the recipient; if it uses a third party product, the route is contractual with that third party.",
   },
   {
     article: "Art. 25",
@@ -940,7 +947,7 @@ export const GPAI_CITATIONS_EN: Citation[] = [
 
 export const GPAI_OBLIGATIONS_EN: string[] = [
   "Your own duty: identify and document which general-purpose model sits underneath, from which provider and in which version. Without that you can neither demand nor evidence anything.",
-  "Require from the model provider the Art. 53(1)(b) documentation (information for integrators), their copyright policy and the public summary of training content; keep a copy as declared evidence.",
+  "Obtain the Art. 53(1)(b) documentation (information for integrators): if your organisation integrates the model, require it from the model provider, since it is the recipient; if you use a third party product, agree with that third party to pass it through. What is public without asking is the summary of training content (Art. 53(1)(d)). Keep a copy as declared evidence.",
   "Ask in writing whether the model is designated as posing systemic risk (Art. 51): it changes the provider's obligations and therefore the evidence you can demand.",
   "Your own duty: AI literacy for the people using it (Art. 4) and written limits of use — what it is and is not for, and who reviews the outputs.",
   "Your own duty: if the system interacts with people or generates synthetic content, meet the Art. 50 transparency duties (disclose that it is AI and mark generated content).",
