@@ -419,6 +419,44 @@ export const en: Dictionary = {
       note: "Evidence declared by your organization and orientative classification — not certification or legal advice.",
     },
 
+    verification: {
+      eyebrow: "How we verify it",
+      title: "A model does not write the legal text",
+      intro:
+        "This is the part of the product where a hallucination is not an annoying bug but a liability. So the regulatory content is not generated: it is assembled from your data and from text an expert has already checked against the law.",
+      steps: [
+        {
+          n: "01",
+          title: "Primary sources before code",
+          body: "Every new rule —an article, a state law, a deadline— is checked against the official text before a line is written. More than once that has changed the content before it existed, and almost always by removing rather than adding.",
+        },
+        {
+          n: "02",
+          title: "An adversarial second pass",
+          body: "The research is reviewed again looking for the mistake, not the confirmation: what has been over-cited, which obligation belongs to someone else, which deadline was taken as settled without reading it.",
+        },
+        {
+          n: "03",
+          title: "Deterministic assembly, zero model",
+          body: "The dossier, the report, the classification and the recommendations are composed only from your organization's data and already-verified text. Where there is automation —regulatory monitoring— the machine drafts and a person validates before anything is published.",
+        },
+        {
+          n: "04",
+          title: "Automatic guards on every change",
+          body: "Every change goes through checks that fail on their own: one watches that no copy implying certification slips in, others encode the regulatory expectation behind each rule. And they are validated by breaking them on purpose: a test that does not fail when the rule is broken protects nothing.",
+        },
+      ],
+      notTitle: "What we do not do",
+      not: [
+        "We do not generate regulatory text with a language model.",
+        "We do not state a date we have not read in the official text: if it is pending verification, we say so.",
+        "We do not score your compliance or your suppliers'. We count facts: what is on record and what is missing.",
+      ],
+      exampleLabel: "Evidence that it works",
+      exampleTitle: "Colorado changed its law and the content changed with it",
+      exampleBody:
+        "Colorado's AI regime was repealed and replaced by another. Half a dozen obligations we had taken as settled described a law that no longer existed —including one that was also a commercial argument—. They were caught by reading the new law, not by waiting for a customer to notice. No automated check would have caught that: it is not a code defect, it is content.",
+    },
     honestidad: {
       eyebrow: "Why you can trust it",
       title: "Zero hallucinations. By design.",

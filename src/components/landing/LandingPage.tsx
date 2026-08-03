@@ -9,6 +9,7 @@ import { Coverage } from "@/components/landing/Coverage";
 import { WhyNow } from "@/components/landing/WhyNow";
 import { UseCaseStory } from "@/components/landing/UseCaseStory";
 import { Evidence } from "@/components/landing/Evidence";
+import { Verification } from "@/components/landing/Verification";
 import { Honestidad } from "@/components/landing/Honestidad";
 import { Pricing } from "@/components/landing/Pricing";
 import { FAQ } from "@/components/landing/FAQ";
@@ -72,6 +73,9 @@ export function LandingPage({ locale }: { locale: Locale }) {
         <UseCaseStory t={l.useCaseStory} />
         <Reveal>
           <Evidence t={l.evidence} />
+        </Reveal>
+        <Reveal>
+          <Verification t={l.verification} />
         </Reveal>
         <Reveal>
           <Honestidad t={l.honestidad} />

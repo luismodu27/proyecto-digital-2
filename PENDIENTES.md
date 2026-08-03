@@ -354,8 +354,19 @@
       `Disallow` prohíbe *rastrear* y no *indexar*, así que bloquearlas impedía que el buscador viera el propio
       `noindex` (las dos directivas se estorbaban). Siguen bloqueados `/auth` y `/api`, que son route handlers
       sin HTML donde colgar un meta. Verificado sobre el build servido en local.
-- [ ] **Sección "cómo verificamos el contenido legal"** — el mayor diferenciador honesto (determinista, doble
-      pasada del experto, citas verbatim) se afirma pero no se demuestra. `medio · M`
+- [x] **Sección "cómo verificamos el contenido legal"** — ✅ **HECHO (2026-08-03)**. Sección nueva en la
+      landing (entre la de evidencia y la de honestidad), ES y EN. Cuatro pasos del proceso —fuente primaria
+      antes que código, segunda pasada adversarial, ensamblado determinista sin modelo, guardas automáticas que
+      se validan rompiéndolas a propósito—, un bloque de **lo que NO hacemos** (en esta categoría enumerar los
+      límites convence más que enumerar capacidades: lo segundo lo promete cualquiera) y **un ejemplo real**:
+      el régimen de IA de Colorado derogado, con media docena de obligaciones que dábamos por buenas y que
+      describían una norma que ya no existía. Se eligió ese ejemplo porque es verificable y porque enseña lo
+      que ninguna comprobación automática puede cazar: no es un fallo de código, es contenido.
+      **Decisión que te dejo a ti:** hay una versión más fuerte de esta sección, con ejemplos explícitos de
+      *«esto lo dijimos mal y lo corregimos»* (el «exige el Anexo IV» de anoche sería el mejor). Es más
+      creíble y encaja con la marca, pero publicar «nos equivocamos» en la portada es una decisión de
+      posicionamiento tuya, no mía, así que la sección va con el encuadre neutro («la ley cambia y lo
+      detectamos»). Cambiarlo es reescribir un párrafo.
 
 - [x] **Corrección de honestidad: el Anexo IV no es exigible** — ✅ **HECHO (2026-08-03)**, salida de la
       investigación del registro de proveedores. Decíamos *«exige al proveedor la documentación técnica del

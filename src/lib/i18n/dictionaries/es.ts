@@ -424,6 +424,48 @@ export const es = {
       note: "Evidencia declarada por tu organización y clasificación orientativa — no es certificación ni asesoría legal.",
     },
 
+    // Cómo verificamos el contenido legal. Regla al editar: aquí SOLO van
+    // afirmaciones comprobables sobre nuestro propio proceso. Nada de lo que
+    // diga esta sección puede ser algo que no hagamos de verdad — es la
+    // sección donde una exageración cuesta más cara.
+    verification: {
+      eyebrow: "Cómo lo verificamos",
+      title: "El texto legal no lo escribe un modelo",
+      intro:
+        "Es la parte del producto donde una alucinación no es un error molesto, sino un pasivo. Así que el contenido regulatorio no se genera: se ensambla con tus datos y con texto que un experto ya verificó contra la norma.",
+      steps: [
+        {
+          n: "01",
+          title: "Fuente primaria antes que código",
+          body: "Cada regla nueva —un artículo, una ley estatal, un plazo— se investiga contra el texto oficial antes de escribir una línea. Varias veces eso ha cambiado el contenido antes de existir, y casi siempre en la dirección de quitar, no de añadir.",
+        },
+        {
+          n: "02",
+          title: "Segunda pasada adversarial",
+          body: "Lo investigado se vuelve a revisar buscando el error, no la confirmación: qué se ha citado de más, qué obligación es de otro sujeto, qué plazo se ha dado por cierto sin leerlo.",
+        },
+        {
+          n: "03",
+          title: "Ensamblado determinista, cero modelo",
+          body: "Dossier, informe, clasificación y recomendaciones se componen solo con datos de tu organización y texto ya verificado. Donde hay automatización —la vigilancia regulatoria— la máquina propone un borrador y una persona lo valida antes de que se publique.",
+        },
+        {
+          n: "04",
+          title: "Guardas automáticas en cada cambio",
+          body: "Cada modificación pasa por comprobaciones que fallan solas: una vigila que no aparezca copy que insinúe certificación, otras codifican la expectativa regulatoria de cada regla. Y se validan rompiéndolas a propósito: un test que no falla al romper la regla no protege nada.",
+        },
+      ],
+      notTitle: "Lo que no hacemos",
+      not: [
+        "No generamos texto regulatorio con un modelo de lenguaje.",
+        "No afirmamos una fecha que no hayamos leído en el texto oficial: si está pendiente de verificar, lo decimos.",
+        "No puntuamos tu cumplimiento ni el de tus proveedores. Contamos hechos: qué consta y qué falta.",
+      ],
+      exampleLabel: "Un ejemplo de que funciona",
+      exampleTitle: "Colorado cambió de ley y el contenido cambió con ella",
+      exampleBody:
+        "El régimen de IA de Colorado fue derogado y reemplazado por otro. Media docena de obligaciones que dábamos por buenas describían una norma que ya no existía —incluida una que era además argumento comercial—. Se detectaron leyendo la ley nueva, no esperando a que lo notara un cliente. Ninguna verificación automática habría cazado eso: no es un fallo de código, es contenido.",
+    },
     honestidad: {
       eyebrow: "Por qué puedes confiar",
       title: "Cero alucinaciones. Por diseño.",
