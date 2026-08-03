@@ -76,7 +76,14 @@ export default async function DashboardLayout({
           activeOrgId={activeOrgId}
           isPlatformAdmin={isPlatformAdmin}
         />
-        <main id="contenido" className="flex-1 md:h-dvh md:overflow-y-auto">
+        {/* `scroll-mt-14` = la altura exacta de la barra móvil `sticky h-14`.
+            Sin esto, «Saltar al contenido» deja el `<h1>` y los primeros
+            controles DEBAJO de la barra. En escritorio no hay barra que
+            esquivar, de ahí el `md:scroll-mt-0`. */}
+        <main
+          id="contenido"
+          className="flex-1 scroll-mt-14 md:h-dvh md:overflow-y-auto md:scroll-mt-0"
+        >
           <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">{children}</div>
         </main>
         {showGuide && <WelcomeGuide show userId={userId} />}

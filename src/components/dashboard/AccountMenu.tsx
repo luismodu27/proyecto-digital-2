@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { signOut, switchAccount } from "@/lib/auth/actions";
 import { switchOrg } from "@/lib/data/org-actions";
@@ -23,7 +23,6 @@ export function AccountMenu({
   orgs = [],
   activeOrgId,
   menuPlacement = "auto",
-  onOpenChange,
 }: {
   userEmail: string;
   userName?: string;
@@ -35,21 +34,8 @@ export function AccountMenu({
    * `top-full` de móvil se saldría de la pantalla. `"auto"` = lo de siempre.
    */
   menuPlacement?: "auto" | "up";
-  /**
-   * Avisa al contenedor de si el desplegable está abierto. Lo usa el `<dialog>`
-   * del cajón para que un MISMO Escape no cierre las dos cosas: el primero
-   * cierra este menú, el segundo el cajón.
-   */
-  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpenState] = useState(false);
-  const setOpen = useCallback(
-    (next: boolean) => {
-      setOpenState(next);
-      onOpenChange?.(next);
-    },
-    [onOpenChange],
-  );
+  const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const t = useT();
   const locale = useLocale();
@@ -61,7 +47,15 @@ export function AccountMenu({
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key !== "Escape") return;
+      // `preventDefault()` sobre el keydown ANULA la petición de cierre que el
+      // navegador generaría a continuación. Importa cuando este menú vive
+      // dentro del cajón de navegación (`<dialog>` modal): sin esto, un solo
+      // Escape cerraba el menú Y el cajón, porque el `cancel` del diálogo es la
+      // acción POR DEFECTO de esta misma pulsación y llega después. Reproducido
+      // en Chromium y Firefox.
+      e.preventDefault();
+      setOpen(false);
     };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
@@ -69,7 +63,7 @@ export function AccountMenu({
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("keydown", onKey);
     };
-  }, [open, setOpen]);
+  }, [open]);
 
   return (
     <div ref={ref} className="relative">

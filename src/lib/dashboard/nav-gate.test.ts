@@ -94,6 +94,15 @@ describe("los destinos bloqueados NAVEGAN al muro", () => {
     expect(sidebar).not.toMatch(/pointer-events-none/);
   });
 
+  it("el enlace apunta al destino y no depende de si está bloqueado", () => {
+    // Sin esto, el test "congelaba" la decisión comercial sin comprobar nunca lo
+    // único que la hace cierta: que el `href` lleve al muro. Cambiarlo por `"#"`
+    // cuando `locked` pasaba todas las aserciones anteriores.
+    expect(sidebar).toContain("href={item.href}");
+    expect(sidebar).not.toMatch(/href=\{[^}]*locked/);
+    expect(sidebar).not.toMatch(/tabIndex/);
+  });
+
   it("la fila de navegación no intercepta el clic", () => {
     // Se acota a `NavRow`, que es donde se renderiza el `<Link>`. El `<dialog>`
     // sí usa `preventDefault()` legítimamente (en `onCancel`, para que un solo

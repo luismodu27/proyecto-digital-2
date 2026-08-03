@@ -21,7 +21,7 @@ const ROW = {
   rail:
     "relative flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
   drawer:
-    "relative flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand",
+    "relative flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-medium transition-colors duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand",
 } as const;
 
 const STATE_RAIL = {
@@ -38,7 +38,7 @@ const STATE_DRAWER = {
 } as const;
 
 const ICON_BTN =
-  "inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-paper-sunken hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand";
+  "inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-paper-sunken hover:text-ink focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand";
 
 type TD = Dictionary["dashboard"];
 
@@ -124,7 +124,6 @@ export function Sidebar({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);          // SOLO para aria-expanded
-  const accountOpenRef = useRef(false);             // ver onCancel
 
   const openDrawer = useCallback(() => {
     const d = dialogRef.current;
@@ -154,8 +153,6 @@ export function Sidebar({
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  const handleAccountOpenChange = useCallback((v: boolean) => { accountOpenRef.current = v; }, []);
-
   const accountBlock = (placement: "auto" | "up") =>
     userEmail ? (
       <AccountMenu
@@ -164,7 +161,6 @@ export function Sidebar({
         orgs={orgs}
         activeOrgId={activeOrgId}
         menuPlacement={placement}
-        onOpenChange={placement === "up" ? handleAccountOpenChange : undefined}
       />
     ) : (
       <div className="rounded-xl border border-line bg-paper-sunken/60 p-4">
@@ -183,7 +179,17 @@ export function Sidebar({
              y la navegación entera se pierde al bajar. z-30 a propósito: queda
              BAJO el overlay z-50 del WelcomeGuide, así que durante el primer
              login el disparador no es pulsable. ══════════════════════════════ */}
-      <div className="sticky top-0 z-30 flex h-14 w-full shrink-0 items-center gap-1 border-b border-line bg-paper-raised px-2 pl-[env(safe-area-inset-left)] md:hidden print:hidden">
+      {/* `<nav>` y no `<div>`: con el cajón cerrado, el rail es `hidden` y el
+          `<dialog>` es `display:none`, así que en móvil no quedaría NINGÚN
+          landmark de navegación en el documento.
+          `pl-[max(…)]` y no `pl-[env(…)]` a secas: `pl-` gana a `px-` por orden
+          de generación, y `env(safe-area-inset-left)` vale 0 mientras no haya
+          `viewport-fit=cover` — la barra se quedaba sin padding izquierdo en
+          TODOS los dispositivos. Mismo patrón que el `pb-[max(...)]` de abajo. */}
+      <nav
+        aria-label={nd.title}
+        className="sticky top-0 z-30 flex h-14 w-full shrink-0 items-center gap-1 border-b border-line bg-paper-raised px-2 pl-[max(0.5rem,env(safe-area-inset-left))] md:hidden print:hidden"
+      >
         <button
           type="button"
           onClick={openDrawer}
@@ -200,7 +206,7 @@ export function Sidebar({
         <Logo href="/dashboard" />
         <span className="flex-1" />
         <ThemeToggle />
-      </div>
+      </nav>
 
       {/* ══ B) RAIL DE ESCRITORIO — idéntico a hoy de md: en adelante.
              Antes: flex w-full … border-b … md:h-dvh md:w-64 md:border-b-0 md:border-r
@@ -229,35 +235,40 @@ export function Sidebar({
           `max-h-none` + `m-0` anulan la hoja del UA para dialog:modal
           (max-height: calc(100% - 6px - 2em); margin: auto).
           Sin `h-dvh`: `inset-y-0` ya fija la altura y `dvh` baila mientras la
-          barra de direcciones de iOS colapsa. ════════════════════════════════ */}
+          barra de direcciones de iOS colapsa.
+
+          No hay `onCancel`: el "doble Escape" (uno cierra el menú de cuenta,
+          otro el cajón) NO se puede resolver desde aquí. Se intentó con una
+          guarda `if (accountOpenRef.current)` y era código muerto — el
+          `keydown` de AccountMenu corre ANTES y ya había puesto el ref a
+          `false`, porque el `cancel` del diálogo es la acción POR DEFECTO de
+          esa misma pulsación. Se arregla donde sí funciona, con
+          `preventDefault()` en el handler de AccountMenu. ══════════════════ */}
       <dialog
         ref={dialogRef}
         id={DRAWER_ID}
         aria-labelledby={DRAWER_TITLE_ID}
         onClose={() => setOpen(false)}
-        onCancel={(e) => {
-          // Escape nativo. Si el desplegable de cuenta está abierto DENTRO del
-          // cajón, su propio handler (AccountMenu.tsx:42-51) ya lo cierra: aquí
-          // se cancela el cierre del cajón para que un Escape no haga las dos
-          // cosas a la vez. El segundo Escape sí cierra el cajón.
-          if (accountOpenRef.current) {
-            e.preventDefault();
-            accountOpenRef.current = false;
-          }
-        }}
         onClick={(e) => {
           // Los clics sobre ::backdrop tienen como target el propio <dialog>.
           // Funciona porque el diálogo lleva `p-0` (sin padding clicable).
           if (e.target === dialogRef.current) closeDrawer();
         }}
-        className="nav-drawer fixed inset-y-0 left-0 right-auto m-0 w-[19.5rem] max-h-none max-w-[86vw] rounded-none border-y-0 border-l-0 border-r border-line bg-paper-raised p-0 pl-[env(safe-area-inset-left)] text-ink shadow-2xl md:hidden print:hidden"
+        className="nav-drawer fixed inset-y-0 left-0 right-auto m-0 w-[19.5rem] max-h-none max-w-[86vw] rounded-none border-y-0 border-l-0 border-r border-line bg-paper-raised p-0 pl-[max(0px,env(safe-area-inset-left))] text-ink shadow-2xl md:hidden print:hidden"
       >
         {/* SIN role="dialog" y SIN aria-modal: showModal() los aporta. Escribirlos
             a mano miente en cuanto alguien abra con show() o con el atributo open. */}
         <div className="flex h-full flex-col">
           <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-line pl-4 pr-2">
             <h2 id={DRAWER_TITLE_ID} className="sr-only">{nd.title}</h2>
-            <Logo href="/dashboard" />
+            {/* El cierre va en un envoltorio y no en el `Logo`, que no acepta
+                `onClick`. Sin esto, abrir el cajón EN `/dashboard` y pulsar el
+                logo no hacía nada: `pathname` no cambia, así que el efecto que
+                cierra al navegar tampoco dispara. Un control muerto justo en la
+                ruta por defecto. */}
+            <span onClick={closeDrawer}>
+              <Logo href="/dashboard" />
+            </span>
             <button
               ref={closeRef}
               type="button"
@@ -300,7 +311,7 @@ export function Sidebar({
                   <Link
                     href="/dashboard/facturacion"
                     onClick={closeDrawer}
-                    className="mt-1.5 inline-flex min-h-11 items-center gap-1 text-xs font-medium text-brand hover:text-brand-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                    className="mt-1.5 inline-flex min-h-11 items-center gap-1 text-xs font-medium text-brand hover:text-brand-strong focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand"
                   >
                     {nd.seePlans}
                     <svg viewBox="0 0 24 24" className="size-3.5" fill="none" aria-hidden>
