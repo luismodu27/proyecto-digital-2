@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { signOut, switchAccount } from "@/lib/auth/actions";
 import { switchOrg } from "@/lib/data/org-actions";
@@ -22,13 +22,34 @@ export function AccountMenu({
   userName,
   orgs = [],
   activeOrgId,
+  menuPlacement = "auto",
+  onOpenChange,
 }: {
   userEmail: string;
   userName?: string;
   orgs?: UserOrg[];
   activeOrgId?: string;
+  /**
+   * `"up"`: el panel abre siempre hacia arriba. Se usa dentro del cajón móvil,
+   * donde el bloque de cuenta va al fondo de un panel de altura completa y el
+   * `top-full` de móvil se saldría de la pantalla. `"auto"` = lo de siempre.
+   */
+  menuPlacement?: "auto" | "up";
+  /**
+   * Avisa al contenedor de si el desplegable está abierto. Lo usa el `<dialog>`
+   * del cajón para que un MISMO Escape no cierre las dos cosas: el primero
+   * cierra este menú, el segundo el cajón.
+   */
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpenState] = useState(false);
+  const setOpen = useCallback(
+    (next: boolean) => {
+      setOpenState(next);
+      onOpenChange?.(next);
+    },
+    [onOpenChange],
+  );
   const ref = useRef<HTMLDivElement>(null);
   const t = useT();
   const locale = useLocale();
@@ -48,13 +69,13 @@ export function AccountMenu({
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("keydown", onKey);
     };
-  }, [open]);
+  }, [open, setOpen]);
 
   return (
     <div ref={ref} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen(!open)}
         aria-haspopup="menu"
         aria-expanded={open}
         className="flex w-full items-center gap-3 rounded-xl border border-line bg-paper-sunken/60 p-3 text-left transition-colors hover:border-line-strong hover:bg-paper-sunken"
@@ -93,7 +114,13 @@ export function AccountMenu({
       {open && (
         <div
           role="menu"
-          className="absolute inset-x-0 top-full z-40 mt-2 origin-top overflow-hidden rounded-xl border border-line bg-paper-raised shadow-lg md:bottom-full md:top-auto md:mb-2 md:mt-0 md:origin-bottom"
+          // Dos literales completos, nunca interpolados: Tailwind v4 no ve las
+          // clases construidas en una plantilla y no generaría el CSS.
+          className={
+            menuPlacement === "up"
+              ? "absolute inset-x-0 bottom-full z-40 mb-2 origin-bottom overflow-hidden rounded-xl border border-line bg-paper-raised shadow-lg"
+              : "absolute inset-x-0 top-full z-40 mt-2 origin-top overflow-hidden rounded-xl border border-line bg-paper-raised shadow-lg md:bottom-full md:top-auto md:mb-2 md:mt-0 md:origin-bottom"
+          }
         >
           {orgs.length > 1 && (
             <div className="border-b border-line">

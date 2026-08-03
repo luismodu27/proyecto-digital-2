@@ -785,7 +785,19 @@ export const es = {
       telemetry: "Telemetría",
       lockedTitle: "Función del plan Preparación",
       lockedTitleEnterprise: "Función del plan Enterprise",
-      lockedLabel: "Bloqueado",
+    },
+
+    // Cajón de navegación móvil. Bloque hermano de `nav` y no dentro de él: de
+    // `nav` sale el tipo de las claves de destino, y meter aquí etiquetas de
+    // chrome lo ensancharía (ya arrastra `lockedTitle*`).
+    navDrawer: {
+      title: "Navegación",
+      openMenu: "Abrir navegación",
+      closeMenu: "Cerrar navegación",
+      planLabel: "Tu plan",
+      lockedCountOne: "1 sección requiere un plan superior",
+      lockedCountMany: "{n} secciones requieren un plan superior",
+      seePlans: "Ver planes",
     },
 
     sidebar: {

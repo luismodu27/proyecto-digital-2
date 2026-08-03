@@ -780,7 +780,16 @@ export const en: Dictionary = {
       telemetry: "Telemetry",
       lockedTitle: "Readiness plan feature",
       lockedTitleEnterprise: "Enterprise plan feature",
-      lockedLabel: "Locked",
+    },
+
+    navDrawer: {
+      title: "Navigation",
+      openMenu: "Open navigation",
+      closeMenu: "Close navigation",
+      planLabel: "Your plan",
+      lockedCountOne: "1 section requires a higher plan",
+      lockedCountMany: "{n} sections require a higher plan",
+      seePlans: "See plans",
     },
 
     sidebar: {
