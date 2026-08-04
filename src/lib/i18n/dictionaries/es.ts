@@ -623,6 +623,40 @@ export const es = {
         "Sin compromiso. Attesta ofrece orientación de compliance, no asesoría legal.",
     },
 
+    demo: {
+      eyebrow: "Venta asistida",
+      title: "Habla con nosotros antes de comprar",
+      intro:
+        "Si gestionas IA en varias áreas o te toca responder a una due-diligence, media hora ahorra semanas. Te enseñamos el producto con tu caso, no con datos de ejemplo.",
+      bullets: [
+        "Recorrido por tu caso: qué sistemas tendrías que inventariar y qué te pediría un auditor.",
+        "Respuesta clara sobre qué cubre Attesta y qué no.",
+        "Sin presentación comercial de 40 diapositivas.",
+      ],
+      emailLabel: "Correo de trabajo",
+      nameLabel: "Nombre",
+      companyLabel: "Organización",
+      roleLabel: "Tu papel",
+      rolePlaceholder: "p. ej. Responsable de RRHH, DPO, IT",
+      sizeLabel: "Tamaño de la organización",
+      sizePlaceholder: "Selecciona",
+      contextLabel: "¿Qué te trae? (opcional)",
+      contextPlaceholder:
+        "p. ej. usamos una herramienta de cribado de currículums y nos han pedido evidencia.",
+      optional: "opcional",
+      cta: "Solicitar una demo",
+      sending: "Enviando…",
+      successTitle: "Recibido.",
+      successBody:
+        "Te escribimos al correo que nos has dejado. Si tienes prisa, responde a ese mensaje y lo adelantamos.",
+      invalidEmail: "Introduce un correo válido.",
+      rateError:
+        "Has enviado varias solicitudes seguidas. Espera unos minutos e inténtalo otra vez.",
+      genericError: "No se pudo enviar. Inténtalo de nuevo en un momento.",
+      privacy:
+        "Usamos estos datos solo para responderte. No los cedemos a nadie.",
+      privacyLink: "Aviso de privacidad",
+    },
     footer: {
       tagline:
         "Gobernanza continua de IA para el mid-market: inventario, riesgo, evidencia y vigilancia regulatoria, listos para auditoría.",

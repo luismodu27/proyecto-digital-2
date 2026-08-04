@@ -623,8 +623,21 @@
       algo prometido por contrato. Lo que NO puedo hacer yo y sigue abierto: fijar RPO/RTO y **probar una
       restauración de verdad** (§1.7). Una copia que nunca se ha restaurado no es una copia, es una suposición.
       `medio · M`
-- [ ] **Motion GTM enterprise + captura de leads** — la landing solo tiene waitlist; el ACV de 30-50k $ no es
-      self-serve (falta "reservar demo", captura cualificada, handoff a venta asistida). `medio · S-M`
+- [x] ✅ **Motion GTM enterprise + captura de leads** (2026-08-04) — migración **0037** (`demo_requests`) +
+      sección `#demo` en la landing (ES y EN) + evento `demo_requested`. El plan **Enterprise ya no manda a la
+      lista de espera**: apunta a la demo. Era el fallo de fondo — el único plan que no es self-serve tenía como
+      siguiente paso "déjame tu correo y ya te avisaremos", que pierde justo la conversación que justifica un
+      contrato de ese tamaño.
+      **Decisiones:** solo dos campos obligatorios (correo y organización); el resto opcional, porque cada campo
+      de más cuesta solicitudes y **una solicitud perdida vale más que un dato de cualificación** — lo que falte
+      se pregunta en la llamada. Se piden tamaño y papel porque son lo que ordena la bandeja y lo que cambia cómo
+      se prepara la conversación. **El correo al fundador se envía ANTES de escribir en la base de datos**, y ese
+      orden es deliberado: si la migración no está o Supabase parpadea, el lead llega igual. Es el único sitio del
+      repo donde el correo es el sistema de registro y la base de datos el respaldo.
+      `demo_requested` es un evento **distinto** de `waitlist_submit`: la lista de espera es "avísame cuando esté"
+      y esto es "quiero hablar"; mezclarlos escondería la única señal que dice si la venta asistida funciona.
+      Mismo modelo de seguridad que la waitlist: `anon` inserta y **no puede leer** — verificado en el Postgres
+      desechable (inserta, y el SELECT devuelve 0). `medio · S-M`
 - [x] ✅ **Deliverability de email transaccional** (2026-08-04) — los registros DNS son tuyos (§1.7), pero la
       parte de ingeniería sí estaba y faltaba: hoy, sin `RESEND_FROM`, los correos salen desde el dominio
       compartido de pruebas de Resend **sin que nada lo diga** — la API responde 200 y los registros ponen
@@ -807,6 +820,19 @@ Intenté arreglarlo y el arreglo era mayor de lo que parecía (no solo los tipos
 así que preferí no dejarlo a medias. Lo he anotado como tarea propia. **Mientras tanto: para una migración
 nueva, pega siempre el fichero de la migración, no `setup.sql`.** `setup.sql` sirve para montar un proyecto
 desde cero.
+
+### 1.8 · 🟡 Migración 0037 (solicitudes de demo)
+
+**Qué:** pega `supabase/migrations/0037_demo_requests.sql` en el SQL Editor.
+
+**Qué habilita:** guardar las solicitudes de demo de la landing en una tabla, para poder consultarlas y
+ordenarlas. **Sin aplicarla no se pierde ninguna solicitud**: el correo con los datos te llega igual, porque
+el aviso se manda *antes* de escribir en la base de datos, a propósito. La migración solo añade el registro
+ordenado.
+
+**Cómo consultarlas:** desde el SQL Editor de Supabase (`select * from public.demo_requests order by
+created_at desc;`). La lista **no se puede leer desde la web**, ni siquiera con sesión: es información
+comercial y no tiene por qué estar expuesta.
 
 ### 1.7 · 🟡 Operación: DNS del correo y ensayo de restauración
 

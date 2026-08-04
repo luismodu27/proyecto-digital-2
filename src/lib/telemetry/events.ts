@@ -22,6 +22,13 @@ export const PRODUCT_EVENTS = [
   "cta_click",
   /** Solicitud de acceso enviada desde la landing (servidor). */
   "waitlist_submit",
+  /**
+   * Solicitud de DEMO enviada (servidor). Es distinta de `waitlist_submit` a
+   * propósito: la lista de espera es "avísame cuando esté" y esto es "quiero
+   * hablar". Mezclarlas escondería la única señal que dice si la venta asistida
+   * funciona. props: `{ size, source }` — nunca correo ni nombre.
+   */
+  "demo_requested",
 
   // --- Alta y activación -------------------------------------------------
   /** El visitante envió el formulario en modo registro (cliente). */

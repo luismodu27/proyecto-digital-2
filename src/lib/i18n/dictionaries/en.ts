@@ -614,6 +614,39 @@ export const en: Dictionary = {
         "No commitment. Attesta provides governance guidance, not legal advice.",
     },
 
+    demo: {
+      eyebrow: "Assisted sales",
+      title: "Talk to us before you buy",
+      intro:
+        "If you manage AI across several teams, or you have to answer a vendor review, half an hour saves weeks. We walk through the product with your case, not with sample data.",
+      bullets: [
+        "A walkthrough of your case: which systems you would have to inventory and what an auditor would ask for.",
+        "A straight answer on what Attesta covers and what it does not.",
+        "No 40-slide sales deck.",
+      ],
+      emailLabel: "Work email",
+      nameLabel: "Name",
+      companyLabel: "Organization",
+      roleLabel: "Your role",
+      rolePlaceholder: "e.g. Head of People, DPO, IT",
+      sizeLabel: "Organization size",
+      sizePlaceholder: "Select",
+      contextLabel: "What brings you here? (optional)",
+      contextPlaceholder:
+        "e.g. we use a CV screening tool and we have been asked for evidence.",
+      optional: "optional",
+      cta: "Request a demo",
+      sending: "Sending…",
+      successTitle: "Got it.",
+      successBody:
+        "We will write to the address you gave us. If you are in a hurry, reply to that message and we will bring it forward.",
+      invalidEmail: "Enter a valid email address.",
+      rateError:
+        "You have sent several requests in a row. Wait a few minutes and try again.",
+      genericError: "Could not send. Please try again in a moment.",
+      privacy: "We use this only to reply to you. We do not share it with anyone.",
+      privacyLink: "Privacy notice",
+    },
     footer: {
       tagline:
         "Continuous AI governance for the mid-market: inventory, risk, evidence and regulatory watch, ready for audit.",

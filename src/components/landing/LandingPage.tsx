@@ -14,6 +14,7 @@ import { Honestidad } from "@/components/landing/Honestidad";
 import { Pricing } from "@/components/landing/Pricing";
 import { FAQ } from "@/components/landing/FAQ";
 import { WaitlistCTA } from "@/components/landing/WaitlistCTA";
+import { DemoRequest } from "@/components/landing/DemoRequest";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { StructuredData } from "@/components/landing/StructuredData";
 import { Reveal } from "@/components/ui/Reveal";
@@ -82,6 +83,16 @@ export function LandingPage({ locale }: { locale: Locale }) {
         </Reveal>
         <Reveal>
           <Pricing t={l.pricing} />
+        </Reveal>
+        {/*
+          La demo va DESPUÉS de precios y ANTES de las preguntas frecuentes. Ahí
+          es donde alguien acaba de ver el precio del plan Enterprise —el que no
+          es self-serve— y necesita un siguiente paso que no sea "déjame tu
+          correo". La lista de espera sigue al final para quien solo quiere que le
+          avisen: son dos intenciones distintas y mezclarlas pierde a las dos.
+        */}
+        <Reveal>
+          <DemoRequest t={l.demo} locale={locale} />
         </Reveal>
         <Reveal>
           <FAQ t={l.faq} />
