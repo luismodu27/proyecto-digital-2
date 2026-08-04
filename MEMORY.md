@@ -127,6 +127,28 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **Sprint 5 · la landing y la CSP con nonce no pueden ser las dos cosas — y de paso, una
+  alarma mía que resultó falsa.** Al ir a sacar la landing del `headers()` del layout raíz vi que los ~44
+  scripts inline de Next (el payload RSC) salían **sin nonce**, y solo el script de tema —que se lo pasamos a
+  mano— lo llevaba. Deduje que al promover la CSP a `enforce` el navegador los bloquearía y la app quedaría
+  muerta en todas las rutas. **Lo probé antes de contarlo y era al revés.** Next saca el nonce de la política
+  que se manda como `Content-Security-Policy` (la aplicada), no de `x-nonce` ni de la Report-Only; como la
+  aplicada hoy es la "sin riesgo" y no lleva `script-src`, no hay nonce que encontrar. Al poner la estricta en
+  esa cabecera, Next empieza a inyectarlo **solo**: de 44 sin nonce a 45 con él, sin tocar la aplicación.
+  - **Lo aprovechable:** las violaciones de `script-src` que el Report-Only reporta hoy son **esperadas** y
+    desaparecen al promover. Quien las mire para decidir si promover concluirá lo contrario de lo cierto. Queda
+    escrito en PENDIENTES §0.4 y hay un test que vigila que el nonce siga siendo encontrable por el algoritmo
+    de Next, porque si alguien reordena las directivas la promoción dejaría de funcionar **en silencio**.
+  - **El hallazgo que sí bloquea el ticket:** un nonce cambia en cada petición, así que **exige render
+    dinámico**. La landing estática y la CSP con nonce en la landing son excluyentes. La alternativa que
+    documenta Next es SRI con hashes (`experimental.sri`) — experimental, y en un producto de compliance
+    adoptar un flag experimental en la página pública es decisión del fundador, no de un commit. Queda como
+    checkpoint suyo.
+  - **Lo que sí se arregló de camino, y era un fallo real de accesibilidad:** `/` con la cookie en inglés se
+    anunciaba como `lang="en"` mientras servía la landing en español (el componente recibe `locale="es"` fijo).
+    En la web pública manda la RUTA en las dos direcciones, no solo en `/en`. La cookie sigue mandando en auth
+    y dashboard, que no llevan el idioma en la URL. Verificado sobre el HTML servido en los tres casos.
+
 - **2026-08-04** · **Sprint 5 · el bug no era la comprobación que faltaba, era el default que sobraba.**
   Los tres sitios que necesitan la URL absoluta del sitio —`layout.tsx` (metadataBase/OG), `i18n/metadata.ts`
   (canonical + hreflang, y de ahí sitemap y robots) y `reminders/email.ts` (enlaces de los correos)— repetían

@@ -518,9 +518,23 @@ El fundador las pegó en el SQL Editor. Con esto las 2 fallas HIGH quedan **cerr
 
 ### 0.4 · 🔴 PENDIENTE TUYO restante de seguridad
 - [ ] **Promover la CSP a `enforce`** — hoy la política estricta (anti-XSS) va en *Report-Only* (observa, no bloquea).
-  Es un cambio de **1 línea** en `src/lib/security/csp.ts` (mover el bloque `reportOnly` a `enforced`). **Antes:**
-  smoke-test en el preview de un PR → login (Supabase) + checkout (Stripe) + descargar radar, y confirmar que no hay
-  violaciones que rompan. Avísame y lo hago + valido.
+  Sigue siendo un cambio de **1 línea** en `src/lib/security/csp.ts`. **Avísame y lo hago + valido.**
+
+  **⚠️ Cómo leer el Report-Only de hoy (medido el 2026-08-04, no deducido).** Al mirarlo verás **violaciones de
+  `script-src` en todas las páginas**, y la conclusión intuitiva —"no se puede promover, rompería la app"— es
+  **exactamente la contraria a la verdad**. Lo que pasa: Next saca el nonce de la política que se manda como
+  `Content-Security-Policy` (la aplicada), y la aplicada hoy es la "sin riesgo", que no lleva `script-src`. Sin
+  nonce que encontrar, Next no se lo pone a sus ~44 scripts inline, y el Report-Only los reporta. **Al promover,
+  el nonce pasa a viajar en esa cabecera y Next empieza a inyectarlo solo.** Comprobado ejecutándolo: de 44
+  scripts inline sin nonce a **45 con él**, sin tocar una línea de la aplicación. Hay un test que vigila que el
+  nonce siga siendo encontrable por el algoritmo de Next (`src/lib/security/csp.test.ts`).
+
+  **El smoke-test sigue haciendo falta** —login (Supabase), checkout (Stripe), descargar radar— pero para cazar
+  allowlists que falten (un dominio de terceros, un iframe), no para el `script-src` de Next.
+
+  **Lo que la promoción SÍ decide, y es una elección tuya:** con nonce, la landing **no puede ser estática**
+  (un nonce es distinto en cada petición, y una página estática se genera una vez). Es el cruce del ítem de
+  rendimiento del Sprint 5 — ver §0.E.
 
 ### 0.5 · 🟡 PENDIENTE MÍO / higiene continua de seguridad
 - [ ] **Re-auditar tras conectar el flujo real de Stripe** (cobros/downgrades/reconciliación no se validan por código).
