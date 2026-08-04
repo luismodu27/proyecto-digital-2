@@ -3,7 +3,14 @@
  * `en.ts` debe satisfacer ese tipo: si falta una clave o cambia una firma, tsc falla.
  *
  * SOLO chrome de UI. Nada de contenido regulatorio determinista (ver config.ts).
- * Las cadenas con variables son funciones tipadas (interpolación sin dependencias).
+ *
+ * PROHIBIDO PONER FUNCIONES AQUÍ. El diccionario entero se pasa como prop a
+ * `I18nProvider`, que es un Client Component, y todo lo que cruza esa frontera se
+ * serializa: una función lanza *"Functions cannot be passed directly to Client
+ * Components"* y devuelve un 500. Es un error de EJECUCIÓN, así que ni `tsc` ni
+ * `next build` lo ven — pasó una vez, con el panel entero roto y el build en
+ * verde. Para cadenas con variables, usa un marcador de posición (`{days}`) y
+ * `replace` en el punto de uso. Lo vigila `dictionaries.guard.test.ts`.
  */
 
 export const es = {
@@ -951,6 +958,18 @@ export const es = {
       backToSite: "← Volver al sitio",
     },
 
+    help: {
+      title: "Ayuda",
+      subtitle: "Las preguntas que más se repiten, y lo que Attesta no hace.",
+      contactTitle: "¿No está aquí?",
+      contactBody:
+        "Escríbenos y te respondemos. Cuéntanos qué intentabas hacer y en qué pantalla te quedaste: con eso solemos resolverlo en el primer mensaje.",
+      contactCta: "Escribir a soporte",
+      goTo: "Ir a la sección",
+      legalTitle: "Documentación legal",
+      legalBody:
+        "Aviso de privacidad, cookies, subprocesadores y el Acuerdo de Tratamiento de Datos.",
+    },
     account: {
       organization: "Organización",
       billing: "Plan y facturación",
@@ -1259,19 +1278,19 @@ export const es = {
         exportFirst:
           "Antes de continuar, descarga tu expediente completo. Es el mismo paquete que puedes pedir en cualquier momento por portabilidad.",
         exportCta: "Descargar mi expediente (JSON)",
-        graceNotice: (d: number) =>
-          `La baja no es inmediata: dispones de ${d} días para cancelarla. Pasado ese plazo, la eliminación es definitiva.`,
+        graceNotice:
+          "La baja no es inmediata: dispones de {days} días para cancelarla. Pasado ese plazo, la eliminación es definitiva.",
         ownerOnly:
           "Solo el propietario de la organización puede darla de baja.",
         confirmLabel: "Escribe el nombre de la organización para confirmar",
-        confirmHint: (name: string) => `Debe coincidir con «${name}».`,
+        confirmHint: "Debe coincidir con «{name}».",
         requestCta: "Solicitar la baja",
         requestingCta: "Solicitando…",
         pendingTitle: "Baja solicitada",
-        pendingBody: (days: number, date: string) =>
-          days > 0
-            ? `Esta organización y todos sus datos se eliminarán en ${days} día(s), el ${date}. Puedes cancelarlo hasta entonces.`
-            : `Esta organización y todos sus datos se eliminarán hoy (${date}). Cancélalo ahora si fue un error.`,
+        pendingBody:
+          "Esta organización y todos sus datos se eliminarán en {days} día(s), el {date}. Puedes cancelarlo hasta entonces.",
+        pendingBodyToday:
+          "Esta organización y todos sus datos se eliminarán hoy ({date}). Cancélalo ahora si fue un error.",
         cancelCta: "Cancelar la baja",
         cancellingCta: "Cancelando…",
       },

@@ -40,6 +40,7 @@ export function AccountMenu({
   const t = useT();
   const locale = useLocale();
   const acc = t.dashboard.account;
+  const help = t.dashboard.help;
 
   useEffect(() => {
     if (!open) return;
@@ -163,6 +164,29 @@ export function AccountMenu({
               labelToEs={t.locale.switchToEs}
             />
           </div>
+
+          {/*
+            Ayuda ANTES que facturación: quien abre este menú con una duda la
+            tiene ahora, y quien viene a mirar su plan sabe buscarlo. Ordenar por
+            frecuencia de la necesidad, no por importancia para nosotros.
+          */}
+          <Link
+            href="/dashboard/ayuda"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft transition-colors hover:bg-paper-sunken hover:text-ink"
+          >
+            <svg viewBox="0 0 24 24" className="size-4 shrink-0" fill="none" aria-hidden>
+              <path
+                d="M12 21a9 9 0 100-18 9 9 0 000 18Zm-2-11a2 2 0 113.5 1.3c-.7.7-1.5 1.1-1.5 2.2m0 3h.01"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {help.title}
+          </Link>
 
           <Link
             href="/dashboard/facturacion"

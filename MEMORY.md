@@ -127,6 +127,28 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **Sprint 6 cerrado 7/7. Y una regresión propia que rompió el panel entero con el build en
+  verde.**
+  Al verificar la página de ayuda en modo demo, `/dashboard/ayuda` devolvió **500**. La causa no estaba en la
+  ayuda: dos commits antes, al añadir la baja de organización, metí **funciones en el diccionario i18n**
+  (`graceNotice: (d) => ...`). El diccionario entero se pasa como prop a `I18nProvider`, que es un **Client
+  Component**, y una función no se puede serializar: *"Functions cannot be passed directly to Client
+  Components"*. **Rompía todo el panel, no solo la demo.**
+  - **Por qué se coló, que es lo aprovechable.** (1) Es un error de EJECUCIÓN: `tsc` y `next build` pasaron en
+    verde con el panel roto. (2) Los tests son de lógica pura y no renderizan. (3) En modo conectado sin
+    sesión el panel redirige a login, así que ninguna comprobación por curl llegó a renderizarlo. (4) Y el
+    encabezado del propio diccionario **invitaba a hacerlo** —"las cadenas con variables son funciones
+    tipadas"—, una convención que nunca se había usado: había **cero** funciones antes. Documentación que
+    describe algo que la arquitectura no admite.
+  - **Arreglo:** marcador de posición (`{days}`) + `replace` en el punto de uso, el comentario del diccionario
+    corregido, y un guard (`dictionaries.guard.test.ts`) que recorre el diccionario a cualquier profundidad
+    **y además comprueba el ida y vuelta por JSON** — la prueba definitiva, no una aproximación: si sobrevive
+    a `JSON.parse(JSON.stringify(x))`, cruza la frontera. Verificado reintroduciendo la regresión: la caza y
+    dice la ruta exacta.
+  - **La lección operativa, que vale más que el arreglo:** `build` + `tsc` + tests en verde **no son evidencia
+    de que una página renderice**. Hay que abrirla. Y en este repo, abrirla significa levantar el servidor en
+    **modo demo**, porque en modo conectado el panel redirige antes de renderizar nada.
+
 - **2026-08-04** · **Sprint 6.4 y 6.5 — correo y operación. El patrón que se repitió todo el sprint.**
   Los cinco ítems del sprint acabaron encontrando la misma clase de fallo: **algo que no da error**. La
   supresión que parecía completa y dejaba filas huérfanas. El webhook que respondía 200 a su propio fallo. El

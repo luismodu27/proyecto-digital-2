@@ -58,7 +58,9 @@ export function OrgDeletion({
           {t.pendingTitle}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-[var(--tone-danger-fg)]">
-          {t.pendingBody(days, date)}
+          {(days > 0 ? t.pendingBody : t.pendingBodyToday)
+            .replace("{days}", String(days))
+            .replace("{date}", date)}
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <a
@@ -99,7 +101,9 @@ export function OrgDeletion({
         </a>
       </div>
 
-      <p className="mt-4 text-sm text-muted">{t.graceNotice(GRACE_DAYS)}</p>
+      <p className="mt-4 text-sm text-muted">
+        {t.graceNotice.replace("{days}", String(GRACE_DAYS))}
+      </p>
 
       {!isOwner ? (
         <p className="mt-4 text-sm text-muted">{t.ownerOnly}</p>
@@ -112,7 +116,9 @@ export function OrgDeletion({
           >
             {t.confirmLabel}
           </label>
-          <p className="mt-1 text-xs text-muted">{t.confirmHint(orgName)}</p>
+          <p className="mt-1 text-xs text-muted">
+            {t.confirmHint.replace("{name}", orgName)}
+          </p>
           <input
             id="confirm-org-name"
             name="confirm"

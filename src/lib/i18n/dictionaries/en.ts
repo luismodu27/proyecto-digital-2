@@ -933,6 +933,18 @@ export const en: Dictionary = {
       backToSite: "← Back to site",
     },
 
+    help: {
+      title: "Help",
+      subtitle: "The questions that come up most, and what Attesta does not do.",
+      contactTitle: "Not here?",
+      contactBody:
+        "Write to us and we will reply. Tell us what you were trying to do and which screen you got stuck on: that usually lets us solve it in the first message.",
+      contactCta: "Email support",
+      goTo: "Go to section",
+      legalTitle: "Legal documentation",
+      legalBody:
+        "Privacy notice, cookies, sub-processors and the Data Processing Agreement.",
+    },
     account: {
       organization: "Organization",
       billing: "Plan and billing",
@@ -1237,18 +1249,18 @@ export const en: Dictionary = {
         exportFirst:
           "Before continuing, download your full record. It is the same bundle you can request at any time for portability.",
         exportCta: "Download my record (JSON)",
-        graceNotice: (d: number) =>
-          `Closure is not immediate: you have ${d} days to cancel it. After that, deletion is final.`,
+        graceNotice:
+          "Closure is not immediate: you have {days} days to cancel it. After that, deletion is final.",
         ownerOnly: "Only the organization's owner can close it.",
         confirmLabel: "Type the organization's name to confirm",
-        confirmHint: (name: string) => `It must match “${name}”.`,
+        confirmHint: "It must match “{name}”.",
         requestCta: "Request closure",
         requestingCta: "Requesting…",
         pendingTitle: "Closure requested",
-        pendingBody: (days: number, date: string) =>
-          days > 0
-            ? `This organization and all its data will be deleted in ${days} day(s), on ${date}. You can cancel until then.`
-            : `This organization and all its data will be deleted today (${date}). Cancel now if this was a mistake.`,
+        pendingBody:
+          "This organization and all its data will be deleted in {days} day(s), on {date}. You can cancel until then.",
+        pendingBodyToday:
+          "This organization and all its data will be deleted today ({date}). Cancel now if this was a mistake.",
         cancelCta: "Cancel closure",
         cancellingCta: "Cancelling…",
       },

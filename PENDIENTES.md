@@ -525,7 +525,11 @@
       un titular grande y un texto pequeño de la misma serif no se vean como la misma letra estirada — eso ya
       no es optimizar, es cambiar el diseño, y es decisión tuya. `bajo · S`
 
-### 0.F · SPRINT 6 — los 8 huecos que el propio panel se dejó fuera (crítico de completitud) ⬅️ SIGUIENTE
+### 0.F · SPRINT 6 — los 8 huecos que el propio panel se dejó fuera ✅ COMPLETADO (2026-08-04)
+> **8/8.** Migraciones nuevas: **0035** (baja de organización), **0036** (facturación), **0037** (solicitudes
+> de demo) — las tres pendientes de aplicar (§1.5, §1.6, §1.8). Documentos nuevos: 4 legales × 2 idiomas,
+> centro de ayuda y `docs/runbook.md`. Verificación: **657 tests**, lint + tsc + check:copy + build en verde.
+> **Siguiente sprint → 0.G, que requiere checkpoint del fundador antes de arrancar.**
 > Confirmados contra el repo: **no hay** analítica, ni páginas legales/privacidad, ni Sentry, ni rutas de ayuda.
 - [x] **Telemetría de producto / funnel de activación** — ✅ **HECHO (2026-07-30, adelantado antes del Sprint 2)**.
       De **primera parte** (sin PostHog/Plausible/GA): migración `0026_telemetry.sql` (`product_events` + RPC
@@ -613,8 +617,16 @@
       envolver los `create type` en un bloque que capture `duplicate_object`, poner `if not exists` en las tablas
       de 0001 y `drop policy if exists` delante de cada policy. Se intentó en la sesión del Sprint 6 y se revirtió
       al ver que un arreglo parcial no entrega la propiedad. `medio · S-M`
-- [ ] **Soporte y documentación de usuario** — cero rutas help/docs y ningún canal de contacto in-app; el
-      onboarding cubre el primer minuto, no la retención. `medio · M`
+- [x] ✅ **Soporte y documentación de usuario** (2026-08-04) — `/dashboard/ayuda`, ES y EN, enlazada desde el
+      menú de cuenta (por delante de facturación: quien abre ese menú con una duda la tiene ahora). 12 preguntas
+      en 4 bloques, **organizadas por pregunta real y no por menú** — una ayuda ordenada como el menú solo la
+      encuentra quien ya sabe dónde mirar. Todo abierto, sin acordeones, para que funcione Ctrl+F. El contacto va
+      **arriba**, no al pie: quien no encuentra su respuesta abandona antes de llegar al final.
+      **La sección que la hace útil es "Lo que Attesta NO hace"** (no certifica / no sustituye a un abogado / no
+      escanea tu red): es la que más consultas de soporte ahorra y la que sostiene la regla nº 1. Un test vigila
+      que exista y que la respuesta sobre certificación siga empezando por un "no" explícito en ambos idiomas.
+      De paso, **el guard de copy prohibido cazó mi propio texto** al escribirla — exactamente para lo que existe.
+      `medio · M`
 - [x] ✅ **Backup / DR y runbook de incidentes** (2026-08-04) — **[docs/runbook.md](./docs/runbook.md)**:
       qué hacer si la cadena de auditoría sale rota, si un cliente pagó y sigue en el plan gratuito, si una baja
       se solicitó por error, y cómo leer los registros de degradación. Incluye el **ensayo de restauración**
@@ -668,7 +680,8 @@
 
 ### 0.H · Cómo retomar esta hoja de ruta tras un compact
 1. Lee esta sección §0 completa (es el plan maestro; no se descarta nada).
-2. El orden por defecto es **0.A → 0.B → 0.C → 0.D → 0.E → 0.F**, con **0.G** solo tras checkpoint del fundador.
+2. El orden por defecto era **0.A → 0.B → 0.C → 0.D → 0.E → 0.F**; todos completados. Queda **0.G**, que
+   son apuestas grandes y **requieren checkpoint del fundador** antes de arrancar ninguna.
 3. Excepción recomendada: **la telemetría de 0.F** conviene adelantarla (medir antes de optimizar).
 4. Cada ítem de *Foso/compliance* (packs, GPAI, crosswalk, corpus) pasa por el `compliance-domain-expert`
    **antes** de escribir texto regulatorio, y se registra en `MEMORY.md §10`.
