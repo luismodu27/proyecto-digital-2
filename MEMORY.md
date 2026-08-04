@@ -127,6 +127,35 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **SPRINT 5 CERRADO (7/7).** Deuda técnica y robustez. Lo que más se repitió como método:
+  **auditar el ticket antes de ejecutarlo**. Tres de los siete estaban descritos con una premisa que ya no era
+  cierta, y en los tres el trabajo útil estaba al lado, no donde señalaba el enunciado.
+  - **«Enums sin whitelist» ya estaba resuelto; lo que faltaba eran los topes.** Ningún campo de texto tenía
+    límite: un miembro autenticado podía escribir megabytes en cualquier nota. Se resolvió con un módulo propio
+    y **no con Zod**, porque hacía falta *un sitio con topes*, no un lenguaje de validación — las acciones
+    redirigen con un toast, no devuelven errores por campo. Regla de diseño explícita: **truncar el texto libre,
+    rechazar lo que tiene estructura**; media URL no es una URL corta, es una URL a otro sitio. Cayeron tres
+    agujeros reales de camino: URL con esquema libre que acaban en un `href` del dossier (`javascript:` = XSS
+    almacenado firmado por el cliente), fechas como `2026-02-31` que pasaban la regex porque `new Date` no falla
+    con ellas, e `id` sin validar interpolados en rutas de redirección.
+  - **«N queries en RPC»: no había N+1.** La fachada ya agrupaba. El coste estaba en la autenticación: cada
+    getter que necesitaba el id del usuario preguntaba a Supabase Auth **por red**, y el layout lo hacía **tres
+    veces** antes de pedir un solo dato — ~90 ms cada una, tanto como una consulta entera, y en serie. Se pasó a
+    verificación local del JWT, que es lo que el middleware ya hacía desde el Sprint 2. Medido con 21 muestras y
+    distribuciones sin solapar: portada **505 → 402 ms**, equipo **597 → 498 ms**.
+  - **«Rate limit con Upstash»: se hizo con Postgres.** Un contador compartido no necesita un proveedor nuevo, y
+    añadir Redis significaba coste recurrente **y un subprocesador más que declarar** justo en el producto que
+    vende gobernanza. La propiedad que hacía falta era la atomicidad, y `insert … on conflict` la da: 30
+    conexiones simultáneas con límite 10 → exactamente 10 pasan. A la tabla no va ninguna IP, va un hash.
+  - **El que no se hizo, y es lo más valioso del sprint:** la landing estática chocaba de frente con la CSP con
+    nonce que está en cola por activar (un nonce cambia en cada petición; una página estática se genera una
+    vez). Se llevó al fundador como decisión y eligió seguridad. **El ítem se cierra sin código y con el motivo
+    escrito**, que vale más que haberlo hecho.
+  - **Y una alarma mía que resultó falsa, comprobada antes de contarla.** Ver la entrada de la CSP: probar en
+    vez de deducir cambió la conclusión por su contraria.
+  - **Dos migraciones pendientes de pegar** (0033 y 0034) y **una variable que definir en Vercel**
+    (`NEXT_PUBLIC_APP_URL`, sin la cual el build ahora falla a propósito). Las tres, en PENDIENTES §1.
+
 - **2026-08-04** · **Sprint 5 · la landing y la CSP con nonce no pueden ser las dos cosas — y de paso, una
   alarma mía que resultó falsa.** Al ir a sacar la landing del `headers()` del layout raíz vi que los ~44
   scripts inline de Next (el payload RSC) salían **sin nonce**, y solo el script de tema —que se lo pasamos a

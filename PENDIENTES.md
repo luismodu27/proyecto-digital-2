@@ -390,7 +390,7 @@
       proveedor del SISTEMA que integra el modelo**, no el deployer — así que se bifurca según si el cliente
       integra el modelo él mismo o usa un producto de terceros.
 
-### 0.E · SPRINT 5 — deuda técnica y robustez restante ⬅️ EN CURSO
+### 0.E · SPRINT 5 — deuda técnica y robustez restante — ✅ COMPLETADO (7/7, 2026-08-04)
 - [x] **Guardar el idioma de lo que se escribe (`locale`)** — ✅ **HECHO (2026-08-04)**. Migración **0033**
       (pendiente de pegar, §1.1-undecies) sobre `gap_items`, `risk_assessments` **y `action_tasks`: el mismo
       defecto estaba en las tareas nacidas de una recomendación**, y dejarlo fuera habría obligado a una
@@ -525,7 +525,7 @@
       un titular grande y un texto pequeño de la misma serif no se vean como la misma letra estirada — eso ya
       no es optimizar, es cambiar el diseño, y es decisión tuya. `bajo · S`
 
-### 0.F · SPRINT 6 — los 8 huecos que el propio panel se dejó fuera (crítico de completitud)
+### 0.F · SPRINT 6 — los 8 huecos que el propio panel se dejó fuera (crítico de completitud) ⬅️ SIGUIENTE
 > Confirmados contra el repo: **no hay** analítica, ni páginas legales/privacidad, ni Sentry, ni rutas de ayuda.
 - [x] **Telemetría de producto / funnel de activación** — ✅ **HECHO (2026-07-30, adelantado antes del Sprint 2)**.
       De **primera parte** (sin PostHog/Plausible/GA): migración `0026_telemetry.sql` (`product_events` + RPC
