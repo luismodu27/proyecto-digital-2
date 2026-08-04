@@ -1,5 +1,7 @@
 import type { OrgReminders } from "./collect";
 import { SITE_URL as APP_URL } from "@/lib/site-url";
+import { needsAttention, senderHealth, type SenderEnv } from "./sender";
+import { logDataFallback } from "@/lib/observability/log";
 
 const RESEND_FROM = process.env.RESEND_FROM ?? "Attesta <onboarding@resend.dev>";
 
@@ -109,6 +111,21 @@ export async function sendEmail(
 ): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || to.length === 0) return false;
+
+  // Enviar desde el dominio de pruebas de Resend NO da error: la API responde
+  // 200 y el correo se va a spam. Como el envío se hace igual (mejor un correo
+  // en spam que ninguno), lo único que impide que esto sea invisible es dejar
+  // constancia. Va por el canal de degradaciones, con antirruido incluido, para
+  // que un digest semanal no escriba una línea por destinatario.
+  const health = senderHealth(process.env as SenderEnv);
+  if (needsAttention(health)) {
+    logDataFallback(
+      "sendEmail",
+      { code: "SENDER_SHARED_DOMAIN", message: health.reason },
+      "configura RESEND_FROM con un dominio propio verificado",
+    );
+  }
+
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

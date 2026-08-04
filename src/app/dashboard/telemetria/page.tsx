@@ -5,6 +5,7 @@ import { ACTIVATION_FUNNEL, PRODUCT_EVENTS } from "@/lib/telemetry/events";
 import { getDictionary } from "@/lib/i18n";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { formatDateTime } from "@/lib/date";
+import { needsAttention, senderHealth, type SenderEnv } from "@/lib/reminders/sender";
 
 /**
  * Panel interno del embudo de activación (telemetría de producto, migración 0026).
@@ -83,9 +84,34 @@ export default async function TelemetriaPage() {
 
   const pct = (n: number) => (visits === 0 ? "—" : `${Math.round((n / visits) * 100)} %`);
 
+  /*
+    Salud del remitente de correo. Va en el panel INTERNO y no en el de seguridad
+    del cliente porque es una alerta de operación nuestra, no una función que se
+    vende. Y va aquí y no solo en el log porque el log de un envío correcto no lo
+    mira nadie: el fallo es que los correos SALEN y acaban en spam, así que la
+    única forma de enterarse es que lo diga una pantalla que sí se abre.
+  */
+  const mail = senderHealth(process.env as SenderEnv);
+
   return (
     <>
       <PageHeader title={tt.title} subtitle={tt.subtitle} />
+
+      {needsAttention(mail) && (
+        <div className="mb-6 rounded-2xl border border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] p-5">
+          <p className="text-sm font-semibold text-[var(--tone-warn-fg)]">
+            Correo saliente: remitente sin dominio propio
+          </p>
+          <p className="mt-1 max-w-[70ch] text-sm leading-relaxed text-[var(--tone-warn-fg)]">
+            {mail.reason} Afecta a invitaciones al equipo, restablecimientos de
+            contraseña y recordatorios de vencimiento: se envían, pero es probable
+            que no lleguen a la bandeja de entrada.
+          </p>
+          <p className="mt-2 font-mono text-xs text-[var(--tone-warn-fg)]">
+            RESEND_FROM = {mail.from}
+          </p>
+        </div>
+      )}
 
       {rows.length === 0 ? (
         <div className="rounded-2xl border border-line bg-paper-raised p-8">

@@ -615,13 +615,25 @@
       al ver que un arreglo parcial no entrega la propiedad. `medio · S-M`
 - [ ] **Soporte y documentación de usuario** — cero rutas help/docs y ningún canal de contacto in-app; el
       onboarding cubre el primer minuto, no la retención. `medio · M`
-- [ ] **Backup / DR y runbook de incidentes** — sin política de backups verificados, RPO/RTO ni plan de
-      restauración probado, el audit-log inmutable y la hash-chain son inútiles. `medio · M`
+- [x] ✅ **Backup / DR y runbook de incidentes** (2026-08-04) — **[docs/runbook.md](./docs/runbook.md)**:
+      qué hacer si la cadena de auditoría sale rota, si un cliente pagó y sigue en el plan gratuito, si una baja
+      se solicitó por error, y cómo leer los registros de degradación. Incluye el **ensayo de restauración**
+      paso a paso (proyecto nuevo, restaurar, comprobar recuento + `verify_all_audit_chains` + login, cronometrar)
+      y la tabla de crons con **qué significa que cada uno no corra** — los dos diarios no avisan de nada, *hacen*
+      algo prometido por contrato. Lo que NO puedo hacer yo y sigue abierto: fijar RPO/RTO y **probar una
+      restauración de verdad** (§1.7). Una copia que nunca se ha restaurado no es una copia, es una suposición.
+      `medio · M`
 - [ ] **Motion GTM enterprise + captura de leads** — la landing solo tiene waitlist; el ACV de 30-50k $ no es
       self-serve (falta "reservar demo", captura cualificada, handoff a venta asistida). `medio · S-M`
-- [ ] **Deliverability de email transaccional (SPF/DKIM/DMARC)** — recordatorios, invitaciones y reset dependen
-      del correo; sin dominio autenticado caen en spam y rompen invitaciones/verificación en silencio. Ligado al
-      SMTP pendiente del fundador (§1.3). `medio · S`
+- [x] ✅ **Deliverability de email transaccional** (2026-08-04) — los registros DNS son tuyos (§1.7), pero la
+      parte de ingeniería sí estaba y faltaba: hoy, sin `RESEND_FROM`, los correos salen desde el dominio
+      compartido de pruebas de Resend **sin que nada lo diga** — la API responde 200 y los registros ponen
+      "enviado". Lo que se pierde en esa carpeta de spam no es un boletín: son invitaciones al equipo,
+      restablecimientos de contraseña y recordatorios de vencimiento. Ahora `src/lib/reminders/sender.ts` lo
+      clasifica (apagado / dominio prestado / propio), se registra al enviar y **sale un aviso en el panel interno
+      de telemetría**, que es una pantalla que sí se abre. Con 12 tests y 2 mutaciones cazadas. Nota de diseño: el
+      estado "apagado" **no** avisa — en desarrollo es lo normal, y un aviso que salta siempre se aprende a
+      ignorar. `medio · S`
 
 ### 0.G · APUESTAS GRANDES — requieren CHECKPOINT del fundador antes de arrancar
 - [ ] **⚠️ Test de sesgo EJECUTABLE (Fairlearn / Evidently)** — hoy solo se *registra* evidencia declarada; el
@@ -795,6 +807,31 @@ Intenté arreglarlo y el arreglo era mayor de lo que parecía (no solo los tipos
 así que preferí no dejarlo a medias. Lo he anotado como tarea propia. **Mientras tanto: para una migración
 nueva, pega siempre el fichero de la migración, no `setup.sql`.** `setup.sql` sirve para montar un proyecto
 desde cero.
+
+### 1.7 · 🟡 Operación: DNS del correo y ensayo de restauración
+
+Los dos están explicados paso a paso en **[docs/runbook.md](./docs/runbook.md)**. Resumen de por qué importan:
+
+**a) Autenticar el dominio del correo (SPF, DKIM, DMARC).** Hoy los correos salen desde el dominio compartido
+de pruebas de Resend. **Se envían** —la API responde bien, los registros dicen "enviado"— y acaban en spam.
+Lo que se pierde ahí son invitaciones al equipo (alguien no puede entrar y no sabe por qué),
+restablecimientos de contraseña (alguien se queda fuera de su cuenta) y recordatorios de vencimiento (el
+producto deja de hacer lo que se contrató). El síntoma visible desde dentro es **ninguno**, y por eso la app
+ahora te lo avisa sola en el panel interno de telemetría. Son tres registros DNS + `RESEND_FROM` en Vercel.
+Empieza el DMARC en `p=none` (solo observa); subir directo a `p=reject` deja de entregar correo sin que te
+enteres, que es justo el problema que venías a arreglar.
+
+**b) Probar una restauración de copia de seguridad, una vez.** Supabase hace copias, pero **nunca se ha
+restaurado ninguna**. Una copia que no se ha restaurado no es una copia, es una suposición: el día que haga
+falta es el peor momento para descubrir que faltaba algo. El ensayo son 20 minutos sobre un proyecto nuevo y
+vacío (no se toca producción) y de él salen los dos números que te va a pedir la revisión de proveedores de
+cualquier cliente: cuántos datos puedes perder como máximo y cuánto tardas en volver. Cuando los tengas,
+anótalos en el DPA.
+
+**Nota honesta:** esta es la casilla más floja que le queda al producto. Todo lo demás del expediente —el
+registro inmutable, la cadena de hashes, la verificación semanal— **no vale nada si un día no hay de dónde
+restaurar**. Un expediente demostrablemente íntegro que se ha perdido entero es tan inútil como uno
+manipulado.
 
 ### 1.6 · 🟡 Migración 0036 (facturación: idempotencia y reconciliación)
 

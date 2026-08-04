@@ -127,6 +127,27 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **Sprint 6.4 y 6.5 — correo y operación. El patrón que se repitió todo el sprint.**
+  Los cinco ítems del sprint acabaron encontrando la misma clase de fallo: **algo que no da error**. La
+  supresión que parecía completa y dejaba filas huérfanas. El webhook que respondía 200 a su propio fallo. El
+  embudo que se inflaba solo con los reintentos. Y ahora el correo: sin `RESEND_FROM`, sale desde el dominio
+  compartido de pruebas de Resend, la API responde 200, los registros dicen "enviado" y el correo se va a
+  spam. Lo que se pierde ahí no es un boletín: invitaciones (alguien no entra y no sabe por qué),
+  restablecimientos de contraseña (alguien se queda fuera) y recordatorios (el producto deja de hacer lo que
+  se contrató).
+  - **Dónde ponerlo importa tanto como detectarlo.** El aviso va al panel INTERNO de telemetría, no al de
+    seguridad del cliente —es operación nuestra, no una función que se vende— y no solo al log, porque el log
+    de un envío "correcto" no lo mira nadie. La única forma de enterarse de un fallo silencioso es que lo diga
+    una pantalla que sí se abre.
+  - **Decisión de diseño con criterio propio:** el estado "envío apagado" NO avisa. En desarrollo es lo
+    normal, y un aviso que salta siempre se aprende a ignorar — que es exactamente cómo se pierde el aviso que
+    sí importaba.
+  - **Runbook (`docs/runbook.md`).** Lo escrito con más convicción: el registro inmutable y la cadena de
+    hashes **no valen nada sin una copia de la que restaurar**. Un expediente demostrablemente íntegro que se
+    ha perdido entero es tan inútil como uno manipulado. Supabase hace copias, pero **nunca se ha restaurado
+    ninguna**, y una copia sin restaurar no es una copia: es una suposición. El ensayo está paso a paso y de
+    él salen el RPO y el RTO reales, que son lo que pregunta la revisión de proveedores de cualquier cliente.
+
 - **2026-08-04** · **Sprint 6.3 — facturación. El bug más caro era una respuesta HTTP.**
   Tres agujeros en el webhook de Stripe, todos de la misma familia: no fallan en pruebas, fallan en
   producción y no dejan traza. El tercero es el que merece recordarse.
