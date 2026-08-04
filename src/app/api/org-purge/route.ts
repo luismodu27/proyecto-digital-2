@@ -64,9 +64,17 @@ async function handle(request: Request) {
     );
   }
 
+  // De paso, poda el registro de eventos de Stripe. Va aquí y no en su propio
+  // cron porque es la misma clase de tarea —barrer lo caducado— y un cron más
+  // es un sitio más donde mirar cuando algo no corre. Su fallo no debe tumbar la
+  // purga, que es lo que cumple un plazo contractual: se registra y se sigue.
+  const { data: pruned, error: pruneError } = await svc.rpc("prune_stripe_events");
+  if (pruneError) logIncident("orgPurgeCron.prune", pruneError);
+
   return NextResponse.json({
     purgedAt: new Date().toISOString(),
     purged: typeof data === "number" ? data : 0,
+    prunedStripeEvents: typeof pruned === "number" ? pruned : null,
     graceDays: GRACE_DAYS,
   });
 }

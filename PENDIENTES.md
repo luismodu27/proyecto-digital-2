@@ -562,9 +562,25 @@
         Sprint 5, ahora generalizado en el middleware.
       **Pendiente del fundador** (§1.4): los 4 datos de la sociedad + decidir si hace falta representante en la
       UE (art. 27) + revisión de abogado antes de publicar. `alto · M`
-- [ ] **Ciclo de vida de facturación** (no solo el checkout) — pago fallido, reintentos, degradación de plan,
-      cancelación, **idempotencia del webhook** y reconciliación Stripe↔DB. Es donde se pierde MRR en silencio.
-      `alto · M`
+- [x] ✅ **Ciclo de vida de facturación** (2026-08-04) — migración **0036** + webhook reescrito +
+      `/api/stripe/reconcile` (cron diario). Tres agujeros reales, los tres de la familia "no falla en pruebas,
+      falla en producción y no deja traza":
+      · **Stripe REINTENTA los webhooks.** El `upsert` de la suscripción aguantaba de casualidad, pero el evento
+        `checkout_completed` no: cada reintento contaba un pago más. El embudo —lo único que mide si el producto
+        funciona— se falseaba solo, **y hacia arriba**, la dirección en la que nadie sospecha. Ahora cada evento
+        se reclama por su id (`stripe_events`) antes de procesarse.
+      · **Stripe NO garantiza el orden.** Un `subscription.updated` viejo que llegaba tarde pisaba el estado
+        bueno: una suscripción activa podía quedar `past_due` porque el evento de hace dos minutos llegó el
+        último. Ahora manda `event.created`, y la comparación va **dentro del `on conflict`** de la RPC, en una
+        sola sentencia, porque dos entregas simultáneas es exactamente lo que ocurre al reintentar. Verificado en
+        el Postgres desechable: el evento tardío devuelve `false` y el estado no se mueve.
+      · **Un fallo nuestro se tragaba el evento.** El `catch` respondía **200**, y un 200 significa "no lo
+        reintentes". Si la base de datos parpadeaba, el pago no se registraba **nunca**: el cliente pagaba y se
+        quedaba en el plan gratuito, sin error en ningún sitio. Ahora suelta la reclamación y devuelve 500.
+      Añadido `invoice.payment_failed` (Stripe ya avisa al cliente; lo que faltaba era enterarnos nosotros) y la
+      **reconciliación** diaria contra Stripe, que es la red que recoge lo que el webhook no llegue a ver — el
+      caso de "endpoint mal configurado" no lo arregla ningún reintento. No borra nada: repara lo desactualizado
+      y **reporta** lo huérfano. **Pendiente del fundador** (§1.6): aplicar la 0036 y conectar Stripe. `alto · M`
 - [x] ✅ **Borrado / exportación de datos por tenant** (2026-08-04) — migración **0035** + zona de baja en
       `/dashboard/organizaciones` + cron diario `/api/org-purge`. Se adelantó sobre facturación porque el DPA y el
       aviso de privacidad que se publicaron esta misma sesión **prometen** supresión y portabilidad: una promesa
@@ -779,6 +795,35 @@ Intenté arreglarlo y el arreglo era mayor de lo que parecía (no solo los tipos
 así que preferí no dejarlo a medias. Lo he anotado como tarea propia. **Mientras tanto: para una migración
 nueva, pega siempre el fichero de la migración, no `setup.sql`.** `setup.sql` sirve para montar un proyecto
 desde cero.
+
+### 1.6 · 🟡 Migración 0036 (facturación: idempotencia y reconciliación)
+
+**Qué:** pega `supabase/migrations/0036_billing_lifecycle.sql` en el SQL Editor. Como la 0035: **el fichero
+de la migración, no `setup.sql`**.
+
+**Por qué te interesa aunque Stripe todavía no esté conectado:** el webhook que había tenía tres formas de
+perder dinero en silencio, y las tres solo se notan cuando ya ha pasado.
+
+1. **Stripe reintenta los avisos.** Cada reintento contaba un pago más en tus métricas. El embudo se
+   inflaba solo, así que habrías tomado decisiones con números mejores de los reales.
+2. **Stripe no los manda en orden.** Un aviso viejo que llega tarde pisaba el estado bueno: una suscripción
+   pagada podía quedar marcada como impagada porque el aviso de hace dos minutos llegó el último.
+3. **El peor:** si nuestra base de datos fallaba un instante al recibir un aviso, el código respondía "todo
+   bien" y Stripe no lo reintentaba nunca. Resultado: **el cliente paga y se queda en el plan gratuito**, sin
+   ningún error en ningún sitio. Nadie abre una incidencia por algo que no da error — la abre el cliente,
+   semanas después.
+
+**Además** he añadido aviso por correo cuando un cobro falla (Stripe ya avisa al cliente; lo que no había era
+que te enteraras tú) y una **reconciliación diaria** que compara lo que dice Stripe con lo que tenemos y
+repara lo que no cuadre. Esa es la red que recoge el caso "el endpoint estaba mal configurado", que ningún
+reintento arregla.
+
+**Sin aplicarla no se rompe nada:** el webhook detecta que la tabla no existe, lo anota en el log y sigue
+funcionando como hasta ahora.
+
+**Verificado:** migración aplicada dos veces (correcta y re-ejecutable) y las cuatro conductas probadas
+contra un Postgres real — evento nuevo se aplica, evento tardío se rechaza y **no** cambia el estado, evento
+posterior sí se aplica, y el mismo id de evento no puede entrar dos veces.
 
 ### 1.4-ter · 🟡 Datos de la sociedad para las páginas legales (privacidad, DPA, subprocesadores)
 

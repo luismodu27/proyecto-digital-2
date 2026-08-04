@@ -127,6 +127,24 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **Sprint 6.3 — facturación. El bug más caro era una respuesta HTTP.**
+  Tres agujeros en el webhook de Stripe, todos de la misma familia: no fallan en pruebas, fallan en
+  producción y no dejan traza. El tercero es el que merece recordarse.
+  - **El `catch` respondía 200.** Un 200 le dice a Stripe "recibido, no lo reintentes" — pero ese `catch`
+    cubría fallos NUESTROS (base de datos, red), que son exactamente los que el reintento arregla. Con la base
+    de datos parpadeando un segundo, el pago no se registraba **nunca**: el cliente pagaba y se quedaba en el
+    plan gratuito, sin un error en ningún log. **Nadie abre una incidencia por algo que no da error.** Ahora
+    suelta la reclamación del evento y devuelve 500.
+  - **Sin idempotencia**, cada reintento de Stripe sumaba un `checkout_completed`. El embudo se falseaba solo
+    y **hacia arriba**, que es la dirección en la que no se sospecha: los números salían mejores.
+  - **Sin orden.** Stripe no lo garantiza. El guard va DENTRO del `on conflict` de la RPC, en una sola
+    sentencia, no en un "lee, compara y escribe" desde la aplicación: dos entregas simultáneas son justo lo
+    que pasa cuando Stripe reintenta mientras el original va de camino, y ahí el patrón de tres pasos pierde.
+  - **La reconciliación no es redundancia del webhook.** Stripe se rinde tras ~72 h de reintentos, así que el
+    caso "endpoint mal configurado en el panel" no lo arregla ningún reintento — solo comparar contra Stripe.
+    Se decidió que **no borre nada**: repara lo desactualizado y reporta lo huérfano. Una reconciliación que
+    borra por su cuenta es peor que la deriva que arregla.
+
 - **2026-08-04** · **Sprint 6.2 — baja de organización. Tres fallos, los tres encontrados probando, ninguno
   razonando.**
   Se adelantó sobre facturación porque el DPA y el aviso de privacidad publicados el mismo día **prometen**
