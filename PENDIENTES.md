@@ -452,8 +452,30 @@
       inyectadas y las 7 fallaron**. Y un **guard sobre el código fuente** (`form.guard.test.ts`, se autoprueba)
       que falla si una acción nueva vuelve a leer texto sin tope — verificado reintroduciendo la regresión a
       mano: la caza y dice en qué fichero y en qué línea. `medio · M`
-- [ ] **Rate-limit distribuido (Upstash / Vercel KV)** — el `Map` en memoria no protege en serverless
-      multi-instancia; crítico si se extiende a login/reset/checkout. `medio · M`
+- [x] **Rate-limit compartido entre instancias** — ✅ **HECHO (2026-08-04). Sobre Postgres, no sobre Upstash.**
+      Migración **0034** (pendiente de pegar, §1.1-duodecies). El diagnóstico del ticket era exacto: el `Map`
+      vive en la memoria de cada instancia, así que frenaba una ráfaga contra una misma instancia caliente pero
+      no a quien repartía sus intentos, porque Vercel le va dando instancias distintas. Con N instancias el
+      límite real era N veces el configurado y nadie sabía cuánto valía N.
+      **Por qué NO Upstash / Vercel KV:** un contador compartido no necesita un proveedor nuevo. Ya tienes un
+      estado compartido en la UE con su DPA firmado y sus copias de seguridad — esta misma base de datos. Redis
+      sería coste recurrente, **un subprocesador más que declarar** en la lista que Attesta todavía debe
+      publicar (§0.F), y otro sitio donde mirar cuando algo falle. Para tres superficies de baja frecuencia no
+      sale a cuenta. Si algún día hay que limitar login o checkout con miles de peticiones por minuto, se cambia
+      **solo el almacén**: la interfaz ya no dice dónde vive el contador.
+      **Dos capas:** memoria primero, y **solo puede denegar** (rechaza al abusador repetido sin gastar una
+      consulta); la compartida manda cuando la memoria deja pasar, porque es la única que ve las demás
+      instancias.
+      **A la base de datos NO va ninguna IP:** la clave viaja hasheada. Un limitador necesita distinguir
+      emisores, no registrarlos, y una tabla de direcciones IP en la UE es un dato personal más que custodiar
+      sin necesidad.
+      **Verificado donde importa:** ventana fija con `insert … on conflict`, que es **atómico** — 30 conexiones
+      simultáneas contra la misma clave con límite 10 dieron **exactamente 10 permitidas y 20 denegadas**. Eso
+      es justo lo que el limitador en memoria no podía garantizar. Más 8 tests y 5 mutaciones inyectadas (una se
+      escapó al principio porque el test no discriminaba; se rehízo hasta que discriminó).
+      **La telemetría se queda en memoria a propósito:** la llama un `sendBeacon` en cada vista de página, así
+      que una consulta compartida sería una ida y vuelta por navegación para proteger unas métricas internas
+      cuyo peor caso es ensuciar un embudo que solo mira el equipo. `medio · M`
 - [x] **Fail-fast del dominio en build (`NEXT_PUBLIC_APP_URL`)** — ✅ **HECHO (2026-08-04)**.
       🔴 **Requiere una acción tuya antes de que esto llegue a `main` → §1.4.**
       El problema no era que faltara una comprobación: era que había un **default plausible**. Los tres sitios
@@ -648,6 +670,24 @@ order by o.name;
 update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
 -- o 'enterprise'
 ```
+
+### 1.1-duodecies · 🔴 Migración 0034 (rate limit compartido) — PENDIENTE DE PEGAR
+**Qué hace:** una tabla de contadores y una función que los incrementa de forma atómica. Nada más.
+
+**Por qué hace falta.** El freno anti-abuso de la lista de espera y del **formulario de intake** —la única
+pantalla donde alguien puede escribir sin tener cuenta— vivía en la memoria de cada servidor. Vercel arranca
+varios, cada uno con su propia cuenta, así que quien repartía sus intentos multiplicaba el límite sin
+esfuerzo. Ahora el contador es uno solo y compartido.
+
+**Cómo pegarla:** Supabase → SQL Editor → `supabase/migrations/0034_rate_limits.sql` (también al final de
+`supabase/setup.sql`). Validada en un Postgres 16 desechable en **dos pasadas**, y probada con **30
+conexiones simultáneas** contra la misma clave con límite 10: exactamente 10 pasaron.
+
+**No corre prisa y no rompe nada:** mientras no la pegues, se sigue usando el freno en memoria de siempre,
+igual que hasta hoy. Se registra como `migration-pending` en los logs y ya está.
+
+**Nota de privacidad, por si te la preguntan en una due-diligence:** esa tabla **no guarda direcciones IP**.
+Le llega un hash. Un limitador necesita distinguir a quién frena, no saber quién es.
 
 ### 1.4-bis · 🔴 ANTES DE DESPLEGAR: define `NEXT_PUBLIC_APP_URL` en Vercel
 **Qué:** Vercel → tu proyecto → *Settings → Environment Variables* → `NEXT_PUBLIC_APP_URL` =

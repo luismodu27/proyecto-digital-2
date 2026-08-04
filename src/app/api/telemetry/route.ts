@@ -62,6 +62,12 @@ export async function POST(req: Request) {
   // las métricas reales.
   if (!isSupabaseConfigured) return noContent;
 
+  // Aquí se QUEDA el límite en memoria, a diferencia del intake y la lista de
+  // espera (migración 0034). Esta ruta la llama un `sendBeacon` en cada vista de
+  // página, así que añadirle una consulta compartida sería pagar una ida y
+  // vuelta por navegación para proteger... unas métricas internas. Lo peor que
+  // puede hacer quien abuse es ensuciar un embudo que solo mira el equipo, y el
+  // catálogo de eventos ya es cerrado. La barrera local es proporcionada.
   if (!rateLimit(`telemetry:${clientIp(req)}`, RL_LIMIT, RL_WINDOW_MS)) {
     return noContent;
   }

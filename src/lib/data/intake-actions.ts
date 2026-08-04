@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
-import { rateLimit } from "@/lib/security/rate-limit";
+import { checkRateLimit } from "@/lib/security/rate-limit";
 import { trackServer } from "@/lib/telemetry/server";
 import { logDataFallback, logIncident } from "@/lib/observability/log";
 import { checkQuota } from "@/lib/billing/quota";
@@ -248,7 +248,7 @@ export async function submitIntakeForm(
   const name = field(formData, "name", MAX_NAME);
   if (!name) return { ok: false, error: "no-name" };
 
-  if (!rateLimit(`intake:${await clientIp()}`, RL_LIMIT, RL_WINDOW_MS)) {
+  if (!(await checkRateLimit(`intake:${await clientIp()}`, RL_LIMIT, RL_WINDOW_MS))) {
     return { ok: false, error: "rate-limit" };
   }
 

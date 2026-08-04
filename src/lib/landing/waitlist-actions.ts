@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { rateLimit } from "@/lib/security/rate-limit";
+import { checkRateLimit } from "@/lib/security/rate-limit";
 import { trackServer } from "@/lib/telemetry/server";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -93,7 +93,7 @@ export async function submitWaitlist(
   // Throttle por IP: frena ráfagas de alta automatizada sin afectar a una
   // persona real. No filtra datos; solo protege la tabla del spam.
   const ip = await clientIp();
-  if (!rateLimit(`waitlist:${ip}`, RL_LIMIT, RL_WINDOW_MS)) {
+  if (!(await checkRateLimit(`waitlist:${ip}`, RL_LIMIT, RL_WINDOW_MS))) {
     return {
       ok: false,
       error: "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.",
