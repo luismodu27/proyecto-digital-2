@@ -34,6 +34,7 @@ import {
 } from "@/lib/regulatory-watch";
 import type { BiasAudit } from "@/lib/bias-audit";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import { coerceStoredLocale } from "@/lib/i18n/stored-locale";
 import { logDataFallback } from "@/lib/observability/log";
 import type { FunnelRow } from "@/lib/telemetry/events";
 import type { IntakeLink, IntakeSubmission } from "@/lib/intake/types";
@@ -109,6 +110,8 @@ export const getAiSystems = cache(getAiSystemsUncached);
 /** Columnas de `risk_assessments` que consumen el dossier y la exportación. */
 const ASSESSMENT_COLS =
   "id, ai_system_id, level, rationale, evidence_state, attested_by_name, evidence_note, evidence_url, assessed_at";
+/** `locale` la aporta la 0033: se pide aparte para poder reintentar sin ella. */
+const ASSESSMENT_COLS_FULL = `${ASSESSMENT_COLS}, locale`;
 
 type AssessmentRow = {
   id: string;
@@ -120,6 +123,7 @@ type AssessmentRow = {
   evidence_note: string | null;
   evidence_url: string | null;
   assessed_at: string;
+  locale?: string | null;
 };
 
 function mapAssessmentRow(r: AssessmentRow): AssessmentRecord {
@@ -132,6 +136,7 @@ function mapAssessmentRow(r: AssessmentRow): AssessmentRecord {
     evidenceNote: r.evidence_note ?? null,
     evidenceUrl: r.evidence_url ?? null,
     assessedAt: String(r.assessed_at),
+    locale: coerceStoredLocale(r.locale),
   };
 }
 
@@ -141,13 +146,20 @@ export async function getSystemAssessments(
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return [];
-  const { data } = await supabase
-    .from("risk_assessments")
-    .select(ASSESSMENT_COLS)
-    .eq("organization_id", org)
-    .eq("ai_system_id", systemId)
-    .order("assessed_at", { ascending: false });
-  return ((data ?? []) as AssessmentRow[]).map(mapAssessmentRow);
+  const q = (cols: string) =>
+    supabase
+      .from("risk_assessments")
+      .select(cols)
+      .eq("organization_id", org)
+      .eq("ai_system_id", systemId)
+      .order("assessed_at", { ascending: false });
+
+  let res = await q(ASSESSMENT_COLS_FULL);
+  if (res.error) {
+    logDataFallback("getSystemAssessments", res.error, "reintento sin locale (0033)");
+    res = await q(ASSESSMENT_COLS);
+  }
+  return ((res.data ?? []) as unknown as AssessmentRow[]).map(mapAssessmentRow);
 }
 
 export type EditableSystem = {
@@ -293,6 +305,9 @@ export async function getSystemDossier(
       status: g.status as GapItem["status"],
       severity: SEVERITY_ES[g.severity] ?? "media",
       system: code,
+      // Viene del `select("*")` de arriba: sin la 0033 la clave no existe y
+      // `coerceStoredLocale` la resuelve a "no consta".
+      locale: coerceStoredLocale((g as { locale?: unknown }).locale),
     })),
     assessments,
     // Auditoría de sesgo (si la migración 0019 está aplicada; si no, campos ausentes).
@@ -644,16 +659,25 @@ export async function getActionTasks(): Promise<ActionTask[]> {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return [];
-  const [tasksRes, members] = await Promise.all([
+  const TASK_COLS =
+    "id, title, detail, article, priority, status, assignee_id, due_date, ai_system_id, source, source_key, created_at, ai_systems(name)";
+  const tasksQuery = (cols: string) =>
     supabase
       .from("action_tasks")
-      .select(
-        "id, title, detail, article, priority, status, assignee_id, due_date, ai_system_id, source, source_key, created_at, ai_systems(name)",
-      )
+      .select(cols)
       .eq("organization_id", org)
-      .order("created_at", { ascending: true }),
+      .order("created_at", { ascending: true });
+  // `locale` la aporta la 0033; sin ella el SELECT falla entero y el plan se
+  // quedaría vacío, así que se reintenta con las columnas de siempre.
+  const [firstTry, members] = await Promise.all([
+    tasksQuery(`${TASK_COLS}, locale`),
     listOrgMembersRaw(),
   ]);
+  let tasksRes = firstTry;
+  if (tasksRes.error) {
+    logDataFallback("getActionTasks", tasksRes.error, "reintento sin locale (0033)");
+    tasksRes = await tasksQuery(TASK_COLS);
+  }
   const emailById = new Map<string, string>();
   for (const m of members) {
     emailById.set(m.user_id, m.email);
@@ -671,9 +695,10 @@ export async function getActionTasks(): Promise<ActionTask[]> {
     source: "manual" | "recommendation";
     source_key: string | null;
     created_at: string;
+    locale?: string | null;
     ai_systems: { name: string } | { name: string }[] | null;
   };
-  return ((tasksRes.data ?? []) as Row[]).map((r) => {
+  return ((tasksRes.data ?? []) as unknown as Row[]).map((r) => {
     const sys = Array.isArray(r.ai_systems) ? r.ai_systems[0] : r.ai_systems;
     return {
       id: r.id,
@@ -690,6 +715,7 @@ export async function getActionTasks(): Promise<ActionTask[]> {
       source: r.source,
       sourceKey: r.source_key,
       createdAt: String(r.created_at),
+      locale: coerceStoredLocale(r.locale),
     };
   });
 }
@@ -792,7 +818,7 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
     const [assessRes, biasRes] = await Promise.all([
       supabase
         .from("risk_assessments")
-        .select(ASSESSMENT_COLS)
+        .select(ASSESSMENT_COLS_FULL)
         .eq("organization_id", org)
         .in("ai_system_id", dbIds)
         .order("assessed_at", { ascending: false }),
@@ -802,7 +828,20 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
         .eq("organization_id", org)
         .in("id", dbIds),
     ]);
-    for (const r of (assessRes.data ?? []) as AssessmentRow[]) {
+    // Sin la 0033 el SELECT con `locale` falla entero: se repite sin ella para no
+    // dejar la exportación sin historial de evaluaciones por un dato accesorio.
+    let assessRows = assessRes.data;
+    if (assessRes.error) {
+      logDataFallback("exportOrganization", assessRes.error, "reintento sin locale (0033)");
+      const fb = await supabase
+        .from("risk_assessments")
+        .select(ASSESSMENT_COLS)
+        .eq("organization_id", org)
+        .in("ai_system_id", dbIds)
+        .order("assessed_at", { ascending: false });
+      assessRows = fb.data as typeof assessRows;
+    }
+    for (const r of (assessRows ?? []) as unknown as AssessmentRow[]) {
       if (!r.ai_system_id) continue;
       const list = assessmentsBySystem.get(r.ai_system_id) ?? [];
       list.push(mapAssessmentRow(r));
@@ -875,8 +914,17 @@ async function getGapItemsUncached(): Promise<GapItem[]> {
 
   const COLS_BASE =
     "id, requirement, article, status, severity, ai_system_id, ai_systems(code)";
-  // Se pide `prohibited` (migración 0022). Si la columna aún no existe, se
-  // reintenta con las columnas base — degradación segura (todo como no prohibido).
+  /**
+   * Columnas que aporta una migración posterior y que por tanto NO se pueden dar
+   * por hechas: `prohibited` (0022) y `locale` (0033). Se piden todas y, si el
+   * SELECT falla, se va soltando la ÚLTIMA en cada reintento.
+   *
+   * Soltarlas de una en una y por el final —en vez de caer directo a `COLS_BASE`—
+   * importa: las migraciones se aplican en orden, así que quien tenga la 0022 pero
+   * no la 0033 conserva `prohibited`, y no se pierde de vista qué prácticas del
+   * Art. 5 quedan fuera del "% listo" por culpa de un dato de accesibilidad.
+   */
+  const OPTIONAL = ["prohibited", "locale"] as const;
   type RawGap = {
     id: string;
     requirement: string;
@@ -886,29 +934,28 @@ async function getGapItemsUncached(): Promise<GapItem[]> {
     ai_system_id: string;
     ai_systems: { code: string } | { code: string }[] | null;
     prohibited?: boolean;
+    locale?: string | null;
   };
-  const primary = await supabase
-    .from("gap_items")
-    .select(`${COLS_BASE}, prohibited`)
-    .eq("organization_id", org)
-    .order("created_at", { ascending: true });
-  let data = primary.data as RawGap[] | null;
-  if (primary.error) {
-    logDataFallback(
-      "getGapItems",
-      primary.error,
-      "reintento sin la columna prohibited (0022)",
-    );
-    const fb = await supabase
+
+  let data: RawGap[] | null = null;
+  for (let extra = OPTIONAL.length; extra >= 0; extra--) {
+    const cols = [COLS_BASE, ...OPTIONAL.slice(0, extra)].join(", ");
+    const res = await supabase
       .from("gap_items")
-      .select(COLS_BASE)
+      .select(cols)
       .eq("organization_id", org)
       .order("created_at", { ascending: true });
-    if (fb.error || !fb.data) {
-      logDataFallback("getGapItems", fb.error, "también falló el reintento");
-      return [];
+    if (!res.error && res.data) {
+      data = res.data as unknown as RawGap[];
+      break;
     }
-    data = fb.data as RawGap[];
+    logDataFallback(
+      "getGapItems",
+      res.error,
+      extra > 0
+        ? `reintento sin la columna ${OPTIONAL[extra - 1]}`
+        : "también falló el reintento con las columnas base",
+    );
   }
   if (!data) return [];
 
@@ -929,6 +976,7 @@ async function getGapItemsUncached(): Promise<GapItem[]> {
       severity: SEVERITY_ES[row.severity] ?? "media",
       system: sys?.code ?? row.ai_system_id,
       prohibited: row.prohibited === true,
+      locale: coerceStoredLocale(row.locale),
     };
   });
 }

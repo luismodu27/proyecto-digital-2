@@ -812,6 +812,19 @@ export const es = {
   dashboard: {
     skipToContent: "Saltar al contenido",
 
+    // Aviso de contenido guardado en otro idioma (migración 0033). Ver
+    // `src/lib/i18n/stored-locale.ts`: solo aparece cuando el idioma CONSTA y
+    // difiere del de la interfaz. Explica por qué se ve mezclado, en vez de
+    // dejar que parezca un fallo.
+    storedLocale: {
+      es: "español",
+      en: "inglés",
+      noticeOne:
+        "Parte de este contenido se guardó en {lang} y se muestra tal cual: es el texto que quedó registrado en su día y traducirlo ahora cambiaría la evidencia.",
+      noticeMany:
+        "Parte de este contenido se guardó en otros idiomas ({langs}) y se muestra tal cual: es el texto que quedó registrado en su día y traducirlo ahora cambiaría la evidencia.",
+    },
+
     nav: {
       overview: "Resumen",
       inventory: "Inventario",

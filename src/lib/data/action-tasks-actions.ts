@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { logDataFallback } from "@/lib/observability/log";
 import { getActiveOrg } from "./context";
 
 const PLAN = "/dashboard/plan";
@@ -52,7 +54,7 @@ export async function createActionTask(formData: FormData) {
       ? "recommendation"
       : "manual";
 
-  const { error } = await supabase.from("action_tasks").insert({
+  const row = {
     organization_id: org,
     title,
     detail: String(formData.get("detail") ?? "").trim() || null,
@@ -64,7 +66,20 @@ export async function createActionTask(formData: FormData) {
     source,
     source_key: String(formData.get("sourceKey") ?? "").trim() || null,
     created_by: user.id,
-  });
+    // Solo cuando el texto lo generó Attesta (migración 0033). En una tarea
+    // manual el idioma lo elige quien teclea, y no se adivina: `null`.
+    locale: source === "recommendation" ? await resolveLocale() : null,
+  };
+
+  let { error } = await supabase.from("action_tasks").insert(row);
+  if (error) {
+    // Degradación: sin la 0033, la columna no existe. Perder la tarea por un
+    // dato accesorio sería desproporcionado.
+    logDataFallback("createActionTask", error, "reintento sin locale (0033)");
+    const legacy: Record<string, unknown> = { ...row };
+    delete legacy.locale;
+    ({ error } = await supabase.from("action_tasks").insert(legacy));
+  }
 
   if (error) redirect(`${PLAN}?toast=task-error`);
   revalidate();

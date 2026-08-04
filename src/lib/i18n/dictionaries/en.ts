@@ -803,6 +803,19 @@ export const en: Dictionary = {
   dashboard: {
     skipToContent: "Skip to content",
 
+    // Notice for content stored in another language (migration 0033). See
+    // `src/lib/i18n/stored-locale.ts`: it only shows when the language IS known
+    // and differs from the interface. It explains the mix instead of letting it
+    // look like a bug.
+    storedLocale: {
+      es: "Spanish",
+      en: "English",
+      noticeOne:
+        "Some of this content was recorded in {lang} and is shown as it was written: translating it now would change the evidence on file.",
+      noticeMany:
+        "Some of this content was recorded in other languages ({langs}) and is shown as it was written: translating it now would change the evidence on file.",
+    },
+
     nav: {
       overview: "Overview",
       inventory: "Inventory",

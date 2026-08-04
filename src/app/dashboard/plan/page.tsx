@@ -27,6 +27,8 @@ import { buildActionPlan, type Priority } from "@/lib/recommendations";
 import { isTaskOverdue } from "@/lib/task-reminders";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import { langAttr } from "@/lib/i18n/stored-locale";
+import { ForeignContentNote } from "@/components/dashboard/ForeignContentNote";
 
 export const dynamic = "force-dynamic";
 
@@ -158,6 +160,8 @@ export default async function PlanPage() {
         </div>
       </div>
 
+      <ForeignContentNote items={tasks} locale={locale} t={dd.storedLocale} className="mt-6" />
+
       {/* Alta manual de tarea */}
       <details className="mt-6 rounded-2xl border border-line bg-paper-raised">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-3 [&::-webkit-details-marker]:hidden">
@@ -284,7 +288,10 @@ export default async function PlanPage() {
                     {taskStatusLabel(t.status, locale)}
                   </Pill>
                   {t.article && (
-                    <span className="rounded-md border border-line bg-paper px-2 py-0.5 font-mono text-[11px] text-seal">
+                    <span
+                      lang={langAttr(t.locale, locale)}
+                      className="rounded-md border border-line bg-paper px-2 py-0.5 font-mono text-[11px] text-seal"
+                    >
                       {t.article}
                     </span>
                   )}
@@ -297,12 +304,15 @@ export default async function PlanPage() {
                 </div>
 
                 <p
+                  lang={langAttr(t.locale, locale)}
                   className={`mt-2 font-medium text-ink ${t.status === "done" ? "line-through" : ""}`}
                 >
                   {t.title}
                 </p>
                 {t.detail && (
-                  <p className="mt-0.5 text-sm text-ink-soft">{t.detail}</p>
+                  <p lang={langAttr(t.locale, locale)} className="mt-0.5 text-sm text-ink-soft">
+                    {t.detail}
+                  </p>
                 )}
 
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line pt-3">

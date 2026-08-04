@@ -6,7 +6,7 @@
 > - **[CLAUDE.md](./CLAUDE.md)** — mapa técnico del código.
 > - **[docs/supabase.md](./docs/supabase.md)** — backend/migraciones.
 >
-> Última actualización: **2026-07-30**.
+> Última actualización: **2026-08-04**.
 
 ---
 
@@ -390,13 +390,25 @@
       proveedor del SISTEMA que integra el modelo**, no el deployer — así que se bifurca según si el cliente
       integra el modelo él mismo o usa un producto de terceros.
 
-### 0.E · SPRINT 5 — deuda técnica y robustez restante ⬅️ SIGUIENTE
-- [ ] **Guardar el idioma de lo que se escribe (`locale` en `gap_items` / autoevaluaciones)** — descubierto al
-      cerrar el ticket del `lang` en el Sprint 4. Una brecha creada aplicando el pack ES se sigue viendo en
-      español cuando el usuario cambia a inglés, y al revés: el texto está congelado en la BD y **nadie sabe en
-      qué idioma está**. Sin ese dato no se puede ni traducir ni etiquetar con `lang` (etiquetar a ciegas
-      empeora el lector de pantalla). Migración de una columna + escribirla en `applyPolicyPack` y al guardar
-      la clasificación. `medio · S`
+### 0.E · SPRINT 5 — deuda técnica y robustez restante ⬅️ EN CURSO
+- [x] **Guardar el idioma de lo que se escribe (`locale`)** — ✅ **HECHO (2026-08-04)**. Migración **0033**
+      (pendiente de pegar, §1.1-undecies) sobre `gap_items`, `risk_assessments` **y `action_tasks`: el mismo
+      defecto estaba en las tareas nacidas de una recomendación**, y dejarlo fuera habría obligado a una
+      segunda migración. Se escribe en `applyPolicyPack`, `saveRiskAssessment` y `createActionTask` — los tres
+      únicos momentos en que el idioma se sabe con certeza; después, la fila ya no lo dice.
+      **La decisión que sostiene todo lo demás: `null` significa «no consta» y NO se rellena hacia atrás.**
+      El default es español, pero rellenar a ciegas marcaría como españolas las filas de una organización que
+      trabajase en inglés, y un `lang` equivocado es **peor que ninguno** (el lector de pantalla cambia de voz
+      y pronuncia con la fonética que no es). Por eso `coerceStoredLocale` NO reutiliza `coerceLocale`: aquel
+      cae al default porque hay que renderizar algo; aquí caer al default sería inventarse un dato. Hay un test
+      que fija esa diferencia y una mutación que lo comprueba.
+      Lo guardado **no se traduce al vuelo** —sería reescribir evidencia—: se muestra literal, se etiqueta con
+      `lang` solo cuando el idioma consta Y difiere (WCAG 3.1.2), y un aviso por pantalla explica la mezcla para
+      que no parezca un fallo. 10 tests nuevos, 5 mutaciones inyectadas y las 5 fallaron.
+      Verificado en el HTML **renderizado** (no en el payload RSC, que contiene el diccionario y da falsos
+      positivos): interfaz EN + contenido ES → 10 nodos `lang="es"` y el aviso; interfaz ES → solo el `<html
+      lang="es">` del layout y ningún aviso. `verify:backend` pasa a 28/28 y se adapta solo a si la 0033 está
+      aplicada o no.
 - [ ] **Aislar la landing del `headers()` del root layout** — leer headers saca a TODA la app del render
       estático/CDN, empezando por la página de mayor coste de conversión (route-group propio o locale por ruta).
       `alto · L`
@@ -541,6 +553,24 @@ order by o.name;
 update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
 -- o 'enterprise'
 ```
+
+### 1.1-undecies · 🔴 Migración 0033 (idioma del contenido guardado) — PENDIENTE DE PEGAR
+**Qué hace:** añade una columna `locale` a `gap_items`, `risk_assessments` y `action_tasks`. Nada más:
+tres `alter table … add column if not exists` y sus comentarios. Es **aditiva y re-ejecutable**.
+
+**Por qué hace falta.** El texto regulatorio que Attesta escribe en la base de datos —los controles de un
+policy pack, la motivación de una evaluación, las tareas nacidas de una recomendación— se queda congelado
+en el idioma en que se creó. Al cambiar la interfaz a inglés, ese texto seguía en español **y nadie sabía
+en qué idioma estaba**, así que no se podía ni traducir después ni avisar al lector de pantalla.
+
+**Cómo pegarla:** Supabase → SQL Editor → pegar `supabase/migrations/0033_content_locale.sql` (también está
+al final de `supabase/setup.sql`). Validada en un Postgres 16 desechable en **dos pasadas** (correcta y
+re-ejecutable) y comprobado que el CHECK acepta `null` y `es`/`en` y rechaza `fr` y `es-ES`.
+
+**No corre prisa:** mientras no la pegues, la app funciona exactamente igual. Verificado por API contra el
+Supabase real (`npm run verify:backend`, 28/28): la lectura con la columna falla, el reintento sin ella
+funciona, y el idioma simplemente queda como «no consta». Al pegarla, vuelve a ejecutar `verify:backend`
+—el script se adapta solo— y pasará a comprobar el CHECK de verdad.
 
 ### 1.1-decies · Migración 0029 (topes a medida para Enterprise) — ✅ APLICADA (verificada 2026-07-30)
 **Verificada por API:** `organizations?select=plan,max_systems,max_seats` → **200**, mientras una columna

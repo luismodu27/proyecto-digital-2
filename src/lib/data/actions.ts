@@ -137,18 +137,29 @@ export async function applyPolicyPack(formData: FormData) {
       // Práctica prohibida del Art. 5 (fuera del "% listo"). La columna la aporta
       // la migración 0022; si no está aplicada, el insert de abajo reintenta sin ella.
       prohibited: c.prohibited ?? false,
+      // Idioma en el que se copia el texto del pack (migración 0033). Aquí SÍ se
+      // sabe con certeza —lo acabamos de elegir tres líneas más arriba— y es el
+      // único momento en el que se sabe: después, la fila ya no lo dice.
+      locale,
       created_by: user?.id,
     }));
 
   if (rows.length > 0) {
     const { error } = await supabase.from("gap_items").insert(rows);
     if (error) {
-      logDataFallback("applyPolicyPack", error, "reintento sin prohibited (0022)");
-      // Degradación: si la columna `prohibited` aún no existe (migración 0022 sin
-      // aplicar), se reinserta sin ella (todos los controles como brecha ordinaria).
+      logDataFallback(
+        "applyPolicyPack",
+        error,
+        "reintento sin las columnas opcionales (prohibited 0022 / locale 0033)",
+      );
+      // Degradación: si falta alguna columna opcional (0022 o 0033 sin aplicar),
+      // se reinserta sin ellas. Se sueltan las DOS a la vez a propósito: el error
+      // de PostgREST no dice cuál falta, y encadenar reintentos por columna
+      // multiplicaría los inserts para ahorrar un dato accesorio.
       const legacy = rows.map((r) => {
         const rest: Record<string, unknown> = { ...r };
         delete rest.prohibited;
+        delete rest.locale;
         return rest;
       });
       const retry = await supabase.from("gap_items").insert(legacy);
@@ -534,24 +545,44 @@ export async function saveRiskAssessment(
   // "Con evidencia" solo si se aportó una nota o un enlace de soporte.
   const evidenceState = note || url ? "evidenced" : "declared";
 
-  const { data, error } = await supabase
+  const row = {
+    organization_id: org,
+    ai_system_id: aiSystemId,
+    answers,
+    level: result.level,
+    rationale: result.rationale,
+    citations: result.citations,
+    obligations: result.obligations,
+    assessed_by: user?.id,
+    attested_by_name: evidence?.attestedByName?.trim() || null,
+    evidence_note: note,
+    evidence_url: url,
+    evidence_state: evidenceState,
+    // Idioma del texto regulatorio que se congela en esta fila —motivación, citas
+    // y obligaciones— (migración 0033). El clasificador ya se ejecutó en el idioma
+    // de la interfaz; este es el momento en que se sabe cuál era.
+    locale: await resolveLocale(),
+  };
+
+  let { data, error } = await supabase
     .from("risk_assessments")
-    .insert({
-      organization_id: org,
-      ai_system_id: aiSystemId,
-      answers,
-      level: result.level,
-      rationale: result.rationale,
-      citations: result.citations,
-      obligations: result.obligations,
-      assessed_by: user?.id,
-      attested_by_name: evidence?.attestedByName?.trim() || null,
-      evidence_note: note,
-      evidence_url: url,
-      evidence_state: evidenceState,
-    })
+    .insert(row)
     .select("id")
     .single();
+
+  // Degradación: sin la 0033 aplicada, la columna no existe. Se reintenta sin
+  // ella —el idioma es un dato accesorio y perder la evaluación entera por él
+  // sería desproporcionado— y la fila queda como "no consta".
+  if (error) {
+    logDataFallback("saveRiskAssessment", error, "reintento sin locale (0033)");
+    const legacy: Record<string, unknown> = { ...row };
+    delete legacy.locale;
+    ({ data, error } = await supabase
+      .from("risk_assessments")
+      .insert(legacy)
+      .select("id")
+      .single());
+  }
 
   if (error || !data) return { ok: false as const, error: error?.message };
 

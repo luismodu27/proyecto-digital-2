@@ -127,6 +127,39 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **Sprint 5 · el idioma de lo que se guarda: `null` no es «español», es «no consta».**
+  El texto regulatorio que Attesta escribe en la BD (controles de un pack, motivación de una evaluación,
+  tareas nacidas de una recomendación) se congela en el idioma en que se creó. Al cambiar la interfaz, salía
+  mezclado — y **nadie sabía en qué idioma estaba cada fila**, así que no se podía ni traducir después ni
+  etiquetar para el lector de pantalla. Migración **0033**: una columna `locale`, nullable, en `gap_items`,
+  `risk_assessments` y `action_tasks`.
+  - **La decisión que sostiene el resto: no rellenar hacia atrás.** Tentador: el default es español, así que
+    marcar todo lo viejo como `es` "arregla" el histórico de un `update`. Es exactamente el error: una org que
+    trabajase en inglés acabaría con filas inglesas marcadas como españolas, y **un `lang` equivocado es peor
+    que ninguno** — el lector de pantalla cambia de voz y pronuncia con la fonética que no es, mientras que sin
+    atributo hereda el de la página, que es el comportamiento de hoy. `null` = no consta, y no se etiqueta.
+  - **Corolario en código:** `coerceStoredLocale` **no** reutiliza `coerceLocale`. Parecen la misma función y
+    resuelven problemas opuestos: uno decide en qué idioma RENDERIZAR (caer al default es obligatorio, hay que
+    pintar algo), el otro describe un HECHO DEL PASADO (caer al default es inventarse un dato). Hay un test que
+    fija la diferencia poniendo las dos llamadas una al lado de la otra, para que quien "simplifique" el
+    duplicado vea por qué no lo es.
+  - **Y no se traduce al vuelo**, aunque ahora se sabría hacer: sería reescribir evidencia. Lo guardado es lo
+    que la organización declaró ese día y el expediente tiene que poder enseñarse tal cual. Se muestra literal,
+    se etiqueta con `lang` solo cuando el idioma consta **y** difiere (WCAG 3.1.2) y un aviso por pantalla
+    explica la mezcla — sin él, un usuario asume que la app está rota.
+  - **Alcance ampliado sobre el ticket, a propósito:** el ticket decía `gap_items` + autoevaluaciones, pero
+    `action_tasks` copia título y artículo igual que las brechas copian los del pack. Mismo defecto, misma
+    columna; dejarlo fuera solo habría comprado una segunda migración.
+  - **Método:** 0033 validada en el Postgres desechable en dos pasadas (correcta + re-ejecutable) y comprobado
+    que el CHECK acepta `null`/`es`/`en` y rechaza `fr` y **`es-ES`** (el error tentador: parece válido y no lo
+    es). 10 tests nuevos con **5 mutaciones inyectadas, las 5 fallaron**. `verify:backend` sube a 28/28 y ahora
+    **se adapta solo** a si la 0033 está aplicada: mientras esté pendiente comprueba que la degradación es el
+    camino activo y que la app no se rompe; al aplicarse, pasa a comprobar el CHECK.
+  - **Trampa de medición, otra vez:** buscar el texto del aviso en la respuesta da falso positivo, porque el
+    payload RSC lleva el diccionario serializado. Hay que anclarse en algo que solo exista si el nodo se pintó
+    (el `className` del aviso, el atributo `lang=` en los nodos). Con eso: interfaz EN + contenido ES → 10 nodos
+    `lang="es"` + aviso; interfaz ES → solo el `<html lang="es">` del layout y ningún aviso.
+
 - **2026-08-03** · **SPRINT 4 CERRADO (10/10).** Filtro de inventario, cajón móvil, registro de incidentes,
   registro de proveedores, streaming con Suspense, i18n de muros, viewport/manifest, packs de California,
   sección de «cómo verificamos» y consolidación del onboarding.

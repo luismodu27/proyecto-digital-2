@@ -1,5 +1,6 @@
 /**
- * Verificación del BACKEND REAL por API: incidentes (0030/0031) y proveedores (0032).
+ * Verificación del BACKEND REAL por API: incidentes (0030/0031), proveedores (0032)
+ * y el idioma del contenido persistido (0033).
  *
  *   npm run verify:backend
  *
@@ -349,6 +350,84 @@ check(
   Array.isArray(evAfter.json) && evAfter.json.length === 0,
   JSON.stringify(evAfter.json)?.slice(0, 160),
 );
+
+// ---------------------------------------------------------------------------
+// 0033 · idioma del contenido persistido
+//
+// Este bloque se ADAPTA a si la migración está aplicada o no, a propósito. El
+// contrato de la fachada es que la app funcione igual con la 0033 pendiente
+// (`logDataFallback` + reintento sin la columna), así que ambos estados son
+// resultados válidos y los dos hay que poder comprobarlos: antes de que el
+// fundador pegue el SQL, y después.
+// ---------------------------------------------------------------------------
+const probe = await api("/rest/v1/gap_items?select=id,locale&limit=1", { token: tokenA });
+const has0033 = probe.status === 200;
+
+if (!has0033) {
+  check(
+    "0033 pendiente: la columna locale aún no existe (degradación activa)",
+    probe.status >= 400,
+    `${probe.status} ${probe.text.slice(0, 120)}`,
+  );
+  // Y lo que de verdad importa mientras esté pendiente: que la lectura SIN la
+  // columna —el reintento que hace `getGapItems`— siga funcionando.
+  const base = await api("/rest/v1/gap_items?select=id,requirement&limit=1", { token: tokenA });
+  check("...y la lectura sin ella sigue funcionando (la app no se rompe)", base.status === 200, String(base.status));
+} else {
+  const sysA = await api("/rest/v1/ai_systems", {
+    token: tokenA,
+    method: "POST",
+    prefer: "return=representation",
+    body: { organization_id: idA, name: `locale-${stamp}` },
+  });
+  const sysId = sysA.json?.[0]?.id;
+  check("A da de alta un sistema para probar el idioma", sysA.status === 201 && Boolean(sysId), sysA.text.slice(0, 160));
+
+  const gapEn = await api("/rest/v1/gap_items", {
+    token: tokenA,
+    method: "POST",
+    prefer: "return=representation",
+    body: {
+      organization_id: idA,
+      ai_system_id: sysId,
+      requirement: "Human oversight",
+      article: "Art. 14",
+      locale: "en",
+    },
+  });
+  const gapId = gapEn.json?.[0]?.id;
+  check("guarda una brecha declarando su idioma (en)", gapEn.status === 201 && gapEn.json?.[0]?.locale === "en", gapEn.text.slice(0, 160));
+
+  // El CHECK del catálogo: ni un idioma fuera de LOCALES ni una etiqueta BCP-47
+  // con región, que es el error tentador ("es-ES" parece válido y no lo es).
+  for (const bad of ["fr", "es-ES"]) {
+    const r = await api("/rest/v1/gap_items", {
+      token: tokenA,
+      method: "POST",
+      body: { organization_id: idA, ai_system_id: sysId, requirement: "x", locale: bad },
+    });
+    check(`rechaza un idioma fuera del catálogo ('${bad}')`, r.status >= 400, String(r.status));
+  }
+
+  // `null` es un valor legítimo: significa "no consta", que es lo que tienen
+  // todas las filas anteriores a la 0033. Si el CHECK lo rechazara, la migración
+  // habría roto el histórico.
+  const gapNull = await api("/rest/v1/gap_items", {
+    token: tokenA,
+    method: "POST",
+    body: { organization_id: idA, ai_system_id: sysId, requirement: "sin idioma" },
+  });
+  check("acepta una brecha sin idioma (null = no consta)", gapNull.status === 201, String(gapNull.status));
+
+  const gapB = await api(`/rest/v1/gap_items?select=id,locale&id=eq.${gapId}`, { token: tokenB });
+  check(
+    "B no ve la brecha de A ni con la columna nueva (RLS)",
+    Array.isArray(gapB.json) && gapB.json.length === 0,
+    JSON.stringify(gapB.json)?.slice(0, 160),
+  );
+
+  await api(`/rest/v1/ai_systems?id=eq.${sysId}`, { token: tokenA, method: "DELETE" });
+}
 
 console.log(`\n${pass} correctas · ${fail} fallos`);
 process.exit(fail === 0 ? 0 : 1);

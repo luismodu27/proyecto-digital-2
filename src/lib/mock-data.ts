@@ -4,6 +4,7 @@
  */
 import type { BiasAudit } from "./bias-audit";
 import type { Locale } from "./i18n/config";
+import type { StoredLocale } from "./i18n/stored-locale";
 import type { Incident } from "./incidents/incidents";
 import type { Supplier, SupplierEvidence } from "./suppliers/types";
 
@@ -274,6 +275,12 @@ export type GapItem = {
    * y se renderiza como Inaceptable / revisión jurídica (ver `PolicyControl`).
    */
   prohibited?: boolean;
+  /**
+   * Idioma en el que se escribió `requirement`/`article` (migración 0033).
+   * `null`/ausente = no consta, y entonces NO se etiqueta: ver
+   * `src/lib/i18n/stored-locale.ts`. No describe `remediationNote`.
+   */
+  locale?: StoredLocale;
 };
 
 /** Una evaluación de riesgo guardada (para el historial de un sistema). */
@@ -286,6 +293,8 @@ export type AssessmentRecord = {
   evidenceNote?: string | null;
   evidenceUrl?: string | null;
   assessedAt: string; // ISO
+  /** Idioma de `rationale` (migración 0033). Ausente = no consta. */
+  locale?: StoredLocale;
 };
 
 /** Todo lo necesario para generar el dossier de gobernanza de un sistema. */
@@ -1350,6 +1359,11 @@ export type ActionTask = {
   source: "manual" | "recommendation";
   sourceKey: string | null;
   createdAt: string; // ISO
+  /**
+   * Idioma del texto cuando lo generó Attesta (`source: "recommendation"`).
+   * En las tareas manuales es `null` a propósito: las escribe el usuario.
+   */
+  locale?: StoredLocale;
 };
 
 /** Tareas de ejemplo (modo demo) para enseñar el plan editable. */

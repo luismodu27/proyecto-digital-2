@@ -7,6 +7,8 @@ import { getAiSystems, getGapItems, isSupabaseConfigured } from "@/lib/data";
 import { severityLabel } from "@/lib/mock-data";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import { langAttr } from "@/lib/i18n/stored-locale";
+import { ForeignContentNote } from "@/components/dashboard/ForeignContentNote";
 
 const severityMeta = {
   alta: "text-[var(--tone-danger-fg)]",
@@ -52,8 +54,18 @@ export default async function GapPage() {
         }
       />
 
+      <ForeignContentNote
+        items={gapItems}
+        locale={locale}
+        t={getDictionary(locale).dashboard.storedLocale}
+        className="mb-4"
+      />
+
       <div className="space-y-3">
         {gapItems.map((g) => {
+          // Idioma real del texto guardado: solo se etiqueta cuando consta y
+          // difiere del de la interfaz (ver `stored-locale.ts`).
+          const lang = langAttr(g.locale, locale);
           // Práctica prohibida (Art. 5): no es una brecha a cerrar. Se renderiza
           // como Inaceptable / revisión jurídica, sin control de estado (no se
           // "prepara"), y con la nota de por qué no cuenta en el "% listo".
@@ -65,12 +77,12 @@ export default async function GapPage() {
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs text-muted">{g.article}</span>
+                    <span lang={lang} className="font-mono text-xs text-muted">{g.article}</span>
                     <span className="inline-flex items-center rounded-full border border-[var(--tone-danger-bd)] px-2 py-0.5 text-xs font-semibold uppercase text-[var(--tone-danger-fg)]">
                       {t.prohibited.badge} · {t.prohibited.level}
                     </span>
                   </div>
-                  <p className="mt-1 font-medium text-ink">{g.requirement}</p>
+                  <p lang={lang} className="mt-1 font-medium text-ink">{g.requirement}</p>
                   <p className="text-xs text-muted">
                     {t.affectedSystemPrefix}{nameById.get(g.system) ?? g.system}
                   </p>
@@ -95,12 +107,12 @@ export default async function GapPage() {
             >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-xs text-muted">{g.article}</span>
+                  <span lang={lang} className="font-mono text-xs text-muted">{g.article}</span>
                   <span className={`text-xs font-medium uppercase ${severityMeta[g.severity]}`}>
                     {t.severityPrefix}{severityLabel(g.severity, locale)}
                   </span>
                 </div>
-                <p className="mt-1 font-medium text-ink">{g.requirement}</p>
+                <p lang={lang} className="mt-1 font-medium text-ink">{g.requirement}</p>
                 <p className="text-xs text-muted">
                   {t.affectedSystemPrefix}{nameById.get(g.system) ?? g.system}
                 </p>

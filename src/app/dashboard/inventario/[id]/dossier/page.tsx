@@ -10,6 +10,7 @@ import { getActiveOrg } from "@/lib/data/context";
 import { orgHasTier } from "@/lib/billing/plan";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import { langAttr } from "@/lib/i18n/stored-locale";
 import type { Locale } from "@/lib/i18n/config";
 import {
   OBLIGATIONS_BY_LEVEL,
@@ -396,7 +397,10 @@ export default async function DossierPage({
                 {evidenceLabel(evidenceState, locale)}
               </span>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+            <p
+              lang={latest ? langAttr(latest.locale, locale) : undefined}
+              className="mt-3 text-sm leading-relaxed text-ink-soft"
+            >
               {rationale}
             </p>
             {latest ? (
@@ -507,10 +511,15 @@ export default async function DossierPage({
                         key={g.id}
                         className="break-inside-avoid border-b border-line align-top"
                       >
-                        <td className="py-3 pr-3 font-mono text-xs text-seal">
+                        <td
+                          lang={langAttr(g.locale, locale)}
+                          className="py-3 pr-3 font-mono text-xs text-seal"
+                        >
                           {g.article || "—"}
                         </td>
-                        <td className="py-3 pr-3">{g.requirement}</td>
+                        <td lang={langAttr(g.locale, locale)} className="py-3 pr-3">
+                          {g.requirement}
+                        </td>
                         <td
                           className="py-3 pr-3"
                           style={{ color: SEVERITY_COLOR.alta }}
@@ -531,10 +540,15 @@ export default async function DossierPage({
                       key={g.id}
                       className="break-inside-avoid border-b border-line align-top"
                     >
-                      <td className="py-3 pr-3 font-mono text-xs text-seal">
+                      <td
+                        lang={langAttr(g.locale, locale)}
+                        className="py-3 pr-3 font-mono text-xs text-seal"
+                      >
                         {g.article || "—"}
                       </td>
-                      <td className="py-3 pr-3">{g.requirement}</td>
+                      <td lang={langAttr(g.locale, locale)} className="py-3 pr-3">
+                        {g.requirement}
+                      </td>
                       <td className="py-3 pr-3 capitalize">
                         <span style={{ color: SEVERITY_COLOR[g.severity] }}>
                           {severityLabel(g.severity, locale)}
@@ -625,7 +639,9 @@ export default async function DossierPage({
                       </span>
                     )}
                   </div>
-                  <p className="mt-1.5 text-ink-soft">{a.rationale}</p>
+                  <p lang={langAttr(a.locale, locale)} className="mt-1.5 text-ink-soft">
+                    {a.rationale}
+                  </p>
                   <p className="mt-1 text-xs text-muted">
                     {formatDateTime(a.assessedAt, locale)}
                     {a.attestedByName

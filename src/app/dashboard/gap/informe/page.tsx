@@ -6,6 +6,8 @@ import { LEGAL_PDF_BY_LOCALE, ScopeNote } from "@/components/ui/LegalNote";
 import { severityLabel, type GapItem } from "@/lib/mock-data";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import { langAttr } from "@/lib/i18n/stored-locale";
+import { ForeignContentNote } from "@/components/dashboard/ForeignContentNote";
 
 export const dynamic = "force-dynamic";
 
@@ -202,6 +204,15 @@ export default async function InformeGapPage() {
         {/* Alcance y método */}
         <ScopeNote fecha={fecha} locale={locale} className="mt-5" />
 
+        {/* El informe es evidencia: el texto sale como se registró, y aquí se
+            dice por qué, para que un lector externo no lo lea como un descuido. */}
+        <ForeignContentNote
+          items={gapItems}
+          locale={locale}
+          t={getDictionary(locale).dashboard.storedLocale}
+          className="mt-3"
+        />
+
         {/* KPIs */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {kpis.map((c) => (
@@ -276,10 +287,15 @@ export default async function InformeGapPage() {
                         key={g.id}
                         className="break-inside-avoid border-b border-line align-top"
                       >
-                        <td className="py-3 pr-3 font-mono text-xs text-seal">
+                        <td
+                          lang={langAttr(g.locale, locale)}
+                          className="py-3 pr-3 font-mono text-xs text-seal"
+                        >
                           {g.article}
                         </td>
-                        <td className="py-3 pr-3">{g.requirement}</td>
+                        <td lang={langAttr(g.locale, locale)} className="py-3 pr-3">
+                          {g.requirement}
+                        </td>
                         <td className="py-3 pr-3">
                           <Chip tone={SEVERITY_TONE[g.severity]}>
                             <span className="capitalize">

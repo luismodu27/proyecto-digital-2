@@ -14,6 +14,7 @@ import { orgHasTier } from "@/lib/billing/plan";
 import { Paywall } from "@/components/dashboard/Paywall";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import { langAttr } from "@/lib/i18n/stored-locale";
 import {
   riskLabel,
   severityLabel,
@@ -345,7 +346,7 @@ export default async function InformeEjecutivoPage() {
                   key={g.id}
                   className="flex items-baseline justify-between gap-3 border-b border-line pb-2 text-sm"
                 >
-                  <span>
+                  <span lang={langAttr(g.locale, locale)}>
                     <span className="font-mono text-xs text-seal">{g.article}</span>{" "}
                     {g.requirement}
                     <span className="ml-1 text-xs text-muted">
