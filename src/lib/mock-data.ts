@@ -7,6 +7,7 @@ import type { Locale } from "./i18n/config";
 import type { StoredLocale } from "./i18n/stored-locale";
 import type { Incident } from "./incidents/incidents";
 import type { Supplier, SupplierEvidence } from "./suppliers/types";
+import type { IntakeSubmission } from "./intake/types";
 
 export type RiskLevel = "unacceptable" | "high" | "limited" | "minimal";
 
@@ -693,6 +694,16 @@ export type ExportBundle = {
   members: OrgMember[];
   regulatoryAcks: Record<string, RegAck>;
   auditLog: AuditEntry[];
+  suppliers: Supplier[];
+  incidents: Incident[];
+  intakeSubmissions: IntakeSubmission[];
+  /**
+   * Aviso de truncamiento. El registro de auditoría se pide con un tope, y una
+   * exportación de portabilidad que se corta **sin decirlo** es peor que una que
+   * falla: quien la recibe cree tenerlo todo. Si se alcanzó el tope, aquí queda
+   * dicho, con el número de filas y a quién escribir para pedir el resto.
+   */
+  truncated: { auditLog: number } | null;
 };
 
 /** Registro de actividad de ejemplo (modo demo). */

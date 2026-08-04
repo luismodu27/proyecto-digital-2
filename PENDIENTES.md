@@ -565,9 +565,38 @@
 - [ ] **Ciclo de vida de facturación** (no solo el checkout) — pago fallido, reintentos, degradación de plan,
       cancelación, **idempotencia del webhook** y reconciliación Stripe↔DB. Es donde se pierde MRR en silencio.
       `alto · M`
-- [ ] **Borrado / exportación de datos por tenant (GDPR + offboarding)** — no hay derecho de supresión ni
-      portabilidad ni borrado de una org al darse de baja. Obligación legal directa **y** requisito que nuestros
-      propios packs exigen a los clientes. `alto · M`
+- [x] ✅ **Borrado / exportación de datos por tenant** (2026-08-04) — migración **0035** + zona de baja en
+      `/dashboard/organizaciones` + cron diario `/api/org-purge`. Se adelantó sobre facturación porque el DPA y el
+      aviso de privacidad que se publicaron esta misma sesión **prometen** supresión y portabilidad: una promesa
+      legal sin producto detrás no puede quedarse abierta.
+      **El fallo que se encontró comprobándolo, no razonándolo:** la hipótesis era que el trigger de inmutabilidad
+      impediría borrar una organización. Era falsa, y la realidad era peor — `audit_log` **no tiene clave ajena** a
+      `organizations`, así que el borrado funcionaba y dejaba las filas de auditoría **huérfanas**, con sus
+      `old_data`/`new_data`. La supresión parecía completa y no lo era.
+      **Diseño:** solicitud → **7 días de gracia** → purga por cron. No es borrado inmediato porque una sola sesión
+      de propietario comprometida no puede destruir el expediente entero sin vuelta atrás, y porque 7 días dejan
+      margen de sobra dentro de los 30 que promete el DPA. `purge_organization` está **revocada para
+      `authenticated`**: si el propietario pudiera purgar en el acto, la gracia sería decorativa.
+      **Segundo hallazgo, del mismo tipo:** el orden de borrado correcto es el contrario del intuitivo. Borrar la
+      auditoría y luego la organización la deja **repoblada**, porque la cascada dispara los `write_audit`. La
+      primera prueba informó de 2 filas borradas y la organización volvió a tener 2. Ahora: organización primero,
+      auditoría después.
+      **Tercer hallazgo, de permisos:** `revoke ... from public` **no basta en Supabase**. Además del EXECUTE de
+      PUBLIC, Supabase tiene `alter default privileges ... grant all on routines to anon, authenticated`, así que
+      cada función nueva nace con un grant **directo** a esos roles que sobrevive al revoke. Comprobado en el
+      Postgres desechable: `has_function_privilege('authenticated', ...)` seguía dando `t`. Corregido nombrándolos.
+      *(0028 está bien: `product_funnel` **necesita** `authenticated` porque un admin de plataforma es un usuario
+      autenticado, y el guard va dentro.)*
+      **Exportación:** ya existía, pero incompleta. Le faltaban **proveedores, incidentes y fichas de intake**, y el
+      registro de auditoría se cortaba en 500 filas **en silencio**. Ahora van los tres módulos y, si se alcanza el
+      tope, el propio paquete lo dice (`truncated`). Verificado sobre el JSON servido.
+      **Pendiente del fundador** (§1.5): aplicar la 0035. `alto · M`
+- [ ] **`supabase/setup.sql` no es re-ejecutable** — muere en `create type risk_level` sobre una BD que ya lo
+      tenga, y no ejecuta nada de lo que sigue. Contradice el flujo documentado ("el fundador re-pega el
+      fichero"). No son solo los tipos: también hay `create table` y `create policy` sin guardas. Arreglarlo es
+      envolver los `create type` en un bloque que capture `duplicate_object`, poner `if not exists` en las tablas
+      de 0001 y `drop policy if exists` delante de cada policy. Se intentó en la sesión del Sprint 6 y se revirtió
+      al ver que un arreglo parcial no entrega la propiedad. `medio · S-M`
 - [ ] **Soporte y documentación de usuario** — cero rutas help/docs y ningún canal de contacto in-app; el
       onboarding cubre el primer minuto, no la retención. `medio · M`
 - [ ] **Backup / DR y runbook de incidentes** — sin política de backups verificados, RPO/RTO ni plan de
@@ -719,6 +748,37 @@ exactamente 8 permitidas**.
 
 **Nota de privacidad, por si te la preguntan en una due-diligence:** esa tabla **no guarda direcciones IP**.
 Le llega un hash. Un limitador necesita distinguir a quién frena, no saber quién es.
+
+### 1.5 · 🔴 Migración 0035 (baja de organización: supresión y portabilidad)
+
+**Qué:** pega en el SQL Editor de Supabase el contenido de
+`supabase/migrations/0035_org_lifecycle.sql`. **Pega ese fichero, no `setup.sql` entero** (ver la nota de
+abajo).
+
+**Qué habilita:** que un propietario pueda dar de baja su organización y que se borre **de verdad** —
+inventario, evaluaciones, evidencia, proveedores, incidentes y registro de auditoría— pasados 7 días, con
+opción de cancelar. Es lo que hace ciertos el plazo del DPA y del aviso de privacidad.
+
+**Por qué importa más de lo que parece:** antes de esta migración, borrar una organización **funcionaba pero
+dejaba rastro**. La tabla del registro de auditoría no está enlazada a la de organizaciones, así que sus
+filas —que incluyen el contenido de cada cambio— sobrevivían al borrado. La supresión parecía completa y no
+lo era. Lo encontré probándolo en un Postgres desechable antes de escribir la migración.
+
+**Sin aplicarla no se rompe nada:** la zona de baja simplemente no encuentra las funciones y la app funciona
+igual que hoy. Pero el derecho de supresión sigue siendo manual (escribirte a ti) hasta que la apliques.
+
+**Verificado antes de dártela:** aplicada dos veces (correcta y re-ejecutable), purga probada con dos
+organizaciones para comprobar que borrar una **no toca** la otra, registro de auditoría comprobado inmutable
+antes y después, y permisos comprobados ejecutando como cada rol —un usuario normal recibe *permission
+denied* al intentar purgar.
+
+**Nota aparte, no bloqueante:** `supabase/setup.sql` **no se puede re-pegar** sobre una base de datos que ya
+lo tenga (muere en la primera línea, `type "risk_level" already exists`, y no ejecuta nada de lo que sigue).
+Es anterior a esta sesión —viene de la migración 0001— y contradice lo que dice la documentación interna.
+Intenté arreglarlo y el arreglo era mayor de lo que parecía (no solo los tipos: también tablas y policies),
+así que preferí no dejarlo a medias. Lo he anotado como tarea propia. **Mientras tanto: para una migración
+nueva, pega siempre el fichero de la migración, no `setup.sql`.** `setup.sql` sirve para montar un proyecto
+desde cero.
 
 ### 1.4-ter · 🟡 Datos de la sociedad para las páginas legales (privacidad, DPA, subprocesadores)
 

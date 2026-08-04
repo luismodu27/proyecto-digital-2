@@ -944,6 +944,11 @@ export const es = {
 
     toasts: {
       "system-created": "Sistema registrado en el inventario.",
+      "deletion-requested":
+        "Baja solicitada. Puedes cancelarla durante los próximos 7 días.",
+      "deletion-cancelled": "Baja cancelada. Tu organización sigue activa.",
+      "deletion-confirm":
+        "El nombre no coincide. Escríbelo tal cual aparece para confirmar la baja.",
       "system-updated": "Sistema actualizado.",
       "system-deleted": "Sistema eliminado.",
       "system-error": "No se pudo guardar el sistema. Inténtalo de nuevo.",
@@ -1212,6 +1217,30 @@ export const es = {
       emptyDemo:
         "En la vista de demostración no hay varias organizaciones. Crea tu cuenta para gestionar tus entidades reales.",
       roles: { owner: "Propietario", admin: "Administrador", member: "Miembro" },
+      /** Baja de la organización (derecho de supresión + cierre de cuenta). */
+      deletion: {
+        title: "Dar de baja esta organización",
+        intro:
+          "Se eliminarán el inventario, las evaluaciones, la evidencia declarada, el plan de acción, los proveedores, los incidentes y el registro de auditoría. No hay forma de recuperarlo después.",
+        exportFirst:
+          "Antes de continuar, descarga tu expediente completo. Es el mismo paquete que puedes pedir en cualquier momento por portabilidad.",
+        exportCta: "Descargar mi expediente (JSON)",
+        graceNotice: (d: number) =>
+          `La baja no es inmediata: dispones de ${d} días para cancelarla. Pasado ese plazo, la eliminación es definitiva.`,
+        ownerOnly:
+          "Solo el propietario de la organización puede darla de baja.",
+        confirmLabel: "Escribe el nombre de la organización para confirmar",
+        confirmHint: (name: string) => `Debe coincidir con «${name}».`,
+        requestCta: "Solicitar la baja",
+        requestingCta: "Solicitando…",
+        pendingTitle: "Baja solicitada",
+        pendingBody: (days: number, date: string) =>
+          days > 0
+            ? `Esta organización y todos sus datos se eliminarán en ${days} día(s), el ${date}. Puedes cancelarlo hasta entonces.`
+            : `Esta organización y todos sus datos se eliminarán hoy (${date}). Cancélalo ahora si fue un error.`,
+        cancelCta: "Cancelar la baja",
+        cancellingCta: "Cancelando…",
+      },
     },
 
     security: {

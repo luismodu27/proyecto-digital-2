@@ -927,6 +927,11 @@ export const en: Dictionary = {
 
     toasts: {
       "system-created": "System registered in the inventory.",
+      "deletion-requested":
+        "Closure requested. You can cancel it during the next 7 days.",
+      "deletion-cancelled": "Closure cancelled. Your organization is still active.",
+      "deletion-confirm":
+        "The name does not match. Type it exactly as shown to confirm closure.",
       "system-updated": "System updated.",
       "system-deleted": "System deleted.",
       "system-error": "Couldn't save the system. Please try again.",
@@ -1192,6 +1197,28 @@ export const en: Dictionary = {
       emptyDemo:
         "The demo view doesn't include multiple organizations. Create your account to manage your real entities.",
       roles: { owner: "Owner", admin: "Admin", member: "Member" },
+      deletion: {
+        title: "Close this organization",
+        intro:
+          "This deletes the inventory, assessments, declared evidence, action plan, suppliers, incidents and audit log. There is no way to recover it afterwards.",
+        exportFirst:
+          "Before continuing, download your full record. It is the same bundle you can request at any time for portability.",
+        exportCta: "Download my record (JSON)",
+        graceNotice: (d: number) =>
+          `Closure is not immediate: you have ${d} days to cancel it. After that, deletion is final.`,
+        ownerOnly: "Only the organization's owner can close it.",
+        confirmLabel: "Type the organization's name to confirm",
+        confirmHint: (name: string) => `It must match “${name}”.`,
+        requestCta: "Request closure",
+        requestingCta: "Requesting…",
+        pendingTitle: "Closure requested",
+        pendingBody: (days: number, date: string) =>
+          days > 0
+            ? `This organization and all its data will be deleted in ${days} day(s), on ${date}. You can cancel until then.`
+            : `This organization and all its data will be deleted today (${date}). Cancel now if this was a mistake.`,
+        cancelCta: "Cancel closure",
+        cancellingCta: "Cancelling…",
+      },
     },
 
     security: {

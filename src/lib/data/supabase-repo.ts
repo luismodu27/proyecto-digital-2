@@ -35,6 +35,7 @@ import {
 import type { BiasAudit } from "@/lib/bias-audit";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { coerceStoredLocale } from "@/lib/i18n/stored-locale";
+import { GRACE_DAYS, type OrgDeletionState } from "@/lib/org-lifecycle";
 import { logDataFallback } from "@/lib/observability/log";
 import type { FunnelRow } from "@/lib/telemetry/events";
 import type { IntakeLink, IntakeSubmission } from "@/lib/intake/types";
@@ -370,6 +371,39 @@ export async function getOrganizationName(): Promise<string | null> {
     .eq("id", org)
     .maybeSingle();
   return data?.name ?? null;
+}
+
+/**
+ * Estado de la baja de la organización activa. `null` = no hay baja pendiente.
+ *
+ * Degrada a `null` si la 0035 no está aplicada (la columna no existe): sin
+ * migración simplemente no hay bajas pendientes que mostrar, que es la verdad.
+ */
+export async function getOrgDeletionState(): Promise<OrgDeletionState | null> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return null;
+
+  const { data, error } = await supabase
+    .from("organizations")
+    .select("deletion_requested_at")
+    .eq("id", org)
+    .maybeSingle();
+
+  if (error) {
+    logDataFallback("getOrgDeletionState", error, "sin 0035 no hay bajas pendientes");
+    return null;
+  }
+  const requestedAt = (data as { deletion_requested_at?: string | null } | null)
+    ?.deletion_requested_at;
+  if (!requestedAt) return null;
+
+  // El plazo se recalcula aquí en lugar de guardarse: si algún día cambia, no
+  // quedan fechas viejas mintiendo en pantalla.
+  const purgeAt = new Date(
+    new Date(requestedAt).getTime() + GRACE_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString();
+  return { requestedAt, purgeAt, graceDays: GRACE_DAYS };
 }
 
 /** Sistemas de la org (id real + nombre) para selectores. */
@@ -792,20 +826,46 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
   if (!org) return null;
 
   const supabase = await createClient();
-  const [orgName, systems, gapItems, actionTasks, members, regulatoryAcks, integrity] =
-    await Promise.all([
-      getOrganizationName(),
-      getAiSystems(),
-      getGapItems(),
-      getActionTasks(),
-      getOrgMembers(),
-      getRegulatoryAcks(),
-      verifyAuditChain(),
-    ]);
+  const [
+    orgName,
+    systems,
+    gapItems,
+    actionTasks,
+    members,
+    regulatoryAcks,
+    integrity,
+    suppliers,
+    incidents,
+    intakeSubmissions,
+  ] = await Promise.all([
+    getOrganizationName(),
+    getAiSystems(),
+    getGapItems(),
+    getActionTasks(),
+    getOrgMembers(),
+    getRegulatoryAcks(),
+    verifyAuditChain(),
+    // Faltaban en el paquete: proveedores, incidentes y bandeja de intake son
+    // datos del cliente tanto como el inventario, y una portabilidad que se deja
+    // fuera tres módulos no es portabilidad. Cada uno degrada solo si su
+    // migración no está aplicada, así que no pueden tumbar la exportación.
+    getSuppliers().catch(() => []),
+    getIncidents().catch(() => []),
+    getIntakeSubmissions().catch(() => []),
+  ]);
 
-  // Registro completo (hasta el tope de la función, 500) para la exportación.
-  const { data: rawLog } = await supabase.rpc("list_audit_log", { org, lim: 500 });
-  const auditLog = ((rawLog ?? []) as RawAudit[]).map((r) => toAuditEntry(r));
+  // El tope de `list_audit_log` es 500. Se pide uno más para poder DISTINGUIR
+  // "hay exactamente 500" de "hay más y se cortó": sin ese +1 no habría forma de
+  // saberlo, y una exportación truncada en silencio es la peor de las tres
+  // opciones — quien la recibe cree tenerlo todo.
+  const AUDIT_LIMIT = 500;
+  const { data: rawLog } = await supabase.rpc("list_audit_log", {
+    org,
+    lim: AUDIT_LIMIT + 1,
+  });
+  const rawRows = (rawLog ?? []) as RawAudit[];
+  const auditTruncated = rawRows.length > AUDIT_LIMIT;
+  const auditLog = rawRows.slice(0, AUDIT_LIMIT).map((r) => toAuditEntry(r));
 
   // Evidencia por sistema (historial de evaluaciones + auditoría de sesgo).
   // Batch: 2 consultas para toda la org en vez de 2 por sistema (evita N+1 en la
@@ -880,6 +940,10 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
     members,
     regulatoryAcks,
     auditLog,
+    suppliers,
+    incidents,
+    intakeSubmissions,
+    truncated: auditTruncated ? { auditLog: AUDIT_LIMIT } : null,
   };
 }
 

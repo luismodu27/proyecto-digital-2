@@ -127,6 +127,36 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **Sprint 6.2 — baja de organización. Tres fallos, los tres encontrados probando, ninguno
+  razonando.**
+  Se adelantó sobre facturación porque el DPA y el aviso de privacidad publicados el mismo día **prometen**
+  supresión y portabilidad. Una promesa legal sin producto detrás es deuda con fecha.
+  - **Fallo 1, el que motivó todo.** La hipótesis era que el trigger de inmutabilidad del `audit_log`
+    impediría borrar una organización. Falsa, y la realidad era peor: `audit_log` **no tiene clave ajena** a
+    `organizations`, así que el borrado funcionaba y dejaba las filas huérfanas, con `old_data`/`new_data`
+    dentro. La supresión parecía completa y no lo era. **Si me hubiera fiado de la hipótesis habría escrito
+    la migración equivocada.**
+  - **Fallo 2: el orden correcto es el contrario del intuitivo.** Borrar auditoría → organización deja la
+    auditoría **repoblada**, porque la cascada dispara los `write_audit`. La primera prueba informó de 2
+    filas borradas y la organización volvió a tener 2. El orden bueno es organización primero.
+  - **Fallo 3, de permisos, y es regla general:** `revoke ... from public` **NO BASTA en Supabase**. Aparte
+    del EXECUTE de PUBLIC, Supabase tiene `alter default privileges in schema public grant all on routines to
+    anon, authenticated, service_role`, así que cada función nueva nace con un grant DIRECTO a esos roles que
+    sobrevive al revoke. El scaffold desechable sí replica esos default privileges, y por eso salió. Corregido
+    nombrándolos. Revisado 0028: está bien — `product_funnel` **necesita** `authenticated` porque un admin de
+    plataforma es un usuario autenticado y el guard va dentro.
+  - **Diseño: gracia de 7 días, no borrado inmediato.** Attesta se vende como system-of-record de evidencia;
+    que una sesión de propietario comprometida lo destruya sin vuelta atrás sería absurdo. `purge_organization`
+    revocada para `authenticated`: si el propietario pudiera purgar en el acto, la gracia sería decorativa.
+  - **La exportación existía pero mentía por omisión:** le faltaban proveedores, incidentes y fichas de
+    intake, y cortaba el registro de auditoría en 500 filas **en silencio**. Lo peor de las tres opciones:
+    quien recibe el paquete cree tenerlo todo. Ahora se pide una fila de más para poder distinguir "hay 500"
+    de "hay más", y el propio paquete declara el truncamiento.
+  - **Lo que se decidió NO hacer:** `setup.sql` no es re-ejecutable (muere en `create type` de 0001), lo cual
+    contradice el flujo documentado. Empecé a arreglarlo, vi que no eran solo los tipos —también tablas y
+    policies— y **lo revertí**: un arreglo parcial que no entrega la propiedad es peor que una limitación
+    documentada, porque invita a confiar en ella. Queda como tarea propia en §0.F.
+
 - **2026-08-04** · **Sprint 6.1 — cumplimiento propio. La lista de subprocesadores se hizo código para que
   no pueda mentir.**
   El problema de una lista de subprocesadores no es escribirla, es que envejece: alguien añade un `fetch` a un

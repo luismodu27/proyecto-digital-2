@@ -49,6 +49,7 @@ import type { Incident } from "@/lib/incidents/incidents";
 import type { Supplier } from "@/lib/suppliers/types";
 import type { SupplierEvidence } from "@/lib/suppliers/evidence";
 import { REVIEW_CADENCE_DEFAULT_DAYS } from "@/lib/incidents/review";
+import type { OrgDeletionState } from "@/lib/org-lifecycle";
 
 /**
  * Repositorio de datos de ejemplo (modo demo).
@@ -87,6 +88,16 @@ export async function getSystemsForSelect(): Promise<
 > {
   const locale = await resolveLocale();
   return aiSystems(locale).map((s) => ({ id: s.id, name: s.name }));
+}
+
+/**
+ * En demo NUNCA hay baja pendiente. No es pereza: la pantalla de baja es
+ * destructiva y el modo demo es lo que se enseña en capturas y en la landing.
+ * Un aviso de "esta organización se borrará en 7 días" en una demo sería, como
+ * poco, una mala primera impresión.
+ */
+export async function getOrgDeletionState(): Promise<OrgDeletionState | null> {
+  return null;
 }
 
 export async function getOrganizationName(): Promise<string | null> {
@@ -176,6 +187,11 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
     members: SAMPLE_MEMBERS,
     regulatoryAcks: en ? SAMPLE_REG_ACKS_EN : SAMPLE_REG_ACKS,
     auditLog: en ? SAMPLE_AUDIT_EN : SAMPLE_AUDIT,
+    suppliers: await getSuppliers(),
+    incidents: await getIncidents(),
+    intakeSubmissions: await getIntakeSubmissions(),
+    // En demo los datos de ejemplo nunca llegan al tope, así que nunca se trunca.
+    truncated: null,
   };
 }
 
