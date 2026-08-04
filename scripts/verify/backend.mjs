@@ -1,6 +1,6 @@
 /**
- * Verificación del BACKEND REAL por API: incidentes (0030/0031), proveedores (0032)
- * y el idioma del contenido persistido (0033).
+ * Verificación del BACKEND REAL por API: incidentes (0030/0031), proveedores (0032),
+ * el idioma del contenido persistido (0033) y el rate limit compartido (0034).
  *
  *   npm run verify:backend
  *
@@ -427,6 +427,87 @@ if (!has0033) {
   );
 
   await api(`/rest/v1/ai_systems?id=eq.${sysId}`, { token: tokenA, method: "DELETE" });
+}
+
+// ---------------------------------------------------------------------------
+// 0034 · rate limit compartido entre instancias
+//
+// Se comprueba por API y no solo en el Postgres desechable porque lo que hay que
+// probar aquí son PERMISOS, y el Postgres desechable no reproduce los grants por
+// defecto de Supabase (la lección de 0028). Lo que importa: que `anon` PUEDA
+// llamar a la función —el formulario de intake se envía sin cuenta— y que nadie
+// pueda leer la tabla de contadores.
+//
+// Igual que el bloque anterior, se adapta a si la migración está aplicada.
+// ---------------------------------------------------------------------------
+const rl = (token, bucket, limit, windowMs) =>
+  api("/rest/v1/rpc/consume_rate_limit", {
+    token,
+    method: "POST",
+    body: { p_bucket: bucket, p_limit: limit, p_window_ms: windowMs },
+  });
+
+const rlProbe = await rl(tokenA, `probe-${stamp}`, 5, 60000);
+
+if (rlProbe.status >= 400 && /consume_rate_limit/i.test(rlProbe.text)) {
+  check("0034 pendiente: la RPC aún no existe (degradación activa)", true, String(rlProbe.status));
+} else {
+  check("la RPC responde a un usuario con sesión", rlProbe.status === 200, rlProbe.text.slice(0, 140));
+
+  // 1) Cuenta y corta donde debe.
+  const bucket = `verify-${stamp}`;
+  const seq = [];
+  for (let i = 0; i < 5; i++) seq.push((await rl(tokenA, bucket, 3, 60000)).json);
+  check(
+    "permite exactamente el límite y deniega después",
+    JSON.stringify(seq) === JSON.stringify([true, true, true, false, false]),
+    JSON.stringify(seq),
+  );
+
+  // 2) Cada clave lleva su cuenta.
+  const otra = await rl(tokenA, `verify-otra-${stamp}`, 3, 60000);
+  check("otra clave no arrastra el bloqueo de la primera", otra.json === true, String(otra.json));
+
+  // 3) Argumentos absurdos: deniega en vez de dividir por cero o dejar pasar.
+    for (const [nombre, body] of [
+    ["límite 0", { p_bucket: `abs-${stamp}`, p_limit: 0, p_window_ms: 60000 }],
+    ["límite negativo", { p_bucket: `abs-${stamp}`, p_limit: -1, p_window_ms: 60000 }],
+    ["ventana 0", { p_bucket: `abs-${stamp}`, p_limit: 3, p_window_ms: 0 }],
+    ["clave vacía", { p_bucket: "", p_limit: 3, p_window_ms: 60000 }],
+  ]) {
+    const r = await api("/rest/v1/rpc/consume_rate_limit", { token: tokenA, method: "POST", body });
+    check(`rechaza un argumento absurdo (${nombre})`, r.json === false, `${r.status} ${r.text.slice(0, 80)}`);
+  }
+
+  // 4) EL PERMISO QUE IMPORTA: `anon` (sin sesión) debe poder llamarla, porque
+  //    el formulario de intake se envía sin cuenta y es la superficie que más
+  //    falta hace limitar.
+  const anon = await rl(undefined, `anon-${stamp}`, 2, 60000);
+  check("anon PUEDE consumir cuota (es el caso del intake)", anon.status === 200 && anon.json === true, `${anon.status} ${anon.text.slice(0, 120)}`);
+
+  // 5) Y la tabla de contadores no la lee nadie: no tiene ninguna policy.
+  for (const [quien, token] of [["anon", undefined], ["un usuario con sesión", tokenA]]) {
+    const t = await api("/rest/v1/rate_limits?select=bucket,hits", { token });
+    check(
+      `${quien} no puede leer la tabla de contadores`,
+      t.status >= 400 || (Array.isArray(t.json) && t.json.length === 0),
+      `${t.status} ${JSON.stringify(t.json)?.slice(0, 120)}`,
+    );
+  }
+
+  // 6) LA PROPIEDAD QUE JUSTIFICA LA MIGRACIÓN: atomicidad. 20 llamadas a la vez
+  //    contra la misma clave con límite 8 tienen que dar 8 permitidas exactas.
+  //    Es justo lo que el limitador en memoria no podía garantizar.
+  const conc = `conc-${stamp}`;
+  const results = await Promise.all(
+    Array.from({ length: 20 }, () => rl(tokenA, conc, 8, 60000).then((r) => r.json)),
+  );
+  const permitidas = results.filter((x) => x === true).length;
+  check(
+    "20 llamadas simultáneas: exactamente 8 permitidas (upsert atómico)",
+    permitidas === 8,
+    `permitidas=${permitidas} · ${JSON.stringify(results)}`,
+  );
 }
 
 console.log(`\n${pass} correctas · ${fail} fallos`);

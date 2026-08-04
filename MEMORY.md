@@ -127,6 +127,22 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **0033 y 0034 aplicadas. La verificación que valió fue la que apagó el servidor.**
+  El fundador pegó las dos migraciones. `verify:backend` sube a **43 comprobaciones** (de 28) porque sus dos
+  bloques adaptativos pasaron de comprobar la degradación a comprobar el comportamiento real.
+  - **Lo que ninguna prueba de API podía cubrir, y sí se hizo:** el camino de ESCRITURA desde la propia
+    aplicación. Se invocaron las Server Actions de verdad —con una sesión real, extrayendo el id de acción del
+    manifiesto del build— y se leyó lo que quedó en la base de datos. Dos evaluaciones guardadas desde el
+    asistente de riesgo, una con la interfaz en español y otra en inglés, dieron `locale=es` y `locale=en`. Sin
+    eso, lo único demostrado habría sido que la columna acepta valores, no que la app escribe el correcto.
+  - **La prueba decisiva de la 0034 fue apagar el servidor.** Que el límite corte al sexto intento no demuestra
+    nada: lo haría igual el limitador en memoria de antes. Lo que lo demuestra es **reiniciar el proceso** —que
+    borra esa memoria— y comprobar que el siguiente intento **sigue bloqueado**. Ese es exactamente el fallo que
+    la migración existe para cerrar, y es la única forma de verlo. Método que conviene repetir: **para probar
+    que algo es compartido, hay que destruir lo que no lo era.**
+  - Confirmado también que la app **dejó de usar los reintentos**: cero líneas `migration-pending` tras recorrer
+    portada, gap, plan e inventario. Un fallback que sigue disparándose en silencio es una migración a medias.
+
 - **2026-08-04** · **SPRINT 5 CERRADO (7/7).** Deuda técnica y robustez. Lo que más se repitió como método:
   **auditar el ticket antes de ejecutarlo**. Tres de los siete estaban descritos con una premisa que ya no era
   cierta, y en los tres el trabajo útil estaba al lado, no donde señalaba el enunciado.

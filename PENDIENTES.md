@@ -671,7 +671,7 @@ update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
 -- o 'enterprise'
 ```
 
-### 1.1-duodecies · 🔴 Migración 0034 (rate limit compartido) — PENDIENTE DE PEGAR
+### 1.1-duodecies · ✅ Migración 0034 (rate limit compartido) — APLICADA Y VERIFICADA (2026-08-04)
 **Qué hace:** una tabla de contadores y una función que los incrementa de forma atómica. Nada más.
 
 **Por qué hace falta.** El freno anti-abuso de la lista de espera y del **formulario de intake** —la única
@@ -683,8 +683,13 @@ esfuerzo. Ahora el contador es uno solo y compartido.
 `supabase/setup.sql`). Validada en un Postgres 16 desechable en **dos pasadas**, y probada con **30
 conexiones simultáneas** contra la misma clave con límite 10: exactamente 10 pasaron.
 
-**No corre prisa y no rompe nada:** mientras no la pegues, se sigue usando el freno en memoria de siempre,
-igual que hasta hoy. Se registra como `migration-pending` en los logs y ya está.
+**Verificada tras aplicarla (2026-08-04),** y con la prueba que de verdad demuestra que sirve: se envió el
+formulario de la lista de espera hasta agotar el límite, **se reinició el servidor** —lo que borra la memoria
+del proceso, que era el único freno que había antes— y el siguiente envío **siguió bloqueado**. Eso solo puede
+venir del contador compartido. Por API se comprobó además que corta exactamente en el límite, que cada clave
+lleva su cuenta, que rechaza argumentos absurdos, que **`anon` puede consumir cuota** (es el caso del intake)
+y que **nadie puede leer la tabla de contadores**. Y la atomicidad: **20 llamadas simultáneas con límite 8 →
+exactamente 8 permitidas**.
 
 **Nota de privacidad, por si te la preguntan en una due-diligence:** esa tabla **no guarda direcciones IP**.
 Le llega un hash. Un limitador necesita distinguir a quién frena, no saber quién es.
@@ -702,7 +707,7 @@ rompiera la indexación y los enlaces de los correos **sin dar ningún error**. 
 pie** (Vercel conserva el último despliegue bueno), así que no hay caída — pero tampoco despliegue, hasta
 que la definas. Son dos minutos.
 
-### 1.1-undecies · 🔴 Migración 0033 (idioma del contenido guardado) — PENDIENTE DE PEGAR
+### 1.1-undecies · ✅ Migración 0033 (idioma del contenido guardado) — APLICADA Y VERIFICADA (2026-08-04)
 **Qué hace:** añade una columna `locale` a `gap_items`, `risk_assessments` y `action_tasks`. Nada más:
 tres `alter table … add column if not exists` y sus comentarios. Es **aditiva y re-ejecutable**.
 
@@ -715,10 +720,13 @@ en qué idioma estaba**, así que no se podía ni traducir después ni avisar al
 al final de `supabase/setup.sql`). Validada en un Postgres 16 desechable en **dos pasadas** (correcta y
 re-ejecutable) y comprobado que el CHECK acepta `null` y `es`/`en` y rechaza `fr` y `es-ES`.
 
-**No corre prisa:** mientras no la pegues, la app funciona exactamente igual. Verificado por API contra el
-Supabase real (`npm run verify:backend`, 28/28): la lectura con la columna falla, el reintento sin ella
-funciona, y el idioma simplemente queda como «no consta». Al pegarla, vuelve a ejecutar `verify:backend`
-—el script se adapta solo— y pasará a comprobar el CHECK de verdad.
+**Verificada tras aplicarla (2026-08-04).** `verify:backend` pasó de comprobar la degradación a comprobar
+la columna de verdad: acepta `es`/`en`, acepta `null`, rechaza `fr` y `es-ES`, y la RLS sigue aislando.
+Y se verificó **el camino de escritura desde la propia aplicación**, que es lo que ningún test podía cubrir:
+se guardaron dos evaluaciones reales desde el asistente de riesgo, una con la interfaz en español y otra en
+inglés, y la base de datos guardó `locale=es` y `locale=en` respectivamente. Es decir: el idioma se resuelve
+de verdad, no está fijo. Comprobado además que la app **ya no cae al reintento** — cero líneas de
+`migration-pending` en los logs del servidor tras recorrer portada, gap, plan e inventario.
 
 ### 1.1-decies · Migración 0029 (topes a medida para Enterprise) — ✅ APLICADA (verificada 2026-07-30)
 **Verificada por API:** `organizations?select=plan,max_systems,max_seats` → **200**, mientras una columna
