@@ -470,7 +470,19 @@
       con ruta → falla; build local/CI → compila con `localhost`. `medio · S`
 - [ ] **Revisar `force-dynamic` de más y consolidar N queries en RPC** — abre caché con invalidación por tag.
       `bajo-medio · M/L`
-- [ ] **Adelgazar fuentes (Fraunces / Geist_Mono)** — KB en el critical path del LCP. `bajo · S`
+- [x] **Adelgazar fuentes (Fraunces / Geist_Mono)** — ✅ **HECHO (2026-08-04)**. El peso no estaba donde
+      decía el ticket: las tres familias se usan de verdad en la landing (titulares, texto y las tres etiquetas
+      en mono), así que no sobraba ninguna. Lo que sobraba era un **eje**: Fraunces se cargaba con `SOFT`
+      declarado y **ni una regla de CSS lo usaba** en todo el repositorio, o sea que el navegador se bajaba un
+      eje entero para renderizarlo siempre en su valor por defecto. Quitarlo **no cambia un píxel** y baja el
+      fichero de **117,9 KB a 65,8 KB**: el critical path de fuentes de la landing pasa de **169,1 KB a
+      117,0 KB (−31 %)**, medido sobre los ficheros que la página referencia de verdad.
+      Comprobado de paso que `font-display: swap` ya estaba activo (es el defecto de `next/font`), así que no
+      hay texto invisible mientras cargan.
+      **Tercera opción medida y NO tomada, por si algún día se quiere:** renunciar también a `opsz` y fijar los
+      pesos deja el conjunto en **86,9 KB** (30 KB menos todavía). No se hace porque `opsz` es lo que hace que
+      un titular grande y un texto pequeño de la misma serif no se vean como la misma letra estirada — eso ya
+      no es optimizar, es cambiar el diseño, y es decisión tuya. `bajo · S`
 
 ### 0.F · SPRINT 6 — los 8 huecos que el propio panel se dejó fuera (crítico de completitud)
 > Confirmados contra el repo: **no hay** analítica, ni páginas legales/privacidad, ni Sentry, ni rutas de ayuda.
