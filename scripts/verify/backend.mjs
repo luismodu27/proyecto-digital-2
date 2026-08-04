@@ -510,5 +510,313 @@ if (rlProbe.status >= 400 && /consume_rate_limit/i.test(rlProbe.text)) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// 0035 · baja de organización (supresión y periodo de gracia)
+//
+// LO QUE ESTE ENTORNO PUEDE DEMOSTRAR Y EL POSTGRES DESECHABLE NO: los
+// PERMISOS. El scaffold desechable no reproduce los grants por defecto de
+// Supabase, así que allí no se puede concluir nada sobre quién puede llamar a
+// qué. Aquí sí, y es justo lo que sostiene el diseño: si `authenticated`
+// pudiera llamar a `purge_organization`, el periodo de gracia sería decorativo.
+//
+// Lo inverso también aplica: la lógica de la purga (orden de borrado,
+// aislamiento entre organizaciones) se probó en el desechable, porque aquí no
+// hay service_role y además no se va a borrar nada de verdad.
+// ---------------------------------------------------------------------------
+const orgProbe = await api(
+  `/rest/v1/organizations?select=id,deletion_requested_at&id=eq.${idA}`,
+  { token: tokenA },
+);
+const has0035 = orgProbe.status === 200;
+
+if (!has0035) {
+  check(
+    "0035 pendiente: la columna deletion_requested_at aún no existe",
+    orgProbe.status >= 400,
+    `${orgProbe.status} ${orgProbe.text.slice(0, 120)}`,
+  );
+  const rpcMissing = await api("/rest/v1/rpc/request_org_deletion", {
+    token: tokenA,
+    method: "POST",
+    body: { p_org: idA, p_confirm: "x" },
+  });
+  check(
+    "0035 pendiente: la RPC de baja no existe (la app degrada sin romperse)",
+    rpcMissing.status >= 400,
+    `${rpcMissing.status}`,
+  );
+} else {
+  check("0035 aplicada: organizations tiene deletion_requested_at", true);
+
+  // 1) El nombre de confirmación tiene que coincidir. Es la defensa contra el
+  //    clic equivocado en la pantalla más destructiva del producto.
+  const wrongName = await api("/rest/v1/rpc/request_org_deletion", {
+    token: tokenA,
+    method: "POST",
+    body: { p_org: idA, p_confirm: "nombre que no es" },
+  });
+  check(
+    "rechaza la baja si el nombre de confirmación no coincide",
+    wrongName.status >= 400,
+    `${wrongName.status} ${wrongName.text.slice(0, 140)}`,
+  );
+
+  // 2) B no es propietario de A: no puede darla de baja aunque acierte el nombre.
+  const notOwner = await api("/rest/v1/rpc/request_org_deletion", {
+    token: tokenB,
+    method: "POST",
+    body: { p_org: idA, p_confirm: `Org A ${stamp}` },
+  });
+  check(
+    "B no puede dar de baja la organización de A (aun sabiendo su nombre)",
+    notOwner.status >= 400,
+    `${notOwner.status} ${notOwner.text.slice(0, 140)}`,
+  );
+
+  // 3) El propietario sí, y el plazo devuelto son ~7 días.
+  const ok = await api("/rest/v1/rpc/request_org_deletion", {
+    token: tokenA,
+    method: "POST",
+    body: { p_org: idA, p_confirm: `Org A ${stamp}` },
+  });
+  const purgeAt = typeof ok.json === "string" ? Date.parse(ok.json) : NaN;
+  const days = (purgeAt - Date.now()) / 86400000;
+  check(
+    "el propietario solicita la baja y recibe la fecha de purga",
+    ok.status === 200 && !Number.isNaN(purgeAt),
+    `${ok.status} ${ok.text.slice(0, 140)}`,
+  );
+  check(
+    "el plazo devuelto es de ~7 días (no 0, no 30)",
+    days > 6.5 && days < 7.5,
+    `días=${days.toFixed(2)}`,
+  );
+
+  // 4) La marca queda visible: es lo que pinta el aviso permanente en el panel.
+  const marked = await api(
+    `/rest/v1/organizations?select=deletion_requested_at&id=eq.${idA}`,
+    { token: tokenA },
+  );
+  check(
+    "la solicitud queda registrada y visible para la organización",
+    Boolean(marked.json?.[0]?.deletion_requested_at),
+    JSON.stringify(marked.json),
+  );
+
+  // 5) Reiterar NO reinicia el plazo. Sin esto, insistir alargaría la gracia
+  //    para siempre y la baja no llegaría nunca.
+  const again = await api("/rest/v1/rpc/request_org_deletion", {
+    token: tokenA,
+    method: "POST",
+    body: { p_org: idA, p_confirm: `Org A ${stamp}` },
+  });
+  const purgeAt2 = typeof again.json === "string" ? Date.parse(again.json) : NaN;
+  check(
+    "repetir la solicitud no reinicia el plazo",
+    Math.abs(purgeAt2 - purgeAt) < 2000,
+    `${new Date(purgeAt).toISOString()} vs ${new Date(purgeAt2).toISOString()}`,
+  );
+
+  // 6) LA COMPROBACIÓN QUE SOSTIENE EL DISEÑO: un usuario con sesión NO puede
+  //    purgar. Si pudiera, el periodo de gracia no existiría.
+  const purgeAttempt = await api("/rest/v1/rpc/purge_organization", {
+    token: tokenA,
+    method: "POST",
+    body: { p_org: idA },
+  });
+  check(
+    "un usuario con sesión NO puede purgar (el plazo de gracia es real)",
+    purgeAttempt.status >= 400,
+    `${purgeAttempt.status} ${purgeAttempt.text.slice(0, 140)}`,
+  );
+
+  const purgeDueAttempt = await api("/rest/v1/rpc/purge_due_organizations", {
+    token: tokenA,
+    method: "POST",
+    body: {},
+  });
+  check(
+    "tampoco puede lanzar la purga masiva del cron",
+    purgeDueAttempt.status >= 400,
+    `${purgeDueAttempt.status} ${purgeDueAttempt.text.slice(0, 140)}`,
+  );
+
+  const purgeAnon = await api("/rest/v1/rpc/purge_organization", {
+    method: "POST",
+    body: { p_org: idA },
+  });
+  check(
+    "anon tampoco puede purgar",
+    purgeAnon.status >= 400,
+    `${purgeAnon.status} ${purgeAnon.text.slice(0, 140)}`,
+  );
+
+  // 7) Y se puede cancelar. Se deja cancelada: la verificación no debe dejar
+  //    una organización condenada a borrarse dentro de 7 días.
+  const cancelB = await api("/rest/v1/rpc/cancel_org_deletion", {
+    token: tokenB,
+    method: "POST",
+    body: { p_org: idA },
+  });
+  check(
+    "B no puede cancelar la baja de A",
+    cancelB.status >= 400,
+    `${cancelB.status}`,
+  );
+
+  const cancelled = await api("/rest/v1/rpc/cancel_org_deletion", {
+    token: tokenA,
+    method: "POST",
+    body: { p_org: idA },
+  });
+  const afterCancel = await api(
+    `/rest/v1/organizations?select=deletion_requested_at&id=eq.${idA}`,
+    { token: tokenA },
+  );
+  check(
+    "el propietario cancela la baja y la marca desaparece",
+    cancelled.status === 200 && afterCancel.json?.[0]?.deletion_requested_at === null,
+    `${cancelled.status} ${JSON.stringify(afterCancel.json)}`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 0036 · facturación (idempotencia y orden)
+//
+// La LÓGICA (que un evento tardío no pise el estado bueno) se probó contra un
+// Postgres real en el desechable, porque aquí no hay service_role. Lo que este
+// entorno demuestra —y el otro no— es la FRONTERA: que ni un usuario con sesión
+// ni `anon` pueden tocar el registro de eventos ni forzar un estado de
+// suscripción. Sin eso, cualquiera se regalaría el plan de pago.
+// ---------------------------------------------------------------------------
+const evProbe = await api("/rest/v1/stripe_events?select=id&limit=1", { token: tokenA });
+const subProbe = await api("/rest/v1/subscriptions?select=last_event_at&limit=1", {
+  token: tokenA,
+});
+// Con RLS sin policies, un SELECT devuelve 200 y vacío; si la TABLA no existe,
+// da 404/400. Es la diferencia entre "no aplicada" y "aplicada y protegida".
+const has0036 = subProbe.status === 200;
+
+if (!has0036) {
+  check(
+    "0036 pendiente: subscriptions aún no tiene last_event_at",
+    subProbe.status >= 400,
+    `${subProbe.status} ${subProbe.text.slice(0, 120)}`,
+  );
+} else {
+  check("0036 aplicada: subscriptions tiene last_event_at", true);
+
+  check(
+    "un usuario con sesión no puede leer el registro de eventos de Stripe",
+    evProbe.status >= 400 || (Array.isArray(evProbe.json) && evProbe.json.length === 0),
+    `${evProbe.status} ${evProbe.text.slice(0, 120)}`,
+  );
+
+  const evAnon = await api("/rest/v1/stripe_events?select=id&limit=1");
+  check(
+    "anon tampoco lo lee",
+    evAnon.status >= 400 || (Array.isArray(evAnon.json) && evAnon.json.length === 0),
+    `${evAnon.status} ${evAnon.text.slice(0, 120)}`,
+  );
+
+  const evInsert = await api("/rest/v1/stripe_events", {
+    token: tokenA,
+    method: "POST",
+    body: { id: `evt_fake_${stamp}`, type: "checkout.session.completed", event_at: new Date().toISOString() },
+  });
+  check(
+    "un usuario con sesión no puede inventarse un evento de Stripe",
+    evInsert.status >= 400,
+    `${evInsert.status} ${evInsert.text.slice(0, 140)}`,
+  );
+
+  // LA IMPORTANTE: si esto se pudiera llamar, cualquiera se pondría el plan de
+  // pago a sí mismo sin pasar por Stripe.
+  const forge = await api("/rest/v1/rpc/apply_subscription_event", {
+    token: tokenA,
+    method: "POST",
+    body: {
+      p_org: idA,
+      p_customer: "cus_fake",
+      p_subscription: "sub_fake",
+      p_status: "active",
+      p_price: "price_fake",
+      p_period_end: new Date(Date.now() + 86400000 * 365).toISOString(),
+      p_cancel_at_period_end: false,
+      p_event_at: new Date().toISOString(),
+    },
+  });
+  check(
+    "un usuario con sesión NO puede regalarse una suscripción activa",
+    forge.status >= 400,
+    `${forge.status} ${forge.text.slice(0, 160)}`,
+  );
+
+  const forgeAnon = await api("/rest/v1/rpc/apply_subscription_event", {
+    method: "POST",
+    body: {
+      p_org: idA, p_customer: "cus_fake", p_subscription: "sub_fake",
+      p_status: "active", p_price: "price_fake",
+      p_period_end: new Date().toISOString(), p_cancel_at_period_end: false,
+      p_event_at: new Date().toISOString(),
+    },
+  });
+  check(
+    "anon tampoco",
+    forgeAnon.status >= 400,
+    `${forgeAnon.status} ${forgeAnon.text.slice(0, 160)}`,
+  );
+
+  // Y comprobamos que el intento NO dejó rastro: la suscripción sigue sin existir.
+  const subAfter = await api(
+    `/rest/v1/subscriptions?select=status&organization_id=eq.${idA}`,
+    { token: tokenA },
+  );
+  check(
+    "tras los intentos, la organización sigue sin suscripción activa",
+    Array.isArray(subAfter.json) && subAfter.json.length === 0,
+    JSON.stringify(subAfter.json),
+  );
+
+  const prune = await api("/rest/v1/rpc/prune_stripe_events", {
+    token: tokenA,
+    method: "POST",
+    body: {},
+  });
+  check(
+    "un usuario con sesión no puede lanzar la limpieza de eventos",
+    prune.status >= 400,
+    `${prune.status}`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Limpieza. Cada ejecución crea dos organizaciones de prueba, y sin esto se
+// acumulan para siempre en el proyecto real. Ahora se pueden dar de baja con la
+// misma función que usa el producto: la purga la hará el cron a los 7 días.
+//
+// Nota: esto usa la 0035 para limpiar lo que la propia verificación ensucia, así
+// que si la migración no está aplicada simplemente no limpia — y lo dice.
+// ---------------------------------------------------------------------------
+if (has0035) {
+  const bye = await Promise.all([
+    api("/rest/v1/rpc/request_org_deletion", {
+      token: tokenA, method: "POST",
+      body: { p_org: idA, p_confirm: `Org A ${stamp}` },
+    }),
+    api("/rest/v1/rpc/request_org_deletion", {
+      token: tokenB, method: "POST",
+      body: { p_org: idB, p_confirm: `Org B ${stamp}` },
+    }),
+  ]);
+  check(
+    "las organizaciones de prueba quedan marcadas para su borrado automático",
+    bye.every((r) => r.status === 200),
+    bye.map((r) => r.status).join("/"),
+  );
+} else {
+  console.log("  ⚠️  sin 0035 no se pueden limpiar las organizaciones de prueba");
+}
+
 console.log(`\n${pass} correctas · ${fail} fallos`);
 process.exit(fail === 0 ? 0 : 1);

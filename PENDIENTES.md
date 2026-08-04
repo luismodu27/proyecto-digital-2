@@ -803,7 +803,22 @@ exactamente 8 permitidas**.
 **Nota de privacidad, por si te la preguntan en una due-diligence:** esa tabla **no guarda direcciones IP**.
 Le llega un hash. Un limitador necesita distinguir a quién frena, no saber quién es.
 
-### 1.5 · 🔴 Migración 0035 (baja de organización: supresión y portabilidad)
+### 1.5 · ✅ Migración 0035 (baja de organización) — APLICADA Y VERIFICADA (2026-08-04)
+
+**Verificado contra el backend real** (`npm run verify:backend`, ahora **64 comprobaciones**, 0 fallos):
+el nombre de confirmación tiene que coincidir · un no-propietario no puede dar de baja la organización de
+otro *aunque sepa su nombre* · el plazo devuelto son ~7 días exactos · repetir la solicitud **no reinicia el
+plazo** · la cancelación funciona y solo la puede hacer el propietario.
+
+**Y la comprobación que sostiene el diseño entero:** un usuario con sesión recibe
+`403 permission denied for function purge_organization`. Lo contrasté con una función inventada, que da
+**404**: la diferencia demuestra que la función existe y está cerrada, no que falte. Si un propietario
+pudiera purgar en el acto, el periodo de gracia sería decorativo. `anon` tampoco puede.
+
+**De regalo:** la propia verificación ahora se limpia sola. Cada ejecución creaba dos organizaciones de
+prueba que se acumulaban en tu proyecto para siempre; ahora las da de baja con esta misma función y el cron
+las borra a los siete días.
+
 
 **Qué:** pega en el SQL Editor de Supabase el contenido de
 `supabase/migrations/0035_org_lifecycle.sql`. **Pega ese fichero, no `setup.sql` entero** (ver la nota de
@@ -872,7 +887,14 @@ registro inmutable, la cadena de hashes, la verificación semanal— **no vale n
 restaurar**. Un expediente demostrablemente íntegro que se ha perdido entero es tan inútil como uno
 manipulado.
 
-### 1.6 · 🟡 Migración 0036 (facturación: idempotencia y reconciliación)
+### 1.6 · ✅ Migración 0036 (facturación) — APLICADA Y VERIFICADA (2026-08-04)
+
+**Verificado contra el backend real.** Aquí lo que importaba no era la lógica —esa se probó contra un
+Postgres real antes de dártela— sino la **frontera**: que nadie pueda saltarse Stripe. Comprobado que un
+usuario con sesión **no puede regalarse una suscripción activa** (`403`, y la organización sigue sin
+suscripción después del intento), no puede inventarse un evento de Stripe, no puede leer el registro de
+eventos y no puede lanzar su limpieza. `anon` tampoco, en los cuatro casos.
+
 
 **Qué:** pega `supabase/migrations/0036_billing_lifecycle.sql` en el SQL Editor. Como la 0035: **el fichero
 de la migración, no `setup.sql`**.
