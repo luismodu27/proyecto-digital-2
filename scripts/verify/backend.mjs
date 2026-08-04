@@ -64,7 +64,7 @@ async function api(path, { token, method = "GET", body, prefer } = {}) {
   } catch {
     /* respuesta no-JSON */
   }
-  return { status: r.status, json, text };
+  return { status: r.status, json, text, headers: r.headers };
 }
 
 async function signUp(email, password) {
@@ -816,6 +816,180 @@ if (has0035) {
   );
 } else {
   console.log("  ⚠️  sin 0035 no se pueden limpiar las organizaciones de prueba");
+}
+
+// ---------------------------------------------------------------------------
+// 0037 · solicitudes de demo (captura de leads)
+//
+// La propiedad que hay que demostrar es asimétrica y poco intuitiva: `anon`
+// DEBE poder escribir (es un formulario de la web pública, sin cuenta) y NO
+// debe poder leer (la lista de leads es información comercial).
+//
+// TRAMPA QUE ESTE BLOQUE PISÓ Y AHORA EVITA, porque cuesta una tarde:
+// `Prefer: return=representation` hace que PostgREST ejecute un
+// `INSERT ... RETURNING`, y eso exige una policy de SELECT. Como aquí NO hay
+// ninguna —a propósito—, el insert falla con un `42501` cuyo mensaje habla de
+// "new row violates row-level security policy", que suena a que la ESCRITURA
+// está bloqueada cuando lo que falla es la RELECTURA. La primera versión de
+// este bloque dio por rota una migración perfectamente correcta. Los inserts de
+// la app no piden representación, así que el producto nunca tuvo ese problema.
+//
+// Y una segunda lección: comprobar solo `status >= 400` no discrimina. Con `anon`
+// incapaz de insertar, los cuatro tests de CHECK pasaban igual, por el motivo
+// equivocado. Ahora se exige el CÓDIGO de error concreto (`23514`, violación de
+// CHECK) y no un fallo cualquiera.
+// ---------------------------------------------------------------------------
+const errCode = (r) => {
+  try {
+    return JSON.parse(r.text)?.code ?? "";
+  } catch {
+    return "";
+  }
+};
+
+const demoProbe = await api("/rest/v1/demo_requests?select=id&limit=1", { token: tokenA });
+const has0037 = demoProbe.status === 200;
+
+if (!has0037) {
+  check(
+    "0037 pendiente: la tabla demo_requests aún no existe",
+    demoProbe.status >= 400,
+    `${demoProbe.status} ${demoProbe.text.slice(0, 120)}`,
+  );
+} else {
+  check("0037 aplicada: demo_requests existe", true);
+
+  const demoEmail = `demo-${stamp}@attesta-test.dev`;
+
+  // 1) `anon` PUEDE enviar el formulario. Es el caso de uso entero.
+  const anonInsert = await api("/rest/v1/demo_requests", {
+    method: "POST",
+    body: {
+      email: demoEmail,
+      company: "ACME de prueba",
+      role: "Responsable de RRHH",
+      team_size: "51-200",
+      context: "verificación automática",
+      source: "verify",
+      locale: "es",
+    },
+  });
+  check(
+    "anon PUEDE enviar una solicitud de demo (es un formulario público)",
+    anonInsert.status === 201,
+    `${anonInsert.status} ${anonInsert.text.slice(0, 160)}`,
+  );
+
+  // 2) Pero NO puede releerla. Es la trampa de arriba, ahora como comprobación:
+  //    documenta la asimetría en vez de dejarla como sorpresa.
+  const anonInsertReturning = await api("/rest/v1/demo_requests", {
+    method: "POST",
+    prefer: "return=representation",
+    body: { email: `ret-${stamp}@attesta-test.dev`, company: "X" },
+  });
+  check(
+    "anon no puede pedir que se le devuelva lo que acaba de escribir",
+    anonInsertReturning.status >= 400,
+    `${anonInsertReturning.status} ${anonInsertReturning.text.slice(0, 120)}`,
+  );
+
+  // 3) Y no puede leer la lista. Es información comercial.
+  const anonRead = await api("/rest/v1/demo_requests?select=email");
+  check(
+    "anon NO puede leer las solicitudes (la lista de leads no se expone)",
+    Array.isArray(anonRead.json) && anonRead.json.length === 0,
+    `${anonRead.status} ${anonRead.text.slice(0, 160)}`,
+  );
+  check(
+    "un usuario con sesión tampoco las lee",
+    Array.isArray(demoProbe.json) && demoProbe.json.length === 0,
+    JSON.stringify(demoProbe.json),
+  );
+
+  // 4) Ni borrar ni modificar. Se comprueba por FILAS AFECTADAS, no por el
+  //    código de estado: un DELETE que la RLS deja sin efecto responde 204 igual
+  //    que uno que borró algo, y solo el recuento distingue una cosa de la otra.
+  const affected = (r) => (r.headers?.get("content-range") ?? "").split("/")[0];
+  const anonDelete = await api(`/rest/v1/demo_requests?email=eq.${demoEmail}`, {
+    method: "DELETE",
+    prefer: "count=exact",
+  });
+  const anonUpdate = await api(`/rest/v1/demo_requests?email=eq.${demoEmail}`, {
+    method: "PATCH",
+    prefer: "count=exact",
+    body: { company: "modificado" },
+  });
+  check(
+    "anon no borra ni modifica lo enviado (0 filas afectadas, no solo un 204)",
+    affected(anonDelete) === "*" && affected(anonUpdate) === "*",
+    `delete=${anonDelete.status}/${anonDelete.headers?.get("content-range")} patch=${anonUpdate.status}/${anonUpdate.headers?.get("content-range")}`,
+  );
+
+  // 5) EL PAYLOAD EXACTO QUE ARMA LA APP, con `null` en los opcionales vacíos.
+  //    `import-actions.ts` dejó escrita la trampa: PostgREST exige las mismas
+  //    claves en todas las filas, así que la acción enumera SIEMPRE los ocho
+  //    campos en vez de omitir los nulos. Comprobarlo con un formulario relleno
+  //    no probaría nada: el caso que rompe es el de los huecos.
+  const nullPayload = await api("/rest/v1/demo_requests", {
+    method: "POST",
+    body: {
+      email: `null-${stamp}@attesta-test.dev`,
+      name: null,
+      company: "ACME",
+      role: null,
+      team_size: null,
+      context: null,
+      source: "landing_demo",
+      locale: "es",
+    },
+  });
+  check(
+    "acepta el payload de la app con los opcionales a null",
+    nullPayload.status === 201,
+    `${nullPayload.status} ${nullPayload.text.slice(0, 160)}`,
+  );
+
+  // 6) Los CHECK del esquema, exigiendo el código 23514: si `anon` no pudiera
+  //    escribir, estos tests fallarían en vez de pasar por el motivo equivocado.
+  const badSize = await api("/rest/v1/demo_requests", {
+    method: "POST",
+    body: { email: `x-${stamp}@attesta-test.dev`, team_size: "muchísimos" },
+  });
+  check(
+    "rechaza un tamaño de organización fuera del catálogo (violación de CHECK)",
+    errCode(badSize) === "23514",
+    `${badSize.status} code=${errCode(badSize)} ${badSize.text.slice(0, 120)}`,
+  );
+
+  const badLocale = await api("/rest/v1/demo_requests", {
+    method: "POST",
+    body: { email: `y-${stamp}@attesta-test.dev`, locale: "fr" },
+  });
+  check(
+    "rechaza un idioma fuera del catálogo ('fr')",
+    errCode(badLocale) === "23514",
+    `${badLocale.status} code=${errCode(badLocale)}`,
+  );
+
+  const longContext = await api("/rest/v1/demo_requests", {
+    method: "POST",
+    body: { email: `z-${stamp}@attesta-test.dev`, context: "x".repeat(3000) },
+  });
+  check(
+    "rechaza un texto libre desmedido (tope de 2000)",
+    errCode(longContext) === "23514",
+    `${longContext.status} code=${errCode(longContext)}`,
+  );
+
+  const noEmail = await api("/rest/v1/demo_requests", {
+    method: "POST",
+    body: { company: "Sin correo" },
+  });
+  check(
+    "rechaza una solicitud sin correo (no habría a quién responder)",
+    errCode(noEmail) === "23502",
+    `${noEmail.status} code=${errCode(noEmail)}`,
+  );
 }
 
 console.log(`\n${pass} correctas · ${fail} fallos`);

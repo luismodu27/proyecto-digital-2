@@ -127,6 +127,29 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **0035, 0036 y 0037 aplicadas. Y un falso negativo que casi doy por bueno.**
+  `verify:backend` sube a **75 comprobaciones**. Lo que este entorno demuestra y el Postgres desechable no
+  son los **permisos**: `purge_organization` responde `403 permission denied` a un usuario con sesión, y lo
+  contrasté con una función inventada, que da **404**. Esa diferencia es la que prueba que la función existe
+  y está cerrada, en vez de que falte — sin el contraste, la comprobación habría pasado igual con la
+  migración sin aplicar.
+  - **El falso negativo.** La primera versión del bloque de la 0037 dio la migración por ROTA: `anon` no
+    podía insertar. La causa era mía: puse `Prefer: return=representation`, que hace que PostgREST ejecute un
+    `INSERT ... RETURNING`, y eso exige una policy de SELECT que aquí NO existe a propósito. El error resultante
+    (`42501`, "new row violates row-level security policy") habla de la escritura, no de la relectura, así que
+    apunta al sitio equivocado. **Lo que lo desmontó fue comprobar lo mismo contra `waitlist`**, viva desde
+    hace meses: fallaba igual, y eso no podía ser cierto. Regla: cuando algo recién escrito parece roto, prueba
+    la MISMA comprobación contra algo que lleva tiempo funcionando; si también "falla", el roto es el test.
+  - **Y la lección de fondo: `status >= 400` no discrimina.** Con `anon` incapaz de insertar, los cuatro tests
+    de CHECK del esquema pasaban en verde por el motivo equivocado. Ahora exigen el CÓDIGO concreto (`23514`
+    violación de CHECK, `23502` nulo obligatorio), y los de borrado/modificación se comprueban por **filas
+    afectadas** —vía `content-range`— porque un DELETE que la RLS deja sin efecto responde `204` igual que uno
+    que sí borró.
+  - **Límite del banco de pruebas, anotado para no repetir el intento:** no se puede invocar por HTTP una
+    Server Action que recibe `FormData`. React codifica los argumentos con su propio esquema de nombres, así
+    que una petición hecha a mano da un `Connection closed` opaco. Lo que sí se verifica —y basta— es el
+    payload EXACTO que la acción construye, con los opcionales a `null`.
+
 - **2026-08-04** · **Sprint 6 cerrado 7/7. Y una regresión propia que rompió el panel entero con el build en
   verde.**
   Al verificar la página de ayuda en modo demo, `/dashboard/ayuda` devolvió **500**. La causa no estaba en la

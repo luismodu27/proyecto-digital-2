@@ -849,7 +849,24 @@ así que preferí no dejarlo a medias. Lo he anotado como tarea propia. **Mientr
 nueva, pega siempre el fichero de la migración, no `setup.sql`.** `setup.sql` sirve para montar un proyecto
 desde cero.
 
-### 1.8 · 🟡 Migración 0037 (solicitudes de demo)
+### 1.8 · ✅ Migración 0037 (solicitudes de demo) — APLICADA Y VERIFICADA (2026-08-04)
+
+**Verificado contra el backend real** (`verify:backend`, ahora **75 comprobaciones**): `anon` **puede**
+enviar el formulario (es público) y **no puede** leer la lista, ni borrarla, ni modificarla — comprobado por
+**filas afectadas**, no por el código de estado, porque un borrado que la RLS deja sin efecto responde `204`
+igual que uno que sí borró. Los cuatro CHECK del esquema exigen ahora el **código de error concreto**
+(`23514`), y se comprueba además el **payload exacto de la app con los opcionales a `null`** — la trampa
+PGRST102 que ya nos mordió con la importación CSV.
+
+**Nota metodológica, porque casi me cuela un falso negativo.** La primera versión de esta verificación dio
+la migración por ROTA: `anon` no podía insertar. La causa era mía — le puse a la petición una cabecera que
+obliga a Postgres a **releer** la fila recién escrita, y no hay permiso de lectura, a propósito. El mensaje de
+error habla de la escritura, así que parecía otra cosa. Lo descubrí porque comprobé lo mismo contra la lista
+de espera, que lleva viva desde marzo: **fallaba igual**, y eso no podía ser. Los inserts de la aplicación no
+piden esa relectura, así que el producto nunca tuvo el problema.
+
+Y una segunda lección que ya está corregida: comprobar solo "dio error" **no discrimina**. Con `anon` sin
+poder insertar, los cuatro tests de CHECK pasaban en verde por el motivo equivocado.
 
 **Qué:** pega `supabase/migrations/0037_demo_requests.sql` en el SQL Editor.
 
