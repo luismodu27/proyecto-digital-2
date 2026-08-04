@@ -409,9 +409,23 @@
       positivos): interfaz EN + contenido ES → 10 nodos `lang="es"` y el aviso; interfaz ES → solo el `<html
       lang="es">` del layout y ningún aviso. `verify:backend` pasa a 28/28 y se adapta solo a si la 0033 está
       aplicada o no.
-- [ ] **Aislar la landing del `headers()` del root layout** — leer headers saca a TODA la app del render
-      estático/CDN, empezando por la página de mayor coste de conversión (route-group propio o locale por ruta).
-      `alto · L`
+- [x] **Aislar la landing del `headers()` del root layout** — ❌ **NO SE HACE. Decisión del fundador
+      (2026-08-04): seguridad antes que velocidad.** El ítem daba por hecho que era solo rendimiento y no lo era.
+      Un nonce es distinto en cada petición, así que **exige render dinámico**: la landing estática y la CSP con
+      nonce en la landing son excluyentes, y la CSP estricta (§0.4) es justo lo que está en cola por activar.
+      La alternativa que documenta Next —CSP por hashes con `experimental.sri`— es un flag **experimental** y
+      además del compilador antiguo, mientras el proyecto compila con **Turbopack**: lo más probable es que no
+      haga nada. En un producto de compliance, aflojar la CSP de la página pública para ganar milisegundos es
+      mal negocio de cara a una due-diligence.
+      **Y el premio era pequeño:** medido, renderizar la landing cuesta ~13 ms. Lo que de verdad pesa en esa
+      página son sus **247 KB de HTML** (el payload RSC va inline), que es una palanca distinta y sin este
+      conflicto — anotada abajo como ítem nuevo.
+      Lo que sí salió de este ticket: el fallo de `lang` en `/` y la corrección del diagnóstico de §0.4, los dos
+      ya arreglados y documentados.
+- [ ] **Adelgazar el HTML de la landing (247 KB)** — sale del ítem anterior. El payload RSC viaja inline en el
+      HTML, así que es coste en el critical path de la página de mayor valor de conversión. A investigar: cuánto
+      de eso es el diccionario i18n serializado (que ya nos ha dado dos falsos positivos al medir) y cuánto son
+      componentes cliente que podrían no serlo. `medio · M`
 - [ ] **Validación con Zod en Server Actions** — hoy es artesanal (enums sin whitelist, sin límites de longitud).
       `medio · M`
 - [ ] **Rate-limit distribuido (Upstash / Vercel KV)** — el `Map` en memoria no protege en serverless
