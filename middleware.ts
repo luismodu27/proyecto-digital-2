@@ -21,10 +21,20 @@ import {
  * fonética inglesa. La cookie sigue mandando en el resto (auth y dashboard), que
  * no llevan el idioma en la URL.
  */
+/**
+ * Rutas públicas cuyo idioma lo fija la URL, no la cookie. Cada una tiene su
+ * gemela bajo `/en`, así que la versión sin prefijo sirve español SIEMPRE y
+ * anunciarla de otro modo es mentirle al lector de pantalla.
+ */
+const PATH_DEFINES_LOCALE = ["/legal"];
+
 function resolveRequestLocale(request: NextRequest): Locale {
   const { pathname } = request.nextUrl;
   if (pathname === "/en" || pathname.startsWith("/en/")) return "en";
   if (pathname === "/") return DEFAULT_LOCALE;
+  if (PATH_DEFINES_LOCALE.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+    return DEFAULT_LOCALE;
+  }
   const cookie = request.cookies.get(LOCALE_COOKIE)?.value;
   return coerceLocale(cookie ?? DEFAULT_LOCALE);
 }

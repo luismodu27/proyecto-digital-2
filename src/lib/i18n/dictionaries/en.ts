@@ -618,7 +618,55 @@ export const en: Dictionary = {
       tagline:
         "Continuous AI governance for the mid-market: inventory, risk, evidence and regulatory watch, ready for audit.",
       contactHeading: "Contact",
+      legalHeading: "Legal and privacy",
       rights: "© 2026 Attesta. All rights reserved.",
+    },
+  },
+
+  legal: {
+    eyebrow: "Legal documentation",
+    updated: "Last updated",
+    contents: "On this page",
+    backToSite: "Back to Attesta",
+    otherDocs: "Other documents",
+    contact: "Contact for privacy matters",
+    draftTitle: "Draft: the data controller is not yet identified",
+    draftBody:
+      "This document does not yet name the company, registered address and tax identification of the controller, as required by Article 13 GDPR. While they are missing, the page is not indexed and should not be treated as the final version.",
+    draftMissing: "Pending details",
+    lawyerNote:
+      "Text prepared from how the product actually works. Pending review by a lawyer before final publication.",
+    controllerHeading: "Data controller",
+    controllerName: "Legal name",
+    controllerAddress: "Registered address",
+    controllerTaxId: "Tax identification",
+    controllerEmail: "Privacy email",
+    controllerEuRep: "EU representative (Art. 27 GDPR)",
+    subprocessors: {
+      customerHeading: "Process customer organizations' data",
+      customerIntro:
+        "Sub-processors within the meaning of Article 28 GDPR. Any new addition is announced 30 days in advance.",
+      corpusHeading: "Process only the public regulatory corpus",
+      corpusIntro:
+        "They take part in the regulatory monitoring radar. They receive no data from any customer organization.",
+      colProvider: "Provider",
+      colPurpose: "Purpose",
+      colData: "What it receives",
+      colLocation: "Where",
+      statusActive: "In use",
+      statusGated: "Not enabled",
+      statusGatedHint:
+        "Configured by environment variable: while it is not enabled, it receives no data at all.",
+      privacyLink: "Provider's privacy policy",
+    },
+    optOut: {
+      heading: "Audience measurement",
+      on: "Measurement is currently active in this browser.",
+      off: "You have opted out of measurement in this browser. No events are emitted.",
+      browser:
+        "Your browser sends a do-not-track signal (GPC or DNT) and it is being honoured: no events are emitted, you need do nothing.",
+      disable: "Opt out of measurement",
+      enable: "Allow it again",
     },
   },
 

@@ -154,6 +154,21 @@ de 5 min por (sitio + código) para que una migración pendiente no escriba una 
 código y el mensaje de Postgres. No manda nada a terceros a propósito: enchufar Sentry es sustituir
 `emit`, y sumar un subprocesador es decisión del fundador (coste + DPA), no un detalle de un commit.
 
+**Cumplimiento propio (`src/lib/legal/`) = la lista de subprocesadores es CÓDIGO.** Las 4 páginas legales
+(privacidad, cookies, subprocesadores, DPA) salen de datos tipados bilingües en `src/lib/legal/`, **no del
+diccionario i18n** (frontera legal: el diccionario es chrome de UI). Rutas `/legal/[slug]` y `/en/legal/[slug]`,
+con **slug distinto por idioma** (`privacidad`↔`privacy`) para que ambas indexen con su canonical. Lo que hace
+que esto no envejezca: `subprocessors.ts` es el registro del que salen **a la vez** la página y un **guard**
+(`subprocessors.test.ts`) que escanea el repo buscando destinos de salida —argumentos de `fetch(...)` y la
+allowlist de la CSP— y **falla si el producto habla con un host no declarado**. Distingue *enviar datos* de
+*citar una URL*, así que los enlaces a eur-lex/ilga.gov del contenido regulatorio no dan falsos positivos.
+Separa **subencargados de datos de cliente** de los que solo ven el **corpus normativo público** (Voyage,
+NVIDIA NIM), y un test vigila que esa clasificación no se afloje. La identidad del responsable
+(`entity.ts`) **no tiene default plausible**, como `site-url.ts`: sin los 4 datos del art. 13.1.a, las páginas
+salen con aviso de borrador visible + `noindex` + fuera del sitemap; con ellos, reales e indexables sin tocar
+código. Ojo: `sitemap.ts` lleva `force-dynamic` **por eso** — si se prerenderiza, las páginas (dinámicas)
+dejarían de ser `noindex` mientras el sitemap seguiría sin listarlas hasta el siguiente despliegue.
+
 **Contenido legal = 100% determinista, cero LLM.** Las rutas que emiten texto regulatorio (dossier,
 informe, radar de vigilancia, clasificación de riesgo, recomendaciones) se ensamblan solo con datos
 reales del cliente + texto del AI Act ya verificado por el experto. Un texto legal alucinado es un

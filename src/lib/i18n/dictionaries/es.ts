@@ -627,7 +627,60 @@ export const es = {
       tagline:
         "Gobernanza continua de IA para el mid-market: inventario, riesgo, evidencia y vigilancia regulatoria, listos para auditoría.",
       contactHeading: "Contacto",
+      legalHeading: "Legal y privacidad",
       rights: "© 2026 Attesta. Todos los derechos reservados.",
+    },
+  },
+
+  /**
+   * Chrome de las páginas legales. El TEXTO LEGAL no está aquí (vive en
+   * `src/lib/legal/`, ver la frontera legal de `i18n/config.ts`): esto es solo el
+   * envoltorio de la interfaz —encabezados, índice, botones— que sí es chrome.
+   */
+  legal: {
+    eyebrow: "Documentación legal",
+    updated: "Última actualización",
+    contents: "En esta página",
+    backToSite: "Volver a Attesta",
+    otherDocs: "Otros documentos",
+    contact: "Contacto para asuntos de privacidad",
+    draftTitle: "Borrador: falta identificar al responsable del tratamiento",
+    draftBody:
+      "Este documento todavía no menciona la sociedad, el domicilio y la identificación fiscal del responsable, que exige el artículo 13 del RGPD. Mientras falten, la página no se indexa y no debe considerarse la versión definitiva.",
+    draftMissing: "Datos pendientes",
+    lawyerNote:
+      "Texto preparado a partir del funcionamiento real del producto. Pendiente de revisión por abogado antes de su publicación definitiva.",
+    controllerHeading: "Responsable del tratamiento",
+    controllerName: "Denominación",
+    controllerAddress: "Domicilio",
+    controllerTaxId: "Identificación fiscal",
+    controllerEmail: "Correo de privacidad",
+    controllerEuRep: "Representante en la UE (art. 27 RGPD)",
+    subprocessors: {
+      customerHeading: "Tratan datos de organizaciones clientes",
+      customerIntro:
+        "Subencargados en el sentido del artículo 28 del RGPD. Cualquier alta nueva se comunica con 30 días de antelación.",
+      corpusHeading: "Solo tratan el corpus normativo público",
+      corpusIntro:
+        "Intervienen en el radar de vigilancia regulatoria. No reciben ningún dato de ninguna organización cliente.",
+      colProvider: "Proveedor",
+      colPurpose: "Para qué",
+      colData: "Qué recibe",
+      colLocation: "Dónde",
+      statusActive: "En uso",
+      statusGated: "Sin activar",
+      statusGatedHint:
+        "Configurado por variable de entorno: mientras no se active, no recibe ningún dato.",
+      privacyLink: "Privacidad del proveedor",
+    },
+    optOut: {
+      heading: "Medición de audiencia",
+      on: "Ahora mismo la medición está activa en este navegador.",
+      off: "Has rechazado la medición en este navegador. No se emite ningún evento.",
+      browser:
+        "Tu navegador envía una señal de no rastreo (GPC o DNT) y se está respetando: no se emite ningún evento, no hace falta que hagas nada.",
+      disable: "Rechazar la medición",
+      enable: "Volver a permitirla",
     },
   },
 

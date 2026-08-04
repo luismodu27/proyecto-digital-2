@@ -532,10 +532,36 @@
       `product_funnel`), catálogo cerrado de 13 eventos (`src/lib/telemetry/events.ts`), API `/api/telemetry`
       (whitelist de eventos de cliente + rate-limit + cuerpo acotado), y panel `/dashboard/telemetria` solo para
       `platform_admins`. Sin IP, sin user-agent, sin PII, y se respetan GPC/DNT. 0026 **aplicada** ✅ (2026-07-30): ya mide.
-- [ ] **Cumplimiento propio de Attesta** — no existe página de **privacidad**, **DPA**, lista de
-      **subprocesadores** (Supabase UE, Stripe, proveedor de email) ni aviso de cookies. Vender gobernanza de IA
-      a mid-market UE sin tu propio DPA **bloquea la compra** en due-diligence y es incoherente con la marca.
-      `alto · M`
+- [x] ✅ **Cumplimiento propio de Attesta** (2026-08-04) — **4 documentos × 2 idiomas** en `/legal/[slug]` y
+      `/en/legal/[slug]` (slug distinto por idioma: `privacidad`↔`privacy`), enlazados desde el pie y con
+      canonical + hreflang recíproco: **aviso de privacidad**, **cookies**, **subprocesadores** y **DPA**
+      (art. 28 punto por punto, letras a–h). El texto vive en `src/lib/legal/` —no en el diccionario i18n—
+      por la frontera legal del proyecto, y es bilingüe en la misma estructura para que no puedan divergir.
+      **Lo que hace que esto no sea una plantilla:**
+      · **La lista de subprocesadores es código, no un documento** (`src/lib/legal/subprocessors.ts`), y de ella
+        salen a la vez la página y un **guard** que escanea el repo en busca de destinos de salida (`fetch(...)`
+        + allowlist de la CSP) y **falla si el producto habla con un host no declarado**. Verificado con 3
+        mutaciones: un `fetch` a PostHog, un host nuevo en la CSP y reclasificar un proveedor de IA — las 3
+        cayeron, y la primera además dice en qué fichero. Distingue *enviar datos* de *citar una URL*, así que
+        los ~40 enlaces a eur-lex/ilga.gov del contenido regulatorio no dan falsos positivos.
+      · **Separa subencargados de datos de cliente (Supabase, Vercel, Stripe, Resend) de los que solo ven el
+        corpus normativo público** (Voyage, NVIDIA NIM). Un test vigila que esa clasificación no se afloje: el
+        día que alguien mande el inventario de un cliente a un modelo, tiene que romper algo.
+      · **La identidad del responsable NO se inventa** (`src/lib/legal/entity.ts`), siguiendo el precedente de
+        `site-url.ts`. Sin los 4 datos del art. 13.1.a: aviso de borrador visible **arriba del todo**, `noindex`
+        y fuera del sitemap. Con ellos: página real e indexable, **sin tocar código**. Verificado arrancando el
+        servidor en los dos estados.
+      · De paso se cazó que **el sitemap se prerenderizaba en el build** y las páginas no: rellenar los datos en
+        Vercel habría dejado las páginas indexables y el sitemap sin listarlas hasta el siguiente despliegue.
+        Corregido con `force-dynamic` y comprobado en ambos estados.
+      · **El botón de rechazo de la medición existe y funciona** (`MeasurementOptOut`), no es solo texto: es lo
+        que sostiene la posición de "analítica de primera parte exenta de banner". Con `useSyncExternalStore`,
+        que además sincroniza pestañas.
+      · Corregido un fallo de accesibilidad heredado: `/legal/...` resolvía el `lang` por cookie, así que con la
+        cookie en inglés servía español etiquetado `lang="en"` — el mismo bug que se arregló en `/` en el
+        Sprint 5, ahora generalizado en el middleware.
+      **Pendiente del fundador** (§1.4): los 4 datos de la sociedad + decidir si hace falta representante en la
+      UE (art. 27) + revisión de abogado antes de publicar. `alto · M`
 - [ ] **Ciclo de vida de facturación** (no solo el checkout) — pago fallido, reintentos, degradación de plan,
       cancelación, **idempotencia del webhook** y reconciliación Stripe↔DB. Es donde se pierde MRR en silencio.
       `alto · M`
@@ -693,6 +719,45 @@ exactamente 8 permitidas**.
 
 **Nota de privacidad, por si te la preguntan en una due-diligence:** esa tabla **no guarda direcciones IP**.
 Le llega un hash. Un limitador necesita distinguir a quién frena, no saber quién es.
+
+### 1.4-ter · 🟡 Datos de la sociedad para las páginas legales (privacidad, DPA, subprocesadores)
+
+**Qué:** cuatro variables de entorno en Vercel (*Settings → Environment Variables*, Production y Preview):
+
+```
+LEGAL_ENTITY_NAME       = denominación social completa (p. ej. "Attesta, S.L.")
+LEGAL_ENTITY_ADDRESS    = domicilio social
+LEGAL_ENTITY_TAX_ID     = NIF / CIF / VAT
+LEGAL_PRIVACY_EMAIL     = correo de contacto para privacidad
+LEGAL_EU_REPRESENTATIVE = (opcional, ver abajo)
+```
+
+**Por qué no las he puesto yo:** son un hecho del mundo, no una decisión de diseño. Inventarlas produciría el
+peor resultado posible: una página que **parece** terminada, se indexa y se enseña en una due-diligence
+siendo falsa. Así que el código hace lo intermedio y honesto — mientras falten, las cuatro páginas legales
+salen con un **aviso de borrador visible arriba del todo**, con `noindex` y fuera del sitemap. En cuanto las
+definas, pasan a ser páginas reales e indexables **sin que yo toque nada**.
+
+**Estado hoy:** las páginas ya existen y son navegables (`/legal/privacidad`, `/legal/cookies`,
+`/legal/subprocesadores`, `/legal/tratamiento-de-datos`, y sus gemelas en `/en/legal/...`), pero se sirven
+como borrador. Puedes verlas y darme feedback del contenido antes de tener la sociedad.
+
+**Dos decisiones que solo puedes tomar tú:**
+
+1. **¿Dónde está constituida la sociedad?** En el pie de la web hay un correo `.mx` y un teléfono de México.
+   Si la entidad **no** está establecida en la UE pero ofrece el servicio a personas en la UE, el **art. 27
+   RGPD** obliga a designar un **representante en la Unión** por escrito, y hay que nombrarlo en el aviso de
+   privacidad (por eso existe `LEGAL_EU_REPRESENTATIVE`). Si la sociedad es española/UE, no aplica y se deja
+   vacía. **No lo he dado por supuesto en ningún sentido.**
+2. **Revisión de abogado antes de publicar.** El texto es correcto en los hechos técnicos —que es la parte
+   que normalmente sale mal en las plantillas descargadas, porque nadie las contrasta con el código— pero la
+   redacción contractual del DPA no se cierra sin jurista. Es barato: llevas un borrador completo y coherente,
+   no un folio en blanco.
+
+**Un punto que conviene que sepas aunque no sea bloqueante:** la web no lleva banner de cookies, y es una
+posición defendible (sin publicidad, sin terceros midiendo, sin cookies entre sitios, con rechazo explícito
+y respeto de la señal del navegador), pero **es una posición, no una certeza**. Está explicada en
+`src/lib/legal/cookies.ts` para que tu abogado la lea y la confirme o la corrija en cinco minutos.
 
 ### 1.4-bis · 🔴 ANTES DE DESPLEGAR: define `NEXT_PUBLIC_APP_URL` en Vercel
 **Qué:** Vercel → tu proyecto → *Settings → Environment Variables* → `NEXT_PUBLIC_APP_URL` =

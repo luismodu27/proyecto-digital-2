@@ -127,6 +127,39 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **Sprint 6.1 — cumplimiento propio. La lista de subprocesadores se hizo código para que
+  no pueda mentir.**
+  El problema de una lista de subprocesadores no es escribirla, es que envejece: alguien añade un `fetch` a un
+  servicio nuevo para arreglar otra cosa y el documento legal se queda desactualizado sin que nadie se entere,
+  hasta que un cliente pregunta en la due-diligence. Así que la lista vive en `src/lib/legal/subprocessors.ts`
+  y de ella salen **a la vez** la página pública y un guard que escanea el repo buscando destinos de salida y
+  **falla si el producto habla con un host que no esté declarado**.
+  - **La distinción que lo hace utilizable sin falsos positivos:** enviar datos a un host ≠ citar una URL. El
+    repo está lleno de enlaces a eur-lex, ilga.gov y cppa.ca.gov porque el contenido regulatorio cita sus
+    fuentes; ninguno recibe nada. El guard mira solo dos sitios donde un host significa flujo real: el
+    argumento de `fetch(...)` y la allowlist de la CSP. Un guard con falsos positivos se acaba desactivando —
+    la misma lección que el de copy prohibido.
+  - **Verificado con 3 mutaciones**, no por deducción: un `fetch` a PostHog (cazado, con el fichero), un host
+    nuevo en la CSP (cazado) y reclasificar un proveedor de IA como si tratara datos de cliente (cazado por
+    dos tests distintos). Ese tercero es el que importa: la página afirma que los modelos solo ven texto
+    normativo público, y el día que alguien mande el inventario de un cliente a un modelo, esa frase pasa a
+    ser mentira **en una página legal**.
+  - **La identidad del responsable no se inventa** (`entity.ts`), aplicando el precedente de `site-url.ts`.
+    Pero aquí fallar el build habría bloqueado desplegar el resto del producto, así que se degrada de forma
+    que el hueco sea imposible de pasar por alto: aviso de borrador arriba del todo, `noindex`, y fuera del
+    sitemap. El modo de fallo temido no era una excepción, era **una página que parece terminada**.
+  - **Hallazgo colateral que se cazó por probar los dos estados, no uno:** las páginas legales son dinámicas y
+    el sitemap se prerenderizaba en el build. Rellenar los datos en Vercel habría dejado las páginas
+    indexables mientras el sitemap seguía sin listarlas hasta el siguiente despliegue — la divergencia
+    silenciosa exacta que el diseño pretendía evitar. Se arregló con `force-dynamic` y se comprobó levantando
+    el servidor **con y sin** las variables. Método que conviene repetir: verificar un fallback no es
+    comprobar que funciona sin los datos, es comprobar **las dos mitades del interruptor**.
+  - **Decisiones que se dejaron al fundador en vez de suponerlas** (§1.4-ter): dónde está constituida la
+    sociedad —hay un correo `.mx` en el pie, y si la entidad no está en la UE el art. 27 RGPD obliga a designar
+    representante— y la revisión de abogado. Y una posición que se dejó escrita para que un jurista la
+    confirme en cinco minutos: no hay banner de cookies, lo cual es defendible (primera parte, agregada, sin
+    cesión, sin cruce, con rechazo explícito y respeto de GPC/DNT) pero **es una posición, no una certeza**.
+
 - **2026-08-04** · **0033 y 0034 aplicadas. La verificación que valió fue la que apagó el servidor.**
   El fundador pegó las dos migraciones. `verify:backend` sube a **43 comprobaciones** (de 28) porque sus dos
   bloques adaptativos pasaron de comprobar la degradación a comprobar el comportamiento real.
