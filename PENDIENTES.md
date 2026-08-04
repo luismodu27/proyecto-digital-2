@@ -468,8 +468,27 @@
       Verificados los cuatro escenarios de build de verdad: despliegue sin variable → falla con el mensaje que
       dice qué poner; con variable → compila y canonical/hreflang/sitemap/robots salen con ese dominio; typo
       con ruta → falla; build local/CI → compila con `localhost`. `medio · S`
-- [ ] **Revisar `force-dynamic` de más y consolidar N queries en RPC** — abre caché con invalidación por tag.
-      `bajo-medio · M/L`
+- [x] **Revisar `force-dynamic` y consolidar consultas** — ✅ **HECHO (2026-08-04)**. Las dos mitades del
+      ticket acabaron en sitios distintos, una en código y otra en una decisión razonada.
+      **Lo que se arregló, y no era N+1:** la fachada ya agrupaba bien (cero consultas dentro de bucles; el
+      export usa `.in()` por lotes). El coste estaba en otro sitio y era **más caro**: cada getter que
+      necesitaba el id del usuario preguntaba a **Supabase Auth por red**, y en el layout eso pasaba **tres
+      veces** —`getCurrentUser`, `getUserOrgs` y `getCurrentRole`— antes de pedir un solo dato. Medida aislada
+      contra el Supabase real: esa ida y vuelta cuesta **~90 ms, tanto como una consulta de datos entera**.
+      Ahora se verifica el **JWT en local**, que es exactamente lo que ya hacía el middleware desde el Sprint 2,
+      y `cache()` lo deduplica: **de 3 idas y vueltas de autenticación a 0** en el camino de lectura.
+      **Medido, 21 muestras por ruta, con las distribuciones sin solaparse:** portada **505 → 402 ms (−20 %)**,
+      equipo **597 → 498 ms (−17 %)**. Verificado antes que nada que sigue funcionando: sesión real por curl,
+      `/dashboard` responde 200 y salen el correo, el nombre del perfil y el nombre de la organización.
+      **Sobre la seguridad, sin adornos:** `getUser()` detecta una sesión revocada y la verificación local no,
+      hasta que el token expira. Pero eso no protegía los datos — PostgREST valida el mismo JWT igual de local,
+      así que la RLS los serviría por API de todas formas. Cambiaba cuándo se redirige una pantalla, no a qué
+      se puede acceder.
+      **Lo que NO se hace, y por qué:** quitar los `force-dynamic` sería un no-op —el layout raíz lee `headers()`
+      y eso ya hace dinámica toda la app, decisión que tomaste tú al elegir seguridad en la landing— y abrir
+      caché de ruta con invalidación por tag significaría **cachear HTML por inquilino**: un error en la clave
+      de caché enseña el expediente de una organización a otra. En un producto multi-tenant de compliance esa
+      apuesta no compensa por unos milisegundos. `bajo-medio · M/L`
 - [x] **Adelgazar fuentes (Fraunces / Geist_Mono)** — ✅ **HECHO (2026-08-04)**. El peso no estaba donde
       decía el ticket: las tres familias se usan de verdad en la landing (titulares, texto y las tres etiquetas
       en mono), así que no sobraba ninguna. Lo que sobraba era un **eje**: Fraunces se cargaba con `SOFT`

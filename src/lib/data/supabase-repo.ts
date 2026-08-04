@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveOrg } from "./context";
+import { getActiveOrg, getCurrentUser } from "./context";
 import { toAuditEntry, type RawAudit } from "@/lib/audit";
 import type {
   ActionTask,
@@ -329,9 +329,11 @@ export async function getSystemDossier(
 /** Organizaciones a las que pertenece el usuario actual (para el selector). */
 export async function getUserOrgs(): Promise<UserOrg[]> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // `getCurrentUser` lleva `cache()` y verifica el JWT en local: sin esto, el
+  // layout pagaba una ida y vuelta a Supabase Auth por CADA getter que
+  // necesitaba el id del usuario (aquí, en `getCurrentRole` y en el propio
+  // layout), tres veces lo mismo antes de pedir un solo dato.
+  const user = await getCurrentUser();
   if (!user) return [];
 
   const { data: mems } = await supabase
@@ -886,9 +888,7 @@ export async function getCurrentMemberRole(): Promise<MemberRole | null> {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return null;
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null;
   const { data } = await supabase
     .from("memberships")
