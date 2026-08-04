@@ -416,8 +416,20 @@
       `medio · M`
 - [ ] **Rate-limit distribuido (Upstash / Vercel KV)** — el `Map` en memoria no protege en serverless
       multi-instancia; crítico si se extiende a login/reset/checkout. `medio · M`
-- [ ] **Fail-fast del dominio en build (`NEXT_PUBLIC_APP_URL`)** — sin la var, canonical/hreflang/sitemap apuntan
-      al placeholder de Vercel y rompen la indexación **en silencio**. `medio · S`
+- [x] **Fail-fast del dominio en build (`NEXT_PUBLIC_APP_URL`)** — ✅ **HECHO (2026-08-04)**.
+      🔴 **Requiere una acción tuya antes de que esto llegue a `main` → §1.4.**
+      El problema no era que faltara una comprobación: era que había un **default plausible**. Los tres sitios
+      que necesitan la URL absoluta repetían `?? "https://attesta-io.vercel.app"`, así que el día que cambie
+      el dominio y se olvide la variable, la app **no se rompe** — sigue sirviendo canonical, hreflang, sitemap
+      y enlaces de correo apuntando al host viejo, que un buscador lee como «la buena está en otro sitio».
+      Ahora hay un único `src/lib/site-url.ts`: la variable manda, en un despliegue sin ella **no hay build**,
+      y fuera de un despliegue (tu portátil, CI) se usa `localhost` sin quejarse. Un valor mal escrito falla
+      siempre —barra final, ruta dentro, esquema raro—; se **rechaza** en vez de recortarlo, porque adivinar
+      la intención produce canonicals a medias que nadie mira hasta que cae el tráfico.
+      11 tests, 5 mutaciones inyectadas y las 5 fallaron (la que más importa: volver a poner un default).
+      Verificados los cuatro escenarios de build de verdad: despliegue sin variable → falla con el mensaje que
+      dice qué poner; con variable → compila y canonical/hreflang/sitemap/robots salen con ese dominio; typo
+      con ruta → falla; build local/CI → compila con `localhost`. `medio · S`
 - [ ] **Revisar `force-dynamic` de más y consolidar N queries en RPC** — abre caché con invalidación por tag.
       `bajo-medio · M/L`
 - [ ] **Adelgazar fuentes (Fraunces / Geist_Mono)** — KB en el critical path del LCP. `bajo · S`
@@ -553,6 +565,19 @@ order by o.name;
 update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
 -- o 'enterprise'
 ```
+
+### 1.4-bis · 🔴 ANTES DE DESPLEGAR: define `NEXT_PUBLIC_APP_URL` en Vercel
+**Qué:** Vercel → tu proyecto → *Settings → Environment Variables* → `NEXT_PUBLIC_APP_URL` =
+`https://attesta-io.vercel.app` (o tu dominio propio cuando lo tengas), **sin barra final y sin ruta**.
+Márcala para *Production* y *Preview*.
+
+**Por qué ahora:** desde el commit del fail-fast, un despliegue **sin** esa variable **no compila** — a
+propósito. Antes había un dominio por defecto escondido en el código, y eso hacía que un cambio de dominio
+rompiera la indexación y los enlaces de los correos **sin dar ningún error**. Ahora avisa en el acto.
+
+**Riesgo si no la pones:** el build de Vercel falla y no se publica nada nuevo. **La web actual sigue en
+pie** (Vercel conserva el último despliegue bueno), así que no hay caída — pero tampoco despliegue, hasta
+que la definas. Son dos minutos.
 
 ### 1.1-undecies · 🔴 Migración 0033 (idioma del contenido guardado) — PENDIENTE DE PEGAR
 **Qué hace:** añade una columna `locale` a `gap_items`, `risk_assessments` y `action_tasks`. Nada más:

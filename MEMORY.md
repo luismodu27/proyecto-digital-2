@@ -127,6 +127,32 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **Sprint 5 · el bug no era la comprobación que faltaba, era el default que sobraba.**
+  Los tres sitios que necesitan la URL absoluta del sitio —`layout.tsx` (metadataBase/OG), `i18n/metadata.ts`
+  (canonical + hreflang, y de ahí sitemap y robots) y `reminders/email.ts` (enlaces de los correos)— repetían
+  `process.env.NEXT_PUBLIC_APP_URL ?? "https://attesta-io.vercel.app"`. Parece una red de seguridad y es lo
+  contrario: **hace que el fallo no se note**. El día que el dominio cambie y se olvide la variable, la app no
+  se rompe — sigue publicando canonical, hreflang, sitemap y enlaces de correo hacia el host viejo, que un
+  buscador lee como «la versión buena está en otro sitio» y deja de indexar la nueva. Se descubre semanas
+  después, mirando por qué no entra tráfico.
+  - **La regla:** en un despliegue, sin variable no hay build. Una build rota se arregla en dos minutos; una
+    indexación rota, no. Fuera de un despliegue (portátil, CI) se usa `localhost` y no se molesta a nadie:
+    ahí la URL absoluta no la ve nadie. La señal de «esto es un despliegue» es `VERCEL`, no `NODE_ENV` —
+    `next build` pone `NODE_ENV=production` también en CI, y usarlo habría roto CI sin motivo.
+  - **Un valor mal escrito se rechaza, no se recorta.** Barra final, una ruta dentro (`https://attesta.io/en`,
+    lo que sale de copiar la URL de una página), esquema raro. Recortar sería adivinar la intención, y adivinar
+    mal aquí produce canonicals a medias, que es exactamente el fallo silencioso que se quería eliminar. Si
+    alguien se molestó en poner la variable, un typo merece saberse en el acto.
+  - **El test que más importa** no comprueba un caso, comprueba que **ningún camino** devuelve un dominio de
+    producción que nadie declaró — el guard contra el «arreglo» tentador de volver a poner un default cuando
+    la build falle. 5 mutaciones inyectadas, las 5 detectadas.
+  - **Verificado ejecutando los cuatro builds**, no razonándolos: despliegue sin variable → falla con el
+    mensaje que dice qué poner; con variable → compila y canonical/hreflang/sitemap/robots salen con ese
+    dominio (comprobado sobre el HTML servido); typo con ruta → falla; build local → compila con localhost.
+  - **Deuda que crea, y es deliberada:** el fundador tiene que definir `NEXT_PUBLIC_APP_URL` en Vercel antes de
+    que esto llegue a `main` (§1.4-bis de PENDIENTES). Si no lo hace, el build falla y no se publica nada
+    nuevo — pero la web actual sigue en pie, porque Vercel conserva el último despliegue bueno.
+
 - **2026-08-04** · **Sprint 5 · el idioma de lo que se guarda: `null` no es «español», es «no consta».**
   El texto regulatorio que Attesta escribe en la BD (controles de un pack, motivación de una evaluación,
   tareas nacidas de una recomendación) se congela en el idioma en que se creó. Al cambiar la interfaz, salía

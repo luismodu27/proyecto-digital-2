@@ -1,8 +1,7 @@
 import type { OrgReminders } from "./collect";
+import { SITE_URL as APP_URL } from "@/lib/site-url";
 
 const RESEND_FROM = process.env.RESEND_FROM ?? "Attesta <onboarding@resend.dev>";
-const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://attesta-io.vercel.app";
 
 /** ¿Está el envío de correo configurado? (Resend). */
 export function isEmailConfigured(): boolean {

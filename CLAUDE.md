@@ -223,6 +223,11 @@ docs/{supabase.md,thesis.md}
   las invitaciones (bugs ya corregidos).
 - **Build necesita `.env.local`:** `next build` inlinea `NEXT_PUBLIC_*` en el cliente. Si compilas sin
   `.env.local`, el bundle queda en modo demo aunque runtime tenga las vars.
+- **El dominio público no tiene default (`src/lib/site-url.ts`).** `NEXT_PUBLIC_APP_URL` manda; en un
+  despliegue (`VERCEL` presente) sin ella el **build falla**; fuera de un despliegue se usa `localhost`.
+  Un valor con barra final, ruta o esquema raro se **rechaza**, no se recorta. El default plausible que
+  había antes era el bug: un cambio de dominio rompía canonical/hreflang/sitemap y los enlaces de los
+  correos sin que nada se quejara. No reintroducir un `?? "https://…"` en ningún sitio.
 - **Verificación del backend real = curl, no navegador.** El Chromium headless de Playwright NO usa el
   proxy de salida → no alcanza Supabase. Verifica el flujo real por API con `curl` (sí usa proxy),
   con usuarios de prueba `*@attesta-test.dev`.

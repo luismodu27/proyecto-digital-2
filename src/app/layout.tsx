@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import { localeFromHeader } from "@/lib/i18n/resolve";
+import { SITE_URL } from "@/lib/site-url";
 import { PageView } from "@/components/telemetry/PageView";
 import "./globals.css";
 
@@ -21,7 +22,7 @@ const fraunces = Fraunces({
   axes: ["opsz", "SOFT"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://attesta-io.vercel.app";
+
 const OG_DESC =
   "Inventaría tus sistemas de IA, clasifica su riesgo (EU AI Act + EE. UU.) y genera evidencia lista para auditoría. Compliance de IA sin equipo GRC.";
 
