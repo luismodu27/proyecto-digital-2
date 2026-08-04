@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
 import type { MemberRole } from "@/lib/mock-data";
+import { MAX_REF, text } from "./form";
 
 const VIGILANCIA = "/dashboard/vigilancia";
 const VALID_STATUS = ["reviewed", "planned", "not_applicable"];
@@ -37,7 +38,7 @@ export async function setEventStatus(formData: FormData) {
     redirect(`${VIGILANCIA}?toast=team-forbidden`);
   }
 
-  const eventId = String(formData.get("eventId") ?? "").trim();
+  const eventId = text(formData.get("eventId"), MAX_REF) ?? "";
   const status = String(formData.get("status") ?? "");
   if (!eventId) redirect(VIGILANCIA);
 

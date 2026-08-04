@@ -6,11 +6,20 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { logIncident } from "@/lib/observability/log";
 import { EVIDENCE_KINDS, EVIDENCE_STATUSES } from "@/lib/suppliers/evidence";
+import {
+  bool as on,
+  date,
+  MAX_NAME,
+  MAX_NOTE,
+  MAX_REF,
+  pick,
+  text,
+  url,
+  uuid,
+} from "./form";
 import { getActiveOrg } from "./context";
 
 const SUPPLIERS = "/dashboard/proveedores";
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const AI_ACT_ROLES = [
   "provider",
@@ -19,8 +28,8 @@ const AI_ACT_ROLES = [
   "model_provider",
   "third_party",
   "unknown",
-];
-const GDPR_ROLES = ["controller", "processor", "joint", "none", "unknown"];
+] as const;
+const GDPR_ROLES = ["controller", "processor", "joint", "none", "unknown"] as const;
 
 /** El catálogo de tipos es el de código: la BD no lo repite (ver 0032). */
 const KIND_SET = new Set(EVIDENCE_KINDS.map((k) => k.key));
@@ -43,28 +52,13 @@ async function ctx() {
   return { supabase, org, user };
 }
 
-const uuid = (v: FormDataEntryValue | null): string | null => {
-  const s = String(v ?? "").trim();
-  return UUID_RE.test(s) ? s : null;
-};
-const date = (v: FormDataEntryValue | null): string | null => {
-  const s = String(v ?? "").trim();
-  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : null;
-};
-const text = (v: FormDataEntryValue | null): string | null =>
-  String(v ?? "").trim() || null;
-const on = (v: FormDataEntryValue | null) => v === "on" || v === "true";
-const pick = (v: FormDataEntryValue | null, allowed: string[], fallback: string) => {
-  const s = String(v ?? "");
-  return allowed.includes(s) ? s : fallback;
-};
 
 /** Da de alta un proveedor o tercero. */
 export async function createSupplier(formData: FormData) {
   if (!isSupabaseConfigured) redirect(`${SUPPLIERS}?toast=supplier-demo`);
   const { supabase, org, user } = await ctx();
 
-  const name = String(formData.get("name") ?? "").trim();
+  const name = text(formData.get("name"), MAX_NAME);
   if (!name) redirect(SUPPLIERS);
 
   const { error } = await supabase.from("suppliers").insert({
@@ -80,7 +74,7 @@ export async function createSupplier(formData: FormData) {
     contract_ends_on: date(formData.get("contractEndsOn")),
     dpa_signed: on(formData.get("dpaSigned")),
     excludes_high_risk_use: on(formData.get("excludesHighRiskUse")),
-    note: text(formData.get("note")),
+    note: text(formData.get("note"), MAX_NOTE),
     created_by: user.id,
   });
 
@@ -112,7 +106,7 @@ export async function updateSupplier(formData: FormData) {
       contract_ends_on: date(formData.get("contractEndsOn")),
       dpa_signed: on(formData.get("dpaSigned")),
       excludes_high_risk_use: on(formData.get("excludesHighRiskUse")),
-      note: text(formData.get("note")),
+      note: text(formData.get("note"), MAX_NOTE),
     })
     .eq("organization_id", org)
     .eq("id", id);
@@ -169,10 +163,10 @@ export async function saveSupplierEvidence(formData: FormData) {
     status,
     requested_on: date(formData.get("requestedOn")),
     received_on: date(formData.get("receivedOn")),
-    document_version: text(formData.get("documentVersion")),
-    source_url: text(formData.get("sourceUrl")),
+    document_version: text(formData.get("documentVersion"), MAX_REF),
+    source_url: url(formData.get("sourceUrl")),
     expires_on: EXPIRING.has(kind) ? date(formData.get("expiresOn")) : null,
-    note: text(formData.get("note")),
+    note: text(formData.get("note"), MAX_NOTE),
   };
 
   const id = uuid(formData.get("id"));

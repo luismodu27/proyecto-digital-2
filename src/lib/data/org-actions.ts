@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ACTIVE_ORG_COOKIE } from "./context";
+import { uuid } from "./form";
 
 /**
  * Cambia la organización activa del usuario. Valida que sigue siendo miembro de
@@ -14,7 +15,7 @@ import { ACTIVE_ORG_COOKIE } from "./context";
  */
 export async function switchOrg(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/dashboard");
-  const orgId = String(formData.get("orgId") ?? "");
+  const orgId = uuid(formData.get("orgId")) ?? "";
   if (!orgId) redirect("/dashboard");
 
   const supabase = await createClient();

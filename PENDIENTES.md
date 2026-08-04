@@ -426,8 +426,32 @@
       HTML, así que es coste en el critical path de la página de mayor valor de conversión. A investigar: cuánto
       de eso es el diccionario i18n serializado (que ya nos ha dado dos falsos positivos al medir) y cuánto son
       componentes cliente que podrían no serlo. `medio · M`
-- [ ] **Validación con Zod en Server Actions** — hoy es artesanal (enums sin whitelist, sin límites de longitud).
-      `medio · M`
+- [x] **Validación de entrada en las Server Actions** — ✅ **HECHO (2026-08-04). Sin Zod, y el ticket estaba
+      medio equivocado.** Auditado sobre el código: los **enums SÍ tenían whitelist** en todas las acciones (eso
+      se arregló en el blindaje del Sprint 2). Lo que era cierto del todo es lo otro: **ningún campo de texto
+      tenía tope**. Un miembro autenticado —o una cuenta comprometida— podía escribir megabytes en la nota de un
+      proveedor o el título de una tarea: Postgres los acepta encantado, la factura sube y la pantalla que los
+      pinta revienta. Y había un defecto estructural detrás: los ayudantes (`uuid`, `date`, `text`, `on`) estaban
+      **copiados en cuatro ficheros**, así que arreglar uno no arreglaba los demás.
+      **Por qué no Zod:** hacía falta *un solo sitio con topes*, no un lenguaje de validación. Las acciones no
+      devuelven errores por campo (redirigen con un toast), así que los mensajes ricos de un validador aquí
+      valen cero, y el proyecto tiene seis dependencias directas a propósito. Si algún día hay que devolver
+      errores por campo al formulario, ese es el momento de reconsiderarlo — queda escrito en el módulo.
+      **`src/lib/data/form.ts`** con una regla de diseño explícita: **truncar el texto libre, rechazar lo que
+      tiene estructura.** Un texto largo casi siempre es alguien pegando de un documento y abortar sería
+      castigarle por un fallo nuestro de UI; en cambio un uuid, una fecha o una URL mal formados no tienen nada
+      que salvar. **Media URL no es una URL corta, es una URL a otro sitio**, así que esas se rechazan por
+      longitud en vez de recortarse.
+      **Tres agujeros reales cerrados de paso:** (1) `bias_audit_summary_url` y `evidenceUrl` aceptaban
+      cualquier esquema y acaban en un `href` del dossier — un `javascript:` ahí es un XSS almacenado firmado
+      por la propia organización; ahora solo http/https. (2) Fechas como `2026-02-31` pasaban la expresión
+      regular y llegaban a Postgres (`new Date` no falla: desborda a marzo); ahora se comprueban contra el
+      calendario. (3) Los `id` que se interpolan en rutas de redirección (`/inventario/${id}/editar`) se validan
+      como uuid: sin eso, un `../..` movía el destino.
+      **9 ficheros de acciones** pasan ya por el módulo, cero helpers duplicados. 19 tests, **7 mutaciones
+      inyectadas y las 7 fallaron**. Y un **guard sobre el código fuente** (`form.guard.test.ts`, se autoprueba)
+      que falla si una acción nueva vuelve a leer texto sin tope — verificado reintroduciendo la regresión a
+      mano: la caza y dice en qué fichero y en qué línea. `medio · M`
 - [ ] **Rate-limit distribuido (Upstash / Vercel KV)** — el `Map` en memoria no protege en serverless
       multi-instancia; crítico si se extiende a login/reset/checkout. `medio · M`
 - [x] **Fail-fast del dominio en build (`NEXT_PUBLIC_APP_URL`)** — ✅ **HECHO (2026-08-04)**.

@@ -12,15 +12,24 @@ import { resolveLocale } from "@/lib/i18n/resolve";
 import { trackServer } from "@/lib/telemetry/server";
 import { logDataFallback, logIncident } from "@/lib/observability/log";
 import { checkQuota } from "@/lib/billing/quota";
+import {
+  date as isoDate,
+  MAX_NAME,
+  MAX_NOTE,
+  MAX_REF,
+  pick,
+  text,
+  url,
+  uuid,
+} from "./form";
 
+const ACTOR_ROLES = ["deployer", "provider"] as const;
 const SEVERITY_EN: Record<string, string> = {
   alta: "high",
   media: "medium",
   baja: "low",
 };
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Verifica que un `ai_system` existe y pertenece a la organización activa.
@@ -33,7 +42,7 @@ async function systemBelongsToOrg(
   org: string,
   systemId: string,
 ): Promise<boolean> {
-  if (!UUID_RE.test(systemId)) return false;
+  if (!uuid(systemId)) return false;
   const { data } = await supabase
     .from("ai_systems")
     .select("id")
@@ -96,7 +105,7 @@ async function recomputeReadiness(
 export async function applyPolicyPack(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/dashboard/packs");
 
-  const systemId = String(formData.get("systemId") ?? "");
+  const systemId = uuid(formData.get("systemId"));
   if (!systemId) redirect("/dashboard/packs");
 
   // Resolvemos el locale para insertar los controles en el idioma de la UI: en
@@ -198,7 +207,7 @@ export async function createAiSystem(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const name = String(formData.get("name") ?? "").trim();
+  const name = text(formData.get("name"), MAX_NAME);
   if (!name) redirect("/dashboard/inventario/nuevo");
 
   // Cupo de sistemas del plan. Se comprueba DESPUÉS de validar el nombre para no
@@ -210,11 +219,10 @@ export async function createAiSystem(formData: FormData) {
   const { error } = await supabase.from("ai_systems").insert({
     organization_id: org,
     name,
-    owner: (String(formData.get("owner") ?? "").trim() || null) as string | null,
-    domain: (String(formData.get("domain") ?? "").trim() || null) as string | null,
-    vendor: (String(formData.get("vendor") ?? "").trim() || null) as string | null,
-    actor_role: (String(formData.get("actor_role") ?? "deployer") ||
-      "deployer") as string,
+    owner: text(formData.get("owner"), MAX_NAME),
+    domain: text(formData.get("domain"), MAX_NAME),
+    vendor: text(formData.get("vendor"), MAX_NAME),
+    actor_role: pick(formData.get("actor_role"), ACTOR_ROLES, "deployer"),
     created_by: user?.id,
   });
   if (error) {
@@ -312,24 +320,24 @@ export async function seedSampleData() {
 /** Edita los campos de un sistema de IA. */
 export async function updateAiSystem(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/dashboard/inventario");
-  const id = String(formData.get("id") ?? "");
+  const id = uuid(formData.get("id"));
   if (!id) redirect("/dashboard/inventario");
 
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
 
-  const name = String(formData.get("name") ?? "").trim();
+  const name = text(formData.get("name"), MAX_NAME);
   if (!name) redirect(`/dashboard/inventario/${id}/editar`);
 
   const { error } = await supabase
     .from("ai_systems")
     .update({
       name,
-      owner: String(formData.get("owner") ?? "").trim() || null,
-      domain: String(formData.get("domain") ?? "").trim() || null,
-      vendor: String(formData.get("vendor") ?? "").trim() || null,
-      actor_role: String(formData.get("actor_role") ?? "deployer") || "deployer",
+      owner: text(formData.get("owner"), MAX_NAME),
+      domain: text(formData.get("domain"), MAX_NAME),
+      vendor: text(formData.get("vendor"), MAX_NAME),
+      actor_role: pick(formData.get("actor_role"), ACTOR_ROLES, "deployer"),
       updated_at: new Date().toISOString(),
     })
     .eq("organization_id", org)
@@ -344,7 +352,7 @@ export async function updateAiSystem(formData: FormData) {
 /** Borra un sistema (y en cascada sus evaluaciones y brechas). */
 export async function deleteAiSystem(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/dashboard/inventario");
-  const id = String(formData.get("id") ?? "");
+  const id = uuid(formData.get("id"));
   if (!id) redirect("/dashboard/inventario");
 
   const supabase = await createClient();
@@ -376,8 +384,8 @@ export async function createGapItem(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const aiSystemId = String(formData.get("systemId") ?? "");
-  const requirement = String(formData.get("requirement") ?? "").trim();
+  const aiSystemId = uuid(formData.get("systemId"));
+  const requirement = text(formData.get("requirement"), MAX_NOTE);
   if (!aiSystemId || !requirement) redirect("/dashboard/gap/nuevo");
   if (!(await systemBelongsToOrg(supabase, org, aiSystemId))) {
     redirect("/dashboard/gap/nuevo?toast=gap-error");
@@ -388,7 +396,7 @@ export async function createGapItem(formData: FormData) {
     organization_id: org,
     ai_system_id: aiSystemId,
     requirement,
-    article: String(formData.get("article") ?? "").trim() || null,
+    article: text(formData.get("article"), MAX_REF),
     severity: SEVERITY_EN[String(formData.get("severity") ?? "media")] ?? "medium",
     status: ["missing", "partial", "done"].includes(status) ? status : "missing",
     created_by: user?.id,
@@ -407,7 +415,7 @@ export async function createGapItem(formData: FormData) {
 /** Elimina una brecha del gap assessment. */
 export async function deleteGapItem(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/dashboard/gap");
-  const id = String(formData.get("id") ?? "");
+  const id = uuid(formData.get("id"));
   if (!id) redirect("/dashboard/gap");
 
   const supabase = await createClient();
@@ -437,7 +445,7 @@ export async function deleteGapItem(formData: FormData) {
 /** Cambia el estado de una brecha (falta / parcial / cubierto). */
 export async function updateGapStatus(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/dashboard/gap");
-  const id = String(formData.get("id") ?? "");
+  const id = uuid(formData.get("id"));
   const status = String(formData.get("status") ?? "");
   if (!id || !["missing", "partial", "done"].includes(status)) {
     redirect("/dashboard/gap");
@@ -473,18 +481,16 @@ export async function updateGapStatus(formData: FormData) {
  */
 export async function saveBiasAudit(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/dashboard/inventario");
-  const id = String(formData.get("id") ?? "");
+  const id = uuid(formData.get("id"));
   if (!id) redirect("/dashboard/inventario");
 
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) redirect("/onboarding");
 
-  const dateOrNull = (key: string) => {
-    const v = String(formData.get(key) ?? "").trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
-  };
-  const textOrNull = (key: string) => String(formData.get(key) ?? "").trim() || null;
+  const dateOrNull = (key: string) => isoDate(formData.get(key));
+  // `back` interpola el id en una ruta: validarlo como uuid (arriba) es lo que
+  // impide que un `../..` mueva el destino de la redirección.
 
   const back = `/dashboard/inventario/${id}/editar`;
   const { error } = await supabase
@@ -492,10 +498,10 @@ export async function saveBiasAudit(formData: FormData) {
     .update({
       is_aedt: formData.get("is_aedt") === "on",
       last_bias_audit_date: dateOrNull("last_bias_audit_date"),
-      independent_auditor_name: textOrNull("independent_auditor_name"),
+      independent_auditor_name: text(formData.get("independent_auditor_name"), MAX_NAME),
       auditor_independence_confirmed:
         formData.get("auditor_independence_confirmed") === "on",
-      bias_audit_summary_url: textOrNull("bias_audit_summary_url"),
+      bias_audit_summary_url: url(formData.get("bias_audit_summary_url")),
       summary_published_date: dateOrNull("summary_published_date"),
       updated_at: new Date().toISOString(),
     })
@@ -540,10 +546,13 @@ export async function saveRiskAssessment(
     data: { user },
   } = await supabase.auth.getUser();
 
-  const note = evidence?.note?.trim() || null;
-  const url = evidence?.url?.trim() || null;
+  // Esta acción no recibe un FormData: la llama el asistente de riesgo con un
+  // objeto. Pasa por los mismos ayudantes igualmente — el origen del dato no lo
+  // hace de fiar, y `evidenceUrl` acaba en un enlace del dossier.
+  const note = text(evidence?.note, MAX_NOTE);
+  const evidenceUrl = url(evidence?.url);
   // "Con evidencia" solo si se aportó una nota o un enlace de soporte.
-  const evidenceState = note || url ? "evidenced" : "declared";
+  const evidenceState = note || evidenceUrl ? "evidenced" : "declared";
 
   const row = {
     organization_id: org,
@@ -554,9 +563,9 @@ export async function saveRiskAssessment(
     citations: result.citations,
     obligations: result.obligations,
     assessed_by: user?.id,
-    attested_by_name: evidence?.attestedByName?.trim() || null,
+    attested_by_name: text(evidence?.attestedByName, MAX_NAME),
     evidence_note: note,
-    evidence_url: url,
+    evidence_url: evidenceUrl,
     evidence_state: evidenceState,
     // Idioma del texto regulatorio que se congela en esta fila —motivación, citas
     // y obligaciones— (migración 0033). El clasificador ya se ejecutó en el idioma

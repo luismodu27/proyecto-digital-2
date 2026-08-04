@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
+import { text, uuid } from "./form";
 import { trackServer } from "@/lib/telemetry/server";
 import { checkQuota } from "@/lib/billing/quota";
 import type { MemberRole } from "@/lib/mock-data";
@@ -40,7 +41,8 @@ export async function inviteMember(formData: FormData) {
   if (!ctx) redirect("/onboarding");
   if (ctx.role !== "owner" && ctx.role !== "admin") back("team-forbidden");
 
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  // 254 = longitud máxima de una dirección de correo (RFC 5321).
+  const email = (text(formData.get("email"), 254) ?? "").toLowerCase();
   const role = String(formData.get("role") ?? "member") as MemberRole;
   if (!email || !email.includes("@")) back("team-bademail");
   if (!VALID_ROLES.includes(role)) back("team-error");
@@ -78,7 +80,7 @@ export async function updateMemberRole(formData: FormData) {
   if (!ctx) redirect("/onboarding");
   if (ctx.role !== "owner" && ctx.role !== "admin") back("team-forbidden");
 
-  const userId = String(formData.get("userId") ?? "");
+  const userId = uuid(formData.get("userId")) ?? "";
   const role = String(formData.get("role") ?? "") as MemberRole;
   if (!userId || !VALID_ROLES.includes(role)) back("team-error");
 
@@ -118,7 +120,7 @@ export async function removeMember(formData: FormData) {
   if (!ctx) redirect("/onboarding");
   if (ctx.role !== "owner" && ctx.role !== "admin") back("team-forbidden");
 
-  const userId = String(formData.get("userId") ?? "");
+  const userId = uuid(formData.get("userId")) ?? "";
   if (!userId) back("team-error");
 
   const { data: members } = await ctx.supabase
@@ -151,7 +153,7 @@ export async function revokeInvitation(formData: FormData) {
   if (!ctx) redirect("/onboarding");
   if (ctx.role !== "owner" && ctx.role !== "admin") back("team-forbidden");
 
-  const id = String(formData.get("id") ?? "");
+  const id = uuid(formData.get("id")) ?? "";
   if (!id) back("team-error");
 
   const { error } = await ctx.supabase

@@ -7,11 +7,10 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { logIncident } from "@/lib/observability/log";
 import { INCIDENT_CATEGORIES, NOTIFY_TARGETS, SERIOUSNESS } from "@/lib/incidents/incidents";
 import { REVIEW_CADENCE_CHOICES } from "@/lib/incidents/review";
+import { bool as on, date, MAX_NAME, MAX_NOTE, text, uuid } from "./form";
 import { getActiveOrg } from "./context";
 
 const INCIDENTS = "/dashboard/incidentes";
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Columna de fecha por destinatario. La ÚNICA vía de escritura a esos campos:
  *  así un `target` manipulado no puede tocar ninguna otra columna. */
@@ -38,17 +37,8 @@ async function ctx() {
   return { supabase, org, user };
 }
 
-function cleanUuid(v: FormDataEntryValue | null): string | null {
-  const s = String(v ?? "").trim();
-  return UUID_RE.test(s) ? s : null;
-}
 
-function cleanDate(v: FormDataEntryValue | null): string | null {
-  const s = String(v ?? "").trim();
-  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : null;
-}
 
-const on = (v: FormDataEntryValue | null) => v === "on" || v === "true";
 
 /** Categorías del Art. 3.49 marcadas, filtradas contra el catálogo cerrado. */
 function cleanCategories(values: FormDataEntryValue[]): string[] {
@@ -73,7 +63,7 @@ export async function createIncident(formData: FormData) {
   if (!isSupabaseConfigured) redirect(`${INCIDENTS}?toast=incident-demo`);
   const { supabase, org, user } = await ctx();
 
-  const title = String(formData.get("title") ?? "").trim();
+  const title = text(formData.get("title"), MAX_NAME);
   if (!title) redirect(INCIDENTS);
 
   const seriousness = String(formData.get("seriousness") ?? "under_assessment");
@@ -81,12 +71,12 @@ export async function createIncident(formData: FormData) {
 
   const { error } = await supabase.from("incidents").insert({
     organization_id: org,
-    ai_system_id: cleanUuid(formData.get("systemId")),
+    ai_system_id: uuid(formData.get("systemId")),
     title,
-    detail: String(formData.get("detail") ?? "").trim() || null,
-    occurred_on: cleanDate(formData.get("occurredOn")),
-    aware_on: cleanDate(formData.get("awareOn")) ?? today,
-    causal_link_on: cleanDate(formData.get("causalLinkOn")),
+    detail: text(formData.get("detail"), MAX_NOTE),
+    occurred_on: date(formData.get("occurredOn")),
+    aware_on: date(formData.get("awareOn")) ?? today,
+    causal_link_on: date(formData.get("causalLinkOn")),
     categories: cleanCategories(formData.getAll("categories")),
     seriousness: (SERIOUSNESS as readonly string[]).includes(seriousness)
       ? seriousness
@@ -114,7 +104,7 @@ export async function createIncident(formData: FormData) {
 export async function updateIncidentAssessment(formData: FormData) {
   if (!isSupabaseConfigured) redirect(`${INCIDENTS}?toast=incident-demo`);
   const { supabase, org } = await ctx();
-  const id = cleanUuid(formData.get("id"));
+  const id = uuid(formData.get("id"));
   if (!id) redirect(INCIDENTS);
 
   const seriousness = String(formData.get("seriousness") ?? "under_assessment");
@@ -130,7 +120,7 @@ export async function updateIncidentAssessment(formData: FormData) {
       use_suspended: on(formData.get("useSuspended")),
       provider_unreachable: on(formData.get("providerUnreachable")),
       personal_data_breach: on(formData.get("personalDataBreach")),
-      causal_link_on: cleanDate(formData.get("causalLinkOn")),
+      causal_link_on: date(formData.get("causalLinkOn")),
     })
     .eq("organization_id", org)
     .eq("id", id);
@@ -153,7 +143,7 @@ export async function updateIncidentAssessment(formData: FormData) {
 export async function markIncidentNotified(formData: FormData) {
   if (!isSupabaseConfigured) redirect(`${INCIDENTS}?toast=incident-demo`);
   const { supabase, org } = await ctx();
-  const id = cleanUuid(formData.get("id"));
+  const id = uuid(formData.get("id"));
   const target = String(formData.get("target") ?? "");
   if (!id || !(NOTIFY_TARGETS as readonly string[]).includes(target)) {
     redirect(INCIDENTS);
@@ -162,7 +152,7 @@ export async function markIncidentNotified(formData: FormData) {
   const column = NOTIFY_COLUMN[target as keyof typeof NOTIFY_COLUMN];
   // Fecha vacía = deshacer (se marcó por error). Que sea reversible importa: un
   // registro que no se puede corregir se rellena con miedo o no se rellena.
-  const value = cleanDate(formData.get("date"));
+  const value = date(formData.get("date"));
 
   const { error } = await supabase
     .from("incidents")
@@ -182,7 +172,7 @@ export async function markIncidentNotified(formData: FormData) {
 export async function setIncidentStatus(formData: FormData) {
   if (!isSupabaseConfigured) redirect(`${INCIDENTS}?toast=incident-demo`);
   const { supabase, org } = await ctx();
-  const id = cleanUuid(formData.get("id"));
+  const id = uuid(formData.get("id"));
   const status = String(formData.get("status") ?? "");
   if (!id || (status !== "open" && status !== "closed")) redirect(INCIDENTS);
 
