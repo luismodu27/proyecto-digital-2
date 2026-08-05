@@ -948,6 +948,29 @@ export const en: Dictionary = {
     },
     vault: {
       title: "Evidence vault",
+      keygen: {
+        title: "Generate the signing key",
+        body:
+          "Attesta needs a key pair to sign audit packages. This button generates it right here; you then paste the two values into your deployment's environment variables.",
+        privacyNote:
+          "The private key is generated in this browser and is sent nowhere: not to Attesta, not to anyone. It only leaves this screen when you paste it into your deployment panel.",
+        cta: "Generate key pair",
+        warning:
+          "Copy them NOW. They disappear when you reload this page and you would have to generate new ones. Also store the private key in your password manager: if you lose it, packages already delivered cannot be verified.",
+        keyIdLabel: "Key fingerprint (keyId)",
+        privateLabel: "Private · a secret, server only",
+        publicLabel: "Public · not secret, used to verify",
+        copy: "Copy",
+        copied: "Copied",
+        steps: [
+          "Paste each value into its variable, in Vercel → Settings → Environment Variables, marked for Production.",
+          "Copy only the value: do not include the variable name or the equals sign.",
+          "Redeploy (Deployments → latest → Redeploy). Variables only take effect on a new deployment.",
+          "Check that /api/vault/key returns the same fingerprint shown above.",
+        ],
+        unsupported:
+          "This browser does not support the key type we use (Ed25519). Try an up-to-date Chrome or Edge.",
+      },
       subtitle:
         "The actual documents behind each control, and the package you hand to an auditor.",
       why: "A control marked as done with no document behind it is a statement. With the file inside, it is evidence someone can check.",

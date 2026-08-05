@@ -973,6 +973,29 @@ export const es = {
     },
     vault: {
       title: "Vault de evidencia",
+      keygen: {
+        title: "Generar la clave de firma",
+        body:
+          "Attesta necesita un par de claves para firmar los paquetes de auditoría. Este botón lo genera aquí mismo; luego solo tienes que pegar los dos valores en las variables de entorno de tu despliegue.",
+        privacyNote:
+          "La clave privada se genera en este navegador y no se envía a ningún sitio: ni a Attesta ni a nadie. Solo saldrá de aquí cuando tú la pegues en tu panel de despliegue.",
+        cta: "Generar par de claves",
+        warning:
+          "Cópialas AHORA. Al recargar esta página desaparecen y habría que generar otras. Guarda la privada también en tu gestor de contraseñas: si la pierdes, los paquetes ya entregados no se podrán verificar.",
+        keyIdLabel: "Huella de la clave (keyId)",
+        privateLabel: "Privada · es un secreto, solo servidor",
+        publicLabel: "Pública · no es secreta, sirve para verificar",
+        copy: "Copiar",
+        copied: "Copiado",
+        steps: [
+          "Pega cada valor en su variable, en Vercel → Settings → Environment Variables, marcadas para Production.",
+          "Copia solo el valor: no incluyas el nombre de la variable ni el signo igual.",
+          "Vuelve a desplegar (Deployments → el último → Redeploy). Las variables solo entran con un despliegue nuevo.",
+          "Comprueba que /api/vault/key devuelve la misma huella que aparece arriba.",
+        ],
+        unsupported:
+          "Este navegador no admite el tipo de clave que usamos (Ed25519). Prueba con Chrome o Edge actualizados.",
+      },
       subtitle:
         "Los documentos reales detrás de cada control, y el paquete que se le entrega a un auditor.",
       why: "Un control marcado como hecho sin documento detrás es una declaración. Con el archivo dentro, es evidencia que alguien puede comprobar.",

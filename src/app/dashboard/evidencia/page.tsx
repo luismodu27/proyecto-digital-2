@@ -1,9 +1,16 @@
 import { PageHeader } from "@/components/dashboard/parts";
-import { getAiSystems, getEvidenceFiles, getGapItems, isSupabaseConfigured } from "@/lib/data";
+import {
+  getAiSystems,
+  getEvidenceFiles,
+  getGapItems,
+  getIsPlatformAdmin,
+  isSupabaseConfigured,
+} from "@/lib/data";
 import { getDictionary } from "@/lib/i18n";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { uploadEvidence, deleteEvidence } from "@/lib/data/vault-actions";
 import { loadSigningKey } from "@/lib/vault/signature";
+import { SigningKeyGenerator } from "@/components/dashboard/SigningKeyGenerator";
 
 export const dynamic = "force-dynamic";
 
@@ -24,10 +31,11 @@ export default async function EvidenciaPage() {
   const locale = await resolveLocale();
   const t = getDictionary(locale).dashboard.vault;
 
-  const [files, gaps, systems] = await Promise.all([
+  const [files, gaps, systems, esAdminDePlataforma] = await Promise.all([
     getEvidenceFiles(),
     getGapItems(),
     getAiSystems(),
+    getIsPlatformAdmin().catch(() => false),
   ]);
 
   // Solo se comprueba SI hay clave, nunca se expone nada de ella.
@@ -109,6 +117,18 @@ export default async function EvidenciaPage() {
           </div>
         </dl>
       </section>
+
+      {/*
+        Generador de la clave: SOLO para el equipo de Attesta y SOLO mientras no
+        haya clave. Es una herramienta de puesta en marcha, no una función del
+        producto — un cliente no debe ver nunca este bloque.
+
+        Existe porque la alternativa era pedir que se pegara criptografía en la
+        consola del navegador, y el aviso que Chrome muestra ahí («no pegues
+        código que no entiendas») es correcto: enseñar a saltárselo es enseñar el
+        hábito que usa el fraude por soporte técnico falso.
+      */}
+      {!firmado && esAdminDePlataforma && <SigningKeyGenerator t={t.keygen} />}
 
       {isSupabaseConfigured && (
         <section className="mt-6 rounded-2xl border border-line bg-paper-raised p-6">
