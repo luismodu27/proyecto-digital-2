@@ -35,6 +35,20 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // No revelar la versión de Next en la cabecera X-Powered-By.
   poweredByHeader: false,
+  experimental: {
+    /*
+      El tope por defecto de una Server Action es 1 MB, y el vault de evidencia
+      recibe PDFs escaneados. Sin subirlo, cualquier documento real se rechaza
+      con un error genérico de Next que no dice el motivo — y el usuario deduce
+      que el producto está roto, no que su archivo pesa mucho.
+
+      Coincide a propósito con `MAX_FILE_BYTES` (25 MB) y con el CHECK de la
+      migración 0038: son tres sitios que declaran el mismo límite y, si
+      divergen, el que quede más bajo rechaza antes de que el mensaje bueno
+      llegue a verse. Al cambiar uno, cambiar los tres.
+    */
+    serverActions: { bodySizeLimit: "25mb" },
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

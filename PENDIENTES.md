@@ -665,10 +665,33 @@
       cálculo (regla 4/5, paridad) lo hace un consultor a ~500 $/h. Integrarlo convierte a Attesta de "carpeta de
       evidencia" en herramienta que **produce** evidencia: la capa pegajosa de la cuña RRHH (NYC LL144 / FEHA).
       Riesgo: complejidad de integración y de encuadre ("tu organización declara", nunca "certificamos"). `alto · L`
-- [ ] **⚠️ Vault de evidencia + paquete de auditoría firmado** — hoy cada control es un "done" autodeclarado
-      **sin archivo adjunto**; sin el documento real el "% listo" no aguanta una auditoría. Incluye ZIP con
-      manifiesto **SHA-256** verificable (la hash-chain del audit-trail ya existe). **El mayor salto de
-      defensibilidad del producto.** `alto · L`
+- [x] ✅ **Vault de evidencia + paquete de auditoría firmado** (2026-08-04) — migración **0038** + sección
+      `/dashboard/evidencia` + `/api/vault/package` + `/api/vault/key` + `npm run vault:keygen`.
+      **La decisión que define el diseño: el adversario no es Attesta, es la organización auditada.** A un
+      auditor no le preocupa que nosotros mintamos; le preocupa que la empresa que audita fabrique o retoque
+      evidencia. Por eso el paquete lo firma **Attesta** con su clave (Ed25519): el cliente no puede producir
+      uno válido desde su portátil. Un manifiesto con hashes pero sin firma no resuelve nada contra ese
+      adversario — quien altera un archivo altera también su hash.
+      **Qué afirma la firma, redactado con cuidado porque roza la regla nº 1:** «estos archivos, con estos
+      hashes, estaban en la cuenta de esta organización en esta fecha». Es CUSTODIA E INTEGRIDAD, nunca
+      suficiencia ni conformidad. Y esa frontera va escrita **dentro del manifiesto** (`attests` /
+      `doesNotAttest`, en ES y EN) y en el README del ZIP, no solo en la pantalla: si alguien reenvía el JSON
+      suelto, el matiz viaja con él.
+      **El hash se calcula en el SERVIDOR** sobre los bytes que se guardan. Un hash aportado por el navegador
+      no probaría nada: quien quisiera falsear evidencia mandaría el hash del documento bueno con el contenido
+      malo. Y al empaquetar **se vuelve a hashear**, así que si un archivo cambió por debajo, no entra en el
+      paquete y el manifiesto declara la omisión.
+      **Cero dependencias nuevas** en la pieza más sensible del producto: el ZIP se escribe a mano (`zlib.crc32`
+      es nativo) y la firma va con Web Crypto. Sin compresión, a propósito: los bytes del ZIP son los del
+      archivo, así que un auditor puede extraer y comprobar con cualquier herramienta.
+      **Verificado por software ajeno, que es lo único que cuenta aquí:** `unzip` y la librería de Python abren
+      el ZIP y validan los CRC; **OpenSSL valida la firma** (`Signature Verified Successfully`) y **la rechaza**
+      al alterar un byte del manifiesto. Más 4 mutaciones cazadas sobre el núcleo (canonicalización superficial,
+      suplantación de clave pública, degradación silenciosa sin clave, desplazamientos del ZIP).
+      **La purga (0035) borra también los archivos**, y va ANTES que la base de datos: las filas caen en cascada
+      pero los objetos del almacenamiento no, y habrían quedado ahí tras decirle al cliente que sus datos se
+      eliminaron. Es exactamente el fallo que ya encontramos una vez.
+      **Pendiente del fundador** (§1.9): aplicar la 0038 y generar la clave de firma. `alto · L`
 - [ ] **⚠️ Crosswalk ISO 42001 / NIST AI RMF** — mapear cada control a otros marcos: una evidencia sirve para N
       normas. Foso de upsell para equipos GRC; requiere tabla de correspondencias curada por el experto. `alto · L`
 - [ ] **⚠️ Contenido regulatorio en INGLÉS (TAM EE. UU.)** — el chrome ya está traducido, pero el output legal se
@@ -878,6 +901,42 @@ ordenado.
 **Cómo consultarlas:** desde el SQL Editor de Supabase (`select * from public.demo_requests order by
 created_at desc;`). La lista **no se puede leer desde la web**, ni siquiera con sesión: es información
 comercial y no tiene por qué estar expuesta.
+
+### 1.9 · 🔴 Vault de evidencia: migración 0038 + clave de firma
+
+**Dos pasos, y el segundo importa tanto como el primero.**
+
+**a) Pega `supabase/migrations/0038_evidence_vault.sql`** en el SQL Editor. Crea la tabla de archivos, el
+bucket privado y el aislamiento entre organizaciones.
+
+**Un aviso sobre esta migración en concreto:** el último bloque crea las reglas de acceso sobre
+`storage.objects`, y en algunos proyectos esa tabla pertenece a otro rol y el SQL Editor puede no tener
+permiso. Lo he puesto **al final a propósito**: si esa parte fallara, todo lo anterior ya habría quedado
+aplicado y solo habría que resolver ese bloque, en vez de perder la migración entera. Si te da error ahí,
+pásame el mensaje.
+
+**b) Genera la clave de firma:**
+
+```bash
+npm run vault:keygen
+```
+
+Imprime dos variables. Pégalas en Vercel (Production) y **no las guardes en ningún fichero**: la privada es un
+secreto y en un fichero acabaría en un backup o en el historial de la terminal.
+
+**Por qué el paso (b) no es opcional si vas a enseñarle esto a un cliente.** Sin clave, el paquete se genera
+igual y los hashes se pueden comprobar, pero **no lleva firma**: nadie puede verificar que lo emitió Attesta.
+Sirve para uso interno y no para entregárselo a un tercero. La aplicación te lo dice en la propia pantalla,
+en el nombre del fichero (`-SIN-FIRMAR`) y dentro del ZIP — no se te va a colar por accidente.
+
+**No genero una clave automáticamente a propósito:** cada despliegue firmaría con una distinta y ninguna
+verificaría. Una firma que no se puede comprobar es peor que ninguna, porque aparenta garantía.
+
+**Al rotar la clave en el futuro:** guarda la anterior. Los paquetes ya entregados se verifican con la clave
+con la que se firmaron; sin ella, parecerán inválidos.
+
+**Comprobación rápida cuando termines:** abre `/api/vault/key` — debe devolver el mismo `keyId` que imprimió
+el generador.
 
 ### 1.7 · 🟡 Operación: DNS del correo y ensayo de restauración
 

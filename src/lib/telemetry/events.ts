@@ -41,6 +41,14 @@ export const PRODUCT_EVENTS = [
   "risk_assessed",
   /** Policy pack aplicado: se generaron brechas reales (servidor). props: `{ pack }`. */
   "pack_applied",
+  /**
+   * Archivo de evidencia subido al vault (servidor). props: `{ bytes }` — el
+   * tamaño, nunca el nombre ni el contenido. Es la señal que distingue un
+   * expediente declarado de uno con documentos detrás.
+   */
+  "evidence_uploaded",
+  /** Paquete de auditoría descargado (servidor). props: `{ files, signed }`. */
+  "audit_package_downloaded",
 
   // --- Monetización ------------------------------------------------------
   /** Un muro de pago se mostró de verdad (servidor). props: `{ feature }`. */

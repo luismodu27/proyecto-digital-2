@@ -25,6 +25,9 @@ const DANGER = new Set([
   // producto y el aviso debe leerse como una alarma, no como una confirmación.
   "deletion-requested",
   "deletion-confirm",
+  "vault-error",
+  "vault-large",
+  "vault-forbidden",
 ]);
 
 /** Claves informativas (avisos de modo demo o duplicados) → tono neutro. */

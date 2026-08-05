@@ -36,6 +36,7 @@ export const getGapItems = () => repo.getGapItems();
 export const getSystemsForSelect = () => repo.getSystemsForSelect();
 export const getOrganizationName = () => repo.getOrganizationName();
 export const getOrgDeletionState = () => repo.getOrgDeletionState();
+export const getEvidenceFiles = () => repo.getEvidenceFiles();
 export const getUserOrgs = () => repo.getUserOrgs();
 export const getSystemById = (id: string) => repo.getSystemById(id);
 export const getSystemBiasAudit = (id: string) => repo.getSystemBiasAudit(id);

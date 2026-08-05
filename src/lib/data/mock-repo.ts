@@ -50,6 +50,7 @@ import type { Supplier } from "@/lib/suppliers/types";
 import type { SupplierEvidence } from "@/lib/suppliers/evidence";
 import { REVIEW_CADENCE_DEFAULT_DAYS } from "@/lib/incidents/review";
 import type { OrgDeletionState } from "@/lib/org-lifecycle";
+import type { EvidenceFile } from "@/lib/vault/files";
 
 /**
  * Repositorio de datos de ejemplo (modo demo).
@@ -98,6 +99,16 @@ export async function getSystemsForSelect(): Promise<
  */
 export async function getOrgDeletionState(): Promise<OrgDeletionState | null> {
   return null;
+}
+
+/**
+ * En demo el vault está VACÍO, y es deliberado. Enseñar archivos de evidencia
+ * inventados sería justo la clase de promesa que el producto no quiere hacer: la
+ * demo debe mostrar el hueco («aquí van tus documentos»), no simular que ya hay
+ * un expediente montado.
+ */
+export async function getEvidenceFiles(): Promise<EvidenceFile[]> {
+  return [];
 }
 
 export async function getOrganizationName(): Promise<string | null> {

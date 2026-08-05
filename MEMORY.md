@@ -127,6 +127,35 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **Vault de evidencia firmado (§0.G). La pregunta que lo ordenó todo: ¿quién es el
+  adversario?**
+  La respuesta no es obvia y decide el diseño entero: **el adversario es la organización auditada, no
+  Attesta**. A un auditor no le preocupa que nosotros mintamos —si dudara de eso no usaría el producto—; le
+  preocupa que la empresa que está auditando fabrique o retoque evidencia y la presente como si llevara ahí
+  desde siempre. De ahí sale todo:
+  - **Un manifiesto con hashes SIN firma no resuelve nada** contra ese adversario: quien altera un archivo
+    altera también su hash y el manifiesto vuelve a ser coherente. La firma de **Attesta** sí, porque el
+    cliente no puede producir un paquete válido desde su portátil.
+  - **El hash se calcula en el servidor.** Uno aportado por el navegador sería un campo de texto, no un
+    control: bastaría mandar el hash del documento bueno con el contenido malo.
+  - **Y al empaquetar se vuelve a hashear**, aunque ya esté en la base de datos. Si el archivo cambió por
+    debajo, el manifiesto tomado de la BD daría fe de algo que ya no es cierto. Comparar convierte el
+    empaquetado en una verificación.
+  - **Qué afirma la firma**, redactado con cuidado porque roza la regla nº 1: custodia e integridad («estaba
+    aquí, con este hash, en esta fecha»), **nunca** suficiencia ni conformidad. Va escrito DENTRO del
+    manifiesto y del README del ZIP, no solo en la pantalla: un paquete que se puede malinterpretar fuera de
+    su pantalla es un pasivo.
+  - **Cero dependencias nuevas** en la pieza más sensible del producto: ZIP escrito a mano (`zlib.crc32` es
+    nativo) y Ed25519 por Web Crypto. Sin compresión a propósito — los bytes del ZIP son los del archivo, así
+    que comprobar es trivial, y en un paquete de evidencia eso vale más que unos megas.
+  - **Verificado por software AJENO, que es lo único que demuestra algo aquí:** `unzip` y Python abren el ZIP y
+    validan los CRC; **OpenSSL valida la firma y la rechaza** al alterar un byte. Un formato binario probado
+    solo con el parser propio no demuestra nada: si el escritor pone mal un desplazamiento y el lector lo lee
+    igual de mal, el test pasa y el auditor no puede abrir el paquete.
+  - **La lección que ya habíamos aprendido y se aplicó sola:** la purga borra también los archivos del
+    almacenamiento, y ANTES que la base de datos. Las filas caen en cascada; los objetos no. Sin esto habríamos
+    repetido la supresión incompleta de la 0035, esta vez con el contenido real de la evidencia dentro.
+
 - **2026-08-04** · **0035, 0036 y 0037 aplicadas. Y un falso negativo que casi doy por bueno.**
   `verify:backend` sube a **75 comprobaciones**. Lo que este entorno demuestra y el Postgres desechable no
   son los **permisos**: `purge_organization` responde `403 permission denied` a un usuario con sesión, y lo

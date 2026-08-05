@@ -924,6 +924,7 @@ export const es = {
       inventory: "Inventario",
       risk: "Riesgo",
       gap: "Gap assessment",
+      vault: "Vault de evidencia",
       plan: "Plan de acción",
       incidents: "Incidentes",
       suppliers: "Proveedores",
@@ -970,6 +971,48 @@ export const es = {
       legalBody:
         "Aviso de privacidad, cookies, subprocesadores y el Acuerdo de Tratamiento de Datos.",
     },
+    vault: {
+      title: "Vault de evidencia",
+      subtitle:
+        "Los documentos reales detrás de cada control, y el paquete que se le entrega a un auditor.",
+      why: "Un control marcado como hecho sin documento detrás es una declaración. Con el archivo dentro, es evidencia que alguien puede comprobar.",
+      empty: "Todavía no has subido ningún documento.",
+      emptyHint:
+        "Empieza por lo que te pediría primero un auditor: la política de uso de IA, el registro de supervisión humana y la evidencia que te dio tu proveedor.",
+      uploadTitle: "Subir un documento",
+      fileLabel: "Archivo",
+      fileHint: "Hasta 25 MB por archivo.",
+      anchorLabel: "¿A qué corresponde?",
+      anchorHint: "Elige la brecha o el sistema al que pertenece este documento.",
+      anchorPlaceholder: "Selecciona",
+      groupGaps: "Brechas",
+      groupSystems: "Sistemas",
+      uploadCta: "Subir documento",
+      uploading: "Subiendo…",
+      listTitle: "Documentos guardados",
+      colFile: "Archivo",
+      colAttached: "Corresponde a",
+      colHash: "Huella SHA-256",
+      colUploaded: "Subido",
+      delete: "Eliminar",
+      packageTitle: "Paquete de auditoría",
+      packageBody:
+        "Un ZIP con los documentos, un manifiesto que lista la huella SHA-256 de cada uno y las instrucciones para comprobarlo. Quien lo reciba puede verificarlo por su cuenta, sin cuenta en Attesta.",
+      packageCta: "Descargar paquete",
+      packageEmpty: "Sube al menos un documento para poder generar el paquete.",
+      signedTitle: "Firmado por Attesta",
+      signedBody:
+        "El manifiesto va firmado, así que quien lo reciba puede comprobar que lo emitió Attesta y que nadie lo ha modificado después.",
+      unsignedTitle: "Sin firma configurada",
+      unsignedBody:
+        "El paquete se genera igual y los hashes se pueden comprobar, pero no lleva firma: nadie podrá verificar que lo emitió Attesta. Configura la clave de firma antes de entregarlo a un tercero.",
+      attests: "Qué afirma este paquete",
+      attestsBody:
+        "Que estos archivos, con estas huellas, estaban guardados en tu cuenta en la fecha indicada.",
+      notAttests: "Qué NO afirma",
+      notAttestsBody:
+        "No es una certificación ni una auditoría. Attesta no abre los archivos ni valora si la evidencia es suficiente: eso lo juzga quien te audite.",
+    },
     account: {
       organization: "Organización",
       billing: "Plan y facturación",
@@ -997,6 +1040,12 @@ export const es = {
 
     toasts: {
       "system-created": "Sistema registrado en el inventario.",
+      "vault-uploaded": "Documento guardado en el vault.",
+      "vault-deleted": "Documento eliminado.",
+      "vault-empty": "Elige un archivo y a qué corresponde.",
+      "vault-large": "El archivo supera los 25 MB.",
+      "vault-forbidden": "Solo un propietario o administrador puede eliminar evidencia.",
+      "vault-error": "No se pudo guardar el documento. Inténtalo de nuevo.",
       "deletion-requested":
         "Baja solicitada. Puedes cancelarla durante los próximos 7 días.",
       "deletion-cancelled": "Baja cancelada. Tu organización sigue activa.",
@@ -1869,6 +1918,11 @@ export const es = {
         },
       },
 
+      vault: {
+        paywallFeature: "Vault de evidencia",
+        paywallDesc:
+          "Guarda los documentos reales detrás de cada control y genera el paquete que se le entrega a un auditor, con la huella SHA-256 de cada archivo.",
+      },
       plan: {
         title: "Plan de acción",
         subtitle:

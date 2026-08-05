@@ -36,6 +36,7 @@ import type { BiasAudit } from "@/lib/bias-audit";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { coerceStoredLocale } from "@/lib/i18n/stored-locale";
 import { GRACE_DAYS, type OrgDeletionState } from "@/lib/org-lifecycle";
+import type { EvidenceFile } from "@/lib/vault/files";
 import { logDataFallback } from "@/lib/observability/log";
 import type { FunnelRow } from "@/lib/telemetry/events";
 import type { IntakeLink, IntakeSubmission } from "@/lib/intake/types";
@@ -404,6 +405,71 @@ export async function getOrgDeletionState(): Promise<OrgDeletionState | null> {
     new Date(requestedAt).getTime() + GRACE_DAYS * 24 * 60 * 60 * 1000,
   ).toISOString();
   return { requestedAt, purgeAt, graceDays: GRACE_DAYS };
+}
+
+/**
+ * Archivos del vault de la organización activa.
+ *
+ * `attachedTo` se resuelve AQUÍ, a texto legible, y no en la UI: ese texto entra
+ * en el manifiesto firmado del paquete de auditoría, así que tiene que salir de
+ * un solo sitio. Si la pantalla y el paquete lo compusieran cada uno por su
+ * cuenta, acabarían diciendo cosas distintas sobre el mismo archivo.
+ *
+ * Degrada a `[]` sin la 0038 aplicada, como el resto de la fachada.
+ */
+export async function getEvidenceFiles(): Promise<EvidenceFile[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+
+  const { data, error } = await supabase
+    .from("evidence_files")
+    .select(
+      "id, filename, mime, size_bytes, sha256, uploaded_at, storage_path, gap_item_id, ai_system_id, gap_items(requirement, article), ai_systems(name)",
+    )
+    .eq("organization_id", org)
+    .order("uploaded_at", { ascending: false });
+
+  if (error || !data) {
+    logDataFallback("getEvidenceFiles", error, "sin 0038 no hay vault");
+    return [];
+  }
+
+  type Row = {
+    id: string;
+    filename: string;
+    mime: string | null;
+    size_bytes: number;
+    sha256: string;
+    uploaded_at: string;
+    storage_path: string;
+    gap_item_id: string | null;
+    ai_system_id: string | null;
+    gap_items?: { requirement?: string; article?: string | null } | null;
+    ai_systems?: { name?: string } | null;
+  };
+
+  return (data as unknown as Row[]).map((r) => {
+    const gap = r.gap_items;
+    const sistema = r.ai_systems?.name;
+    const attachedTo = gap
+      ? [gap.article, gap.requirement].filter(Boolean).join(" · ")
+      : sistema
+        ? `Sistema: ${sistema}`
+        : "Sin anclaje";
+    return {
+      id: r.id,
+      filename: r.filename,
+      mime: r.mime,
+      bytes: Number(r.size_bytes),
+      sha256: r.sha256,
+      uploadedAt: String(r.uploaded_at),
+      attachedTo,
+      gapItemId: r.gap_item_id,
+      aiSystemId: r.ai_system_id,
+      storagePath: r.storage_path,
+    };
+  });
 }
 
 /** Sistemas de la org (id real + nombre) para selectores. */

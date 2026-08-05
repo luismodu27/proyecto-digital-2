@@ -18,7 +18,7 @@ export const RANK: Record<PlanTier, number> = { free: 0, preparacion: 1, enterpr
 
 /** Unión EXPLÍCITA (no `keyof …nav`, que está contaminado con lockedTitle/…). */
 export type NavKey =
-  | "overview" | "inventory" | "risk" | "gap" | "plan" | "incidents" | "suppliers" | "packs"
+  | "overview" | "inventory" | "risk" | "gap" | "vault" | "plan" | "incidents" | "suppliers" | "packs"
   | "monitoring" | "team" | "activity" | "organizations" | "security" | "telemetry";
 
 /**
@@ -53,6 +53,7 @@ export const NAV: readonly NavItem[] = [
   { key: "inventory", href: "/dashboard/inventario",     icon: "M4 7h16M4 12h16M4 17h16" },
   { key: "risk",      href: "/dashboard/riesgo",         icon: "M12 3 2 20h20L12 3Zm0 6v5m0 3h.01" },
   { key: "gap",       href: "/dashboard/gap",            icon: "M9 11l3 3 8-8M4 12a8 8 0 108-8", requires: "preparacion" },
+  { key: "vault",     href: "/dashboard/evidencia",     icon: "M12 3 4 6v6c0 4.4 3.4 8.4 8 9 4.6-.6 8-4.6 8-9V6l-8-3Zm0 7v3m0 3h.01", requires: "preparacion" },
   { key: "plan",      href: "/dashboard/plan",           icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9 2 2 4-4", requires: "preparacion" },
   { key: "incidents", href: "/dashboard/incidentes",     icon: "M5 21V4m0 0h12l-2.2 4L17 12H5", requires: "preparacion" },
   { key: "suppliers", href: "/dashboard/proveedores",     icon: "M21 8v8a2 2 0 01-1 1.7l-7 4a2 2 0 01-2 0l-7-4A2 2 0 013 16V8a2 2 0 011-1.7l7-4a2 2 0 012 0l7 4A2 2 0 0121 8Zm-9 4 8.7-5M12 12 3.3 7M12 12v9", requires: "preparacion" },

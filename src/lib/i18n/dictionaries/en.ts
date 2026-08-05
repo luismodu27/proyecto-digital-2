@@ -902,6 +902,7 @@ export const en: Dictionary = {
       inventory: "Inventory",
       risk: "Risk",
       gap: "Gap assessment",
+      vault: "Evidence vault",
       plan: "Action plan",
       incidents: "Incidents",
       suppliers: "Suppliers",
@@ -945,6 +946,48 @@ export const en: Dictionary = {
       legalBody:
         "Privacy notice, cookies, sub-processors and the Data Processing Agreement.",
     },
+    vault: {
+      title: "Evidence vault",
+      subtitle:
+        "The actual documents behind each control, and the package you hand to an auditor.",
+      why: "A control marked as done with no document behind it is a statement. With the file inside, it is evidence someone can check.",
+      empty: "You have not uploaded any documents yet.",
+      emptyHint:
+        "Start with what an auditor asks for first: your AI usage policy, the human oversight log, and the evidence your vendor gave you.",
+      uploadTitle: "Upload a document",
+      fileLabel: "File",
+      fileHint: "Up to 25 MB per file.",
+      anchorLabel: "What does it correspond to?",
+      anchorHint: "Pick the gap or the system this document belongs to.",
+      anchorPlaceholder: "Select",
+      groupGaps: "Gaps",
+      groupSystems: "Systems",
+      uploadCta: "Upload document",
+      uploading: "Uploading…",
+      listTitle: "Stored documents",
+      colFile: "File",
+      colAttached: "Corresponds to",
+      colHash: "SHA-256 fingerprint",
+      colUploaded: "Uploaded",
+      delete: "Delete",
+      packageTitle: "Audit package",
+      packageBody:
+        "A ZIP with the documents, a manifest listing each one's SHA-256 fingerprint, and instructions to check it. Whoever receives it can verify it themselves, with no Attesta account.",
+      packageCta: "Download package",
+      packageEmpty: "Upload at least one document to generate the package.",
+      signedTitle: "Signed by Attesta",
+      signedBody:
+        "The manifest is signed, so whoever receives it can check that Attesta issued it and that nobody has modified it since.",
+      unsignedTitle: "No signing key configured",
+      unsignedBody:
+        "The package is still generated and the hashes can be checked, but it carries no signature: nobody will be able to verify that Attesta issued it. Configure the signing key before handing it to a third party.",
+      attests: "What this package states",
+      attestsBody:
+        "That these files, with these fingerprints, were stored in your account on the date shown.",
+      notAttests: "What it does NOT state",
+      notAttestsBody:
+        "It is not a certification or an audit. Attesta does not open the files and does not assess whether the evidence is sufficient: that is judged by whoever audits you.",
+    },
     account: {
       organization: "Organization",
       billing: "Plan and billing",
@@ -972,6 +1015,12 @@ export const en: Dictionary = {
 
     toasts: {
       "system-created": "System registered in the inventory.",
+      "vault-uploaded": "Document stored in the vault.",
+      "vault-deleted": "Document deleted.",
+      "vault-empty": "Choose a file and what it corresponds to.",
+      "vault-large": "The file is larger than 25 MB.",
+      "vault-forbidden": "Only an owner or admin can delete evidence.",
+      "vault-error": "Could not store the document. Please try again.",
       "deletion-requested":
         "Closure requested. You can cancel it during the next 7 days.",
       "deletion-cancelled": "Closure cancelled. Your organization is still active.",
@@ -1826,6 +1875,11 @@ export const en: Dictionary = {
         },
       },
 
+      vault: {
+        paywallFeature: "Evidence vault",
+        paywallDesc:
+          "Store the actual documents behind each control and generate the package you hand to an auditor, with each file's SHA-256 fingerprint.",
+      },
       plan: {
         title: "Action plan",
         subtitle:

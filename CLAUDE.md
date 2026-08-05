@@ -169,6 +169,20 @@ salen con aviso de borrador visible + `noindex` + fuera del sitemap; con ellos, 
 código. Ojo: `sitemap.ts` lleva `force-dynamic` **por eso** — si se prerenderiza, las páginas (dinámicas)
 dejarían de ser `noindex` mientras el sitemap seguiría sin listarlas hasta el siguiente despliegue.
 
+**Vault de evidencia + paquete firmado (`src/lib/vault/`).** Archivos reales detrás de cada control
+(migración 0038: `evidence_files` + bucket privado; la ruta empieza por `organization_id` **porque la policy
+del bucket compara esa primera carpeta** — no es nomenclatura, es el aislamiento). El paquete
+(`/api/vault/package`) es un ZIP con la evidencia, el manifiesto y la firma Ed25519. **El adversario es la
+organización auditada, no Attesta**: por eso firma Attesta, y por eso un manifiesto sin firma no valdría.
+El **hash se calcula en el servidor** y se **recalcula al empaquetar** (si un archivo cambió por debajo, no
+entra y la omisión se declara). La firma es sobre la **serialización canónica** (`canonicalJson`, ordenada en
+profundidad): sin eso un verificador ajeno diría "firma inválida" sobre un paquete legítimo. Qué afirma —
+custodia e integridad, nunca conformidad — va **dentro** del manifiesto y del README del ZIP. Sin
+`VAULT_SIGNING_KEY` el paquete sale SIN firmar y lo dice en pantalla, en el nombre del fichero y dentro; no se
+genera una clave al vuelo a propósito. Cero dependencias: ZIP a mano (`zlib.crc32`) y Web Crypto. Verificado
+con `unzip`, Python y **OpenSSL** — probar un formato binario con el parser propio no demuestra nada. Y la
+purga de organización borra también los objetos del almacenamiento, **antes** que la BD: no caen en cascada.
+
 **Contenido legal = 100% determinista, cero LLM.** Las rutas que emiten texto regulatorio (dossier,
 informe, radar de vigilancia, clasificación de riesgo, recomendaciones) se ensamblan solo con datos
 reales del cliente + texto del AI Act ya verificado por el experto. Un texto legal alucinado es un
