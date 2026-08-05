@@ -67,6 +67,15 @@ async function api(path, { token, method = "GET", body, prefer } = {}) {
   return { status: r.status, json, text, headers: r.headers };
 }
 
+/** Código de error de PostgREST/Postgres, para no dar por bueno un fallo cualquiera. */
+const errCode = (r) => {
+  try {
+    return JSON.parse(r.text)?.code ?? "";
+  } catch {
+    return "";
+  }
+};
+
 async function signUp(email, password) {
   const r = await api("/auth/v1/signup", {
     method: "POST",
@@ -790,6 +799,166 @@ if (!has0036) {
   );
 }
 
+
+// ---------------------------------------------------------------------------
+// 0038 · vault de evidencia
+//
+// Lo que este entorno demuestra y el Postgres desechable no puede: que el
+// aislamiento de los ARCHIVOS funcione con los grants reales de Supabase. La
+// lógica (CHECKs, policies) ya se probó allí; aquí se prueba quién puede qué.
+// ---------------------------------------------------------------------------
+const vaultProbe = await api("/rest/v1/evidence_files?select=id&limit=1", { token: tokenA });
+const has0038 = vaultProbe.status === 200;
+
+if (!has0038) {
+  check(
+    "0038 pendiente: la tabla evidence_files aún no existe",
+    vaultProbe.status >= 400,
+    `${vaultProbe.status} ${vaultProbe.text.slice(0, 120)}`,
+  );
+} else {
+  check("0038 aplicada: evidence_files existe", true);
+
+  // Sistema propio: el de la 0033 vive dentro de otro bloque y no está en ámbito.
+  const sysVault = await api("/rest/v1/ai_systems", {
+    token: tokenA,
+    method: "POST",
+    prefer: "return=representation",
+    body: { organization_id: idA, name: `vault-${stamp}` },
+  });
+  const vaultSysId = sysVault.json?.[0]?.id;
+  check("A da de alta un sistema al que anclar la evidencia", Boolean(vaultSysId), sysVault.text.slice(0, 140));
+
+  // 1) El CHECK del hash. Es lo que impide que entre cualquier cosa donde debe
+  //    ir un SHA-256: un hash con formato libre convierte la verificación del
+  //    paquete de auditoría en un adorno.
+  const badHash = await api("/rest/v1/evidence_files", {
+    token: tokenA,
+    method: "POST",
+    body: {
+      organization_id: idA,
+      ai_system_id: vaultSysId,
+      filename: "x.pdf",
+      size_bytes: 10,
+      sha256: "NO-ES-UN-HASH",
+      storage_path: `${idA}/badhash-${stamp}`,
+    },
+  });
+  check(
+    "rechaza un sha256 que no lo es (violación de CHECK)",
+    errCode(badHash) === "23514",
+    `${badHash.status} code=${errCode(badHash)} ${badHash.text.slice(0, 120)}`,
+  );
+
+  const badSize = await api("/rest/v1/evidence_files", {
+    token: tokenA,
+    method: "POST",
+    body: {
+      organization_id: idA, ai_system_id: vaultSysId, filename: "x.pdf",
+      size_bytes: 99_999_999, sha256: "a".repeat(64),
+      storage_path: `${idA}/badsize-${stamp}`,
+    },
+  });
+  check(
+    "rechaza un archivo por encima del tope de 25 MB",
+    errCode(badSize) === "23514",
+    `${badSize.status} code=${errCode(badSize)}`,
+  );
+
+  const sinAnclaje = await api("/rest/v1/evidence_files", {
+    token: tokenA,
+    method: "POST",
+    body: {
+      organization_id: idA, filename: "suelto.pdf", size_bytes: 10,
+      sha256: "a".repeat(64), storage_path: `${idA}/suelto-${stamp}`,
+    },
+  });
+  check(
+    "rechaza un archivo sin anclaje (nadie lo encontraría)",
+    errCode(sinAnclaje) === "23514",
+    `${sinAnclaje.status} code=${errCode(sinAnclaje)}`,
+  );
+
+  // 2) Una fila legítima, y el aislamiento.
+  const ok = await api("/rest/v1/evidence_files", {
+    token: tokenA,
+    method: "POST",
+    prefer: "return=representation",
+    body: {
+      organization_id: idA, ai_system_id: vaultSysId, filename: "politica.pdf",
+      size_bytes: 1024, sha256: "a".repeat(64),
+      storage_path: `${idA}/ok-${stamp}`,
+    },
+  });
+  check(
+    "A registra un archivo de evidencia",
+    ok.status === 201,
+    `${ok.status} ${ok.text.slice(0, 160)}`,
+  );
+  const fileId = ok.json?.[0]?.id;
+
+  const cruzado = await api("/rest/v1/evidence_files", {
+    token: tokenB,
+    method: "POST",
+    body: {
+      organization_id: idA, ai_system_id: vaultSysId, filename: "intruso.pdf",
+      size_bytes: 10, sha256: "b".repeat(64),
+      storage_path: `${idA}/intruso-${stamp}`,
+    },
+  });
+  check(
+    "B no puede registrar evidencia EN la organización de A",
+    cruzado.status >= 400,
+    `${cruzado.status} ${cruzado.text.slice(0, 140)}`,
+  );
+
+  const leeB = await api(`/rest/v1/evidence_files?select=id,sha256&id=eq.${fileId}`, {
+    token: tokenB,
+  });
+  check(
+    "B no ve el archivo de A ni pidiéndolo por su id",
+    Array.isArray(leeB.json) && leeB.json.length === 0,
+    JSON.stringify(leeB.json),
+  );
+
+  // 3) LA QUE MÁS IMPORTA: la fila NO se puede editar. Cambiar el sha256 de un
+  //    registro existente es justo la manipulación contra la que existe el vault.
+  const edita = await api(`/rest/v1/evidence_files?id=eq.${fileId}`, {
+    token: tokenA,
+    method: "PATCH",
+    prefer: "count=exact",
+    body: { sha256: "c".repeat(64) },
+  });
+  check(
+    "NADIE puede cambiar el hash de un archivo ya registrado (0 filas afectadas)",
+    (edita.headers?.get("content-range") ?? "").split("/")[0] === "*",
+    `${edita.status}/${edita.headers?.get("content-range")}`,
+  );
+
+  // 4) El bucket existe y `anon` no puede curiosear en él.
+  const bucketAnon = await api("/storage/v1/object/list/evidence", {
+    method: "POST",
+    body: { prefix: "", limit: 10 },
+  });
+  check(
+    "anon no puede listar el bucket de evidencia",
+    bucketAnon.status >= 400 ||
+      (Array.isArray(bucketAnon.json) && bucketAnon.json.length === 0),
+    `${bucketAnon.status} ${bucketAnon.text.slice(0, 120)}`,
+  );
+
+  const bucketB = await api("/storage/v1/object/list/evidence", {
+    token: tokenB,
+    method: "POST",
+    body: { prefix: idA, limit: 10 },
+  });
+  check(
+    "B no puede listar los archivos de A en el bucket",
+    bucketB.status >= 400 || (Array.isArray(bucketB.json) && bucketB.json.length === 0),
+    `${bucketB.status} ${bucketB.text.slice(0, 120)}`,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Limpieza. Cada ejecución crea dos organizaciones de prueba, y sin esto se
 // acumulan para siempre en el proyecto real. Ahora se pueden dar de baja con la
@@ -839,14 +1008,6 @@ if (has0035) {
 // equivocado. Ahora se exige el CÓDIGO de error concreto (`23514`, violación de
 // CHECK) y no un fallo cualquiera.
 // ---------------------------------------------------------------------------
-const errCode = (r) => {
-  try {
-    return JSON.parse(r.text)?.code ?? "";
-  } catch {
-    return "";
-  }
-};
-
 const demoProbe = await api("/rest/v1/demo_requests?select=id&limit=1", { token: tokenA });
 const has0037 = demoProbe.status === 200;
 

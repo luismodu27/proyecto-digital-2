@@ -902,7 +902,13 @@ ordenado.
 created_at desc;`). La lista **no se puede leer desde la web**, ni siquiera con sesión: es información
 comercial y no tiene por qué estar expuesta.
 
-### 1.9 · 🔴 Vault de evidencia: migración 0038 + clave de firma
+### 1.9 · 🟡 Vault de evidencia: 0038 APLICADA ✅ · falta la clave de firma
+
+**La migración 0038 está aplicada y verificada** (2026-08-04, `verify:backend` → **86 comprobaciones**):
+rechaza un `sha256` que no lo es y un archivo por encima del tope · un usuario de otra organización no puede
+registrar evidencia en la tuya, ni verla pidiéndola por su id, ni listar tus archivos en el bucket · `anon` no
+puede listar el bucket · y **nadie puede cambiar el hash de un archivo ya registrado** (0 filas afectadas),
+que es justo la manipulación contra la que existe el vault.
 
 **Dos pasos, y el segundo importa tanto como el primero.**
 
