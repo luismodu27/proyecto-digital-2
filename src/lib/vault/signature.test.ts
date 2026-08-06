@@ -55,6 +55,53 @@ describe("carga de la clave", () => {
     ).rejects.toThrow(/32 bytes/);
   });
 
+  /**
+   * EL FALLO SILENCIOSO QUE ESTE TEST PROTEGE, y que es el peor de todo el vault.
+   *
+   * Las dos variables se pegan a mano en Vercel, una detrás de otra. Generar el
+   * par dos veces y mezclar la privada de una con la pública de otra es un error
+   * de dos segundos que NO se nota: el arranque va bien, `/api/vault/key`
+   * responde `configured: true` con un keyId perfectamente derivado de la
+   * pública, la pantalla se pone en verde y los paquetes salen "firmados".
+   *
+   * El error aparece semanas después, en la mesa de un auditor, con la forma
+   * exacta que este producto existe para evitar: «firma no válida» sobre un
+   * paquete legítimo — una acusación de manipulación contra un cliente que no ha
+   * tocado nada. Y para entonces los paquetes ya están entregados.
+   *
+   * Nótese que el par cruzado es INDIVIDUALMENTE válido: la privada es una PKCS#8
+   * correcta y la pública son 32 bytes de Ed25519 de verdad. Ninguna de las
+   * comprobaciones de arriba lo caza. Solo lo caza firmar y verificar.
+   */
+  it("rechaza un par CRUZADO: privada de una generación y pública de otra", async () => {
+    const a = await generateKeyPairForEnv();
+    const b = await generateKeyPairForEnv();
+    // Ambas son válidas por separado; lo que no son es pareja.
+    expect(b.publicKeyBase64).not.toBe(a.publicKeyBase64);
+
+    await expect(
+      loadSigningKey({
+        [SIGNING_KEY_ENV]: a.privateKeyBase64,
+        [`${SIGNING_KEY_ENV}_PUBLIC`]: b.publicKeyBase64,
+      }),
+    ).rejects.toThrow(/no son pareja/);
+  });
+
+  /**
+   * La otra mitad: un par legítimo no puede quedar rechazado por la comprobación
+   * nueva. Un guard que rechaza lo bueno se acaba desactivando, y entonces deja
+   * de proteger de lo malo.
+   */
+  it("un par legítimo pasa la comprobación de correspondencia", async () => {
+    const kp = await generateKeyPairForEnv();
+    await expect(
+      loadSigningKey({
+        [SIGNING_KEY_ENV]: kp.privateKeyBase64,
+        [`${SIGNING_KEY_ENV}_PUBLIC`]: kp.publicKeyBase64,
+      }),
+    ).resolves.not.toBeNull();
+  });
+
   it("con las dos, carga y expone la huella", async () => {
     const { env, kp } = await envWithKey();
     const key = await loadSigningKey(env);

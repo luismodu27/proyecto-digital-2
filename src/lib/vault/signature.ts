@@ -27,6 +27,14 @@
 /** Nombre de la variable de entorno con la clave privada (PKCS#8, base64). */
 export const SIGNING_KEY_ENV = "VAULT_SIGNING_KEY";
 
+/**
+ * Mensaje fijo que se firma al cargar la clave para comprobar que la privada y
+ * la pública son pareja (ver `loadSigningKey`). Es una constante y no un valor
+ * aleatorio a propósito: así la comprobación es determinista y reproducible, y
+ * nada de esto acaba nunca dentro de un paquete.
+ */
+const KEY_PAIR_PROBE = "attesta-vault-key-pair-check-v1";
+
 export type SignatureBlock = {
   algorithm: "Ed25519";
   /** Huella de la clave pública: primeros 16 bytes del SHA-256, en hex. */
@@ -104,6 +112,50 @@ export async function loadSigningKey(env: Record<string, string | undefined>): P
   const publicKeyRaw = fromBase64(publicRaw);
   if (publicKeyRaw.length !== 32) {
     throw new Error(`${SIGNING_KEY_ENV}_PUBLIC no es una clave Ed25519 (se esperaban 32 bytes, hay ${publicKeyRaw.length}).`);
+  }
+
+  /**
+   * PRUEBA DE CORRESPONDENCIA: ¿son pareja las dos claves?
+   *
+   * EL FALLO QUE ESTO IMPIDE, que es silencioso y devastador. Las dos variables
+   * se pegan A MANO en Vercel, una detrás de otra. Basta con generar el par dos
+   * veces y pegar la privada de la primera con la pública de la segunda —o copiar
+   * una a medias— para que el servidor firme con una clave y publique otra.
+   *
+   * Sin esta comprobación NADA se queja: el arranque va bien, `/api/vault/key`
+   * responde `configured: true` con un keyId perfectamente derivado de la pública,
+   * la pantalla se pone en verde y los paquetes salen "firmados". El error aparece
+   * semanas después, en la mesa de un auditor, con la forma exacta que este
+   * producto existe para evitar: **«firma no válida»** sobre un paquete legítimo,
+   * es decir, una acusación de manipulación contra un cliente que no ha tocado
+   * nada. Y para entonces esos paquetes ya están entregados.
+   *
+   * Se comprueba firmando un mensaje fijo y verificándolo con la pública
+   * declarada. Cuesta menos de un milisegundo y convierte un fallo diferido e
+   * irreparable en un fallo inmediato y evidente. Por eso LANZA en vez de
+   * degradar a "sin firma": quien pegó esas variables creía estar firmando, y
+   * seguir adelante en silencio sería mentirle.
+   */
+  const probe = new TextEncoder().encode(KEY_PAIR_PROBE) as Uint8Array<ArrayBuffer>;
+  const probeSignature = await crypto.subtle.sign({ name: "Ed25519" }, privateKey, probe);
+  const declared = await crypto.subtle.importKey(
+    "raw",
+    publicKeyRaw,
+    { name: "Ed25519" },
+    false,
+    ["verify"],
+  );
+  const sonPareja = await crypto.subtle.verify(
+    { name: "Ed25519" },
+    declared,
+    probeSignature,
+    probe,
+  );
+  if (!sonPareja) {
+    throw new Error(
+      `${SIGNING_KEY_ENV} y ${SIGNING_KEY_ENV}_PUBLIC no son pareja: la clave pública declarada no verifica lo que firma la privada. ` +
+        "Los paquetes saldrían firmados y NADIE podría verificarlos. Vuelve a generar el par y pega LAS DOS variables de la misma generación.",
+    );
   }
 
   return { privateKey, publicKeyRaw, keyId: await keyFingerprint(publicKeyRaw) };
