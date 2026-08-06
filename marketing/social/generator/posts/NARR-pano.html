@@ -1,0 +1,82 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../brand.css">
+<style>
+  .pano{position:relative;width:4320px;height:1350px;background:#0e1512;color:#eef2ee;overflow:hidden;font-family:"Geist",sans-serif}
+  .pano::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity:.03;mix-blend-mode:screen}
+  .track{position:absolute;left:0;top:0;width:4320px;height:1350px;z-index:1}
+  .col{position:absolute;top:0;width:1080px;height:1350px;z-index:2}
+  .c0{left:0}.c1{left:1080px}.c2{left:2160px}.c3{left:3240px}
+  .brand{position:absolute;top:86px;left:80px;display:flex;align-items:center;gap:15px}
+  .brand .seal{width:52px;height:52px;background:url("../assets/sealmark-dark.png") center/contain no-repeat}
+  .brand .wm{font-family:"Fraunces",serif;font-weight:600;font-size:31px;color:#eef2ee}
+  .idx{position:absolute;top:96px;right:80px;font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.2em;color:#79857e}
+  .kick{position:absolute;top:226px;left:80px;font-family:"Geist Mono",monospace;font-size:19px;letter-spacing:.2em;text-transform:uppercase;color:#c79a5f}
+  .kick.jade{color:#22b581}
+  .hl{position:absolute;top:286px;left:80px;width:940px;font-family:"Fraunces",serif;font-weight:600;font-size:72px;line-height:1.02;letter-spacing:-.015em;color:#eef2ee}
+  .hl .em{color:#22b581;font-style:italic}
+  .cap{position:absolute;left:80px;width:920px;font-family:"Geist",sans-serif;font-size:31px;line-height:1.4;color:#aeb9b2}
+  .foot{position:absolute;bottom:92px;left:80px;font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:#79857e}
+  .cta{position:absolute;bottom:86px;left:80px;display:inline-flex;align-items:center;gap:12px;background:#12946a;color:#04150f;font-family:"Geist",sans-serif;font-weight:600;font-size:27px;padding:18px 30px;border-radius:100px}
+  .swipe{position:absolute;bottom:92px;right:80px;font-family:"Geist Mono",monospace;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:#22b581;display:flex;align-items:center;gap:10px}
+</style></head>
+<body>
+<div class="pano">
+  <svg class="track" viewBox="0 0 4320 1350" xmlns="http://www.w3.org/2000/svg">
+    <defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <!-- camino ascendente que cruza todas las slides -->
+    <path d="M120 1110 L540 1080 L1620 950 L2700 820 L3780 705" fill="none" stroke="#12946a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+    <path d="M120 1110 L540 1080 L1620 950 L2700 820 L3780 705" fill="none" stroke="#22b581" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 26" opacity="0.9"/>
+    <!-- flecha final ascendente -->
+    <path d="M3780 705 L4180 600" fill="none" stroke="#22b581" stroke-width="4" stroke-linecap="round"/>
+    <path d="M4152 592 l32 8 l-11 29" fill="none" stroke="#22b581" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- nodos -->
+    <g filter="url(#glow)">
+      <circle cx="540" cy="1080" r="26" fill="#0e1512" stroke="#c79a5f" stroke-width="4"/><circle cx="540" cy="1080" r="10" fill="#c79a5f"/>
+      <circle cx="1620" cy="950" r="26" fill="#0e1512" stroke="#22b581" stroke-width="4"/><circle cx="1620" cy="950" r="10" fill="#22b581"/>
+      <circle cx="2700" cy="820" r="26" fill="#0e1512" stroke="#22b581" stroke-width="4"/><circle cx="2700" cy="820" r="10" fill="#22b581"/>
+      <circle cx="3780" cy="705" r="34" fill="#12946a"/><path d="M3765 705 l10 10 l17 -20" fill="none" stroke="#04150f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </svg>
+
+  <!-- S1 principal -->
+  <div class="col c0">
+    <div class="brand"><span class="seal"></span><span class="wm">Attesta</span></div>
+    <div class="idx">01 / 04</div>
+    <div class="kick">El dolor · el dato</div>
+    <div class="hl">El 77% va más rápido en IA que en <span class="em">gobernarla.</span></div>
+    <div class="cap" style="top:548px">Y más de la mitad ni siquiera tiene inventario de su IA. Así se pasa del riesgo a la tranquilidad.</div>
+    <div class="foot">@attesta.io</div>
+    <div class="swipe">Desliza <span style="font-size:22px">→</span></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="col c1">
+    <div class="idx">02 / 04</div>
+    <div class="kick jade">Paso 1 · Inventario</div>
+    <div class="hl">Descubre tu IA <span class="em">y su riesgo.</span></div>
+    <div class="cap" style="top:548px">Cribado de CVs, ranking, entrevistas por vídeo: alto riesgo (Anexo III).</div>
+    <div class="foot">Clasificación orientativa</div>
+  </div>
+
+  <!-- S3 -->
+  <div class="col c2">
+    <div class="idx">03 / 04</div>
+    <div class="kick jade">Paso 2 · Brechas</div>
+    <div class="hl">Cierra brechas, <span class="em">sin $500 la hora.</span></div>
+    <div class="cap" style="top:548px">Un flujo continuo y tuyo, siempre actualizado. No un informe que envejece.</div>
+    <div class="foot">Plan de acción sugerido</div>
+  </div>
+
+  <!-- S4 -->
+  <div class="col c3">
+    <div class="idx">04 / 04</div>
+    <div class="kick jade">Listo</div>
+    <div class="hl">Evidencia lista <span class="em">para auditoría.</span></div>
+    <div class="cap" style="top:548px">Un dossier por sistema, en PDF, con registro inmutable. La tranquilidad se construye antes.</div>
+    <div class="cta">Empieza gratis <span style="font-size:22px">→</span></div>
+  </div>
+
+</div>
+</body></html>

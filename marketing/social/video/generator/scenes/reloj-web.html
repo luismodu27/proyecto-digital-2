@@ -1,0 +1,124 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../web.css">
+<style>
+  html,body{margin:0;padding:0}
+  #stage{position:relative;width:100vw;height:100vh;overflow:hidden;font-family:"Geist",sans-serif;--k:1}
+  #stage[data-fmt="square"]{--k:.76}
+  #stage[data-fmt="wide"]{--k:.82}
+  #stage[data-fmt="square"] #s2,#stage[data-fmt="square"] #s1{justify-content:center;padding-top:0}
+  #bg{position:absolute;inset:0;z-index:0}
+  .scene{position:absolute;inset:0;z-index:10;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 80px;box-sizing:border-box;font-family:"Geist",sans-serif}
+  .eyebrow{font-size:calc(24px*var(--k));margin:0}
+  h2.disp{margin:calc(18px*var(--k)) 0 0;font-size:calc(70px*var(--k))}
+  h2.disp .em{font-style:italic;color:var(--brand)}
+  .sub{margin-top:calc(28px*var(--k));font-size:calc(32px*var(--k));color:var(--ink-soft);line-height:1.4;max-width:calc(840px*var(--k))}
+  .sub .em{color:var(--brand);font-style:italic;font-family:"Fraunces",serif}
+  /* S2 timeline */
+  #s2{justify-content:flex-start;padding-top:calc(140px*var(--k))}
+  #stage[data-fmt="wide"] #s2{justify-content:center;padding-top:0}
+  #s2 .cap{font-size:calc(23px*var(--k));margin:0;font-family:"Geist Mono",monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--brand)}
+  #s2 .capt{margin:calc(14px*var(--k)) 0 calc(50px*var(--k));font-family:"Fraunces",serif;font-weight:600;font-size:calc(54px*var(--k));color:var(--ink);letter-spacing:-.015em;line-height:1.05}
+  #tl{position:relative;width:100%;max-width:calc(880px*var(--k));display:flex;flex-direction:column;gap:calc(26px*var(--k))}
+  #stage[data-fmt="wide"] #tl{flex-direction:row;max-width:1760px;gap:calc(24px*var(--k))}
+  #tline{position:absolute;left:calc(29px*var(--k));top:calc(20px*var(--k));width:calc(3px*var(--k));background:var(--line-strong);z-index:0}
+  #stage[data-fmt="wide"] #tline{left:0;top:calc(29px*var(--k));height:calc(3px*var(--k));width:100%}
+  .mil{position:relative;z-index:1;display:flex;gap:calc(30px*var(--k));align-items:flex-start;flex:1}
+  #stage[data-fmt="wide"] .mil{flex-direction:column}
+  .mil .dot{flex:none;width:calc(60px*var(--k));height:calc(60px*var(--k));border-radius:50%;background:var(--paper);border:calc(3px*var(--k)) solid var(--line-strong);display:flex;align-items:center;justify-content:center;transform-origin:50% 50%}
+  .mil .dot i{width:calc(18px*var(--k));height:calc(18px*var(--k));border-radius:50%;background:var(--line-strong);display:block}
+  .mil.on .dot{border-color:var(--brand)} .mil.on .dot i{background:var(--brand)}
+  .mil.hot .dot{border-color:var(--brand);background:var(--brand)} .mil.hot .dot i{background:#fff}
+  .dark .mil.hot .dot i{background:#04150f}
+  .mil .body{padding-top:calc(2px*var(--k));text-align:left}
+  #stage[data-fmt="wide"] .mil .body{text-align:center}
+  .mil .date{font-family:"Geist Mono",monospace;font-size:calc(20px*var(--k));letter-spacing:.06em;color:var(--brand);text-transform:uppercase;font-weight:500}
+  .mil .ti{margin-top:calc(8px*var(--k));font-family:"Fraunces",serif;font-weight:600;font-size:calc(38px*var(--k));color:var(--ink);line-height:1.02;letter-spacing:-.01em}
+  .mil .bd{margin-top:calc(10px*var(--k));font-size:calc(24px*var(--k));color:var(--muted);line-height:1.35;font-family:"Geist",sans-serif}
+  .mil .flag{margin-top:calc(12px*var(--k));display:inline-block;font-family:"Geist Mono",monospace;font-size:calc(16px*var(--k));letter-spacing:.06em;text-transform:uppercase;color:var(--brand-strong);background:var(--brand-soft);border:1px solid var(--good-bd);border-radius:999px;padding:calc(7px*var(--k)) calc(14px*var(--k))}
+  /* S3 close */
+  #s3 .l1{font-size:calc(84px*var(--k))}
+  #s3 .l1 .em{font-style:italic;color:var(--brand)}
+  #s3 .mkt{margin-top:calc(36px*var(--k));font-size:calc(30px*var(--k));color:var(--muted);font-family:"Geist",sans-serif}
+  #s3 .mkt b{color:var(--ink);font-weight:600}
+  #s3 .seal{width:calc(112px*var(--k));height:calc(112px*var(--k));margin:calc(48px*var(--k)) 0 calc(10px*var(--k))}
+  #s3 .url{margin-top:calc(30px*var(--k));font-family:"Geist Mono",monospace;font-size:calc(25px*var(--k));letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+</style></head>
+<body>
+<div id="stage" class="gridbg dark" data-fmt="story">
+  <div id="bg" class="gridbg"></div>
+
+  <div class="scene" id="s1">
+    <p class="eyebrow w a">Por qué ahora</p>
+    <h2 class="disp w a">Una obligación inevitable,<br>con una <span class="em">ventana</span> para adelantarse.</h2>
+    <p class="sub w b">Las obligaciones del EU AI Act llegan por fases. Saber <span class="em">cuándo</span> te aplica cada una es la diferencia entre prepararte con calma o a última hora.</p>
+  </div>
+
+  <div class="scene" id="s2">
+    <p class="cap w t">La línea de tiempo</p>
+    <p class="capt w t">Los plazos que te afectan</p>
+    <div id="tl">
+      <div id="tline"></div>
+      <div class="mil w"><div class="dot"><i></i></div><div class="body"><div class="date">Feb 2025 · en vigor</div><div class="ti">Alfabetización en IA (Art. 4)</div><div class="bd">Ya exigible: quien opera la IA debe tener formación suficiente. Deber del deployer.</div></div></div>
+      <div class="mil w"><div class="dot"><i></i></div><div class="body"><div class="date">2 ago 2026</div><div class="ti">Transparencia (Art. 50)</div><div class="bd">El plazo más cercano: avisar a los candidatos cuando interactúan con IA o ésta genera contenido.</div></div></div>
+      <div class="mil w hotcandidate"><div class="dot"><i></i></div><div class="body"><div class="date">Dic 2027</div><div class="ti">Obligaciones de alto riesgo</div><div class="bd">El Digital Omnibus movió aquí el Anexo III (empleo).</div><div class="flag">No es agosto de 2026</div></div></div>
+      <div class="mil w"><div class="dot"><i></i></div><div class="body"><div class="date">2026 →</div><div class="ti">Leyes estatales en EE.UU.</div><div class="bd">Nueva York, Illinois, Colorado… la superficie regulatoria crece.</div></div></div>
+    </div>
+  </div>
+
+  <div class="scene" id="s3">
+    <h2 class="disp l1 w a">Tienes una ventana.<br><span class="em">Úsala.</span></h2>
+    <p class="mkt w b">El mercado de gobernanza de IA: <b>$492M → $15.8B</b> para 2030.</p>
+    <div class="seal w c"></div>
+    <p class="url w c">attesta-io.vercel.app · @attesta.io</p>
+  </div>
+
+  <div id="grain" style="position:absolute;inset:0;pointer-events:none;z-index:60;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22180%22 height=%22180%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22 stitchTiles=%22stitch%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/></svg>');opacity:.03;mix-blend-mode:screen"></div>
+</div>
+<script src="../vlib.js"></script>
+<script>
+  const q=new URLSearchParams(location.search), stage=document.getElementById('stage');
+  const theme=q.get('theme')||'dark'; stage.classList.remove('dark'); stage.classList.add(theme); stage.dataset.fmt=q.get('fmt')||'story';
+  const grain=document.getElementById('grain'); grain.style.mixBlendMode=theme==='dark'?'screen':'multiply'; grain.style.opacity=theme==='dark'?'0.03':'0.02';
+  window.DURATION=26.5;
+  const V=window.V,E=V.E,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+  const bg=$('#bg'), isWide=stage.dataset.fmt==='wide';
+  const S={s1:{el:$('#s1'),a:0,b:5.0},s2:{el:$('#s2'),a:5.0,b:20.5},s3:{el:$('#s3'),a:20.5,b:26.5}};
+  function vis(sc,t,fin=0.55,fout=0.5){const{a,b,el}=sc;if(t<a-0.02||t>b+0.02){el.style.opacity=0;return null;}
+    let o=1,y=0;if(t<a+fin){const u=E.web(V.p(t,a,a+fin));o=u;y=V.lerp(60,0,u);}else if(t>b-fout){const u=E.web(V.p(t,b-fout,b));o=1-u;y=V.lerp(0,-52,u);}
+    el.style.opacity=o;el.style.transform=`translateY(${y}px)`;return t-a;}
+  function reveal(el,t,t0,dur=0.7,dist=18){const u=V.p(t,t0,t0+dur);el.style.opacity=E.web(u);el.style.transform=`translateY(${V.lerp(dist,0,E.web(u))}px)`;}
+  function group(sel,t,t0,st=0.14,dur=0.7,dist=20){$$(sel).forEach((el,i)=>reveal(el,t,t0+i*st,dur,dist));}
+
+  window.SEEK=function(t){
+    const drift=-t*5; stage.style.backgroundPosition=`0px ${drift}px`; bg.style.backgroundPosition=`0px ${drift}px`;
+    // S1
+    let lt=vis(S.s1,t);
+    if(lt!=null){ group('#s1 .a',t,0.2,0.16,0.7,24); reveal($('#s1 .b'),t,1.0,0.8,26); }
+    // S2 timeline
+    lt=vis(S.s2,t);
+    if(lt!=null){
+      group('#s2 .t',t,5.3,0.16,0.7,22);
+      const mils=$$('#s2 .mil'), tline=$('#tline'), base=6.4, gap=1.7;
+      const drawEnd=base+gap*3+0.5;
+      const dp=V.tw(t,base,drawEnd,0,100,E.outQuint);
+      if(isWide) tline.style.width=dp+'%'; else tline.style.height=dp+'%';
+      mils.forEach((m,i)=>{
+        const t0=base+i*gap;
+        const r=V.rise(t,t0,0.6,30,E.web?E.web:E.out); m.style.opacity=E.web(V.p(t,t0,t0+0.6)); m.style.transform=`translateY(${V.lerp(28,0,E.web(V.p(t,t0,t0+0.6)))}px)`;
+        const dot=m.querySelector('.dot'); const ds=V.tw(t,t0+0.1,t0+0.5,0.3,1,E.outBack); dot.style.transform=`scale(${Math.max(0,ds)})`;
+        const on=t>=t0+0.25; const hot=m.classList.contains('hotcandidate');
+        m.classList.toggle('on', on && !hot); m.classList.toggle('hot', on && hot);
+        const flag=m.querySelector('.flag'); if(flag) flag.style.opacity=V.p(t,t0+0.5,t0+1.0);
+      });
+    }
+    // S3 close
+    lt=vis(S.s3,t);
+    if(lt!=null){
+      reveal($('#s3 .a'),t,20.8,0.8,30); reveal($('#s3 .b'),t,21.8,0.7,24);
+      const cs=V.p(t,22.6,23.3); $('#s3 .seal').style.opacity=E.web(cs); $('#s3 .seal').style.transform=`scale(${V.lerp(0.7,1,E.outBack(cs))})`;
+      group('#s3 .c',t,23.1,0.16,0.7,22);
+    }
+  };
+  window.SEEK(0);
+</script>
+</body></html>

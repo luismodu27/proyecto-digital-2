@@ -1,0 +1,187 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../web.css">
+<style>
+  html,body{margin:0;padding:0}
+  #stage{position:relative;width:100vw;height:100vh;overflow:hidden;font-family:"Geist",sans-serif;--k:1}
+  #stage[data-fmt="square"]{--k:.76}
+  #stage[data-fmt="wide"]{--k:.82}
+  #stage[data-fmt="square"] #s2,#stage[data-fmt="square"] #s3{justify-content:center;padding-top:0}
+  #bg{position:absolute;inset:0;z-index:0}
+  .scene{position:absolute;inset:0;z-index:10;opacity:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:0 80px;box-sizing:border-box;font-family:"Geist",sans-serif}
+  .stat .c,.mod .md,.body,.mono,.small{font-family:"Geist",sans-serif}
+  .eyebrow{font-size:calc(24px*var(--k))}
+  h2.disp{margin:calc(18px*var(--k)) 0 0;font-size:calc(76px*var(--k))}
+  h2.disp .em{font-style:italic;color:var(--brand)}
+  .sub{margin-top:calc(30px*var(--k));font-size:calc(34px*var(--k));color:var(--ink-soft);font-family:"Geist",sans-serif;line-height:1.4;max-width:calc(820px*var(--k))}
+  .sub .em{color:var(--brand);font-style:italic;font-family:"Fraunces",serif}
+  /* browser mockup (validator tray) */
+  #s2{justify-content:flex-start;padding-top:calc(130px*var(--k))}
+  #stage[data-fmt="wide"] #s2{justify-content:center;padding-top:0}
+  #s2 .cap{font-size:calc(24px*var(--k));margin:0}
+  #s2 .capt{margin:calc(14px*var(--k)) 0 calc(40px*var(--k));font-family:"Fraunces",serif;font-weight:600;font-size:calc(52px*var(--k));color:var(--ink);letter-spacing:-.015em}
+  .mock{width:calc(900px*var(--k));background:var(--paper-raised);border:2px solid var(--line-strong);border-radius:calc(26px*var(--k));
+    padding:calc(16px*var(--k));box-shadow:var(--shadow-float);text-align:left}
+  .mbar{display:flex;align-items:center;gap:calc(12px*var(--k));padding:calc(12px*var(--k)) calc(14px*var(--k))}
+  .mbar .dot{width:calc(16px*var(--k));height:calc(16px*var(--k));border-radius:50%}
+  .murl{margin-left:calc(14px*var(--k));flex:1;background:var(--paper-sunken);border-radius:calc(9px*var(--k));padding:calc(9px*var(--k)) calc(16px*var(--k));font-size:calc(20px*var(--k));color:var(--muted)}
+  .mapp{border:1px solid var(--line);border-radius:calc(18px*var(--k));background:var(--paper);padding:calc(26px*var(--k))}
+  .trayhead{display:flex;align-items:center;justify-content:space-between}
+  .trayhead .th{font-family:"Fraunces",serif;font-weight:600;font-size:calc(28px*var(--k));color:var(--ink)}
+  .trayhead .pend{font-family:"Geist Mono",monospace;font-size:calc(16px*var(--k));color:var(--muted);letter-spacing:.06em}
+  /* candidate card */
+  .cand{margin-top:calc(20px*var(--k));border:2px solid var(--line);border-radius:calc(16px*var(--k));padding:calc(26px*var(--k));background:var(--paper-raised);position:relative;transition:none}
+  .cand.active{border-color:var(--brand)}
+  .cand .prov{display:flex;gap:calc(10px*var(--k));align-items:center;margin-bottom:calc(16px*var(--k))}
+  .provb{font-family:"Geist Mono",monospace;font-size:calc(15px*var(--k));letter-spacing:.08em;text-transform:uppercase;padding:calc(7px*var(--k)) calc(14px*var(--k));border-radius:999px;border:1px solid}
+  .provb.vigia{background:var(--neutral-bg);color:var(--neutral-fg);border-color:var(--neutral-bd)}
+  .provb.analista{background:var(--good-bg);color:var(--good-fg);border-color:var(--good-bd)}
+  .cand .ctitle{font-family:"Fraunces",serif;font-weight:600;font-size:calc(34px*var(--k));color:var(--ink);line-height:1.1}
+  .cand .cmeta{margin-top:calc(10px*var(--k));font-size:calc(22px*var(--k));color:var(--muted)}
+  .cand .cite{margin-top:calc(18px*var(--k));font-family:"Geist Mono",monospace;font-size:calc(20px*var(--k));color:var(--ink);
+    background:color-mix(in srgb,var(--brand) 12%,transparent);border-left:calc(4px*var(--k)) solid var(--brand);padding:calc(16px*var(--k)) calc(18px*var(--k));border-radius:calc(6px*var(--k));line-height:1.45}
+  .cand .ref{margin-top:calc(14px*var(--k));font-family:"Geist Mono",monospace;font-size:calc(16px*var(--k));letter-spacing:.1em;text-transform:uppercase;color:var(--brand)}
+  .cand .pubrow{margin-top:calc(22px*var(--k));display:flex;align-items:center;justify-content:space-between}
+  .cand .gate{font-family:"Geist",sans-serif;font-size:calc(19px*var(--k));color:var(--muted)}
+  .cand .pubbtn{background:var(--brand);color:#fff;border-radius:calc(12px*var(--k));padding:calc(14px*var(--k)) calc(26px*var(--k));font-size:calc(22px*var(--k));font-weight:600}
+  .dark .cand .pubbtn{color:#04150f}
+  .cand .done{position:absolute;inset:0;background:color-mix(in srgb,var(--brand-soft) 92%,transparent);border-radius:calc(14px*var(--k));
+    display:flex;align-items:center;justify-content:center;gap:calc(14px*var(--k));opacity:0}
+  .cand .done .dt{font-family:"Fraunces",serif;font-weight:600;font-size:calc(30px*var(--k));color:var(--brand-strong)}
+  /* S3 pilares (Cero alucinaciones) */
+  #s3{justify-content:flex-start;padding-top:calc(150px*var(--k))}
+  #stage[data-fmt="wide"] #s3{justify-content:center;padding-top:0}
+  #s3 .cap{font-size:calc(24px*var(--k));margin:0}
+  #s3 h2.disp{font-size:calc(58px*var(--k))}
+  #pillars{margin-top:calc(56px*var(--k));display:flex;flex-direction:column;gap:calc(20px*var(--k));width:100%;max-width:calc(880px*var(--k))}
+  #stage[data-fmt="wide"] #pillars{flex-direction:row}
+  .pill{display:flex;gap:calc(24px*var(--k));align-items:flex-start;background:var(--paper-raised);border:1px solid var(--line);border-radius:calc(16px*var(--k));padding:calc(30px*var(--k));text-align:left;box-shadow:var(--shadow-card);flex:1}
+  .pill .pi{flex:none;width:calc(56px*var(--k));height:calc(56px*var(--k));border-radius:calc(13px*var(--k));background:var(--good-bg);display:flex;align-items:center;justify-content:center;color:var(--brand)}
+  .pill .pi svg{width:52%;height:52%}
+  .pill .pt{font-family:"Fraunces",serif;font-weight:600;font-size:calc(31px*var(--k));color:var(--ink);line-height:1.05}
+  .pill .pb{margin-top:calc(10px*var(--k));font-size:calc(23px*var(--k));color:var(--muted);line-height:1.35;font-family:"Geist",sans-serif}
+  /* S4 close */
+  #s4 .seal{width:calc(120px*var(--k));height:calc(120px*var(--k));margin-bottom:calc(16px*var(--k))}
+  #s4 .l1{font-size:calc(74px*var(--k))}
+  #s4 .l2{margin-top:calc(30px*var(--k));font-size:calc(50px*var(--k));color:var(--brand);font-style:italic;font-family:"Fraunces",serif;font-weight:600}
+  #s4 .url{margin-top:calc(44px*var(--k));font-family:"Geist Mono",monospace;font-size:calc(26px*var(--k));letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  /* cursor */
+  #cursor{position:absolute;left:0;top:0;z-index:80;width:calc(46px*var(--k));height:calc(46px*var(--k));opacity:0;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.5));transform-origin:6px 4px}
+  #cursor .ring{position:absolute;left:50%;top:44%;width:calc(60px*var(--k));height:calc(60px*var(--k));margin-left:calc(-30px*var(--k));margin-top:calc(-30px*var(--k));border-radius:50%;border:2px solid var(--brand);opacity:0}
+</style></head>
+<body>
+<div id="stage" class="gridbg dark" data-fmt="story">
+  <div id="bg" class="gridbg"></div>
+
+  <div class="scene" id="s1">
+    <p class="eyebrow w a" style="margin:0">Por qué puedes confiar</p>
+    <h2 class="disp w a">Cero alucinaciones.<br>Por <span class="em">diseño.</span></h2>
+    <p class="sub w b">La IA no escribe tu derecho: se ensambla con el texto verificado del EU AI Act — y un <span class="em">humano valida</span> antes de publicar.</p>
+  </div>
+
+  <div class="scene" id="s2">
+    <p class="cap eyebrow w t">Dentro del producto</p>
+    <p class="capt w t">De la norma a tu radar, con un humano en el bucle.</p>
+    <div class="mock w m">
+      <div class="mbar"><span class="dot" style="background:#e4b0aa"></span><span class="dot" style="background:#e6cfa0"></span><span class="dot" style="background:#bfdccf"></span>
+        <div class="murl">app.attesta.io/vigilancia/candidatos</div></div>
+      <div class="mapp">
+        <div class="trayhead"><span class="th">Bandeja de validación</span><span class="pend">1 candidato pendiente</span></div>
+        <div class="cand" id="cand">
+          <div class="prov"><span class="provb vigia" id="pv-vigia">Vigía · cero LLM</span><span class="provb analista" id="pv-analista" style="opacity:0">Analista · anclado a citas</span></div>
+          <div class="ctitle" id="c-title">Señal: algo cambió en EUR-Lex</div>
+          <div class="cmeta" id="c-meta">Detectado por huella de contenido · sin analizar</div>
+          <div class="cite" id="c-cite" style="opacity:0;height:0;overflow:hidden">«… los sistemas … informarán a las personas … de manera clara … — Art. 50»</div>
+          <div class="ref" id="c-ref" style="opacity:0">EU AI Act · Art. 50 · Transparencia</div>
+          <div class="pubrow" id="c-pubrow" style="opacity:0"><span class="gate">Fecha y tipo verificados</span><span class="pubbtn">Publicar en el radar</span></div>
+          <div class="done" id="c-done"><span class="dt">✓ Publicado en el radar</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene" id="s3">
+    <p class="cap eyebrow w l">Cero alucinaciones</p>
+    <h2 class="disp w l">Por diseño, no por <span class="em">promesa.</span></h2>
+    <div id="pillars">
+      <div class="pill w"><div class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 4v5c0 4.4-3 8.3-7 9-4-.7-7-4.6-7-9V7l7-4Zm-2.5 8.5 2 2 4-4"/></svg></div>
+        <div><div class="pt">Contenido legal determinista</div><div class="pb">No lo redacta un modelo generativo: reglas + el texto verificado del EU AI Act sobre tus datos.</div></div></div>
+      <div class="pill w"><div class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3 8-8M4 12a8 8 0 108-8"/></svg></div>
+        <div><div class="pt">Contrastado con criterio experto</div><div class="pb">Verificado en el articulado del AI Act antes de publicarse; se actualiza cuando la norma cambia.</div></div></div>
+      <div class="pill w"><div class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1Zm7 0v4h4M9 13h6M9 16h4"/></svg></div>
+        <div><div class="pt">Evidencia verificable</div><div class="pb">Cada registro con huella SHA-256: cualquier alteración posterior es detectable.</div></div></div>
+    </div>
+  </div>
+
+  <div class="scene" id="s4">
+    <div class="seal w s"></div>
+    <h2 class="disp l1 w s">Un texto legal inventado<br>sería un pasivo.</h2>
+    <p class="l2 w a">Aquí no existe.</p>
+    <p class="url w a">Attesta · @attesta.io</p>
+  </div>
+
+  <div id="cursor"><span class="ring"></span><svg viewBox="0 0 24 24" fill="none"><path d="M5 2.5l14.5 8.2-6.3 1.4-3.4 6.2L5 2.5z" fill="#faf8f2" stroke="#0f1a14" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+  <div id="grain" style="position:absolute;inset:0;pointer-events:none;z-index:60;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22180%22 height=%22180%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22 stitchTiles=%22stitch%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/></svg>');opacity:.03;mix-blend-mode:screen"></div>
+</div>
+<script src="../vlib.js"></script>
+<script>
+  const q=new URLSearchParams(location.search), stage=document.getElementById('stage');
+  const theme=q.get('theme')||'dark'; stage.classList.remove('dark'); stage.classList.add(theme); stage.dataset.fmt=q.get('fmt')||'story';
+  const grain=$id('grain'); function $id(i){return document.getElementById(i);}
+  grain.style.mixBlendMode=theme==='dark'?'screen':'multiply'; grain.style.opacity=theme==='dark'?'0.03':'0.02';
+  window.DURATION=27.5;
+  const V=window.V,E=V.E,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+  const bg=$('#bg'),cursor=$('#cursor'),ring=cursor.querySelector('.ring');
+  const S={s1:{el:$('#s1'),a:0,b:5.0},s2:{el:$('#s2'),a:5.0,b:17.0},s3:{el:$('#s3'),a:17.0,b:22.4},s4:{el:$('#s4'),a:22.4,b:27.5}};
+  function vis(sc,t,fin=0.55,fout=0.5){const{a,b,el}=sc;if(t<a-0.02||t>b+0.02){el.style.opacity=0;return null;}
+    let o=1,y=0;if(t<a+fin){const u=E.web(V.p(t,a,a+fin));o=u;y=V.lerp(60,0,u);}else if(t>b-fout){const u=E.web(V.p(t,b-fout,b));o=1-u;y=V.lerp(0,-52,u);}
+    el.style.opacity=o;el.style.transform=`translateY(${y}px)`;return t-a;}
+  function reveal(el,t,t0,dur=0.7,dist=18){const u=V.p(t,t0,t0+dur);el.style.opacity=E.web(u);el.style.transform=`translateY(${V.lerp(dist,0,E.web(u))}px)`;}
+  function group(sel,t,t0,st=0.14,dur=0.7,dist=20){$$(sel).forEach((el,i)=>reveal(el,t,t0+i*st,dur,dist));}
+  const rectC=el=>{const r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};};
+  function cursorShow(o){cursor.style.opacity=o;} function cursorTo(x,y,s=1){cursor.style.transform=`translate(${x}px,${y}px) scale(${s})`;}
+  function cursorMove(t,t0,t1,from,to){const u=E.web(V.p(t,t0,t1));return {x:V.lerp(from.x,to.x,u),y:V.lerp(from.y,to.y,u)};}
+  function clickPulse(t,tc){const rp=V.p(t,tc,tc+0.5);ring.style.opacity=(rp>0&&rp<1)?(1-rp)*0.9:0;ring.style.transform=`scale(${V.lerp(0.2,1.4,E.web(rp))})`;
+    const d=V.p(t,tc,tc+0.1)-V.p(t,tc+0.1,tc+0.22);return 1-0.16*Math.max(0,d);}
+
+  window.SEEK=function(t){
+    const drift=-t*5; stage.style.backgroundPosition=`0px ${drift}px`; bg.style.backgroundPosition=`0px ${drift}px`;
+    // S1
+    let lt=vis(S.s1,t);
+    if(lt!=null){ group('#s1 .a',t,0.2,0.16,0.7,24); reveal($('#s1 .b'),t,0.9,0.8,26); }
+    // S2 tray flow: Vigía signal -> Analista enrich -> human publish
+    lt=vis(S.s2,t);
+    if(lt!=null){
+      group('#s2 .t',t,5.3,0.16,0.7,22); reveal($('#s2 .m'),t,6.0,0.8,40);
+      const cand=$('#cand');
+      // Analista enrich at ~8.6: title/meta swap, citation grows, provenance analista, pubrow appears
+      const en=V.p(t,8.6,9.4);
+      $('#pv-analista').style.opacity=en;
+      $('#c-title').textContent = t>=8.9 ? 'Transparencia (Art. 50): nuevo aviso a las personas' : 'Señal: algo cambió en EUR-Lex';
+      $('#c-meta').textContent = t>=8.9 ? 'Borrador propuesto por el Analista · anclado a citas' : 'Detectado por huella de contenido · sin analizar';
+      const cite=$('#c-cite'); cite.style.opacity=en; cite.style.height = en>0.05 ? 'auto':'0'; cite.style.overflow='visible';
+      $('#c-ref').style.opacity=V.p(t,9.2,9.8);
+      $('#c-pubrow').style.opacity=V.p(t,9.8,10.4);
+      cand.classList.toggle('active', t>=8.6);
+      // cursor publishes at ~12.0
+      const CLICK=12.0, btn=$('#s2 .pubbtn');
+      if(t>=10.8 && t<13.4){
+        cursorShow(E.web(V.p(t,10.8,11.2)) * (1-V.p(t,12.9,13.4)));
+        const bt=rectC(btn); const start={x:bt.x+170,y:bt.y+230};
+        const pos=cursorMove(t,11.0,11.9,start,bt); const sc=clickPulse(t,CLICK); cursorTo(pos.x,pos.y,sc);
+        btn.style.transform=`scale(${t>=CLICK&&t<CLICK+0.14?0.96:1})`;
+      } else cursorShow(0);
+      // published overlay after click
+      $('#c-done').style.opacity=V.p(t,12.15,12.7);
+    } else cursorShow(0);
+    // S3 pilares (Cero alucinaciones)
+    lt=vis(S.s3,t);
+    if(lt!=null){ group('#s3 .l',t,17.3,0.16,0.7,24); group('#s3 .pill',t,18.1,0.22,0.7,26); }
+    // S4 close
+    lt=vis(S.s4,t);
+    if(lt!=null){ const cs=V.p(t,22.7,23.4); $('#s4 .seal').style.opacity=E.web(cs); $('#s4 .seal').style.transform=`scale(${V.lerp(0.7,1,E.outBack(cs))})`;
+      group('#s4 .s',t,23.0,0.16,0.7,24); group('#s4 .a',t,24.0,0.16,0.7,22); }
+  };
+  window.SEEK(0);
+</script>
+</body></html>

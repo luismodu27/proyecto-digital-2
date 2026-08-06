@@ -42,8 +42,22 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const ROOT = process.cwd();
-const SCAN_DIRS = ["src"];
-const EXTENSIONS = [".ts", ".tsx"];
+/**
+ * Qué se escanea y con qué extensiones.
+ *
+ * `marketing/` entró después que `src/`, y su ausencia era el agujero más grande
+ * que tenía este guard: la copy de una publicación en redes la lee muchísima más
+ * gente que un tooltip del panel, viaja fuera del producto —capturada, reenviada,
+ * citada— y no hay forma de retirarla. Si «Attesta certifica» va a hacer daño en
+ * algún sitio, es ahí. Que la regla nº 1 se comprobara en la aplicación pero no
+ * en el escaparate era exactamente al revés de lo razonable.
+ */
+const SCAN_TARGETS = [
+  { dir: "src", extensions: [".ts", ".tsx"] },
+  // Los HTML del generador de imágenes llevan el texto que acaba en la imagen;
+  // CAPTIONS.md, los pies que se pegan en cada red.
+  { dir: "marketing", extensions: [".md", ".html"] },
+];
 /**
  * Archivos cuyo CONTENIDO ES la lista de vocabulario prohibido (por definición la
  * contienen). Excluirlos evita 12 falsos positivos estructurales:
@@ -337,20 +351,23 @@ if (selfTestErrors.length > 0) {
 }
 
 /** Recorre recursivamente y devuelve los archivos con extensión relevante. */
-function walk(dir, out = []) {
+function walk(dir, extensions, out = []) {
   for (const entry of readdirSync(dir)) {
     if (entry === "node_modules" || entry === ".next" || entry.startsWith(".")) continue;
     const full = join(dir, entry);
-    if (statSync(full).isDirectory()) walk(full, out);
-    else if (EXTENSIONS.some((e) => entry.endsWith(e))) out.push(full);
+    if (statSync(full).isDirectory()) walk(full, extensions, out);
+    else if (extensions.some((e) => entry.endsWith(e))) out.push(full);
   }
   return out;
 }
 
-const files = SCAN_DIRS.flatMap((d) => {
+const files = SCAN_TARGETS.flatMap(({ dir, extensions }) => {
   try {
-    return walk(join(ROOT, d));
+    return walk(join(ROOT, dir), extensions);
   } catch {
+    // Una carpeta que no existe no es un error: `marketing/` puede no estar en
+    // un checkout parcial. Lo que sí sería un error es que no exista `src/`, y
+    // eso lo caza la aserción de cobertura de más abajo.
     return [];
   }
 });

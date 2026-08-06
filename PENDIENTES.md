@@ -6,7 +6,31 @@
 > - **[CLAUDE.md](./CLAUDE.md)** — mapa técnico del código.
 > - **[docs/supabase.md](./docs/supabase.md)** — backend/migraciones.
 >
-> Última actualización: **2026-08-04**.
+> Última actualización: **2026-08-06**.
+
+---
+
+## 🚨 0-pre. ANTES DE DAR NADA POR HECHO: ¿está PUBLICADO?
+
+**Lo que costó esta regla.** Durante seis semanas (22-jul → 6-ago) todo el trabajo se fue a la rama
+`claude/init-3bwfhm` y **`main` no se tocó**. Vercel publica `main`. El fundador aplicó migraciones,
+redesplegó, refrescó y buscó en el panel el vault, Incidentes y Proveedores — que **no existían en
+producción**, mientras el repositorio y el CI decían que todo estaba hecho. 41 commits en el limbo.
+
+```bash
+npm run verify:deploy      # commit publicado vs local + rutas públicas reales
+```
+
+**«Hecho» ya no significa *commit + push*.** Significa **fusionado en `main` + `verify:deploy` en verde**.
+
+- Si el resultado es `⚠️ /api/version no responde`, lo publicado es anterior a esa comprobación → mira las
+  rutas de abajo del informe.
+- Si fallan rutas que **sí** existen en el repositorio: la rama de trabajo no está fusionada en `main`.
+- **Ojo:** el script no comprueba rutas de `/dashboard` **a propósito**. El middleware redirige a login antes
+  de que Next resuelva la ruta, así que una página inexistente responde 307 igual que una que sí está. Lo que
+  cubre esas rutas es la comparación de commits.
+
+**Estado actual: ✅ `main` = `f7f12dc`, publicado y verificado el 2026-08-06 (11/11).**
 
 ---
 
@@ -921,14 +945,27 @@ permiso. Lo he puesto **al final a propósito**: si esa parte fallara, todo lo a
 aplicado y solo habría que resolver ese bloque, en vez de perder la migración entera. Si te da error ahí,
 pásame el mensaje.
 
-**b) Genera la clave de firma:**
+**b) Genera la clave de firma — 🔴 ES LO ÚNICO QUE FALTA (2026-08-06: el vault ya está publicado).**
 
-```bash
-npm run vault:keygen
-```
+Entra en **`/dashboard/evidencia`** y pulsa **«Generar la clave de firma»**. El botón solo lo ves tú
+(administrador de plataforma) y solo mientras no haya clave. Genera el par en tu propio navegador, con la
+criptografía nativa; la clave privada **no viaja a ningún servidor**.
 
-Imprime dos variables. Pégalas en Vercel (Production) y **no las guardes en ningún fichero**: la privada es un
-secreto y en un fichero acabaría en un backup o en el historial de la terminal.
+Te dará dos variables. Pégalas en **Vercel → Settings → Environment Variables → Production**:
+
+- `VAULT_SIGNING_KEY` — la privada. **Secreta.**
+- `VAULT_SIGNING_KEY_PUBLIC` — la pública. No es secreta.
+
+Después, **redespliega** (Vercel no recarga variables en caliente).
+
+**No las guardes en ningún fichero ni las pegues en el chat**, por la regla de §1.1: la privada acabaría en un
+backup, en el historial de la terminal o en una conversación.
+
+> **Por qué es un botón y no un comando.** La primera versión de estas instrucciones decía que pegaras código
+> criptográfico en la consola del navegador. Chrome muestra ahí un aviso —«no pegues código que no
+> entiendas»— y **ese aviso tiene razón**: es la defensa contra el fraude por soporte técnico falso. Enseñar a
+> saltárselo es enseñar el hábito exacto que explotan esas estafas. El error fue mío, no del navegador.
+> (También existe `npm run vault:keygen` si prefieres la terminal, pero el botón es la vía recomendada.)
 
 **Por qué el paso (b) no es opcional si vas a enseñarle esto a un cliente.** Sin clave, el paquete se genera
 igual y los hashes se pueden comprobar, pero **no lleva firma**: nadie puede verificar que lo emitió Attesta.
@@ -943,6 +980,22 @@ con la que se firmaron; sin ella, parecerán inválidos.
 
 **Comprobación rápida cuando termines:** abre `/api/vault/key` — debe devolver el mismo `keyId` que imprimió
 el generador.
+
+### 1.10 · 🟡 Pack de redes sociales: citar la fuente del 78 % / 83 % antes de publicar
+
+El pack de contenido para redes (16 publicaciones en 4:5 y 9:16, 5 carruseles, generador y `CAPTIONS.md`) está
+**integrado en el repositorio** desde 2026-08-06, en `marketing/social/`. Se hizo en julio y llevaba seis
+semanas en una rama sin fusionar (era el PR #2).
+
+**Antes de publicar la pieza que cita «78 %» y «83 %»: hay que citar la fuente de esas cifras.** Lo dejó
+señalado la auditoría de copy del propio pack y sigue pendiente. Una cifra sin fuente en una publicación sobre
+cumplimiento es justo el tipo de afirmación que nos pueden pedir sostener — y no se puede retirar un post que
+ya circula.
+
+Lo demás del pack ya pasó la revisión: copy dentro de las reglas de marca, fechas del EU AI Act verificadas y
+descargos de «contenido informativo, no asesoría legal» donde corresponde. Desde ahora el **guard de copy
+prohibido también escanea `marketing/`** (`npm run check:copy`), así que un caption que incumpla la regla nº 1
+rompe el CI igual que lo haría dentro del producto.
 
 ### 1.7 · 🟡 Operación: DNS del correo y ensayo de restauración
 
