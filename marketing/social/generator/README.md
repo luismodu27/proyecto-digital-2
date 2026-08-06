@@ -19,7 +19,7 @@ pip install Pillow          # solo para (re)procesar el logo y cortar carruseles
 - `fonts/` — Fraunces (display, varios pesos), Geist y Geist Mono (woff2).
 - `assets/` — `sealmark.png` / `sealmark-dark.png` (logo real, claro/oscuro).
 - `posts/` — un `.html` por pieza. Los `*-pano.html` son carruseles (lienzo de 4320×1350).
-- `process_logo.py` — genera variantes del sello desde el PNG original (opcional).
+- `process_logo.py` — genera variantes del sello desde el PNG original (opcional). <!-- attesta-copy-ok: «sello» aquí es el sealmark del logotipo, no un sello de conformidad -->
 
 ## Render de un post suelto (4:5, 2×)
 

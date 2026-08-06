@@ -20,7 +20,7 @@ producto: usa el **logo real** (`sealmark`), las **fuentes** (Fraunces + Geist) 
 
 Attesta es **autoevaluación + preparación para auditoría + gestión de evidencia**, no un
 organismo certificador. **Prohibido:** certifica / cumple / compliant / garantiza / aprobado /
-sello de conformidad / "auditado por Attesta" / libre de riesgo / asesoría legal.
+sello de conformidad / "auditado por Attesta" / libre de riesgo / asesoría legal. <!-- attesta-copy-ok: esta línea ENUNCIA la regla; es la lista de términos prohibidos, no un uso -->
 **Permitido:** autoevaluación · preparación para auditoría · % listo · brechas · clasificación
 orientativa · evidencia declarada · registro inmutable. Los verbos son de **la organización**.
 

@@ -22,7 +22,6 @@ console.log(`${jobs.length} jobs, concurrency ${CONC}`);
 let idx = 0, done = 0;
 function runOne(job){
   return new Promise((res)=>{
-    const t0 = Date.now();
     const p = spawn('node', job.args, { stdio:['ignore','ignore','ignore'] });
     p.on('close', (code)=>{ done++; console.log(`[${done}/${jobs.length}] ${job.label} ${code===0?'OK':'FAIL('+code+')'}`); res(); });
   });

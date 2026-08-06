@@ -291,7 +291,7 @@ Alterna claro/oscuro para que el grid respire.
 
 ## Ajustes de compliance aplicados (auditoría del experto del proyecto)
 
-- **Ningún post viola las reglas de copy.** Los casos "certificamos" (#3) y "cumplimos" (#12)
+- **Ningún post viola las reglas de copy.** Los casos "certificamos" (#3) y "cumplimos" (#12) <!-- attesta-copy-ok: cita el caso auditado; el post usa el término negándolo -->
   se usan **negándolos** — es el posicionamiento de Attesta, es correcto.
 - **#2:** corregido — el chatbot ya no se marca como alto riesgo (es transparencia, Art. 50);
   se evita la contradicción con el inventario del #8.

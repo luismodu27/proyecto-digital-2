@@ -50,6 +50,6 @@ Una sola variante: `node vrender.mjs "scenes/intro-web.html?fmt=story&theme=ligh
 ## Reglas de copy (innegociables)
 Attesta = autoevaluación + preparación para auditoría + gestión de evidencia. **No certifica.**
 Prohibido: certifica/cumple/compliant/garantiza/aprobado/sello de conformidad/marcado CE/
-"auditado por Attesta"/libre de riesgo/asesoría legal. Clasificación siempre "orientativa";
+"auditado por Attesta"/libre de riesgo/asesoría legal. Clasificación siempre "orientativa"; <!-- attesta-copy-ok: esta línea ENUNCIA la regla; es la lista de términos prohibidos, no un uso -->
 puntaje = "% listo/preparación", nunca "% cumplimiento". Verbos de la organización.
 Todo el pack se verificó con el experto de compliance y contra la web en vivo (jul-2026).

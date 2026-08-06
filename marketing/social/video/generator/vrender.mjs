@@ -35,7 +35,11 @@ const ff = spawn(FFMPEG, [
 ], { stdio: ['pipe', 'inherit', 'inherit'] });
 
 let ffErr = null; ff.on('error', e => { ffErr = e; });
-const canWrite = (buf) => new Promise((res) => { ff.stdin.write(buf) ? res() : ff.stdin.once('drain', res); });
+const canWrite = (buf) =>
+  new Promise((res) => {
+    if (ff.stdin.write(buf)) res();
+    else ff.stdin.once('drain', res);
+  });
 
 process.stdout.write(`Rendering ${totalFrames} frames @ ${fps}fps (${duration}s, ${width}x${height}@${dsf}x)\n`);
 for (let i = 0; i < totalFrames; i++) {

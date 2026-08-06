@@ -127,6 +127,61 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-06** · **SUBIDO ≠ PUBLICADO. El fallo más caro del proyecto, y no fue de código.**
+  Durante **seis semanas** (desde el 22 de julio) todo el trabajo se fue a la rama `claude/init-3bwfhm` y
+  **`main` no se tocó**. Vercel publica `main`. El resultado: el fundador aplicaba migraciones, redesplegaba,
+  refrescaba y buscaba en el panel funciones que **no existían en producción** —el vault, incidentes,
+  proveedores, las cuatro páginas legales— mientras el repositorio, los tests, el CI y yo decíamos que estaba
+  todo hecho. **Nadie mintió ni se equivocó al escribir código: la pregunta "¿esto está publicado?" no tenía
+  forma barata de responderse, así que sencillamente no se hacía.** 41 commits en el limbo.
+
+  **Cómo se descubrió**, que es la parte que conviene recordar: no por el vault. El fundador dijo que en la
+  barra lateral solo veía «Telemetría» y no «Vault». Si el vault hubiera sido lo único ausente, la hipótesis
+  natural habría sido un fallo del vault. Lo que rompió esa hipótesis fue notar que **faltaban también
+  Incidentes y Proveedores**, construidos semanas antes: cuando falta *todo lo reciente a la vez*, la causa no
+  está en la última pieza, está en el canal. **Un síntoma que abarca más de lo que tocaste apunta al
+  transporte, no al cambio.**
+
+  **Qué se construyó para que no vuelva a pasar** (y por qué no basta con "acordarse"):
+  - **`/api/version`** devuelve el commit que Vercel usó para construir lo que se está sirviendo. Convierte
+    una pregunta que antes no se podía responder sin entrar en Vercel en una consulta de un segundo.
+  - **`npm run verify:deploy`** compara ese commit con el local **y**, por separado, comprueba que las rutas
+    públicas que el código dice tener respondan de verdad. Las dos comprobaciones hacen falta: la primera es
+    exacta pero depende de que la ruta exista; la segunda funciona siempre y es la que de verdad habría cazado
+    esto (`/legal/privacidad` devolvía 404 en producción mientras existía en el repositorio).
+  - **La primera versión del verificador era ella misma un adorno**: incluía cuatro rutas de `/dashboard` y
+    las cuatro pasaban en verde con el vault sin publicar, porque el middleware redirige a login **antes** de
+    que Next resuelva la ruta y un 307 no distingue "existe" de "no existe". Se quitaron, con el motivo
+    escrito en el script. **Un test que no distingue no es un test.**
+  - **Regla de trabajo nueva:** "hecho" no es *commit + push*. Es **fusionado en `main` + `verify:deploy` en
+    verde**. Escrito también en `CLAUDE.md`, que es lo primero que se lee al retomar.
+
+  **Publicado y verificado el 2026-08-06** (commit `f7f12dc`, 11/11 comprobaciones).
+
+- **2026-08-06** · **El CI cazó lo que mi máquina no podía: rutas ASCII dentro del paquete de evidencia.**
+  Los tests del vault pasaban aquí y fallaron en el runner. Causa: `unzip` de Info-ZIP **traduce** los nombres
+  UTF-8 al juego de caracteres del entorno al escribirlos en disco, así que en una máquina sin locale UTF-8
+  «política.pdf» aterriza como «pol├нtica.pdf». El ZIP no estaba mal —el bit 11 estaba puesto y un lector
+  estricto los recupera exactos—, pero **la consecuencia de producto sí era grave**: el manifiesto declara una
+  ruta, en el disco hay otro nombre, y el paso 1 de las instrucciones de verificación falla sobre un paquete
+  legítimo. Otra vez el mismo modo de fallo que ya obligó a canonicalizar el JSON: **acusar de manipulación a
+  quien no ha tocado nada.** Corregido reduciendo la ruta del ZIP a ASCII y conservando el nombre original en
+  un campo `filename` nuevo del manifiesto.
+  Dos cosas que aprender de aquí: (1) **el `unzip` de este contenedor está compilado sin soporte Unicode y no
+  reproduce el fallo**, así que un test que dependiera de él mediría el entorno y no el código — el guard vive
+  en lógica pura, que se comporta igual en todas partes; (2) **"verificado con herramientas ajenas" era cierto
+  pero dependiente del entorno**, y eso no se veía hasta tener un segundo entorno. El CI no es burocracia: es
+  la segunda máquina.
+
+- **2026-08-06** · **El guard de copy prohibido no miraba `marketing/`**, que es la copy más pública que
+  existe. Al integrar el pack de redes (PR #2) se extendió a `marketing/**.{md,html}`: 311 → 339 ficheros
+  vigilados. Que la regla nº 1 se comprobara dentro del producto pero no en el escaparate era exactamente al
+  revés de lo razonable — un post se captura, se reenvía y no se puede retirar. Los 9 avisos que salieron eran
+  falsos positivos del mismo tipo (ficheros que **enuncian** la regla, y el «sello» del logotipo): se marcaron
+  línea a línea con `attesta-copy-ok` en vez de excluir los ficheros enteros, para que `CAPTIONS.md` —los
+  textos reales— siga vigilado. Comprobado inyectando «Attesta certifica que tu organización cumple»: 2
+  infracciones detectadas.
+
 - **2026-08-04** · **Vault de evidencia firmado (§0.G). La pregunta que lo ordenó todo: ¿quién es el
   adversario?**
   La respuesta no es obvia y decide el diseño entero: **el adversario es la organización auditada, no

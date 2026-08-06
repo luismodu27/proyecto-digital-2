@@ -1,5 +1,4 @@
 import puppeteer from 'puppeteer-core';
-import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
