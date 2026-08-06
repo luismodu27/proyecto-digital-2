@@ -100,11 +100,15 @@ begin
     for r in
       select * from public.audit_log a
       where a.organization_id = o.id
-      order by a.id
+      order by a.id asc
     loop
       v_total := v_total + 1;
-      v_calc := private.audit_hash(r, v_prev);
-      if v_calc is distinct from r.row_hash then
+      v_calc := private.audit_hash(
+        v_prev, r.organization_id, r.actor_id, r.table_name, r.row_id,
+        r.action::text, r.old_data, r.new_data, r.diff, r.at
+      );
+      if r.prev_hash is distinct from v_prev
+         or r.row_hash is distinct from v_calc then
         v_broken := r.id;
         exit;
       end if;
