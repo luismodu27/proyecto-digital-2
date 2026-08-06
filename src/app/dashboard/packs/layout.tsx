@@ -1,11 +1,15 @@
 import { PaidGate } from "@/lib/billing/gate";
+import { getDictionary } from "@/lib/i18n";
+import { resolveLocale } from "@/lib/i18n/resolve";
 
-export default function PacksLayout({ children }: { children: React.ReactNode }) {
+export default async function PacksLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const t = getDictionary(await resolveLocale()).dashboard.pages.packsPage;
   return (
-    <PaidGate
-      feature="Policy packs"
-      description="Plantillas de políticas listas para tu vertical (empezando por RRHH) para acelerar tu evidencia."
-    >
+    <PaidGate feature={t.paywallFeature} description={t.paywallDesc}>
       {children}
     </PaidGate>
   );

@@ -34,6 +34,9 @@ export const ENTITY_META: Record<
   memberships: { label: "miembro", article: "el", tone: "good" },
   regulatory_acks: { label: "revisión regulatoria", article: "la", tone: "info" },
   action_tasks: { label: "tarea del plan", article: "la", tone: "gold" },
+  incidents: { label: "incidente", article: "el", tone: "danger" },
+  suppliers: { label: "proveedor", article: "el", tone: "info" },
+  supplier_evidence: { label: "evidencia de proveedor", article: "la", tone: "gold" },
 };
 
 /**
@@ -55,6 +58,9 @@ export const ENTITY_META_EN: Record<
   memberships: { label: "member", article: "the", tone: "good" },
   regulatory_acks: { label: "regulatory review", article: "the", tone: "info" },
   action_tasks: { label: "plan task", article: "the", tone: "gold" },
+  incidents: { label: "incident", article: "the", tone: "danger" },
+  suppliers: { label: "supplier", article: "the", tone: "info" },
+  supplier_evidence: { label: "supplier evidence", article: "the", tone: "gold" },
 };
 
 export const ACTION_META: Record<
@@ -111,6 +117,23 @@ const FIELD_LABELS: Record<string, Record<string, string>> = {
     title: "título",
     detail: "detalle",
   },
+  incidents: {
+    title: "título",
+    detail: "detalle",
+    seriousness: "calificación",
+    categories: "categorías",
+    risk_art79: "riesgo del Art. 79.1",
+    use_suspended: "uso suspendido",
+    provider_unreachable: "proveedor ilocalizable",
+    aware_on: "fecha de conocimiento",
+    occurred_on: "fecha del hecho",
+    causal_link_on: "nexo causal",
+    notified_provider_on: "aviso al proveedor",
+    notified_distributor_on: "aviso al distribuidor",
+    notified_authority_on: "aviso a la autoridad",
+    personal_data_breach: "afecta a datos personales",
+    status: "estado",
+  },
 };
 
 /**
@@ -149,6 +172,23 @@ export const FIELD_LABELS_EN: Record<string, Record<string, string>> = {
     due_date: "due date",
     title: "title",
     detail: "detail",
+  },
+  incidents: {
+    title: "title",
+    detail: "detail",
+    seriousness: "classification",
+    categories: "categories",
+    risk_art79: "Art. 79(1) risk",
+    use_suspended: "use suspended",
+    provider_unreachable: "provider unreachable",
+    aware_on: "date of knowledge",
+    occurred_on: "date of occurrence",
+    causal_link_on: "causal link",
+    notified_provider_on: "provider informed",
+    notified_distributor_on: "distributor informed",
+    notified_authority_on: "authority informed",
+    personal_data_breach: "involves personal data",
+    status: "status",
   },
 };
 

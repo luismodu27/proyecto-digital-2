@@ -12,6 +12,12 @@ import {
   SAMPLE_MEMBERS,
   SAMPLE_ACTION_TASKS,
   SAMPLE_ACTION_TASKS_EN,
+  SAMPLE_INCIDENTS,
+  SAMPLE_INCIDENTS_EN,
+  SAMPLE_SUPPLIERS,
+  SAMPLE_SUPPLIERS_EN,
+  SAMPLE_SUPPLIER_EVIDENCE,
+  SAMPLE_SUPPLIER_EVIDENCE_EN,
   SAMPLE_REG_ACKS,
   SAMPLE_REG_ACKS_EN,
   SAMPLE_REG_CANDIDATES,
@@ -36,8 +42,15 @@ import {
 } from "@/lib/mock-data";
 import { mergeCatalog, type RegulatoryEvent } from "@/lib/regulatory-watch";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import type { Locale } from "@/lib/i18n/config";
 import type { FunnelRow } from "@/lib/telemetry/events";
 import type { IntakeLink, IntakeSubmission } from "@/lib/intake/types";
+import type { Incident } from "@/lib/incidents/incidents";
+import type { Supplier } from "@/lib/suppliers/types";
+import type { SupplierEvidence } from "@/lib/suppliers/evidence";
+import { REVIEW_CADENCE_DEFAULT_DAYS } from "@/lib/incidents/review";
+import type { OrgDeletionState } from "@/lib/org-lifecycle";
+import type { EvidenceFile } from "@/lib/vault/files";
 
 /**
  * Repositorio de datos de ejemplo (modo demo).
@@ -54,9 +67,21 @@ export async function getAiSystems(): Promise<AiSystem[]> {
   return aiSystems(locale);
 }
 
+/**
+ * Marca las muestras con el idioma en el que se están sirviendo.
+ *
+ * En demo el texto SIEMPRE sale en el idioma de la interfaz (hay espejo ES/EN de
+ * cada muestra), así que aquí el idioma consta y coincide. `langAttr()` no
+ * etiquetará nada — que es justo lo correcto: la demo enseña el caso normal, no
+ * el de contenido heredado en otro idioma.
+ */
+function tagged<T extends object>(rows: readonly T[], locale: Locale): T[] {
+  return rows.map((r) => ({ ...r, locale }));
+}
+
 export async function getGapItems(): Promise<GapItem[]> {
   const locale = await resolveLocale();
-  return locale === "en" ? GAP_ITEMS_EN : GAP_ITEMS;
+  return tagged(locale === "en" ? GAP_ITEMS_EN : GAP_ITEMS, locale);
 }
 
 export async function getSystemsForSelect(): Promise<
@@ -64,6 +89,26 @@ export async function getSystemsForSelect(): Promise<
 > {
   const locale = await resolveLocale();
   return aiSystems(locale).map((s) => ({ id: s.id, name: s.name }));
+}
+
+/**
+ * En demo NUNCA hay baja pendiente. No es pereza: la pantalla de baja es
+ * destructiva y el modo demo es lo que se enseña en capturas y en la landing.
+ * Un aviso de "esta organización se borrará en 7 días" en una demo sería, como
+ * poco, una mala primera impresión.
+ */
+export async function getOrgDeletionState(): Promise<OrgDeletionState | null> {
+  return null;
+}
+
+/**
+ * En demo el vault está VACÍO, y es deliberado. Enseñar archivos de evidencia
+ * inventados sería justo la clase de promesa que el producto no quiere hacer: la
+ * demo debe mostrar el hueco («aquí van tus documentos»), no simular que ya hay
+ * un expediente montado.
+ */
+export async function getEvidenceFiles(): Promise<EvidenceFile[]> {
+  return [];
 }
 
 export async function getOrganizationName(): Promise<string | null> {
@@ -93,7 +138,7 @@ export async function getSystemAssessments(
 ): Promise<AssessmentRecord[]> {
   const locale = await resolveLocale();
   const src = locale === "en" ? SAMPLE_ASSESSMENTS_EN : SAMPLE_ASSESSMENTS;
-  return src[id] ?? [];
+  return tagged(src[id] ?? [], locale);
 }
 
 export async function getOrgMembers(): Promise<OrgMember[]> {
@@ -148,11 +193,16 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
       checkedAt: new Date().toISOString(),
     },
     systems,
-    gapItems: en ? GAP_ITEMS_EN : GAP_ITEMS,
-    actionTasks: en ? SAMPLE_ACTION_TASKS_EN : SAMPLE_ACTION_TASKS,
+    gapItems: tagged(en ? GAP_ITEMS_EN : GAP_ITEMS, locale),
+    actionTasks: tagged(en ? SAMPLE_ACTION_TASKS_EN : SAMPLE_ACTION_TASKS, locale),
     members: SAMPLE_MEMBERS,
     regulatoryAcks: en ? SAMPLE_REG_ACKS_EN : SAMPLE_REG_ACKS,
     auditLog: en ? SAMPLE_AUDIT_EN : SAMPLE_AUDIT,
+    suppliers: await getSuppliers(),
+    incidents: await getIncidents(),
+    intakeSubmissions: await getIntakeSubmissions(),
+    // En demo los datos de ejemplo nunca llegan al tope, así que nunca se trunca.
+    truncated: null,
   };
 }
 
@@ -190,7 +240,7 @@ export async function getOrgJurisdictions(): Promise<string[]> {
 
 export async function getActionTasks(): Promise<ActionTask[]> {
   const locale = await resolveLocale();
-  return locale === "en" ? SAMPLE_ACTION_TASKS_EN : SAMPLE_ACTION_TASKS;
+  return tagged(locale === "en" ? SAMPLE_ACTION_TASKS_EN : SAMPLE_ACTION_TASKS, locale);
 }
 
 /**
@@ -206,8 +256,14 @@ export async function getSystemDossier(
   if (!system) return null;
   return {
     system: { ...system, actorRole: "deployer" },
-    gaps: (en ? GAP_ITEMS_EN : GAP_ITEMS).filter((g) => g.system === system.id),
-    assessments: (en ? SAMPLE_ASSESSMENTS_EN : SAMPLE_ASSESSMENTS)[system.id] ?? [],
+    gaps: tagged(
+      (en ? GAP_ITEMS_EN : GAP_ITEMS).filter((g) => g.system === system.id),
+      locale,
+    ),
+    assessments: tagged(
+      (en ? SAMPLE_ASSESSMENTS_EN : SAMPLE_ASSESSMENTS)[system.id] ?? [],
+      locale,
+    ),
     biasAudit: (en ? SAMPLE_BIAS_AUDITS_EN : SAMPLE_BIAS_AUDITS)[system.id] ?? null,
   };
 }
@@ -237,4 +293,27 @@ export async function getIntakeLinks(): Promise<IntakeLink[]> {
 
 export async function getIntakeSubmissions(): Promise<IntakeSubmission[]> {
   return [];
+}
+
+/** Expedientes de incidente de ejemplo (modo demo). */
+export async function getIncidents(): Promise<Incident[]> {
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_INCIDENTS_EN : SAMPLE_INCIDENTS;
+}
+
+/** En demo la cadencia no es configurable: se enseña el defecto del producto. */
+export async function getReviewCadenceDays(): Promise<number> {
+  return REVIEW_CADENCE_DEFAULT_DAYS;
+}
+
+/** Proveedores de ejemplo (modo demo). */
+export async function getSuppliers(): Promise<Supplier[]> {
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_SUPPLIERS_EN : SAMPLE_SUPPLIERS;
+}
+
+/** Evidencia de ejemplo (modo demo). */
+export async function getSupplierEvidence(): Promise<SupplierEvidence[]> {
+  const locale = await resolveLocale();
+  return locale === "en" ? SAMPLE_SUPPLIER_EVIDENCE_EN : SAMPLE_SUPPLIER_EVIDENCE;
 }

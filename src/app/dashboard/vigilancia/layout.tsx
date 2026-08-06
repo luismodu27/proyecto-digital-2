@@ -1,11 +1,15 @@
 import { PaidGate } from "@/lib/billing/gate";
+import { getDictionary } from "@/lib/i18n";
+import { resolveLocale } from "@/lib/i18n/resolve";
 
-export default function VigilanciaLayout({ children }: { children: React.ReactNode }) {
+export default async function VigilanciaLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const t = getDictionary(await resolveLocale()).dashboard.pages.monitoring;
   return (
-    <PaidGate
-      feature="Vigilancia regulatoria"
-      description="El radar que vigila las fuentes oficiales y te avisa de cada plazo y cambio del EU AI Act antes de que te afecte."
-    >
+    <PaidGate feature={t.paywallFeature} description={t.paywallDesc}>
       {children}
     </PaidGate>
   );

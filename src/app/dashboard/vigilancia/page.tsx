@@ -13,6 +13,8 @@ import {
   isSupabaseConfigured,
 } from "@/lib/data";
 import { JurisdictionSettings } from "@/components/dashboard/JurisdictionSettings";
+import { ReadonlySetting } from "@/components/dashboard/ReadonlySetting";
+import { canEditSettings, settingsAccess } from "@/lib/dashboard/settings-access";
 import {
   regAckLabel,
   type RegAck,
@@ -398,6 +400,10 @@ export default async function VigilanciaPage({
   const jurLabels = JURISDICTION_LABEL_BY_LOCALE[locale];
   const canManage =
     isSupabaseConfigured && (role === "owner" || role === "admin");
+  // Ajustes de organización: misma regla que en incidentes, en un solo sitio.
+  // (`canManage` sigue rigiendo el estado interno de los eventos, que es otra
+  // cosa: ahí demo SÍ debe quedarse en solo lectura.)
+  const jurAccess = settingsAccess({ role, isConnected: isSupabaseConfigured });
 
   const jurisdictionOf = (e: RegulatoryEvent) =>
     FRAMEWORK_META[e.framework]?.jurisdiction;
@@ -564,10 +570,26 @@ export default async function VigilanciaPage({
         }
       />
 
-      {/* Configurador del nexo de jurisdicción (owner/admin) */}
-      {canManage && jurisdictions.length > 1 && (
-        <JurisdictionSettings selected={nexus} />
-      )}
+      {/* Nexo de jurisdicción. Quien no puede cambiarlo VE el valor igualmente:
+          antes se ocultaba entero y el radar parecía incompleto sin explicación.
+          Mismo criterio que el estado interno de cada evento, unos bloques más
+          abajo. La autorización real la impone `set_org_jurisdictions`. */}
+      {jurisdictions.length > 1 &&
+        (canEditSettings(jurAccess) ? (
+          <JurisdictionSettings selected={nexus} />
+        ) : (
+          <div className="mb-6">
+            <ReadonlySetting
+              label={dd.controls.jurisdiction.readonlyTitle}
+              value={
+                nexus.length > 0
+                  ? nexus.map((j) => jurLabels[j]).join(" · ")
+                  : dd.controls.jurisdiction.readonlyEmpty
+              }
+              note={dd.controls.ownerAdminOnly}
+            />
+          </div>
+        ))}
 
       {/* Filtro por jurisdicción (solo si hay más de un marco) */}
       {jurisdictions.length > 1 && (

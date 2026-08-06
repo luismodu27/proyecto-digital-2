@@ -7,6 +7,8 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
 import { NewEntityForm } from "@/components/dashboard/NewEntityForm";
+import { OrgDeletion } from "@/components/dashboard/OrgDeletion";
+import { getCurrentMemberRole, getOrgDeletionState, getOrganizationName } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +26,13 @@ export default async function OrganizacionesPage() {
   const t = dict.dashboard.organizations;
   const tierLabel = dict.dashboard.billing.tier;
 
-  const [orgs, activeOrgId] = await Promise.all([getUserOrgs(), getActiveOrg()]);
+  const [orgs, activeOrgId, deletionState, role, orgName] = await Promise.all([
+    getUserOrgs(),
+    getActiveOrg(),
+    getOrgDeletionState(),
+    getCurrentMemberRole(),
+    getOrganizationName(),
+  ]);
   // Plan efectivo por organización (se aplica por-org, no por usuario).
   const plans = await Promise.all(orgs.map((o) => getOrgPlan(o.id)));
 
@@ -114,6 +122,22 @@ export default async function OrganizacionesPage() {
             </div>
           )}
         </div>
+      )}
+
+      {/*
+        Baja de la organización. Solo con backend real y organización activa: en
+        demo no hay nada que dar de baja, y enseñar la zona de peligro en la
+        vista que se usa para capturas sería gratuito.
+      */}
+      {isSupabaseConfigured && activeOrgId && (
+        <OrgDeletion
+          orgId={activeOrgId}
+          orgName={orgName ?? ""}
+          role={role}
+          state={deletionState}
+          locale={locale}
+          t={t.deletion}
+        />
       )}
     </>
   );

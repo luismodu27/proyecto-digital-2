@@ -46,6 +46,22 @@ npm run test:watch
 La verificación completa es **lint + tsc + `check:copy` + `test` + build** (los cinco están en CI)
 y, para el backend real, **curl por API** (usuarios `*@attesta-test.dev`) — ver gotchas.
 
+```bash
+npm run verify:deploy   # ¿lo que dice el repo está PUBLICADO? (ver abajo)
+```
+
+**⚠️ SUBIDO ≠ PUBLICADO. Léelo antes de decir "hecho".** Vercel publica **`main`**, y el trabajo
+se hace en ramas. Durante seis semanas se dio por bueno que `commit + push` equivalía a
+producción: los tests pasaban, las migraciones se aplicaban y la web servía el código de julio.
+El fundador aplicó migraciones y buscó funciones que no existían en el aire. Nadie mintió — es
+que la pregunta "¿esto está publicado?" no tenía forma barata de responderse, así que no se
+hacía. Ahora sí: `npm run verify:deploy` compara el commit publicado (`/api/version`, que Vercel
+rellena solo) con el local, y comprueba que las rutas públicas respondan. **Ejecutarlo al cerrar
+cualquier trabajo que el fundador vaya a mirar**, y no decir "está en producción" sin él.
+Ojo: NO incluye rutas de `/dashboard` — el middleware redirige a login antes de resolverlas, así
+que un 307 no distingue "existe" de "no existe"; la primera versión las incluía y pasaban en
+verde con el vault sin publicar.
+
 **Tests (`npm test`, Vitest, `src/**/*.test.ts`).** Cubren solo **lógica pura** (nada de componentes
 ni de Supabase; entorno `node`, sin jsdom, para que la suite corra en <1 s y nadie la desactive).
 Existen porque `build`/`lint`/`tsc` compilan tan felices una **regla legal mal editada**: un `if`
@@ -154,6 +170,35 @@ de 5 min por (sitio + código) para que una migración pendiente no escriba una 
 código y el mensaje de Postgres. No manda nada a terceros a propósito: enchufar Sentry es sustituir
 `emit`, y sumar un subprocesador es decisión del fundador (coste + DPA), no un detalle de un commit.
 
+**Cumplimiento propio (`src/lib/legal/`) = la lista de subprocesadores es CÓDIGO.** Las 4 páginas legales
+(privacidad, cookies, subprocesadores, DPA) salen de datos tipados bilingües en `src/lib/legal/`, **no del
+diccionario i18n** (frontera legal: el diccionario es chrome de UI). Rutas `/legal/[slug]` y `/en/legal/[slug]`,
+con **slug distinto por idioma** (`privacidad`↔`privacy`) para que ambas indexen con su canonical. Lo que hace
+que esto no envejezca: `subprocessors.ts` es el registro del que salen **a la vez** la página y un **guard**
+(`subprocessors.test.ts`) que escanea el repo buscando destinos de salida —argumentos de `fetch(...)` y la
+allowlist de la CSP— y **falla si el producto habla con un host no declarado**. Distingue *enviar datos* de
+*citar una URL*, así que los enlaces a eur-lex/ilga.gov del contenido regulatorio no dan falsos positivos.
+Separa **subencargados de datos de cliente** de los que solo ven el **corpus normativo público** (Voyage,
+NVIDIA NIM), y un test vigila que esa clasificación no se afloje. La identidad del responsable
+(`entity.ts`) **no tiene default plausible**, como `site-url.ts`: sin los 4 datos del art. 13.1.a, las páginas
+salen con aviso de borrador visible + `noindex` + fuera del sitemap; con ellos, reales e indexables sin tocar
+código. Ojo: `sitemap.ts` lleva `force-dynamic` **por eso** — si se prerenderiza, las páginas (dinámicas)
+dejarían de ser `noindex` mientras el sitemap seguiría sin listarlas hasta el siguiente despliegue.
+
+**Vault de evidencia + paquete firmado (`src/lib/vault/`).** Archivos reales detrás de cada control
+(migración 0038: `evidence_files` + bucket privado; la ruta empieza por `organization_id` **porque la policy
+del bucket compara esa primera carpeta** — no es nomenclatura, es el aislamiento). El paquete
+(`/api/vault/package`) es un ZIP con la evidencia, el manifiesto y la firma Ed25519. **El adversario es la
+organización auditada, no Attesta**: por eso firma Attesta, y por eso un manifiesto sin firma no valdría.
+El **hash se calcula en el servidor** y se **recalcula al empaquetar** (si un archivo cambió por debajo, no
+entra y la omisión se declara). La firma es sobre la **serialización canónica** (`canonicalJson`, ordenada en
+profundidad): sin eso un verificador ajeno diría "firma inválida" sobre un paquete legítimo. Qué afirma —
+custodia e integridad, nunca conformidad — va **dentro** del manifiesto y del README del ZIP. Sin
+`VAULT_SIGNING_KEY` el paquete sale SIN firmar y lo dice en pantalla, en el nombre del fichero y dentro; no se
+genera una clave al vuelo a propósito. Cero dependencias: ZIP a mano (`zlib.crc32`) y Web Crypto. Verificado
+con `unzip`, Python y **OpenSSL** — probar un formato binario con el parser propio no demuestra nada. Y la
+purga de organización borra también los objetos del almacenamiento, **antes** que la BD: no caen en cascada.
+
 **Contenido legal = 100% determinista, cero LLM.** Las rutas que emiten texto regulatorio (dossier,
 informe, radar de vigilancia, clasificación de riesgo, recomendaciones) se ensamblan solo con datos
 reales del cliente + texto del AI Act ya verificado por el experto. Un texto legal alucinado es un
@@ -223,6 +268,11 @@ docs/{supabase.md,thesis.md}
   las invitaciones (bugs ya corregidos).
 - **Build necesita `.env.local`:** `next build` inlinea `NEXT_PUBLIC_*` en el cliente. Si compilas sin
   `.env.local`, el bundle queda en modo demo aunque runtime tenga las vars.
+- **El dominio público no tiene default (`src/lib/site-url.ts`).** `NEXT_PUBLIC_APP_URL` manda; en un
+  despliegue (`VERCEL` presente) sin ella el **build falla**; fuera de un despliegue se usa `localhost`.
+  Un valor con barra final, ruta o esquema raro se **rechaza**, no se recorta. El default plausible que
+  había antes era el bug: un cambio de dominio rompía canonical/hreflang/sitemap y los enlaces de los
+  correos sin que nada se quejara. No reintroducir un `?? "https://…"` en ningún sitio.
 - **Verificación del backend real = curl, no navegador.** El Chromium headless de Playwright NO usa el
   proxy de salida → no alcanza Supabase. Verifica el flujo real por API con `curl` (sí usa proxy),
   con usuarios de prueba `*@attesta-test.dev`.

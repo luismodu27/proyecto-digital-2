@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { RISK_ORDER } from "@/lib/mock-data";
+import { MAX_NAME, MAX_NOTE, MAX_REF, text, uuid } from "./form";
 
 const QUEUE = "/dashboard/vigilancia/candidatos";
 
@@ -16,8 +17,8 @@ const QUEUE = "/dashboard/vigilancia/candidatos";
 export async function approveCandidate(formData: FormData) {
   if (!isSupabaseConfigured) redirect(`${QUEUE}?toast=cand-demo`);
 
-  const id = String(formData.get("id") ?? "").trim();
-  const eventId = String(formData.get("eventId") ?? "").trim();
+  const id = uuid(formData.get("id")) ?? "";
+  const eventId = text(formData.get("eventId"), MAX_REF) ?? "";
   if (!id) redirect(QUEUE);
 
   const supabase = await createClient();
@@ -46,13 +47,13 @@ export async function approveCandidate(formData: FormData) {
 export async function enrichCandidate(formData: FormData) {
   if (!isSupabaseConfigured) redirect(`${QUEUE}?toast=cand-demo`);
 
-  const id = String(formData.get("id") ?? "").trim();
+  const id = uuid(formData.get("id")) ?? "";
   if (!id) redirect(QUEUE);
 
   const intent = String(formData.get("intent") ?? "save");
-  const str = (k: string) => String(formData.get(k) ?? "").trim();
+  const str = (k: string, max = MAX_REF) => text(formData.get(k), max) ?? "";
 
-  const title = str("title");
+  const title = str("title", MAX_NAME);
   if (!title) redirect(`${QUEUE}?toast=cand-error`);
 
   const eventDate = str("event_date") || null;
@@ -60,7 +61,7 @@ export async function enrichCandidate(formData: FormData) {
   const framework = str("framework") || "eu-ai-act";
   const proposedEventId = str("proposed_event_id");
 
-  const articles = str("articles")
+  const articles = str("articles", MAX_NOTE)
     .split(/[\n,]/)
     .map((a) => a.trim())
     .filter(Boolean);
@@ -116,8 +117,8 @@ export async function enrichCandidate(formData: FormData) {
 export async function rejectCandidate(formData: FormData) {
   if (!isSupabaseConfigured) redirect(`${QUEUE}?toast=cand-demo`);
 
-  const id = String(formData.get("id") ?? "").trim();
-  const note = String(formData.get("note") ?? "");
+  const id = uuid(formData.get("id")) ?? "";
+  const note = text(formData.get("note"), MAX_NOTE) ?? "";
   if (!id) redirect(QUEUE);
 
   const supabase = await createClient();

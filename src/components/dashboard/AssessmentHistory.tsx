@@ -5,6 +5,7 @@ import { EvidenceBadge } from "@/components/ui/EvidenceBadge";
 import { riskLabel, type AssessmentRecord } from "@/lib/mock-data";
 import { useT, useLocale } from "@/lib/i18n/provider";
 import type { Locale } from "@/lib/i18n/config";
+import { langAttr } from "@/lib/i18n/stored-locale";
 
 function formatDate(iso: string, locale: Locale): string {
   const d = new Date(iso);
@@ -53,7 +54,9 @@ export function AssessmentHistory({
               </span>
             )}
           </div>
-          <p className="mt-2 text-sm text-ink-soft">{a.rationale}</p>
+          <p lang={langAttr(a.locale, locale)} className="mt-2 text-sm text-ink-soft">
+            {a.rationale}
+          </p>
           <p className="mt-1.5 text-xs text-muted">
             {formatDate(a.assessedAt, locale)}
             {a.attestedByName ? `${h.attestedByPrefix}${a.attestedByName}` : ""}

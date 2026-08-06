@@ -22,6 +22,13 @@ export const PRODUCT_EVENTS = [
   "cta_click",
   /** Solicitud de acceso enviada desde la landing (servidor). */
   "waitlist_submit",
+  /**
+   * Solicitud de DEMO enviada (servidor). Es distinta de `waitlist_submit` a
+   * propósito: la lista de espera es "avísame cuando esté" y esto es "quiero
+   * hablar". Mezclarlas escondería la única señal que dice si la venta asistida
+   * funciona. props: `{ size, source }` — nunca correo ni nombre.
+   */
+  "demo_requested",
 
   // --- Alta y activación -------------------------------------------------
   /** El visitante envió el formulario en modo registro (cliente). */
@@ -34,6 +41,14 @@ export const PRODUCT_EVENTS = [
   "risk_assessed",
   /** Policy pack aplicado: se generaron brechas reales (servidor). props: `{ pack }`. */
   "pack_applied",
+  /**
+   * Archivo de evidencia subido al vault (servidor). props: `{ bytes }` — el
+   * tamaño, nunca el nombre ni el contenido. Es la señal que distingue un
+   * expediente declarado de uno con documentos detrás.
+   */
+  "evidence_uploaded",
+  /** Paquete de auditoría descargado (servidor). props: `{ files, signed }`. */
+  "audit_package_downloaded",
 
   // --- Monetización ------------------------------------------------------
   /** Un muro de pago se mostró de verdad (servidor). props: `{ feature }`. */

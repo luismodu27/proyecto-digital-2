@@ -175,8 +175,8 @@ export const GESTION_TRABAJADORES_PACK: PolicyPack = {
       id: "documentacion",
       title: "Uso conforme a instrucciones y documentación del proveedor",
       description:
-        "Usa el sistema conforme a las instrucciones de uso del proveedor (Art. 26.1). Exige y conserva como evidencia la información que debe facilitarte (instrucciones de uso e información del Anexo IV / Art. 11, obligación del proveedor). Evidencia = instrucciones de uso archivadas y confirmación de que el uso real se ajusta a la finalidad prevista.",
-      article: "Art. 26.1 (Anexo IV/Art. 11 = proveedor)",
+        "Usa el sistema conforme a las instrucciones de uso del proveedor (Art. 26.1). Exige y conserva las instrucciones de uso (Art. 13): son el único documento que el Reglamento dirige al responsable del despliegue. La documentación técnica del Anexo IV (Art. 11) NO es exigible —se dirige a autoridades y organismos notificados—: si la necesitas, pacta su acceso en el contrato. Evidencia = instrucciones de uso archivadas y confirmación de que el uso real se ajusta a la finalidad prevista.",
+      article: "Art. 26.1 + Art. 13 (Anexo IV/Art. 11 = solo por contrato)",
       severity: "media",
     },
     {
@@ -379,8 +379,8 @@ export const GESTION_TRABAJADORES_PACK_EN: PolicyPack = {
       id: "documentacion",
       title: "Use in line with the provider's instructions and documentation",
       description:
-        "Use the system in accordance with the provider's instructions for use (Art. 26.1). Require and keep as evidence the information the provider must supply to you (instructions for use and the Annex IV / Art. 11 information, a provider obligation). Evidence = archived instructions for use and confirmation that real use conforms to the intended purpose.",
-      article: "Art. 26.1 (Annex IV/Art. 11 = provider)",
+        "Use the system in accordance with the provider's instructions for use (Art. 26.1). Require and keep the instructions for use (Art. 13): they are the only document the Regulation addresses to the deployer. The Annex IV technical documentation (Art. 11) is NOT something you can require —it is addressed to authorities and notified bodies—: if you need it, negotiate access in the contract. Evidence = archived instructions for use and confirmation that real use conforms to the intended purpose.",
+      article: "Art. 26.1 + Art. 13 (Annex IV/Art. 11 = contract only)",
       severity: "media",
     },
     {

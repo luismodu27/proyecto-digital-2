@@ -29,7 +29,11 @@ function fill(text: string): string {
 const TIER_META: { href: string; highlight: boolean; cta: string }[] = [
   { href: "/login?signup=1", highlight: false, cta: "pricing_free" },
   { href: "/login?signup=1", highlight: true, cta: "pricing_preparacion" },
-  { href: "#waitlist", highlight: false, cta: "pricing_enterprise" },
+  // Enterprise apunta a la DEMO, no a la lista de espera. Es el plan que no es
+  // self-serve: quien llega aquí necesita hablar con alguien, y mandarlo a
+  // "déjame tu correo y ya te avisaremos" era perder la única conversación que
+  // justifica un contrato de este tamaño.
+  { href: "#demo", highlight: false, cta: "pricing_enterprise" },
 ];
 
 // Matriz de comparación: cada fila = una capacidad. Una celda es `true`/`false`

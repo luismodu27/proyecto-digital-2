@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveOrg } from "./context";
+import { getActiveOrg, getCurrentUser } from "./context";
 import { toAuditEntry, type RawAudit } from "@/lib/audit";
 import type {
   ActionTask,
@@ -34,9 +34,16 @@ import {
 } from "@/lib/regulatory-watch";
 import type { BiasAudit } from "@/lib/bias-audit";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import { coerceStoredLocale } from "@/lib/i18n/stored-locale";
+import { GRACE_DAYS, type OrgDeletionState } from "@/lib/org-lifecycle";
+import type { EvidenceFile } from "@/lib/vault/files";
 import { logDataFallback } from "@/lib/observability/log";
 import type { FunnelRow } from "@/lib/telemetry/events";
 import type { IntakeLink, IntakeSubmission } from "@/lib/intake/types";
+import type { Incident, IncidentCategory, Seriousness } from "@/lib/incidents/incidents";
+import type { AiActRole, GdprRole, Supplier } from "@/lib/suppliers/types";
+import type { EvidenceStatus, SupplierEvidence } from "@/lib/suppliers/evidence";
+import { REVIEW_CADENCE_DEFAULT_DAYS, normalizeCadenceDays } from "@/lib/incidents/review";
 
 /** Mapea la severidad de BD (en) a la del modelo de UI (es). */
 const SEVERITY_ES: Record<string, GapItem["severity"]> = {
@@ -58,7 +65,14 @@ const SEVERITY_ES: Record<string, GapItem["severity"]> = {
 const AI_SYSTEM_LIST_COLS =
   "id, code, name, owner, domain, vendor, risk_level, compliance_pct, last_reviewed_at, evidence_state";
 
-export async function getAiSystems(): Promise<AiSystem[]> {
+/**
+ * Inventario de la organización activa.
+ *
+ * `cache()` (por request) porque desde que el layout decide si enseña el
+ * recorrido guiado, lo miran DOS sitios: el layout y la propia portada. Sin
+ * esto, gatear el modal habría costado una consulta extra en cada ruta.
+ */
+async function getAiSystemsUncached(): Promise<AiSystem[]> {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return [];
@@ -92,10 +106,14 @@ export async function getAiSystems(): Promise<AiSystem[]> {
   }));
 }
 
+export const getAiSystems = cache(getAiSystemsUncached);
+
 /** Historial de evaluaciones de un sistema (más recientes primero). */
 /** Columnas de `risk_assessments` que consumen el dossier y la exportación. */
 const ASSESSMENT_COLS =
   "id, ai_system_id, level, rationale, evidence_state, attested_by_name, evidence_note, evidence_url, assessed_at";
+/** `locale` la aporta la 0033: se pide aparte para poder reintentar sin ella. */
+const ASSESSMENT_COLS_FULL = `${ASSESSMENT_COLS}, locale`;
 
 type AssessmentRow = {
   id: string;
@@ -107,6 +125,7 @@ type AssessmentRow = {
   evidence_note: string | null;
   evidence_url: string | null;
   assessed_at: string;
+  locale?: string | null;
 };
 
 function mapAssessmentRow(r: AssessmentRow): AssessmentRecord {
@@ -119,6 +138,7 @@ function mapAssessmentRow(r: AssessmentRow): AssessmentRecord {
     evidenceNote: r.evidence_note ?? null,
     evidenceUrl: r.evidence_url ?? null,
     assessedAt: String(r.assessed_at),
+    locale: coerceStoredLocale(r.locale),
   };
 }
 
@@ -128,13 +148,20 @@ export async function getSystemAssessments(
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return [];
-  const { data } = await supabase
-    .from("risk_assessments")
-    .select(ASSESSMENT_COLS)
-    .eq("organization_id", org)
-    .eq("ai_system_id", systemId)
-    .order("assessed_at", { ascending: false });
-  return ((data ?? []) as AssessmentRow[]).map(mapAssessmentRow);
+  const q = (cols: string) =>
+    supabase
+      .from("risk_assessments")
+      .select(cols)
+      .eq("organization_id", org)
+      .eq("ai_system_id", systemId)
+      .order("assessed_at", { ascending: false });
+
+  let res = await q(ASSESSMENT_COLS_FULL);
+  if (res.error) {
+    logDataFallback("getSystemAssessments", res.error, "reintento sin locale (0033)");
+    res = await q(ASSESSMENT_COLS);
+  }
+  return ((res.data ?? []) as unknown as AssessmentRow[]).map(mapAssessmentRow);
 }
 
 export type EditableSystem = {
@@ -280,6 +307,9 @@ export async function getSystemDossier(
       status: g.status as GapItem["status"],
       severity: SEVERITY_ES[g.severity] ?? "media",
       system: code,
+      // Viene del `select("*")` de arriba: sin la 0033 la clave no existe y
+      // `coerceStoredLocale` la resuelve a "no consta".
+      locale: coerceStoredLocale((g as { locale?: unknown }).locale),
     })),
     assessments,
     // Auditoría de sesgo (si la migración 0019 está aplicada; si no, campos ausentes).
@@ -301,9 +331,11 @@ export async function getSystemDossier(
 /** Organizaciones a las que pertenece el usuario actual (para el selector). */
 export async function getUserOrgs(): Promise<UserOrg[]> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // `getCurrentUser` lleva `cache()` y verifica el JWT en local: sin esto, el
+  // layout pagaba una ida y vuelta a Supabase Auth por CADA getter que
+  // necesitaba el id del usuario (aquí, en `getCurrentRole` y en el propio
+  // layout), tres veces lo mismo antes de pedir un solo dato.
+  const user = await getCurrentUser();
   if (!user) return [];
 
   const { data: mems } = await supabase
@@ -340,6 +372,104 @@ export async function getOrganizationName(): Promise<string | null> {
     .eq("id", org)
     .maybeSingle();
   return data?.name ?? null;
+}
+
+/**
+ * Estado de la baja de la organización activa. `null` = no hay baja pendiente.
+ *
+ * Degrada a `null` si la 0035 no está aplicada (la columna no existe): sin
+ * migración simplemente no hay bajas pendientes que mostrar, que es la verdad.
+ */
+export async function getOrgDeletionState(): Promise<OrgDeletionState | null> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return null;
+
+  const { data, error } = await supabase
+    .from("organizations")
+    .select("deletion_requested_at")
+    .eq("id", org)
+    .maybeSingle();
+
+  if (error) {
+    logDataFallback("getOrgDeletionState", error, "sin 0035 no hay bajas pendientes");
+    return null;
+  }
+  const requestedAt = (data as { deletion_requested_at?: string | null } | null)
+    ?.deletion_requested_at;
+  if (!requestedAt) return null;
+
+  // El plazo se recalcula aquí en lugar de guardarse: si algún día cambia, no
+  // quedan fechas viejas mintiendo en pantalla.
+  const purgeAt = new Date(
+    new Date(requestedAt).getTime() + GRACE_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString();
+  return { requestedAt, purgeAt, graceDays: GRACE_DAYS };
+}
+
+/**
+ * Archivos del vault de la organización activa.
+ *
+ * `attachedTo` se resuelve AQUÍ, a texto legible, y no en la UI: ese texto entra
+ * en el manifiesto firmado del paquete de auditoría, así que tiene que salir de
+ * un solo sitio. Si la pantalla y el paquete lo compusieran cada uno por su
+ * cuenta, acabarían diciendo cosas distintas sobre el mismo archivo.
+ *
+ * Degrada a `[]` sin la 0038 aplicada, como el resto de la fachada.
+ */
+export async function getEvidenceFiles(): Promise<EvidenceFile[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+
+  const { data, error } = await supabase
+    .from("evidence_files")
+    .select(
+      "id, filename, mime, size_bytes, sha256, uploaded_at, storage_path, gap_item_id, ai_system_id, gap_items(requirement, article), ai_systems(name)",
+    )
+    .eq("organization_id", org)
+    .order("uploaded_at", { ascending: false });
+
+  if (error || !data) {
+    logDataFallback("getEvidenceFiles", error, "sin 0038 no hay vault");
+    return [];
+  }
+
+  type Row = {
+    id: string;
+    filename: string;
+    mime: string | null;
+    size_bytes: number;
+    sha256: string;
+    uploaded_at: string;
+    storage_path: string;
+    gap_item_id: string | null;
+    ai_system_id: string | null;
+    gap_items?: { requirement?: string; article?: string | null } | null;
+    ai_systems?: { name?: string } | null;
+  };
+
+  return (data as unknown as Row[]).map((r) => {
+    const gap = r.gap_items;
+    const sistema = r.ai_systems?.name;
+    const attachedTo = gap
+      ? [gap.article, gap.requirement].filter(Boolean).join(" · ")
+      : sistema
+        ? `Sistema: ${sistema}`
+        : "Sin anclaje";
+    return {
+      id: r.id,
+      filename: r.filename,
+      mime: r.mime,
+      bytes: Number(r.size_bytes),
+      sha256: r.sha256,
+      uploadedAt: String(r.uploaded_at),
+      attachedTo,
+      gapItemId: r.gap_item_id,
+      aiSystemId: r.ai_system_id,
+      storagePath: r.storage_path,
+    };
+  });
 }
 
 /** Sistemas de la org (id real + nombre) para selectores. */
@@ -631,16 +761,25 @@ export async function getActionTasks(): Promise<ActionTask[]> {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return [];
-  const [tasksRes, members] = await Promise.all([
+  const TASK_COLS =
+    "id, title, detail, article, priority, status, assignee_id, due_date, ai_system_id, source, source_key, created_at, ai_systems(name)";
+  const tasksQuery = (cols: string) =>
     supabase
       .from("action_tasks")
-      .select(
-        "id, title, detail, article, priority, status, assignee_id, due_date, ai_system_id, source, source_key, created_at, ai_systems(name)",
-      )
+      .select(cols)
       .eq("organization_id", org)
-      .order("created_at", { ascending: true }),
+      .order("created_at", { ascending: true });
+  // `locale` la aporta la 0033; sin ella el SELECT falla entero y el plan se
+  // quedaría vacío, así que se reintenta con las columnas de siempre.
+  const [firstTry, members] = await Promise.all([
+    tasksQuery(`${TASK_COLS}, locale`),
     listOrgMembersRaw(),
   ]);
+  let tasksRes = firstTry;
+  if (tasksRes.error) {
+    logDataFallback("getActionTasks", tasksRes.error, "reintento sin locale (0033)");
+    tasksRes = await tasksQuery(TASK_COLS);
+  }
   const emailById = new Map<string, string>();
   for (const m of members) {
     emailById.set(m.user_id, m.email);
@@ -658,9 +797,10 @@ export async function getActionTasks(): Promise<ActionTask[]> {
     source: "manual" | "recommendation";
     source_key: string | null;
     created_at: string;
+    locale?: string | null;
     ai_systems: { name: string } | { name: string }[] | null;
   };
-  return ((tasksRes.data ?? []) as Row[]).map((r) => {
+  return ((tasksRes.data ?? []) as unknown as Row[]).map((r) => {
     const sys = Array.isArray(r.ai_systems) ? r.ai_systems[0] : r.ai_systems;
     return {
       id: r.id,
@@ -677,6 +817,7 @@ export async function getActionTasks(): Promise<ActionTask[]> {
       source: r.source,
       sourceKey: r.source_key,
       createdAt: String(r.created_at),
+      locale: coerceStoredLocale(r.locale),
     };
   });
 }
@@ -751,20 +892,46 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
   if (!org) return null;
 
   const supabase = await createClient();
-  const [orgName, systems, gapItems, actionTasks, members, regulatoryAcks, integrity] =
-    await Promise.all([
-      getOrganizationName(),
-      getAiSystems(),
-      getGapItems(),
-      getActionTasks(),
-      getOrgMembers(),
-      getRegulatoryAcks(),
-      verifyAuditChain(),
-    ]);
+  const [
+    orgName,
+    systems,
+    gapItems,
+    actionTasks,
+    members,
+    regulatoryAcks,
+    integrity,
+    suppliers,
+    incidents,
+    intakeSubmissions,
+  ] = await Promise.all([
+    getOrganizationName(),
+    getAiSystems(),
+    getGapItems(),
+    getActionTasks(),
+    getOrgMembers(),
+    getRegulatoryAcks(),
+    verifyAuditChain(),
+    // Faltaban en el paquete: proveedores, incidentes y bandeja de intake son
+    // datos del cliente tanto como el inventario, y una portabilidad que se deja
+    // fuera tres módulos no es portabilidad. Cada uno degrada solo si su
+    // migración no está aplicada, así que no pueden tumbar la exportación.
+    getSuppliers().catch(() => []),
+    getIncidents().catch(() => []),
+    getIntakeSubmissions().catch(() => []),
+  ]);
 
-  // Registro completo (hasta el tope de la función, 500) para la exportación.
-  const { data: rawLog } = await supabase.rpc("list_audit_log", { org, lim: 500 });
-  const auditLog = ((rawLog ?? []) as RawAudit[]).map((r) => toAuditEntry(r));
+  // El tope de `list_audit_log` es 500. Se pide uno más para poder DISTINGUIR
+  // "hay exactamente 500" de "hay más y se cortó": sin ese +1 no habría forma de
+  // saberlo, y una exportación truncada en silencio es la peor de las tres
+  // opciones — quien la recibe cree tenerlo todo.
+  const AUDIT_LIMIT = 500;
+  const { data: rawLog } = await supabase.rpc("list_audit_log", {
+    org,
+    lim: AUDIT_LIMIT + 1,
+  });
+  const rawRows = (rawLog ?? []) as RawAudit[];
+  const auditTruncated = rawRows.length > AUDIT_LIMIT;
+  const auditLog = rawRows.slice(0, AUDIT_LIMIT).map((r) => toAuditEntry(r));
 
   // Evidencia por sistema (historial de evaluaciones + auditoría de sesgo).
   // Batch: 2 consultas para toda la org en vez de 2 por sistema (evita N+1 en la
@@ -779,7 +946,7 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
     const [assessRes, biasRes] = await Promise.all([
       supabase
         .from("risk_assessments")
-        .select(ASSESSMENT_COLS)
+        .select(ASSESSMENT_COLS_FULL)
         .eq("organization_id", org)
         .in("ai_system_id", dbIds)
         .order("assessed_at", { ascending: false }),
@@ -789,7 +956,20 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
         .eq("organization_id", org)
         .in("id", dbIds),
     ]);
-    for (const r of (assessRes.data ?? []) as AssessmentRow[]) {
+    // Sin la 0033 el SELECT con `locale` falla entero: se repite sin ella para no
+    // dejar la exportación sin historial de evaluaciones por un dato accesorio.
+    let assessRows = assessRes.data;
+    if (assessRes.error) {
+      logDataFallback("exportOrganization", assessRes.error, "reintento sin locale (0033)");
+      const fb = await supabase
+        .from("risk_assessments")
+        .select(ASSESSMENT_COLS)
+        .eq("organization_id", org)
+        .in("ai_system_id", dbIds)
+        .order("assessed_at", { ascending: false });
+      assessRows = fb.data as typeof assessRows;
+    }
+    for (const r of (assessRows ?? []) as unknown as AssessmentRow[]) {
       if (!r.ai_system_id) continue;
       const list = assessmentsBySystem.get(r.ai_system_id) ?? [];
       list.push(mapAssessmentRow(r));
@@ -826,6 +1006,10 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
     members,
     regulatoryAcks,
     auditLog,
+    suppliers,
+    incidents,
+    intakeSubmissions,
+    truncated: auditTruncated ? { auditLog: AUDIT_LIMIT } : null,
   };
 }
 
@@ -834,9 +1018,7 @@ export async function getCurrentMemberRole(): Promise<MemberRole | null> {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return null;
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null;
   const { data } = await supabase
     .from("memberships")
@@ -847,15 +1029,32 @@ export async function getCurrentMemberRole(): Promise<MemberRole | null> {
   return (data?.role ?? null) as MemberRole | null;
 }
 
-export async function getGapItems(): Promise<GapItem[]> {
+/**
+ * Brechas de la organización activa.
+ *
+ * `cache()` (por request) porque desde el streaming del resumen la miran DOS
+ * bloques a la vez —la tarjeta de brechas abiertas y el checklist de
+ * activación—, y sin esto partir la página en `<Suspense>` habría duplicado la
+ * consulta: el streaming saldría más caro que lo que ahorra.
+ */
+async function getGapItemsUncached(): Promise<GapItem[]> {
   const supabase = await createClient();
   const org = await getActiveOrg();
   if (!org) return [];
 
   const COLS_BASE =
     "id, requirement, article, status, severity, ai_system_id, ai_systems(code)";
-  // Se pide `prohibited` (migración 0022). Si la columna aún no existe, se
-  // reintenta con las columnas base — degradación segura (todo como no prohibido).
+  /**
+   * Columnas que aporta una migración posterior y que por tanto NO se pueden dar
+   * por hechas: `prohibited` (0022) y `locale` (0033). Se piden todas y, si el
+   * SELECT falla, se va soltando la ÚLTIMA en cada reintento.
+   *
+   * Soltarlas de una en una y por el final —en vez de caer directo a `COLS_BASE`—
+   * importa: las migraciones se aplican en orden, así que quien tenga la 0022 pero
+   * no la 0033 conserva `prohibited`, y no se pierde de vista qué prácticas del
+   * Art. 5 quedan fuera del "% listo" por culpa de un dato de accesibilidad.
+   */
+  const OPTIONAL = ["prohibited", "locale"] as const;
   type RawGap = {
     id: string;
     requirement: string;
@@ -865,29 +1064,28 @@ export async function getGapItems(): Promise<GapItem[]> {
     ai_system_id: string;
     ai_systems: { code: string } | { code: string }[] | null;
     prohibited?: boolean;
+    locale?: string | null;
   };
-  const primary = await supabase
-    .from("gap_items")
-    .select(`${COLS_BASE}, prohibited`)
-    .eq("organization_id", org)
-    .order("created_at", { ascending: true });
-  let data = primary.data as RawGap[] | null;
-  if (primary.error) {
-    logDataFallback(
-      "getGapItems",
-      primary.error,
-      "reintento sin la columna prohibited (0022)",
-    );
-    const fb = await supabase
+
+  let data: RawGap[] | null = null;
+  for (let extra = OPTIONAL.length; extra >= 0; extra--) {
+    const cols = [COLS_BASE, ...OPTIONAL.slice(0, extra)].join(", ");
+    const res = await supabase
       .from("gap_items")
-      .select(COLS_BASE)
+      .select(cols)
       .eq("organization_id", org)
       .order("created_at", { ascending: true });
-    if (fb.error || !fb.data) {
-      logDataFallback("getGapItems", fb.error, "también falló el reintento");
-      return [];
+    if (!res.error && res.data) {
+      data = res.data as unknown as RawGap[];
+      break;
     }
-    data = fb.data as RawGap[];
+    logDataFallback(
+      "getGapItems",
+      res.error,
+      extra > 0
+        ? `reintento sin la columna ${OPTIONAL[extra - 1]}`
+        : "también falló el reintento con las columnas base",
+    );
   }
   if (!data) return [];
 
@@ -908,9 +1106,12 @@ export async function getGapItems(): Promise<GapItem[]> {
       severity: SEVERITY_ES[row.severity] ?? "media",
       system: sys?.code ?? row.ai_system_id,
       prohibited: row.prohibited === true,
+      locale: coerceStoredLocale(row.locale),
     };
   });
 }
+
+export const getGapItems = cache(getGapItemsUncached);
 
 /**
  * Embudo de activación agregado (telemetría de producto interna, migración 0026).
@@ -1044,6 +1245,199 @@ export async function getIntakeSubmissions(): Promise<IntakeSubmission[]> {
         : "pending",
       createdAt: r.created_at,
       linkLabel: link?.label ?? null,
+    };
+  });
+}
+
+/**
+ * Expedientes de incidente de la organización activa (Art. 26.5).
+ *
+ * Fallback seguro: si la migración 0030 aún no está aplicada devuelve `[]` y lo
+ * registra como `migration-pending`. La sección se ve vacía; nada se rompe.
+ */
+export async function getIncidents(): Promise<Incident[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data, error } = await supabase
+    .from("incidents")
+    .select(
+      "id, title, detail, occurred_on, aware_on, causal_link_on, categories, seriousness, risk_art79, use_suspended, provider_unreachable, notified_provider_on, notified_distributor_on, notified_authority_on, personal_data_breach, status, ai_system_id, created_at, ai_systems(name)",
+    )
+    .eq("organization_id", org)
+    .order("aware_on", { ascending: false });
+
+  if (error) {
+    logDataFallback("getIncidents", error);
+    return [];
+  }
+
+  type Row = {
+    id: string;
+    title: string;
+    detail: string | null;
+    occurred_on: string | null;
+    aware_on: string;
+    causal_link_on: string | null;
+    categories: string[] | null;
+    seriousness: Seriousness;
+    risk_art79: boolean;
+    use_suspended: boolean;
+    provider_unreachable: boolean;
+    notified_provider_on: string | null;
+    notified_distributor_on: string | null;
+    notified_authority_on: string | null;
+    personal_data_breach: boolean;
+    status: "open" | "closed";
+    ai_system_id: string | null;
+    created_at: string;
+    ai_systems: { name: string } | { name: string }[] | null;
+  };
+
+  return ((data ?? []) as Row[]).map((r) => {
+    const sys = Array.isArray(r.ai_systems) ? r.ai_systems[0] : r.ai_systems;
+    return {
+      id: r.id,
+      systemId: r.ai_system_id,
+      systemName: sys?.name ?? null,
+      title: r.title,
+      detail: r.detail,
+      occurredOn: r.occurred_on,
+      awareOn: String(r.aware_on).slice(0, 10),
+      causalLinkOn: r.causal_link_on,
+      categories: (r.categories ?? []) as IncidentCategory[],
+      seriousness: r.seriousness,
+      riskArt79: r.risk_art79,
+      useSuspended: r.use_suspended,
+      providerUnreachable: r.provider_unreachable,
+      notifiedProviderOn: r.notified_provider_on,
+      notifiedDistributorOn: r.notified_distributor_on,
+      notifiedAuthorityOn: r.notified_authority_on,
+      personalDataBreach: r.personal_data_breach,
+      status: r.status,
+      createdAt: String(r.created_at),
+    };
+  });
+}
+
+/**
+ * Cadencia de revisión elegida por la organización. Si la columna aún no existe
+ * (0030 sin aplicar) se usa el defecto del producto: una cadencia ausente no
+ * puede dejar el inventario sin avisos ni marcarlo entero como vencido.
+ */
+export async function getReviewCadenceDays(): Promise<number> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return REVIEW_CADENCE_DEFAULT_DAYS;
+  const { data, error } = await supabase
+    .from("organizations")
+    .select("review_cadence_days")
+    .eq("id", org)
+    .maybeSingle();
+  if (error) {
+    logDataFallback("getReviewCadenceDays", error);
+    return REVIEW_CADENCE_DEFAULT_DAYS;
+  }
+  return data?.review_cadence_days == null
+    ? REVIEW_CADENCE_DEFAULT_DAYS
+    : normalizeCadenceDays(data.review_cadence_days);
+}
+
+/** Proveedores y terceros de la organización activa (migración 0032). */
+export async function getSuppliers(): Promise<Supplier[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data, error } = await supabase
+    .from("suppliers")
+    .select(
+      "id, name, country, ai_act_role, outside_eu, authorized_rep, authorized_rep_checked_on, gdpr_role, contact, contract_ends_on, dpa_signed, excludes_high_risk_use, note",
+    )
+    .eq("organization_id", org)
+    .order("name", { ascending: true });
+
+  if (error) {
+    logDataFallback("getSuppliers", error);
+    return [];
+  }
+  type Row = {
+    id: string;
+    name: string;
+    country: string | null;
+    ai_act_role: AiActRole;
+    outside_eu: boolean;
+    authorized_rep: string | null;
+    authorized_rep_checked_on: string | null;
+    gdpr_role: GdprRole;
+    contact: string | null;
+    contract_ends_on: string | null;
+    dpa_signed: boolean;
+    excludes_high_risk_use: boolean;
+    note: string | null;
+  };
+  return ((data ?? []) as Row[]).map((r) => ({
+    id: r.id,
+    name: r.name,
+    country: r.country,
+    aiActRole: r.ai_act_role,
+    outsideEu: r.outside_eu,
+    authorizedRep: r.authorized_rep,
+    authorizedRepCheckedOn: r.authorized_rep_checked_on,
+    gdprRole: r.gdpr_role,
+    contact: r.contact,
+    contractEndsOn: r.contract_ends_on,
+    dpaSigned: r.dpa_signed,
+    excludesHighRiskUse: r.excludes_high_risk_use,
+    note: r.note,
+  }));
+}
+
+/** Elementos de evidencia de todos los proveedores de la organización activa. */
+export async function getSupplierEvidence(): Promise<SupplierEvidence[]> {
+  const supabase = await createClient();
+  const org = await getActiveOrg();
+  if (!org) return [];
+  const { data, error } = await supabase
+    .from("supplier_evidence")
+    .select(
+      "id, supplier_id, ai_system_id, kind, status, requested_on, received_on, document_version, source_url, expires_on, note, ai_systems(name)",
+    )
+    .eq("organization_id", org)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    logDataFallback("getSupplierEvidence", error);
+    return [];
+  }
+  type Row = {
+    id: string;
+    supplier_id: string;
+    ai_system_id: string | null;
+    kind: string;
+    status: EvidenceStatus;
+    requested_on: string | null;
+    received_on: string | null;
+    document_version: string | null;
+    source_url: string | null;
+    expires_on: string | null;
+    note: string | null;
+    ai_systems: { name: string } | { name: string }[] | null;
+  };
+  return ((data ?? []) as Row[]).map((r) => {
+    const sys = Array.isArray(r.ai_systems) ? r.ai_systems[0] : r.ai_systems;
+    return {
+      id: r.id,
+      supplierId: r.supplier_id,
+      systemId: r.ai_system_id,
+      systemName: sys?.name ?? null,
+      kind: r.kind,
+      status: r.status,
+      requestedOn: r.requested_on,
+      receivedOn: r.received_on,
+      documentVersion: r.document_version,
+      sourceUrl: r.source_url,
+      expiresOn: r.expires_on,
+      note: r.note,
     };
   });
 }

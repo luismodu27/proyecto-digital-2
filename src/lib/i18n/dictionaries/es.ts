@@ -3,7 +3,14 @@
  * `en.ts` debe satisfacer ese tipo: si falta una clave o cambia una firma, tsc falla.
  *
  * SOLO chrome de UI. Nada de contenido regulatorio determinista (ver config.ts).
- * Las cadenas con variables son funciones tipadas (interpolación sin dependencias).
+ *
+ * PROHIBIDO PONER FUNCIONES AQUÍ. El diccionario entero se pasa como prop a
+ * `I18nProvider`, que es un Client Component, y todo lo que cruza esa frontera se
+ * serializa: una función lanza *"Functions cannot be passed directly to Client
+ * Components"* y devuelve un 500. Es un error de EJECUCIÓN, así que ni `tsc` ni
+ * `next build` lo ven — pasó una vez, con el panel entero roto y el build en
+ * verde. Para cadenas con variables, usa un marcador de posición (`{days}`) y
+ * `replace` en el punto de uso. Lo vigila `dictionaries.guard.test.ts`.
  */
 
 export const es = {
@@ -424,6 +431,48 @@ export const es = {
       note: "Evidencia declarada por tu organización y clasificación orientativa — no es certificación ni asesoría legal.",
     },
 
+    // Cómo verificamos el contenido legal. Regla al editar: aquí SOLO van
+    // afirmaciones comprobables sobre nuestro propio proceso. Nada de lo que
+    // diga esta sección puede ser algo que no hagamos de verdad — es la
+    // sección donde una exageración cuesta más cara.
+    verification: {
+      eyebrow: "Cómo lo verificamos",
+      title: "El texto legal no lo escribe un modelo",
+      intro:
+        "Es la parte del producto donde una alucinación no es un error molesto, sino un pasivo. Así que el contenido regulatorio no se genera: se ensambla con tus datos y con texto que un experto ya verificó contra la norma.",
+      steps: [
+        {
+          n: "01",
+          title: "Fuente primaria antes que código",
+          body: "Cada regla nueva —un artículo, una ley estatal, un plazo— se investiga contra el texto oficial antes de escribir una línea. Varias veces eso ha cambiado el contenido antes de existir, y casi siempre en la dirección de quitar, no de añadir.",
+        },
+        {
+          n: "02",
+          title: "Segunda pasada adversarial",
+          body: "Lo investigado se vuelve a revisar buscando el error, no la confirmación: qué se ha citado de más, qué obligación es de otro sujeto, qué plazo se ha dado por cierto sin leerlo.",
+        },
+        {
+          n: "03",
+          title: "Ensamblado determinista, cero modelo",
+          body: "Dossier, informe, clasificación y recomendaciones se componen solo con datos de tu organización y texto ya verificado. Donde hay automatización —la vigilancia regulatoria— la máquina propone un borrador y una persona lo valida antes de que se publique.",
+        },
+        {
+          n: "04",
+          title: "Guardas automáticas en cada cambio",
+          body: "Cada modificación pasa por comprobaciones que fallan solas: una vigila que no aparezca copy que insinúe certificación, otras codifican la expectativa regulatoria de cada regla. Y se validan rompiéndolas a propósito: un test que no falla al romper la regla no protege nada.",
+        },
+      ],
+      notTitle: "Lo que no hacemos",
+      not: [
+        "No generamos texto regulatorio con un modelo de lenguaje.",
+        "No afirmamos una fecha que no hayamos leído en el texto oficial: si está pendiente de verificar, lo decimos.",
+        "No puntuamos tu cumplimiento ni el de tus proveedores. Contamos hechos: qué consta y qué falta.",
+      ],
+      exampleLabel: "Un ejemplo de que funciona",
+      exampleTitle: "Colorado cambió de ley y el contenido cambió con ella",
+      exampleBody:
+        "El régimen de IA de Colorado fue derogado y reemplazado por otro. Media docena de obligaciones que dábamos por buenas describían una norma que ya no existía —incluida una que era además argumento comercial—. Se detectaron leyendo la ley nueva, no esperando a que lo notara un cliente. Ninguna verificación automática habría cazado eso: no es un fallo de código, es contenido.",
+    },
     honestidad: {
       eyebrow: "Por qué puedes confiar",
       title: "Cero alucinaciones. Por diseño.",
@@ -581,11 +630,98 @@ export const es = {
         "Sin compromiso. Attesta ofrece orientación de compliance, no asesoría legal.",
     },
 
+    demo: {
+      eyebrow: "Venta asistida",
+      title: "Habla con nosotros antes de comprar",
+      intro:
+        "Si gestionas IA en varias áreas o te toca responder a una due-diligence, media hora ahorra semanas. Te enseñamos el producto con tu caso, no con datos de ejemplo.",
+      bullets: [
+        "Recorrido por tu caso: qué sistemas tendrías que inventariar y qué te pediría un auditor.",
+        "Respuesta clara sobre qué cubre Attesta y qué no.",
+        "Sin presentación comercial de 40 diapositivas.",
+      ],
+      emailLabel: "Correo de trabajo",
+      nameLabel: "Nombre",
+      companyLabel: "Organización",
+      roleLabel: "Tu papel",
+      rolePlaceholder: "p. ej. Responsable de RRHH, DPO, IT",
+      sizeLabel: "Tamaño de la organización",
+      sizePlaceholder: "Selecciona",
+      contextLabel: "¿Qué te trae? (opcional)",
+      contextPlaceholder:
+        "p. ej. usamos una herramienta de cribado de currículums y nos han pedido evidencia.",
+      optional: "opcional",
+      cta: "Solicitar una demo",
+      sending: "Enviando…",
+      successTitle: "Recibido.",
+      successBody:
+        "Te escribimos al correo que nos has dejado. Si tienes prisa, responde a ese mensaje y lo adelantamos.",
+      invalidEmail: "Introduce un correo válido.",
+      rateError:
+        "Has enviado varias solicitudes seguidas. Espera unos minutos e inténtalo otra vez.",
+      genericError: "No se pudo enviar. Inténtalo de nuevo en un momento.",
+      privacy:
+        "Usamos estos datos solo para responderte. No los cedemos a nadie.",
+      privacyLink: "Aviso de privacidad",
+    },
     footer: {
       tagline:
         "Gobernanza continua de IA para el mid-market: inventario, riesgo, evidencia y vigilancia regulatoria, listos para auditoría.",
       contactHeading: "Contacto",
+      legalHeading: "Legal y privacidad",
       rights: "© 2026 Attesta. Todos los derechos reservados.",
+    },
+  },
+
+  /**
+   * Chrome de las páginas legales. El TEXTO LEGAL no está aquí (vive en
+   * `src/lib/legal/`, ver la frontera legal de `i18n/config.ts`): esto es solo el
+   * envoltorio de la interfaz —encabezados, índice, botones— que sí es chrome.
+   */
+  legal: {
+    eyebrow: "Documentación legal",
+    updated: "Última actualización",
+    contents: "En esta página",
+    backToSite: "Volver a Attesta",
+    otherDocs: "Otros documentos",
+    contact: "Contacto para asuntos de privacidad",
+    draftTitle: "Borrador: falta identificar al responsable del tratamiento",
+    draftBody:
+      "Este documento todavía no menciona la sociedad, el domicilio y la identificación fiscal del responsable, que exige el artículo 13 del RGPD. Mientras falten, la página no se indexa y no debe considerarse la versión definitiva.",
+    draftMissing: "Datos pendientes",
+    lawyerNote:
+      "Texto preparado a partir del funcionamiento real del producto. Pendiente de revisión por abogado antes de su publicación definitiva.",
+    controllerHeading: "Responsable del tratamiento",
+    controllerName: "Denominación",
+    controllerAddress: "Domicilio",
+    controllerTaxId: "Identificación fiscal",
+    controllerEmail: "Correo de privacidad",
+    controllerEuRep: "Representante en la UE (art. 27 RGPD)",
+    subprocessors: {
+      customerHeading: "Tratan datos de organizaciones clientes",
+      customerIntro:
+        "Subencargados en el sentido del artículo 28 del RGPD. Cualquier alta nueva se comunica con 30 días de antelación.",
+      corpusHeading: "Solo tratan el corpus normativo público",
+      corpusIntro:
+        "Intervienen en el radar de vigilancia regulatoria. No reciben ningún dato de ninguna organización cliente.",
+      colProvider: "Proveedor",
+      colPurpose: "Para qué",
+      colData: "Qué recibe",
+      colLocation: "Dónde",
+      statusActive: "En uso",
+      statusGated: "Sin activar",
+      statusGatedHint:
+        "Configurado por variable de entorno: mientras no se active, no recibe ningún dato.",
+      privacyLink: "Privacidad del proveedor",
+    },
+    optOut: {
+      heading: "Medición de audiencia",
+      on: "Ahora mismo la medición está activa en este navegador.",
+      off: "Has rechazado la medición en este navegador. No se emite ningún evento.",
+      browser:
+        "Tu navegador envía una señal de no rastreo (GPC o DNT) y se está respetando: no se emite ningún evento, no hace falta que hagas nada.",
+      disable: "Rechazar la medición",
+      enable: "Volver a permitirla",
     },
   },
 
@@ -770,12 +906,28 @@ export const es = {
   dashboard: {
     skipToContent: "Saltar al contenido",
 
+    // Aviso de contenido guardado en otro idioma (migración 0033). Ver
+    // `src/lib/i18n/stored-locale.ts`: solo aparece cuando el idioma CONSTA y
+    // difiere del de la interfaz. Explica por qué se ve mezclado, en vez de
+    // dejar que parezca un fallo.
+    storedLocale: {
+      es: "español",
+      en: "inglés",
+      noticeOne:
+        "Parte de este contenido se guardó en {lang} y se muestra tal cual: es el texto que quedó registrado en su día y traducirlo ahora cambiaría la evidencia.",
+      noticeMany:
+        "Parte de este contenido se guardó en otros idiomas ({langs}) y se muestra tal cual: es el texto que quedó registrado en su día y traducirlo ahora cambiaría la evidencia.",
+    },
+
     nav: {
       overview: "Resumen",
       inventory: "Inventario",
       risk: "Riesgo",
       gap: "Gap assessment",
+      vault: "Vault de evidencia",
       plan: "Plan de acción",
+      incidents: "Incidentes",
+      suppliers: "Proveedores",
       packs: "Policy packs",
       monitoring: "Vigilancia",
       team: "Equipo",
@@ -785,7 +937,19 @@ export const es = {
       telemetry: "Telemetría",
       lockedTitle: "Función del plan Preparación",
       lockedTitleEnterprise: "Función del plan Enterprise",
-      lockedLabel: "Bloqueado",
+    },
+
+    // Cajón de navegación móvil. Bloque hermano de `nav` y no dentro de él: de
+    // `nav` sale el tipo de las claves de destino, y meter aquí etiquetas de
+    // chrome lo ensancharía (ya arrastra `lockedTitle*`).
+    navDrawer: {
+      title: "Navegación",
+      openMenu: "Abrir navegación",
+      closeMenu: "Cerrar navegación",
+      planLabel: "Tu plan",
+      lockedCountOne: "1 sección requiere un plan superior",
+      lockedCountMany: "{n} secciones requieren un plan superior",
+      seePlans: "Ver planes",
     },
 
     sidebar: {
@@ -795,6 +959,83 @@ export const es = {
       backToSite: "← Volver al sitio",
     },
 
+    help: {
+      title: "Ayuda",
+      subtitle: "Las preguntas que más se repiten, y lo que Attesta no hace.",
+      contactTitle: "¿No está aquí?",
+      contactBody:
+        "Escríbenos y te respondemos. Cuéntanos qué intentabas hacer y en qué pantalla te quedaste: con eso solemos resolverlo en el primer mensaje.",
+      contactCta: "Escribir a soporte",
+      goTo: "Ir a la sección",
+      legalTitle: "Documentación legal",
+      legalBody:
+        "Aviso de privacidad, cookies, subprocesadores y el Acuerdo de Tratamiento de Datos.",
+    },
+    vault: {
+      title: "Vault de evidencia",
+      keygen: {
+        title: "Generar la clave de firma",
+        body:
+          "Attesta necesita un par de claves para firmar los paquetes de auditoría. Este botón lo genera aquí mismo; luego solo tienes que pegar los dos valores en las variables de entorno de tu despliegue.",
+        privacyNote:
+          "La clave privada se genera en este navegador y no se envía a ningún sitio: ni a Attesta ni a nadie. Solo saldrá de aquí cuando tú la pegues en tu panel de despliegue.",
+        cta: "Generar par de claves",
+        warning:
+          "Cópialas AHORA. Al recargar esta página desaparecen y habría que generar otras. Guarda la privada también en tu gestor de contraseñas: si la pierdes, los paquetes ya entregados no se podrán verificar.",
+        keyIdLabel: "Huella de la clave (keyId)",
+        privateLabel: "Privada · es un secreto, solo servidor",
+        publicLabel: "Pública · no es secreta, sirve para verificar",
+        copy: "Copiar",
+        copied: "Copiado",
+        steps: [
+          "Pega cada valor en su variable, en Vercel → Settings → Environment Variables, marcadas para Production.",
+          "Copia solo el valor: no incluyas el nombre de la variable ni el signo igual.",
+          "Vuelve a desplegar (Deployments → el último → Redeploy). Las variables solo entran con un despliegue nuevo.",
+          "Comprueba que /api/vault/key devuelve la misma huella que aparece arriba.",
+        ],
+        unsupported:
+          "Este navegador no admite el tipo de clave que usamos (Ed25519). Prueba con Chrome o Edge actualizados.",
+      },
+      subtitle:
+        "Los documentos reales detrás de cada control, y el paquete que se le entrega a un auditor.",
+      why: "Un control marcado como hecho sin documento detrás es una declaración. Con el archivo dentro, es evidencia que alguien puede comprobar.",
+      empty: "Todavía no has subido ningún documento.",
+      emptyHint:
+        "Empieza por lo que te pediría primero un auditor: la política de uso de IA, el registro de supervisión humana y la evidencia que te dio tu proveedor.",
+      uploadTitle: "Subir un documento",
+      fileLabel: "Archivo",
+      fileHint: "Hasta 25 MB por archivo.",
+      anchorLabel: "¿A qué corresponde?",
+      anchorHint: "Elige la brecha o el sistema al que pertenece este documento.",
+      anchorPlaceholder: "Selecciona",
+      groupGaps: "Brechas",
+      groupSystems: "Sistemas",
+      uploadCta: "Subir documento",
+      uploading: "Subiendo…",
+      listTitle: "Documentos guardados",
+      colFile: "Archivo",
+      colAttached: "Corresponde a",
+      colHash: "Huella SHA-256",
+      colUploaded: "Subido",
+      delete: "Eliminar",
+      packageTitle: "Paquete de auditoría",
+      packageBody:
+        "Un ZIP con los documentos, un manifiesto que lista la huella SHA-256 de cada uno y las instrucciones para comprobarlo. Quien lo reciba puede verificarlo por su cuenta, sin cuenta en Attesta.",
+      packageCta: "Descargar paquete",
+      packageEmpty: "Sube al menos un documento para poder generar el paquete.",
+      signedTitle: "Firmado por Attesta",
+      signedBody:
+        "El manifiesto va firmado, así que quien lo reciba puede comprobar que lo emitió Attesta y que nadie lo ha modificado después.",
+      unsignedTitle: "Sin firma configurada",
+      unsignedBody:
+        "El paquete se genera igual y los hashes se pueden comprobar, pero no lleva firma: nadie podrá verificar que lo emitió Attesta. Configura la clave de firma antes de entregarlo a un tercero.",
+      attests: "Qué afirma este paquete",
+      attestsBody:
+        "Que estos archivos, con estas huellas, estaban guardados en tu cuenta en la fecha indicada.",
+      notAttests: "Qué NO afirma",
+      notAttestsBody:
+        "No es una certificación ni una auditoría. Attesta no abre los archivos ni valora si la evidencia es suficiente: eso lo juzga quien te audite.",
+    },
     account: {
       organization: "Organización",
       billing: "Plan y facturación",
@@ -822,6 +1063,17 @@ export const es = {
 
     toasts: {
       "system-created": "Sistema registrado en el inventario.",
+      "vault-uploaded": "Documento guardado en el vault.",
+      "vault-deleted": "Documento eliminado.",
+      "vault-empty": "Elige un archivo y a qué corresponde.",
+      "vault-large": "El archivo supera los 25 MB.",
+      "vault-forbidden": "Solo un propietario o administrador puede eliminar evidencia.",
+      "vault-error": "No se pudo guardar el documento. Inténtalo de nuevo.",
+      "deletion-requested":
+        "Baja solicitada. Puedes cancelarla durante los próximos 7 días.",
+      "deletion-cancelled": "Baja cancelada. Tu organización sigue activa.",
+      "deletion-confirm":
+        "El nombre no coincide. Escríbelo tal cual aparece para confirmar la baja.",
       "system-updated": "Sistema actualizado.",
       "system-deleted": "Sistema eliminado.",
       "system-error": "No se pudo guardar el sistema. Inténtalo de nuevo.",
@@ -875,6 +1127,17 @@ export const es = {
       "vigia-demo": "El Vigía requiere conectar tu organización.",
       "vigia-denied": "Solo el equipo de validación de Attesta puede ejecutar el Vigía.",
       "vigia-error": "El Vigía no pudo completar la revisión. Inténtalo de nuevo.",
+      "incident-created": "Incidente registrado en el expediente.",
+      "incident-updated": "Expediente del incidente actualizado.",
+      "incident-demo": "El registro de incidentes requiere conectar tu organización.",
+      "incident-error": "No se pudo completar la acción. Inténtalo de nuevo.",
+      "cadence-updated": "Cadencia de revisión actualizada.",
+      "supplier-created": "Proveedor añadido al registro.",
+      "supplier-updated": "Proveedor actualizado.",
+      "supplier-deleted": "Proveedor eliminado del registro.",
+      "evidence-updated": "Elemento de evidencia actualizado.",
+      "supplier-demo": "El registro de proveedores requiere conectar tu organización.",
+      "supplier-error": "No se pudo completar la acción. Inténtalo de nuevo.",
     },
 
     units: {
@@ -1079,6 +1342,30 @@ export const es = {
       emptyDemo:
         "En la vista de demostración no hay varias organizaciones. Crea tu cuenta para gestionar tus entidades reales.",
       roles: { owner: "Propietario", admin: "Administrador", member: "Miembro" },
+      /** Baja de la organización (derecho de supresión + cierre de cuenta). */
+      deletion: {
+        title: "Dar de baja esta organización",
+        intro:
+          "Se eliminarán el inventario, las evaluaciones, la evidencia declarada, el plan de acción, los proveedores, los incidentes y el registro de auditoría. No hay forma de recuperarlo después.",
+        exportFirst:
+          "Antes de continuar, descarga tu expediente completo. Es el mismo paquete que puedes pedir en cualquier momento por portabilidad.",
+        exportCta: "Descargar mi expediente (JSON)",
+        graceNotice:
+          "La baja no es inmediata: dispones de {days} días para cancelarla. Pasado ese plazo, la eliminación es definitiva.",
+        ownerOnly:
+          "Solo el propietario de la organización puede darla de baja.",
+        confirmLabel: "Escribe el nombre de la organización para confirmar",
+        confirmHint: "Debe coincidir con «{name}».",
+        requestCta: "Solicitar la baja",
+        requestingCta: "Solicitando…",
+        pendingTitle: "Baja solicitada",
+        pendingBody:
+          "Esta organización y todos sus datos se eliminarán en {days} día(s), el {date}. Puedes cancelarlo hasta entonces.",
+        pendingBodyToday:
+          "Esta organización y todos sus datos se eliminarán hoy ({date}). Cancélalo ahora si fue un error.",
+        cancelCta: "Cancelar la baja",
+        cancellingCta: "Cancelando…",
+      },
     },
 
     security: {
@@ -1191,6 +1478,25 @@ export const es = {
       },
       classify: "Clasificar",
       dossier: "Dossier",
+      filters: {
+        searchLabel: "Buscar en el inventario",
+        searchPlaceholder: "Nombre, código, responsable, proveedor…",
+        searchAction: "Buscar",
+        clearSearch: "Borrar",
+        riskLabel: "Riesgo",
+        evidenceLabel: "Respaldo",
+        all: "Todos",
+        evidenceNone: "Sin clasificar",
+        clear: "Quitar filtros",
+        countOne: "1 sistema de {total}",
+        countOther: "{n} sistemas de {total}",
+        countAllOne: "1 sistema",
+        countAllOther: "{n} sistemas",
+        sortAria: "Ordenar por {column}",
+        noResultsTitle: "Ningún sistema coincide con esa búsqueda",
+        noResultsBody:
+          "Prueba con menos palabras o quita algún filtro. Tu inventario sigue intacto: solo estás viendo un subconjunto.",
+      },
       addTitle: "Añadir sistemas al inventario",
       addSubtitle:
         "Dos caminos: pregunta a cada área con un enlace, o sube la lista que ya tengas en una hoja de cálculo.",
@@ -1361,6 +1667,9 @@ export const es = {
     team: {
       title: "Equipo",
       subtitle: "Invita a tu equipo (RRHH, Legal, auditoría) y gestiona sus roles.",
+      paywallFeature: "Equipo y roles",
+      paywallDesc:
+        "Invita a tu equipo, asigna roles (owner/admin/member) y gestiona quién ve y atesta la evidencia de tu organización.",
       demoBefore: "Estás en ",
       demoMode: "modo demo",
       demoAfter:
@@ -1524,7 +1833,15 @@ export const es = {
         hint: "Dónde contratas · afina el radar",
         body: "Marca los territorios donde tu organización contrata o tiene empleados. El radar priorizará las normas de esas jurisdicciones.",
         save: "Guardar",
+        readonlyTitle: "Jurisdicciones de tu organización",
+        readonlyEmpty: "Sin configurar",
       },
+      // Nota compartida por los ajustes de organización (nexo de jurisdicción y
+      // cadencia de revisión) cuando el usuario no puede cambiarlos. Se enseña
+      // el valor, no solo el candado: sin él, lo que el usuario ve en pantalla
+      // parece arbitrario.
+      ownerAdminOnly:
+        "Solo quien tenga rol de propietario o administrador puede cambiarlo.",
       task: {
         statusAria: "Estado",
         assigneeAria: "Responsable",
@@ -1624,10 +1941,18 @@ export const es = {
         },
       },
 
+      vault: {
+        paywallFeature: "Vault de evidencia",
+        paywallDesc:
+          "Guarda los documentos reales detrás de cada control y genera el paquete que se le entrega a un auditor, con la huella SHA-256 de cada archivo.",
+      },
       plan: {
         title: "Plan de acción",
         subtitle:
           "Tareas priorizadas para cerrar tus brechas: asigna responsable, fecha y estado.",
+        paywallFeature: "Plan de acción",
+        paywallDesc:
+          "Convierte las brechas en tareas con responsables y fechas, y sigue su avance hasta cerrarlas.",
         exportEvidence: "⬇ Exportar evidencia",
         statOpen: "abiertas",
         statInProgress: "en curso",
@@ -1655,10 +1980,331 @@ export const es = {
         addSuggestionToPlan: "+ Añadir al plan",
       },
 
+      // Registro de incidentes (Art. 26.5) + revisión periódica.
+      // Ojo al redactar aquí: los plazos numéricos (15/10/2 días) son del
+      // Art. 73 y son DEL PROVEEDOR; el 26.5 solo dice "sin demora
+      // injustificada" e "inmediatamente". Y la cadencia de revisión es buena
+      // práctica, no una obligación: hay un test que rompe si se reescribe como
+      // obligatoria.
+      incidents: {
+        title: "Incidentes",
+        subtitle:
+          "Expediente de lo ocurrido, de lo que tu organización declara haber informado y de cuándo. Art. 26.5 del Reglamento de IA.",
+        paywallFeature: "Registro de incidentes",
+        paywallDesc:
+          "Abre un expediente por cada incidencia, registra a quién informaste y cuándo, y conserva la fecha de conocimiento que arranca los plazos.",
+        legalFrame:
+          "El Art. 26 es exigible para el alto riesgo del Anexo III desde el 2 de diciembre de 2027. Registrar incidentes hoy es preparación, no una obligación vencida.",
+
+        statOpen: "abiertos",
+        statSerious: "calificados como graves",
+        statAttention: "con avisos por registrar",
+        statUnsuspended: "con riesgo y sin suspensión registrada",
+
+        newIncident: "+ Abrir expediente",
+        newIncidentHint: "Registra una incidencia",
+        fieldTitle: "Qué ha pasado",
+        fieldTitlePlaceholder: "Resume el hecho en una línea",
+        fieldDetail: "Detalle (opcional)",
+        fieldSystem: "Sistema afectado",
+        fieldOccurredOn: "Fecha del hecho",
+        fieldAwareOn: "Fecha de conocimiento",
+        fieldAwareOnHint:
+          "La más importante del expediente: el Art. 73 cuenta sus plazos desde que el proveedor —o, en su caso, tu organización— tiene conocimiento.",
+        fieldCausalLinkOn: "Nexo causal establecido",
+        fieldCausalLinkOnHint:
+          "Cuándo se estableció el nexo con el sistema, o su probabilidad razonable. La definición admite causalidad directa o indirecta.",
+        fieldSeriousness: "Calificación",
+        fieldCategories: "Categorías del Art. 3, punto 49",
+        categoriesHint:
+          "Solo si lo has calificado como grave. Marca todas las que apliquen: cuando concurren varias, el plazo de referencia es el más corto.",
+        create: "Abrir expediente",
+        saveAssessment: "Guardar calificación",
+
+        emptyTitle: "Todavía no hay expedientes",
+        emptyBody:
+          "Abre uno en cuanto detectes una incidencia, aunque aún no sepas si es grave. Casi todos empiezan en evaluación.",
+
+        seriousnessLabel: {
+          under_assessment: "En evaluación",
+          serious: "Incidente grave",
+          not_serious: "No es incidente grave",
+        },
+        seriousnessHint:
+          "Se puede empezar en evaluación y escalar después: el expediente conserva las dos fechas.",
+
+        categoryLabel: {
+          death: "Muerte de una persona",
+          serious_health_harm: "Daño grave para la salud",
+          critical_infrastructure:
+            "Perturbación grave e irreversible de infraestructuras críticas",
+          fundamental_rights:
+            "Incumplimiento de obligaciones del Derecho de la Unión que protegen derechos fundamentales",
+          property_or_environment: "Daños graves a la propiedad o al medio ambiente",
+        },
+
+        stageLabel: {
+          attention: "Avisos por registrar",
+          notified: "Avisos registrados",
+          logged: "Registrado",
+          closed: "Cerrado",
+        },
+
+        targetLabel: {
+          provider: "Proveedor",
+          distributor: "Importador o distribuidor",
+          authority: "Autoridad de vigilancia del mercado",
+        },
+
+        notifyTitle: "A quién informar",
+        notifyOrderedNote:
+          "Incidente grave: el Art. 26.5 fija el orden — primero al proveedor y después al importador o distribuidor y a las autoridades, inmediatamente.",
+        notifySimultaneousNote:
+          "Riesgo del Art. 79.1: informa al proveedor o distribuidor y a la autoridad de vigilancia del mercado, sin demora injustificada.",
+        notifyNothing:
+          "Mientras el expediente esté en evaluación y no haya riesgo declarado del Art. 79.1, el Art. 26.5 no activa todavía ningún aviso.",
+        notifyDisclaimer:
+          "Attesta no transmite nada a ninguna autoridad ni a ningún proveedor: aquí se registra lo que tu organización declara haber hecho.",
+        notifyDeclared: "Declarado el",
+        notifyPending: "Sin registrar",
+        markNotified: "Registrar aviso",
+        undoNotified: "Deshacer",
+
+        elapsedPrefix: "Conocido hace ",
+        elapsedToday: "Conocido hoy",
+
+        flagRisk79: "Hay motivos para considerar un riesgo del Art. 79.1",
+        flagRisk79Hint:
+          "Riesgo para la salud, la seguridad o los derechos fundamentales. Cuenta aunque el sistema se esté usando conforme a las instrucciones: no hace falta mal uso.",
+        flagSuspended: "Tu organización ha suspendido el uso",
+        flagSuspendedHint:
+          "El Art. 26.5 manda suspender el uso en la rama del riesgo del Art. 79.1 — no por el hecho de que el incidente sea grave.",
+        flagProviderUnreachable: "No se ha podido contactar con el proveedor",
+        flagProviderUnreachableHint:
+          "Solo en ese caso el Art. 26.5 remite al Art. 73 «mutatis mutandis» y sus plazos pasan a ser de tu organización.",
+        flagPersonalData: "Afecta además a datos personales",
+        flagPersonalDataHint:
+          "Bandera aparte a propósito: los plazos del RGPD (72 h a la autoridad de protección de datos) corren en paralelo y ninguno sustituye al otro.",
+
+        suspendRequired: "Suspensión de uso pendiente de registrar",
+        suspendDone: "Uso suspendido, según lo declarado",
+
+        deadlineProviderTitle: "Plazo del proveedor (Art. 73)",
+        deadlineProviderBody:
+          "El Art. 73 obliga al proveedor, no a tu organización. Se cuenta desde tu fecha de conocimiento, así que tu expediente es la prueba de cuándo empezó a correr.",
+        deadlineSelfTitle: "Plazo aplicable a tu organización (Art. 73)",
+        deadlineSelfBody:
+          "Al declarar que no has podido contactar con el proveedor, el Art. 26.5 remite al Art. 73 y el plazo pasa a ser tuyo. El canal lo define tu autoridad nacional de vigilancia del mercado.",
+        deadlineRef: "Referencia: ",
+        deadlineDaysSuffix: " días desde el conocimiento",
+
+        gdprTitle: "Dos relojes distintos",
+        gdprBody:
+          "Un incidente grave del Reglamento de IA no es una violación de seguridad de datos personales, ni al revés. Si además lo es, corren en paralelo los plazos del RGPD (arts. 33 y 34) con otros destinatarios.",
+
+        close: "Cerrar expediente",
+        reopen: "Reabrir",
+        openBadge: "Abierto",
+        closedBadge: "Cerrado",
+        detailsToggle: "Calificación y avisos",
+
+        // --- Revisión periódica de la autoevaluación ---
+        reviewTitle: "Revisión de la autoevaluación",
+        reviewSubtitle:
+          "Sistemas cuya autoevaluación conviene volver a mirar, según la cadencia que ha fijado tu organización.",
+        cadenceLabel: "Cadencia",
+        cadenceNote:
+          "Buena práctica: el Reglamento no fija periodicidad de revisión para el responsable del despliegue. El Art. 26.5 pide supervisión continua y el Art. 27.2 se dispara por cambios, no por calendario; ISO/IEC 42001 habla de «intervalos planificados» y NIST AI RMF (GOVERN 1.5) deja la frecuencia a criterio de la organización.",
+        cadence180: "Cada 6 meses",
+        cadence365: "Cada 12 meses",
+        cadence730: "Cada 24 meses",
+        saveCadence: "Guardar",
+        reviewEmpty: "Ningún sistema entra todavía en la ventana de revisión.",
+        reviewStateLabel: {
+          overdue: "Pasada la fecha",
+          unknown: "Sin revisión registrada",
+          due_soon: "Próxima",
+          ok: "Al día",
+        },
+        reviewViewAll: "Ver revisiones",
+        reviewMorePrefix: "Y ",
+        reviewMoreSuffix: " sistemas más en la ventana de revisión.",
+        reviewLastPrefix: "Última revisión: ",
+        reviewNever: "sin registrar",
+        reviewDuePrefix: "Toca el ",
+
+        triggersTitle: "Qué debería disparar una revisión",
+        triggersNote:
+          "Estos son los disparadores que la norma sí reconoce. La cadencia de arriba es solo la red de seguridad.",
+        art27Note:
+          "Los marcados con Art. 27 solo obligan a quien está sujeto a la evaluación de impacto en derechos fundamentales: organismos públicos, entidades privadas que prestan servicios públicos y los puntos 5.b y 5.c del Anexo III. Una empresa privada de RRHH no debe esa evaluación.",
+        triggers: {
+          incident: "Se ha registrado un incidente en este sistema",
+          substantialChange: "Modificación sustancial del sistema",
+          vendorOrModel: "Cambio de proveedor o de versión del modelo",
+          purpose: "Cambian los procesos o la finalidad de uso",
+          affectedGroups: "Cambian las personas o los grupos afectados",
+          newRisks: "Aparecen riesgos de perjuicio que antes no constaban",
+          humanOversight: "Cambian las medidas de supervisión humana",
+          regulatory: "Novedad regulatoria del radar de vigilancia",
+        },
+      },
+
+      // Registro de proveedores y terceros (Capa 8).
+      // Al redactar aquí: el VERBO depende de la base jurídica del elemento
+      // (`src/lib/suppliers/evidence.ts`). Solo las instrucciones de uso son
+      // exigibles; el Anexo IV, el SGC y la gestión de riesgos van dirigidos a
+      // autoridades y organismos notificados. Y nada de puntuar al proveedor.
+      suppliers: {
+        title: "Proveedores",
+        subtitle:
+          "Quién te vende cada sistema de IA, qué evidencia te ha dado y qué te falta. La obligación de diseño es suya; el expediente es tuyo.",
+        paywallFeature: "Registro de proveedores",
+        paywallDesc:
+          "Inventaría a tus proveedores de IA, lleva la cuenta de qué evidencia te ha entregado cada uno y ten a mano lo que hay que pactar en el próximo contrato.",
+        legalFrame:
+          "Las obligaciones de importador y distribuidor (Arts. 23 y 24) son exigibles para el alto riesgo del Anexo III desde el 2 de diciembre de 2027, igual que las del Art. 26. Hasta entonces esto es preparación contractual: hazlo mientras renuevas contratos, que es cuando tienes palanca.",
+
+        statSuppliers: "proveedores",
+        statCovered: "elementos con evidencia",
+        statPending: "pendientes",
+        statRefused: "negativas registradas",
+
+        addSupplier: "+ Añadir proveedor",
+        addSupplierHint: "Da de alta un tercero",
+        fieldName: "Nombre",
+        fieldNamePlaceholder: "Razón social del proveedor",
+        fieldCountry: "País de establecimiento",
+        fieldRole: "Papel en el Reglamento",
+        fieldGdprRole: "Papel en protección de datos",
+        fieldContact: "Contacto de compliance",
+        fieldContractEnds: "Fin del contrato",
+        fieldNote: "Notas",
+        flagOutsideEu: "Establecido fuera de la UE",
+        flagOutsideEuHint:
+          "Entonces debe tener representante autorizado en la Unión (Art. 22). Si el representante cesa, es señal de alarma: el Art. 22.4 le obliga a poner fin al mandato cuando cree que el proveedor incumple.",
+        fieldAuthorizedRep: "Representante autorizado",
+        fieldAuthorizedRepChecked: "Verificado el",
+        flagDpa: "Hay contrato de encargo de tratamiento (RGPD 28)",
+        flagDpaHint:
+          "Solo aplica si el proveedor trata datos personales por tu cuenta. Muchos se declaran responsables para entrenar o mejorar su producto: el papel es un dato, no una suposición.",
+        flagExcludesHighRisk: "El contrato excluye usarlo en casos de alto riesgo",
+        flagExcludesHighRiskHint:
+          "Bandera roja del Art. 25.2. Si tu contrato lo excluye y aun así lo usas para un caso de alto riesgo, asumes las obligaciones de proveedor y pierdes el derecho a que el proveedor inicial coopere.",
+        create: "Añadir proveedor",
+        save: "Guardar",
+        remove: "Eliminar proveedor",
+
+        emptyTitle: "Sin proveedores registrados",
+        emptyBody:
+          "Empieza por quien te vende el sistema de mayor riesgo. La evidencia que le pidas hoy es la que no tendrás que improvisar cuando llegue una auditoría.",
+
+        roles: {
+          provider: "Proveedor",
+          importer: "Importador",
+          distributor: "Distribuidor",
+          model_provider: "Proveedor del modelo",
+          third_party: "Otro tercero",
+          unknown: "Sin determinar",
+        },
+        gdprRoles: {
+          controller: "Responsable del tratamiento",
+          processor: "Encargado del tratamiento",
+          joint: "Corresponsable",
+          none: "No trata datos personales",
+          unknown: "Sin determinar",
+        },
+
+        // De la base jurídica sale el verbo. Esto es el corazón de la sección.
+        verbs: {
+          deliverable: "Exige",
+          publicSource: "Verifica",
+          contractOnly: "Pacta en contrato",
+          existsNoAccess: "Registra que existe",
+        },
+        verbHints: {
+          deliverable:
+            "El Reglamento obliga al proveedor a hacértelo llegar.",
+          publicSource:
+            "Es público: se comprueba sin depender de la buena voluntad del proveedor.",
+          contractOnly:
+            "No es exigible por ley. Se consigue negociando, y el mejor momento es la renovación.",
+          existsNoAccess:
+            "Debe existir, pero su destinatario es otro (autoridades u organismos notificados).",
+        },
+
+        kinds: {
+          instructions: "Instrucciones de uso",
+          correctiveActions: "Aviso de acciones correctoras o retirada",
+          authorizedRep: "Representante autorizado en la Unión",
+          ceMarking: "Marcado CE",
+          declarationOfConformity: "Declaración UE de conformidad",
+          euDatabase: "Ficha en la base de datos de la UE",
+          notifiedBodyCertificate: "Certificado de organismo notificado",
+          technicalDocumentation: "Documentación técnica (Anexo IV)",
+          qualityManagement: "Sistema de gestión de la calidad",
+          riskManagement: "Sistema de gestión de riesgos",
+          dataGovernance: "Gobernanza y calidad de los datos",
+          logAccess: "Acceso y exportación de los registros",
+          dataProcessingAgreement: "Contrato de encargo de tratamiento",
+          versionChangeNotice: "Aviso de cambio de versión",
+          importerRecords: "Documentación conservada por el importador",
+          distributorChecks: "Verificaciones del distribuidor",
+          gpaiIntegratorDocs: "Documentación para integradores del modelo",
+          gpaiTrainingSummary: "Resumen público del contenido de entrenamiento",
+        },
+        statuses: {
+          notRequested: "Sin solicitar",
+          requested: "Solicitado",
+          received: "Recibido",
+          verifiedPublicly: "Verificado en fuente pública",
+          refused: "El proveedor se negó",
+          notApplicable: "No aplica",
+        },
+        statusHintRefused:
+          "Anota qué te contestó y cuándo: una negativa por escrito es evidencia, y de las mejores.",
+
+        evidenceTitle: "Evidencia",
+        fieldVersion: "Versión del documento o del sistema",
+        fieldVersionHint:
+          "Más útil que una fecha: lo que invalida unas instrucciones no es que pase el tiempo, es que salga una versión nueva.",
+        fieldSourceUrl: "Enlace o referencia",
+        fieldExpires: "Caduca el",
+        fieldExpiresHint:
+          "Solo el certificado de organismo notificado caduca (Art. 44). El marcado CE, la declaración de conformidad, las instrucciones y el registro en la base de datos de la UE no caducan.",
+        addEvidence: "Añadir elemento",
+        certWarning: "Certificado próximo a caducar",
+        certExpired: "Certificado caducado",
+
+        noNotifiedBody:
+          "Aviso útil: para los puntos 2 a 8 del Anexo III —empleo, crédito, educación, servicios públicos— la evaluación de conformidad es por control interno y NO interviene ningún organismo notificado (Art. 43.2). Si tu proveedor no te da un número de certificado, en la mayoría de los casos no es que te lo esconda: es que no existe.",
+
+        art25Title: "Cuándo dejas de ser responsable del despliegue",
+        art25Note:
+          "Cuatro situaciones convierten a quien usa un sistema en su proveedor, con todas las obligaciones del Art. 16 encima. La tercera es la que más se da en el mid-market y no exige tocar nada técnico.",
+        art25Outcome:
+          "Puede activar el Art. 25: requiere revisión jurídica. Attesta no dictamina si te has convertido en proveedor.",
+        art25: {
+          whiteLabel:
+            "Pones tu nombre o tu marca en un sistema de alto riesgo que ya estaba en el mercado",
+          substantialModification:
+            "Modificas sustancialmente el sistema, más allá de los cambios que el proveedor dejó previstos",
+          purposeChange:
+            "Cambias la finalidad de uso de un sistema que no era de alto riesgo —incluido uno de propósito general— y con ello pasa a serlo",
+          fineTuning:
+            "Ajustas (fine-tuning) un modelo de propósito general por tu cuenta",
+        },
+        art25CarveOut:
+          "Único con matiz contractual: el Art. 25.1.a admite que un pacto reparta las obligaciones entre las partes.",
+      },
+
       activity: {
         title: "Registro de actividad",
         subtitle:
           "Cada cambio queda registrado y encadenado con SHA-256: cualquier alteración posterior es detectable. Quién hizo qué y cuándo.",
+        paywallFeature: "Registro de actividad",
+        paywallDesc:
+          "El audit-trail inmutable de tu organización: quién creó, cambió o atestó cada sistema, evaluación y brecha, con fecha y autor.",
         chainOk: "Cadena íntegra",
         chainBroken: "Integridad rota",
         filterAll: "Todo",
@@ -1696,6 +2342,9 @@ export const es = {
         title: "Vigilancia regulatoria",
         subtitle:
           "Radar de plazos y cambios normativos que afectan a tus sistemas de IA.",
+        paywallFeature: "Vigilancia regulatoria",
+        paywallDesc:
+          "El radar que vigila las fuentes oficiales y te avisa de cada plazo y cambio del EU AI Act antes de que te afecte.",
         watchedSources: "Fuentes vigiladas →",
         validationInbox: "Bandeja de validación →",
         jurisdictionFilter: "Jurisdicción",
@@ -1986,6 +2635,9 @@ export const es = {
         title: "Policy packs",
         subtitle:
           "Plantillas de controles por caso de uso y marco. Aplícalas para precargar las brechas de un sistema.",
+        paywallFeature: "Policy packs",
+        paywallDesc:
+          "Plantillas de políticas listas para tu vertical (empezando por RRHH) para acelerar tu evidencia.",
         controlsUnit: "controles",
         applies: "Aplica:",
         applyToSystem: "Aplicar a un sistema",

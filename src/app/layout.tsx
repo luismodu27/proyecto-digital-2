@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import { localeFromHeader } from "@/lib/i18n/resolve";
+import { SITE_URL } from "@/lib/site-url";
 import { PageView } from "@/components/telemetry/PageView";
 import "./globals.css";
 
@@ -15,13 +16,32 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/**
+ * Fraunces es la tipografía de titulares y va en el critical path de la landing,
+ * así que cada eje que se declara se paga en cada primera visita.
+ *
+ * `opsz` (tamaño óptico) SE QUEDA: el navegador lo aplica solo —
+ * `font-optical-sizing: auto` es el valor por defecto de CSS— y es la razón por
+ * la que un titular grande y un texto pequeño de la misma familia no se ven como
+ * la misma letra estirada. Es lo que hace que la serif no parezca barata.
+ *
+ * `SOFT` SE FUE: estaba declarado y **no lo usaba ni una regla de CSS** en todo
+ * el repositorio, así que el navegador se descargaba un eje entero para
+ * renderizarlo siempre en su valor por defecto. Quitarlo no cambia un píxel y
+ * baja el fichero de 117,9 KB a 65,8 KB — 52 KB menos en la primera visita a la
+ * página que más tráfico recibe.
+ *
+ * Queda una tercera opción, medida y NO tomada: renunciar también a `opsz` y
+ * fijar los pesos deja el conjunto en 86,9 KB (30 KB menos todavía). Eso ya no
+ * es una optimización, es un cambio de diseño — decisión del fundador.
+ */
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
-  axes: ["opsz", "SOFT"],
+  axes: ["opsz"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://attesta-io.vercel.app";
+
 const OG_DESC =
   "Inventaría tus sistemas de IA, clasifica su riesgo (EU AI Act + EE. UU.) y genera evidencia lista para auditoría. Compliance de IA sin equipo GRC.";
 
@@ -60,6 +80,29 @@ export const metadata: Metadata = {
     title: "Attesta — Gobernanza continua de IA",
     description: OG_DESC,
   },
+};
+
+/**
+ * `themeColor` pinta la barra del navegador (Safari iOS, Chrome Android) con el
+ * papel de la app en vez del blanco por defecto: sin esto, la cabecera choca
+ * con el tema oscuro y la app parece rota en móvil antes de renderizar nada.
+ *
+ * Se declara por `prefers-color-scheme` y NO sigue al toggle manual
+ * (`data-theme` en localStorage): el meta se resuelve antes de que corra
+ * ningún script, así que un usuario en tema claro dentro de un SO oscuro verá
+ * la barra oscura. Corregirlo exigiría mover el `theme-color` a JS en cada
+ * cambio de tema; no compensa por una franja de 40 px.
+ *
+ * `colorScheme` le dice al navegador que hay ambos, para que los controles
+ * nativos (scrollbars, selects, autofill) hereden el tema en lugar de salir
+ * siempre en claro.
+ */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf8f2" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e1512" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default async function RootLayout({

@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { WelcomeGuide } from "@/components/dashboard/WelcomeGuide";
+import { shouldShowGuide } from "@/lib/dashboard/onboarding";
+import { getAiSystems } from "@/lib/data";
 import { Toaster } from "@/components/ui/Toast";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
@@ -11,6 +14,8 @@ import type { UserOrg } from "@/lib/mock-data";
 import { I18nProvider } from "@/lib/i18n/provider";
 import { getDictionary } from "@/lib/i18n";
 import { resolveLocale } from "@/lib/i18n/resolve";
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function DashboardLayout({
   children,
@@ -49,8 +54,15 @@ export default async function DashboardLayout({
       (typeof meta.nombre === "string" && meta.nombre) ||
       "";
     userName = rawName.trim() || undefined;
-    // La guía se muestra solo la primera vez (hasta que se marca vista).
-    showGuide = meta.guide_seen !== true;
+    // La guía se muestra solo la primera vez (hasta que se marca vista) Y solo
+    // si hay algo por lo que guiar: con el inventario vacío manda la pantalla
+    // de bienvenida, y el modal encima sería la segunda bienvenida simultánea.
+    // `getAiSystems` lleva `cache()`, así que en la portada esta consulta es
+    // gratis (la página ya la hace).
+    showGuide = shouldShowGuide({
+      guideSeen: meta.guide_seen === true,
+      systemCount: (await getAiSystems()).length,
+    });
   }
 
   const locale = await resolveLocale();
@@ -73,7 +85,14 @@ export default async function DashboardLayout({
           activeOrgId={activeOrgId}
           isPlatformAdmin={isPlatformAdmin}
         />
-        <main id="contenido" className="flex-1 md:h-dvh md:overflow-y-auto">
+        {/* `scroll-mt-14` = la altura exacta de la barra móvil `sticky h-14`.
+            Sin esto, «Saltar al contenido» deja el `<h1>` y los primeros
+            controles DEBAJO de la barra. En escritorio no hay barra que
+            esquivar, de ahí el `md:scroll-mt-0`. */}
+        <main
+          id="contenido"
+          className="flex-1 scroll-mt-14 md:h-dvh md:overflow-y-auto md:scroll-mt-0"
+        >
           <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">{children}</div>
         </main>
         {showGuide && <WelcomeGuide show userId={userId} />}

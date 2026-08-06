@@ -88,7 +88,7 @@ const REMEDIATION: Record<string, CatalogEntry> = {
   "Art. 11": {
     title: "Documentación técnica (Anexo IV)",
     action:
-      "Obligación principalmente del proveedor: elaborar la documentación técnica conforme al Anexo IV. Como deployer, exige al proveedor esa documentación (e instrucciones) y consérvala como evidencia de auditoría.",
+      "Obligación del proveedor: elaborar la documentación técnica conforme al Anexo IV. OJO — el Reglamento la dirige a las autoridades y a los organismos notificados, no al responsable del despliegue: no es algo que puedas exigir por ley, así que pacta su acceso en el contrato. Lo que el proveedor sí debe entregarte son las instrucciones de uso (Art. 13); consérvalas como evidencia de auditoría.",
     article: "Art. 11",
     priority: "media",
     effort: "bajo",
@@ -96,7 +96,7 @@ const REMEDIATION: Record<string, CatalogEntry> = {
   "Art. 12": {
     title: "Registro y trazabilidad (logging)",
     action:
-      "El proveedor diseña el registro automático de eventos (por diseño). Como deployer, mantén el sistema con el logging activo y conserva los logs que estén bajo tu control durante al menos 6 meses (Art. 26.6), salvo que otra norma exija más.",
+      "El proveedor diseña el registro automático de eventos (por diseño). Como deployer, mantén el sistema con el logging activo y conserva los logs que estén bajo tu control durante un período adecuado a la finalidad prevista y de al menos 6 meses (Art. 26.6), salvo que otra norma aplicable —en particular la de protección de datos— disponga otra cosa.",
     article: "Art. 12",
     priority: "media",
     effort: "medio",
@@ -202,7 +202,7 @@ export const REMEDIATION_EN: Record<string, CatalogEntry> = {
   "Art. 11": {
     title: "Technical documentation (Annex IV)",
     action:
-      "Primarily a provider obligation: draw up the technical documentation in accordance with Annex IV. As a deployer, require that documentation (and the instructions for use) from the provider and retain it as audit evidence.",
+      "A provider obligation: draw up the technical documentation in accordance with Annex IV. NOTE — the Regulation directs it to authorities and notified bodies, not to the deployer: it is not something you can require by law, so negotiate access in the contract. What the provider must hand you are the instructions for use (Art. 13); retain them as audit evidence.",
     article: "Art. 11",
     priority: "media",
     effort: "bajo",
@@ -210,7 +210,7 @@ export const REMEDIATION_EN: Record<string, CatalogEntry> = {
   "Art. 12": {
     title: "Record-keeping and traceability (logging)",
     action:
-      "The provider designs the automatic logging of events (by design). As a deployer, keep the system running with logging enabled and retain the logs under your control for at least 6 months (Art. 26.6), unless other law requires longer.",
+      "The provider designs the automatic logging of events (by design). As a deployer, keep the system running with logging enabled and retain the logs under your control for a period appropriate to the intended purpose and of at least 6 months (Art. 26.6), unless other applicable law —in particular data protection law— provides otherwise.",
     article: "Art. 12",
     priority: "media",
     effort: "medio",

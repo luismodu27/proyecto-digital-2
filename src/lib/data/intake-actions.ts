@@ -7,10 +7,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
-import { rateLimit } from "@/lib/security/rate-limit";
+import { checkRateLimit } from "@/lib/security/rate-limit";
 import { trackServer } from "@/lib/telemetry/server";
 import { logDataFallback, logIncident } from "@/lib/observability/log";
 import { checkQuota } from "@/lib/billing/quota";
+import { text } from "./form";
 
 /**
  * Enlace de intake compartible (escrituras).
@@ -45,11 +46,14 @@ async function clientIp(): Promise<string> {
   return h.get("x-real-ip")?.trim() || "unknown";
 }
 
+/**
+ * Atajo sobre `text()` de `./form` con el tope por defecto de esta pantalla.
+ * Los topes de aquí son MÁS ESTRICTOS que los generales a propósito: esta es la
+ * única escritura anónima del producto y quien la usa no tiene cuenta, así que
+ * el margen que se le da es el justo para rellenar una ficha.
+ */
 function field(form: FormData, key: string, max = MAX_FIELD): string | null {
-  const raw = form.get(key);
-  if (typeof raw !== "string") return null;
-  const v = raw.trim().slice(0, max);
-  return v ? v : null;
+  return text(form.get(key), max);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -153,7 +157,7 @@ export async function acceptIntakeSubmission(formData: FormData) {
 
   const { error: insertError } = await supabase.from("ai_systems").insert({
     organization_id: org,
-    name: String(sub.name).slice(0, MAX_NAME),
+    name: text(sub.name, MAX_NAME) ?? "",
     owner: sub.owner,
     domain: sub.domain,
     vendor: sub.vendor,
@@ -244,7 +248,7 @@ export async function submitIntakeForm(
   const name = field(formData, "name", MAX_NAME);
   if (!name) return { ok: false, error: "no-name" };
 
-  if (!rateLimit(`intake:${await clientIp()}`, RL_LIMIT, RL_WINDOW_MS)) {
+  if (!(await checkRateLimit(`intake:${await clientIp()}`, RL_LIMIT, RL_WINDOW_MS))) {
     return { ok: false, error: "rate-limit" };
   }
 

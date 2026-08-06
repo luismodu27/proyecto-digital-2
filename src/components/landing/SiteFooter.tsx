@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import { LEGAL_FOOTER_BY_LOCALE } from "@/components/ui/LegalNote";
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/config";
+import { LEGAL_DOCUMENTS, legalPath } from "@/lib/legal";
 
 export function SiteFooter({
   t,
@@ -12,7 +14,7 @@ export function SiteFooter({
 }) {
   return (
     <footer className="mt-auto border-t border-line bg-paper-sunken/50">
-      <div className="container-page grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="container-page grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <Logo />
           <p className="mt-3 max-w-xs text-sm text-muted">{t.tagline}</p>
@@ -61,6 +63,29 @@ export function SiteFooter({
                 @attesta.io
               </a>
             </li>
+          </ul>
+        </div>
+        {/*
+          Los documentos legales salen del registro, no de una lista escrita a
+          mano: si se añade uno y el pie no lo enlaza, existe pero nadie lo
+          encuentra — y una página de privacidad que no se encuentra es, a
+          efectos prácticos, una página de privacidad que no está.
+        */}
+        <div className="text-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+            {t.legalHeading}
+          </p>
+          <ul className="mt-3 space-y-1.5">
+            {LEGAL_DOCUMENTS.map((doc) => (
+              <li key={doc.id}>
+                <Link
+                  href={legalPath(doc, locale)}
+                  className="text-ink-soft transition-colors hover:text-brand"
+                >
+                  {doc.title[locale]}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
         <div className="text-sm text-muted">

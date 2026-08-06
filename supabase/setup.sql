@@ -2131,3 +2131,1274 @@ comment on column public.organizations.max_seats is
 --   -- al terminar el contrato, limpiar el pacto (vuelve al cupo de su plan):
 --   update public.organizations set max_systems = null, max_seats = null
 --    where id = '<org-uuid>';
+
+
+-- ==========================================================================
+-- 0030_incidents.sql
+-- ==========================================================================
+-- 0030_incidents.sql
+-- Registro de incidentes del deployer + cadencia de revisión de la autoevaluación.
+--
+-- POR QUÉ EXISTE: los packs ya llevan controles que citan el Art. 26.5 ("vigila
+-- el funcionamiento… suspende el uso e informa al proveedor… notifica los
+-- incidentes graves"), pero no había NINGÚN sitio donde registrar un incidente
+-- real. Un control sin expediente es una casilla, no evidencia.
+--
+-- LAS TRES REGLAS QUE ESTE ESQUEMA EXISTE PARA NO EQUIVOCAR (las tres son
+-- contraintuitivas y las tres tienen test en `src/lib/incidents/`):
+--
+--  1. El Art. 26.5 NO contiene ningún plazo numérico ("sin demora injustificada",
+--     "inmediatamente"). Los 15 / 10 / 2 días son del Art. 73 y son DEL
+--     PROVEEDOR. Por eso aquí no hay ninguna columna de "fecha límite": se
+--     derivan de `aware_on`, y de quién sea el plazo depende de
+--     `provider_unreachable`.
+--
+--  2. `aware_on` es la columna de más valor probatorio de toda la tabla. El
+--     Art. 73 cuenta sus plazos "desde que el proveedor O, EN SU CASO, el
+--     responsable del despliegue tenga conocimiento": la fecha del cliente
+--     arranca un reloj que corre para otro. Es `not null` a propósito.
+--
+--  3. `use_suspended` acompaña a `risk_art79`, no a `seriousness`. El mandato
+--     "suspenderán el uso" está en la frase del riesgo del Art. 79.1, no en la
+--     del incidente grave.
+--
+-- ENCUADRE TEMPORAL: el Art. 26 es exigible para el alto riesgo del Anexo III
+-- desde el 2-dic-2027 (Reglamento (UE) 2026/1744). Registrar incidentes hoy es
+-- PREPARACIÓN, no una obligación vencida.
+--
+-- ADITIVO y seguro: si esta migración no está aplicada, la fachada de datos
+-- devuelve lista vacía, lo registra como `migration-pending` y la app funciona
+-- igual. Nada de lo que ya existe cambia de comportamiento.
+--
+-- Nota de operación: `create policy` no admite `if not exists`, así que cada una
+-- va precedida de `drop policy if exists` para que re-pegar el fichero funcione.
+
+-- ---------------------------------------------------------------------------
+-- Expediente de incidente
+-- ---------------------------------------------------------------------------
+create table if not exists public.incidents (
+  id                        uuid primary key default gen_random_uuid(),
+  organization_id           uuid not null references public.organizations (id) on delete cascade,
+  -- `set null` y no `cascade`: si se da de baja el sistema, el expediente del
+  -- incidente SOBREVIVE. Borrar la evidencia al retirar la herramienta es justo
+  -- lo contrario de lo que hace un system-of-record.
+  ai_system_id              uuid references public.ai_systems (id) on delete set null,
+  title                     text not null,
+  detail                    text,
+
+  -- Tres fechas distintas, y las tres importan. La definición del Art. 3.49
+  -- admite causalidad directa O INDIRECTA, así que el nexo causal se establece
+  -- (o no) en un momento propio, distinto del hecho y del conocimiento.
+  occurred_on               date,
+  aware_on                  date not null default current_date,
+  causal_link_on            date,
+
+  -- Categorías del Art. 3, punto 49. Son CINCO y no cuatro: la letra (a) se
+  -- parte en muerte / daño grave a la salud porque el Art. 73 les da plazos
+  -- distintos (10 vs 15 días), y lo que el registro necesita distinguir es el
+  -- plazo, no la letra.
+  categories                text[] not null default '{}',
+
+  -- `under_assessment` no es un adorno: al abrir la ficha casi nadie sabe aún si
+  -- el evento es "grave" en sentido del Art. 3.49. Obligar a decidirlo entonces
+  -- produce o registros falsos o ningún registro.
+  seriousness               text not null default 'under_assessment'
+    check (seriousness in ('under_assessment', 'serious', 'not_serious')),
+
+  -- ¿Hay motivos para considerar que el uso CONFORME A LAS INSTRUCCIONES puede
+  -- hacer que el sistema presente un riesgo del Art. 79.1 (salud, seguridad o
+  -- derechos fundamentales)? Ojo: no hace falta mal uso.
+  risk_art79                boolean not null default false,
+  use_suspended             boolean not null default false,
+
+  -- La casilla que decide si Attesta puede enseñar una cuenta atrás legal al
+  -- deployer: solo cuando no se ha podido contactar con el proveedor, el
+  -- Art. 26.5 remite al Art. 73 "mutatis mutandis".
+  provider_unreachable      boolean not null default false,
+
+  -- Notificación DECLARADA por la organización. Attesta no transmite nada a
+  -- ninguna autoridad; esto es el registro de lo que el cliente dice haber hecho.
+  notified_provider_on      date,
+  notified_distributor_on   date,
+  notified_authority_on     date,
+
+  -- Bandera INDEPENDIENTE. Un incidente grave del AI Act no es una violación de
+  -- datos personales, ni al revés: pueden coincidir, pero los disparadores, los
+  -- destinatarios y los plazos son distintos (72 h del RGPD 33 frente al
+  -- "inmediatamente" del 26.5) y corren en paralelo.
+  personal_data_breach      boolean not null default false,
+
+  status                    text not null default 'open'
+    check (status in ('open', 'closed')),
+  created_by                uuid references auth.users (id),
+  created_at                timestamptz not null default now(),
+  updated_at                timestamptz not null default now()
+);
+
+-- El contenido del array sí se acota (un enum suelto en un text[] se degrada en
+-- semanas). `<@` exige que TODO elemento esté en el catálogo; el array vacío lo
+-- cumple, que es justo lo que queremos mientras el incidente está en evaluación.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'incidents_categories_check'
+  ) then
+    alter table public.incidents
+      add constraint incidents_categories_check
+      check (categories <@ array[
+        'death',
+        'serious_health_harm',
+        'critical_infrastructure',
+        'fundamental_rights',
+        'property_or_environment'
+      ]::text[]);
+  end if;
+end $$;
+
+create index if not exists incidents_org_idx
+  on public.incidents (organization_id, status, aware_on desc);
+
+alter table public.incidents enable row level security;
+
+-- Colaborativo, como el plan de acción: cualquier miembro de la organización
+-- registra y actualiza incidentes. Quien detecta un incidente rara vez es quien
+-- tiene rol de admin, y un registro que exige permisos se rellena tarde o no se
+-- rellena.
+drop policy if exists incidents_select on public.incidents;
+create policy incidents_select on public.incidents
+  for select to authenticated
+  using (organization_id in (select private.user_orgs()));
+
+drop policy if exists incidents_write on public.incidents;
+create policy incidents_write on public.incidents
+  for all to authenticated
+  using (organization_id in (select private.user_orgs()))
+  with check (organization_id in (select private.user_orgs()));
+
+-- Se audita como el resto (aparece en el registro de actividad encadenado).
+drop trigger if exists audit_incidents on public.incidents;
+create trigger audit_incidents
+  after insert or update or delete on public.incidents
+  for each row execute function private.write_audit();
+
+drop trigger if exists set_incidents_updated_at on public.incidents;
+create trigger set_incidents_updated_at
+  before update on public.incidents
+  for each row execute function public.set_updated_at();
+
+comment on table public.incidents is
+  'Registro de incidentes del deployer (Art. 26.5). Notificaciones DECLARADAS por la organización: Attesta no transmite nada a ninguna autoridad.';
+comment on column public.incidents.aware_on is
+  'Fecha de conocimiento. Arranca los plazos del Art. 73, que son DEL PROVEEDOR salvo que provider_unreachable sea true.';
+comment on column public.incidents.risk_art79 is
+  'Motivos para considerar un riesgo del Art. 79.1. Esta es la rama que obliga a suspender el uso, no la del incidente grave.';
+
+-- ---------------------------------------------------------------------------
+-- Cadencia de revisión de la autoevaluación
+-- ---------------------------------------------------------------------------
+-- IMPORTANTE: el Reglamento NO fija periodicidad de revisión para el deployer.
+-- El Art. 26.5 es un deber continuo sin cadencia y el Art. 27.2 dispara por
+-- CAMBIO, no por calendario. Esta columna es una red de seguridad de BUENA
+-- PRÁCTICA que la organización elige; la UI la etiqueta como tal y hay un test
+-- que rompe si alguien reescribe ese copy como "obligatorio".
+--
+-- `null` = usa el defecto del producto (12 meses). Se acotan los valores porque
+-- una cadencia de 0 o negativa marcaría el inventario entero como vencido.
+alter table public.organizations
+  add column if not exists review_cadence_days integer;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'organizations_review_cadence_check'
+  ) then
+    alter table public.organizations
+      add constraint organizations_review_cadence_check
+      check (review_cadence_days is null or review_cadence_days in (180, 365, 730));
+  end if;
+end $$;
+
+comment on column public.organizations.review_cadence_days is
+  'Cadencia de revisión de la autoevaluación en días (180/365/730). null = 12 meses. BUENA PRÁCTICA: el Reglamento no fija periodicidad.';
+
+
+-- ==========================================================================
+-- 0031_review_cadence_rpc.sql
+-- ==========================================================================
+-- 0031_review_cadence_rpc.sql
+-- Arregla la escritura de la cadencia de revisión que 0030 dejó inalcanzable.
+--
+-- POR QUÉ EXISTE. 0030 añadió `organizations.review_cadence_days` y la aplicación
+-- la escribía con un `update` directo sobre la tabla. En el Postgres de pruebas
+-- funcionaba; contra el Supabase real da **42501 permission denied**.
+--
+-- La causa no es la RLS, es un GRANT: la migración **0025** endureció esta tabla
+-- a propósito, cambiando el `UPDATE` de tabla por una lista blanca de columnas
+-- (`grant update (name, slug) on public.organizations to authenticated`). Aquello
+-- cerró un agujero real —sin esa lista, un cliente podía escribirse su propia
+-- columna `plan` y ascenderse de plan solo—, así que la lista blanca se queda; lo
+-- que estaba mal era escribir por fuera de ella.
+--
+-- Cómo se detectó, y por qué merece la pena repetirlo: el Postgres desechable NO
+-- reproduce los grants por defecto de Supabase, así que **no puede decir nada
+-- sobre permisos**. Esto solo aparece verificando por API contra el proyecto real
+-- con usuarios `*@attesta-test.dev`. Es la segunda vez que ese entorno de pruebas
+-- da un falso verde sobre permisos (la primera, 0026/0027 → 0028).
+--
+-- SOLUCIÓN: el mismo patrón que ya usa `set_org_jurisdictions` para el otro ajuste
+-- de organización — una función `security definer` con el guard de rol DENTRO.
+-- Ventaja añadida sobre ampliar el grant: la policy `organizations_update` es solo
+-- de `owner`, y para un ajuste operativo como este owner **y** admin es lo
+-- razonable; el guard de la función lo permite sin tocar la policy.
+--
+-- ADITIVO y seguro: si no está aplicada, la sección de incidentes se ve y se usa
+-- igual; lo único que no se puede es cambiar la cadencia (queda la de 12 meses).
+
+create or replace function public.set_review_cadence(org uuid, days integer)
+returns void
+language plpgsql volatile security definer set search_path = '' as $$
+begin
+  if not private.user_has_role(org, array['owner', 'admin']::public.member_role[]) then
+    raise exception 'no autorizado';
+  end if;
+
+  -- Doble cinturón con el CHECK de 0030: el catálogo se valida aquí también para
+  -- que el error sea 'cadencia no válida' y no un fallo de restricción opaco.
+  if days is not null and days not in (180, 365, 730) then
+    raise exception 'cadencia no válida';
+  end if;
+
+  update public.organizations
+     set review_cadence_days = days
+   where id = org;
+end $$;
+
+-- `revoke ... from anon` a secas NO revoca nada: PostgreSQL concede EXECUTE a
+-- PUBLIC por defecto y `anon` lo hereda por ahí (lección de 0028).
+revoke all on function public.set_review_cadence(uuid, integer) from public;
+revoke all on function public.set_review_cadence(uuid, integer) from anon;
+grant execute on function public.set_review_cadence(uuid, integer) to authenticated;
+
+comment on function public.set_review_cadence(uuid, integer) is
+  'Fija la cadencia de revisión de la autoevaluación (180/365/730, null = defecto). Solo owner/admin. Existe porque 0025 dejó organizations con UPDATE restringido a (name, slug).';
+
+
+-- ==========================================================================
+-- 0032_suppliers.sql
+-- ==========================================================================
+-- 0032_suppliers.sql
+-- Registro de proveedores y terceros (Capa 8).
+--
+-- POR QUÉ EXISTE: todos los packs reencuadran las obligaciones de diseño del
+-- proveedor (Arts. 9-15) como «exige y conserva evidencia», pero no había dónde
+-- guardar esa evidencia ni a quién se la pediste ni qué te contestó. Sin ese
+-- sitio, el reencuadre era un consejo, no un expediente.
+--
+-- LA REGLA QUE ESTE ESQUEMA EXISTE PARA NO PERDER: cada elemento de evidencia
+-- tiene una BASE JURÍDICA distinta, y de ella depende lo que el cliente puede
+-- hacer. El Reglamento solo dirige al responsable del despliegue las
+-- instrucciones de uso (Art. 13); la documentación técnica del Anexo IV, el
+-- sistema de gestión de la calidad y el de gestión de riesgos van dirigidos a
+-- las autoridades y a los organismos notificados. La base vive en el catálogo de
+-- código (`src/lib/suppliers/evidence.ts`, cerrado y con tests), no en la BD:
+-- es una afirmación jurídica y su sitio es donde se puede probar.
+--
+-- LO QUE NO SE MODELA, A PROPÓSITO:
+--   · No hay `fecha_caducidad` obligatoria. Casi nada caduca: ni el marcado CE,
+--     ni la declaración de conformidad, ni las instrucciones, ni el registro en
+--     la base de datos de la UE. Los diez años de los Arts. 18, 23.5 y 47.1 son
+--     plazo de CONSERVACIÓN del proveedor, no de validez. `expires_on` es
+--     nullable y solo tiene sentido en el certificado del Art. 44.
+--   · No hay puntuación ni «% de cumplimiento» del proveedor. No existe umbral
+--     normativo y sería copy prohibido. Lo que se cuenta son elementos.
+--   · No hay estado «conforme/no conforme». Recibido, verificado, rechazado.
+--
+-- ADITIVO y seguro: sin aplicar, la fachada devuelve listas vacías, lo registra
+-- como `migration-pending` y la app funciona igual.
+--
+-- `create policy` no admite `if not exists`: cada una va precedida de su `drop`.
+
+-- ---------------------------------------------------------------------------
+-- Proveedores
+-- ---------------------------------------------------------------------------
+create table if not exists public.suppliers (
+  id                      uuid primary key default gen_random_uuid(),
+  organization_id         uuid not null references public.organizations (id) on delete cascade,
+  name                    text not null,
+  country                 text,
+
+  -- `unknown` es un valor legítimo y frecuente: al empezar el inventario de
+  -- terceros casi nadie sabe si su proveedor es provider, importador o
+  -- distribuidor, y obligar a elegir produciría datos inventados.
+  ai_act_role             text not null default 'unknown'
+    check (ai_act_role in ('provider', 'importer', 'distributor', 'model_provider', 'third_party', 'unknown')),
+
+  -- Si está fuera de la UE debe tener representante autorizado (Art. 22). El
+  -- Art. 22.4 obliga al representante a PONER FIN al mandato si cree que el
+  -- proveedor incumple: por eso un cambio o cese es señal de alarma, no un
+  -- trámite, y se guarda con su fecha de verificación.
+  outside_eu              boolean not null default false,
+  authorized_rep          text,
+  authorized_rep_checked_on date,
+
+  gdpr_role               text not null default 'unknown'
+    check (gdpr_role in ('controller', 'processor', 'joint', 'none', 'unknown')),
+  contact                 text,
+
+  contract_ends_on        date,
+  dpa_signed              boolean not null default false,
+
+  -- BANDERA ROJA del Art. 25.2. Muchas condiciones de uso SaaS excluyen el uso
+  -- en casos de alto riesgo. Si tu contrato la tiene y aun así usas la
+  -- herramienta para uno, te quedas con las obligaciones de proveedor y SIN
+  -- derecho a que el proveedor inicial coopere.
+  excludes_high_risk_use  boolean not null default false,
+
+  note                    text,
+  created_by              uuid references auth.users (id),
+  created_at              timestamptz not null default now(),
+  updated_at              timestamptz not null default now()
+);
+
+create index if not exists suppliers_org_idx
+  on public.suppliers (organization_id, name);
+
+alter table public.suppliers enable row level security;
+
+-- Colaborativo, como el plan y los incidentes: quien negocia con el proveedor
+-- rara vez tiene rol de admin.
+drop policy if exists suppliers_select on public.suppliers;
+create policy suppliers_select on public.suppliers
+  for select to authenticated
+  using (organization_id in (select private.user_orgs()));
+
+drop policy if exists suppliers_write on public.suppliers;
+create policy suppliers_write on public.suppliers
+  for all to authenticated
+  using (organization_id in (select private.user_orgs()))
+  with check (organization_id in (select private.user_orgs()));
+
+drop trigger if exists audit_suppliers on public.suppliers;
+create trigger audit_suppliers
+  after insert or update or delete on public.suppliers
+  for each row execute function private.write_audit();
+
+drop trigger if exists set_suppliers_updated_at on public.suppliers;
+create trigger set_suppliers_updated_at
+  before update on public.suppliers
+  for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- Elementos de evidencia
+-- ---------------------------------------------------------------------------
+create table if not exists public.supplier_evidence (
+  id               uuid primary key default gen_random_uuid(),
+  organization_id  uuid not null references public.organizations (id) on delete cascade,
+  supplier_id      uuid not null references public.suppliers (id) on delete cascade,
+  -- Opcional: el marcado CE y la declaración son por SISTEMA, pero en el
+  -- mid-market lo normal es un sistema por proveedor. Se permite null para no
+  -- obligar a elegir antes de tener el inventario cruzado.
+  ai_system_id     uuid references public.ai_systems (id) on delete set null,
+
+  -- El catálogo de tipos vive en `src/lib/suppliers/evidence.ts` y NO se repite
+  -- aquí como CHECK a propósito: cada tipo nuevo obligaría a una migración, y
+  -- el catálogo ya es cerrado en TypeScript (un tipo inventado no compila) y se
+  -- filtra en la escritura. Un valor desconocido en BD simplemente no se pinta.
+  kind             text not null,
+
+  status           text not null default 'notRequested'
+    check (status in ('notRequested', 'requested', 'received', 'verifiedPublicly', 'refused', 'notApplicable')),
+
+  requested_on     date,
+  received_on      date,
+
+  -- Más útil que cualquier fecha: lo que invalida unas instrucciones de uso no
+  -- es que pase el tiempo, es que salga una versión nueva del sistema.
+  document_version text,
+  source_url       text,
+
+  -- NUNCA se autocalcula. Solo tiene sentido en el certificado del Art. 44.
+  expires_on       date,
+
+  -- Aquí va lo que contestó el proveedor cuando se negó. Una negativa por
+  -- escrito, con fecha, ES evidencia, y de las mejores para un expediente.
+  note             text,
+
+  created_by       uuid references auth.users (id),
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+
+create index if not exists supplier_evidence_supplier_idx
+  on public.supplier_evidence (supplier_id, kind);
+create index if not exists supplier_evidence_org_idx
+  on public.supplier_evidence (organization_id, status);
+
+alter table public.supplier_evidence enable row level security;
+
+drop policy if exists supplier_evidence_select on public.supplier_evidence;
+create policy supplier_evidence_select on public.supplier_evidence
+  for select to authenticated
+  using (organization_id in (select private.user_orgs()));
+
+drop policy if exists supplier_evidence_write on public.supplier_evidence;
+create policy supplier_evidence_write on public.supplier_evidence
+  for all to authenticated
+  using (organization_id in (select private.user_orgs()))
+  with check (organization_id in (select private.user_orgs()));
+
+drop trigger if exists audit_supplier_evidence on public.supplier_evidence;
+create trigger audit_supplier_evidence
+  after insert or update or delete on public.supplier_evidence
+  for each row execute function private.write_audit();
+
+drop trigger if exists set_supplier_evidence_updated_at on public.supplier_evidence;
+create trigger set_supplier_evidence_updated_at
+  before update on public.supplier_evidence
+  for each row execute function public.set_updated_at();
+
+comment on table public.suppliers is
+  'Registro de proveedores y terceros del deployer (Capa 8). Sin puntuaciones ni juicios de conformidad: solo hechos declarados.';
+comment on column public.suppliers.excludes_high_risk_use is
+  'El contrato excluye el uso en casos de alto riesgo (Art. 25.2). Bandera roja: si aun así se usa así, no hay derecho a la cooperación del proveedor inicial.';
+comment on column public.supplier_evidence.expires_on is
+  'Solo tiene sentido en el certificado de organismo notificado (Art. 44). Marcado CE, declaración de conformidad, instrucciones y registro en la BD de la UE NO caducan.';
+comment on column public.supplier_evidence.note is
+  'Incluye la respuesta del proveedor cuando se niega a entregar algo: una negativa por escrito y con fecha es evidencia.';
+
+
+-- ==========================================================================
+-- 0033_content_locale.sql
+-- ==========================================================================
+-- 0033_content_locale.sql
+-- Idioma del texto regulatorio que se PERSISTE (brechas y evaluaciones).
+--
+-- POR QUÉ EXISTE: el chrome de la UI se traduce en cada render, pero hay texto
+-- que se copia a la base de datos y ahí se queda congelado. Al aplicar un policy
+-- pack, el título y el artículo de cada control se escriben en `gap_items`; al
+-- guardar una clasificación, su motivación se escribe en `risk_assessments`. Si
+-- luego se cambia el idioma de la interfaz, esas filas siguen en el idioma en el
+-- que se crearon — y hasta ahora NADIE SABÍA EN CUÁL. Sin ese dato no se puede
+-- ni traducirlas después ni etiquetarlas con `lang` para el lector de pantalla.
+--
+-- POR QUÉ ES NULLABLE Y NO SE RELLENA HACIA ATRÁS: `null` significa «no consta»,
+-- y es la verdad para toda fila anterior a esta migración. Rellenarlas con el
+-- default (`es`) sería inventarse un dato: una organización que trabajara en
+-- inglés acabaría con filas inglesas marcadas como españolas, y un `lang`
+-- equivocado es PEOR que ninguno — el lector de pantalla cambia de voz y
+-- pronuncia con la fonética que no es. El código trata `null` como desconocido y
+-- simplemente no etiqueta (ver `src/lib/i18n/stored-locale.ts`, con tests).
+--
+-- QUÉ DESCRIBE EXACTAMENTE: el idioma del texto que genera Attesta (requisito,
+-- artículo, motivación). NO el de las notas que escribe el usuario
+-- (`remediation_note`, `evidence_note`): ese idioma lo elige quien teclea, no lo
+-- sabemos, y no se etiqueta.
+--
+-- ADITIVO y seguro: sin aplicar, la fachada mapea `undefined`, el idioma queda
+-- como desconocido y todo se comporta igual que antes.
+
+alter table public.gap_items
+  add column if not exists locale text
+  check (locale is null or locale in ('es', 'en'));
+
+alter table public.risk_assessments
+  add column if not exists locale text
+  check (locale is null or locale in ('es', 'en'));
+
+comment on column public.gap_items.locale is
+  'Idioma del texto GENERADO por Attesta (requirement, article). null = no consta (fila anterior a 0033); no se rellena a ciegas. No describe remediation_note, que la escribe el usuario.';
+comment on column public.risk_assessments.locale is
+  'Idioma del texto GENERADO por Attesta (rationale, citations, obligations). null = no consta (fila anterior a 0033).';
+
+
+-- ==========================================================================
+-- 0034_rate_limits.sql
+-- ==========================================================================
+-- 0034_rate_limits.sql
+-- Rate limit COMPARTIDO entre instancias, sobre Postgres.
+--
+-- POR QUÉ EXISTE: el limitador que hay vive en la memoria del proceso, y en
+-- serverless cada instancia tiene la suya. Frena una ráfaga contra una misma
+-- instancia caliente —el patrón del script de spam tonto— pero no frena a quien
+-- reparte sus intentos, porque Vercel le va dando instancias distintas. Con N
+-- instancias el límite real es N veces el configurado, y nadie sabe cuánto vale
+-- N. Eso importa en las tres superficies que hoy lo usan, y sobre todo en el
+-- formulario de intake: la ÚNICA escritura anónima del producto.
+--
+-- POR QUÉ POSTGRES Y NO UPSTASH / VERCEL KV, que es lo que pedía el ticket:
+-- porque un contador compartido no necesita un proveedor nuevo. Ya hay un estado
+-- compartido, en la UE, con su DPA firmado y su copia de seguridad — esta misma
+-- base de datos. Añadir Redis significa coste recurrente, otro subprocesador que
+-- declarar en la lista que Attesta todavía debe publicar, y otro sitio donde
+-- mirar cuando algo falle. Para tres superficies de baja frecuencia (lista de
+-- espera, intake, telemetría) eso no sale a cuenta. Si algún día hay que limitar
+-- el login o el checkout, con miles de peticiones por minuto, ese es el momento
+-- de reconsiderarlo — y entonces se cambia solo el almacén, porque la interfaz
+-- (`src/lib/security/rate-limit.ts`) ya no depende de dónde vive el contador.
+--
+-- CÓMO CUENTA, y por qué así: ventana FIJA, no deslizante. La deslizante es más
+-- justa pero exige guardar cada marca de tiempo; la fija guarda una fila por
+-- (clave, ventana) y se resuelve con un `insert … on conflict do update`, que es
+-- ATÓMICO — que es la propiedad que de verdad hace falta aquí, porque dos
+-- instancias pidiendo a la vez es justo el caso que el limitador en memoria no
+-- sabía resolver. El precio conocido: en el peor caso se admite hasta el doble
+-- del límite a caballo entre dos ventanas. Es aceptable para lo que protege.
+--
+-- LO QUE NO SE GUARDA: la clave llega ya HASHEADA desde la aplicación, así que
+-- aquí no hay direcciones IP. Un limitador no necesita saber a quién limita,
+-- solo distinguirlo, y una tabla de IP en la UE es un dato personal más que
+-- custodiar sin ninguna necesidad.
+--
+-- ADITIVO y seguro: sin aplicar, la RPC no existe, `rateLimit` se queda solo con
+-- el limitador en memoria de siempre y la app funciona igual que hoy.
+
+create table if not exists public.rate_limits (
+  -- Hash de la clave (superficie + emisor). Nunca la clave en claro.
+  bucket       text not null,
+  -- Inicio de la ventana, truncado. Junto con `bucket` forma la identidad.
+  window_start timestamptz not null,
+  hits         integer not null default 0,
+  primary key (bucket, window_start)
+);
+
+-- Barrido de ventanas viejas. Sin esto la tabla crece para siempre.
+create index if not exists rate_limits_window_idx
+  on public.rate_limits (window_start);
+
+alter table public.rate_limits enable row level security;
+
+-- Ninguna policy: nadie lee ni escribe esta tabla directamente. El único acceso
+-- es la RPC de abajo, que es `security definer` y por tanto salta la RLS. Sin
+-- policies, un SELECT de `anon` o `authenticated` devuelve vacío aunque tengan
+-- el grant de tabla por defecto de Supabase — que es justo lo que se quiere:
+-- el contador no es asunto de nadie salvo del propio limitador.
+
+/**
+ * Consume una unidad de cuota. Devuelve `true` si la petición SE PERMITE.
+ *
+ * `security definer` + `search_path = ''`: todo cualificado con esquema.
+ */
+create or replace function public.consume_rate_limit(
+  p_bucket    text,
+  p_limit     integer,
+  p_window_ms integer
+)
+returns boolean
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_start timestamptz;
+  v_hits  integer;
+begin
+  -- Defensas contra una llamada absurda: sin esto, un `p_window_ms` de cero
+  -- provoca una división por cero y un límite negativo dejaría pasar todo.
+  if p_bucket is null or length(p_bucket) = 0 or length(p_bucket) > 128 then
+    return false;
+  end if;
+  if p_limit is null or p_limit < 1 or p_window_ms is null or p_window_ms < 1000 then
+    return false;
+  end if;
+
+  -- Inicio de la ventana actual: el tiempo troceado en bloques de p_window_ms.
+  v_start := to_timestamp(
+    floor(extract(epoch from clock_timestamp()) / (p_window_ms / 1000.0))
+    * (p_window_ms / 1000.0)
+  );
+
+  -- Atómico: el upsert incrementa y devuelve el valor ya consolidado, así que
+  -- dos instancias concurrentes no pueden leer el mismo contador y sumarle uno
+  -- cada una. Es la razón de ser de esta migración.
+  insert into public.rate_limits (bucket, window_start, hits)
+  values (p_bucket, v_start, 1)
+  on conflict (bucket, window_start)
+    do update set hits = public.rate_limits.hits + 1
+  returning hits into v_hits;
+
+  -- Barrido oportunista: una de cada ~100 llamadas limpia lo caducado, para no
+  -- necesitar un cron solo para esto.
+  if v_hits % 100 = 0 then
+    delete from public.rate_limits
+    where window_start < clock_timestamp() - interval '1 day';
+  end if;
+
+  return v_hits <= p_limit;
+end
+$$;
+
+-- `revoke ... from anon` sobre una función es casi siempre un no-op: EXECUTE se
+-- concede a PUBLIC por defecto. Hay que quitárselo a PUBLIC y luego concederlo.
+-- (Lección de la migración 0028.)
+revoke all on function public.consume_rate_limit(text, integer, integer) from public;
+-- `anon` SÍ la necesita: el formulario de intake se envía sin cuenta, y es
+-- precisamente la superficie que más falta hace limitar. La función no revela
+-- nada —devuelve un booleano sobre una clave que ya viene hasheada— y valida
+-- sus propios argumentos, así que abrirla no da ningún oráculo.
+grant execute on function public.consume_rate_limit(text, integer, integer) to anon;
+grant execute on function public.consume_rate_limit(text, integer, integer) to authenticated;
+grant execute on function public.consume_rate_limit(text, integer, integer) to service_role;
+
+comment on table public.rate_limits is
+  'Contadores del rate limit compartido entre instancias. `bucket` es un hash: aquí NO se guardan direcciones IP.';
+comment on function public.consume_rate_limit(text, integer, integer) is
+  'Consume una unidad de cuota en una ventana fija. true = permitido. Atómico vía upsert: es lo que el limitador en memoria no podía garantizar entre instancias.';
+
+
+-- ============================================================
+-- 0035_org_lifecycle.sql
+-- ============================================================
+
+-- 0035_org_lifecycle.sql
+-- Baja de una organización: solicitud, periodo de gracia y purga completa.
+--
+-- EL FALLO QUE ARREGLA, comprobado en un Postgres desechable antes de escribir
+-- una línea de esto. La hipótesis era que el trigger de inmutabilidad del
+-- `audit_log` impediría borrar una organización. Era falso, y la realidad es
+-- peor: `audit_log.organization_id` NO tiene clave ajena a `organizations`, así
+-- que un `delete from organizations` funciona sin protestar y deja las filas de
+-- auditoría **huérfanas** — incluidos los `old_data`/`new_data`, que llevan el
+-- contenido real de cada cambio. Es decir: hoy la supresión parece completa y no
+-- lo es. Eso convierte en falso el plazo de 30 días del aviso de privacidad y del
+-- DPA, que es exactamente la clase de afirmación que no puede quedarse sin
+-- producto detrás.
+--
+-- POR QUÉ NO SE AÑADE, SIN MÁS, UN `on delete cascade` al `audit_log`: porque
+-- entonces el trigger `audit_no_delete` haría fallar el borrado en cascada, y
+-- porque un `cascade` silencioso sobre el registro inmutable es justo lo que no
+-- se quiere. La purga tiene que ser un acto explícito, autorizado y trazable.
+--
+-- POR QUÉ HAY PERIODO DE GRACIA Y NO BORRADO INMEDIATO. Attesta se vende como
+-- system-of-record de evidencia. Que una sola sesión de propietario comprometida
+-- destruya el expediente entero sin vuelta atrás sería un diseño malo para
+-- cualquier producto y absurdo para este. Con la solicitud, el propietario ve un
+-- aviso permanente y puede cancelar con un clic; sin ella, el atacante gana en
+-- silencio.
+--
+-- POR QUÉ 7 DÍAS Y NO 30. El DPA promete la supresión «en un plazo máximo de 30
+-- días». Si la gracia fuera de 30, la purga ocurriría justo en el límite y
+-- cualquier retraso del cron incumpliría lo prometido. Con 7 queda margen de
+-- sobra y la promesa se cumple con holgura, que es como deben escribirse los
+-- plazos que uno mismo firma.
+--
+-- ADITIVO: sin aplicar, la app funciona igual (las nuevas RPC no existen y la
+-- fachada degrada con `logDataFallback`).
+
+-- ---------- 1. Marcas de solicitud de baja ----------
+
+alter table public.organizations
+  add column if not exists deletion_requested_at timestamptz,
+  add column if not exists deletion_requested_by uuid references auth.users (id) on delete set null;
+
+comment on column public.organizations.deletion_requested_at is
+  'Momento en que un propietario solicitó la baja. La purga ocurre pasados 7 días; hasta entonces se puede cancelar.';
+
+-- Lo que consulta el cron: pocas filas, pero evita recorrer toda la tabla.
+create index if not exists organizations_deletion_due_idx
+  on public.organizations (deletion_requested_at)
+  where deletion_requested_at is not null;
+
+-- ---------- 2. Excepción ÚNICA a la inmutabilidad del audit_log ----------
+
+/**
+ * El `audit_log` sigue siendo inmutable para todo el mundo y para siempre, con
+ * una sola excepción: la purga de una organización concreta.
+ *
+ * CÓMO SE ACOTA, que es lo delicado: la excepción no es "puede borrar quien sea
+ * `security definer`", sino "puede borrarse una fila SI Y SOLO SI su
+ * `organization_id` coincide con el que la transacción en curso declaró estar
+ * purgando". La marca es un ajuste **local a la transacción** (`set_config(...,
+ * true)`) que solo pone `purge_organization`, y va con el identificador dentro:
+ * ni siquiera con la marca puesta se puede tocar la auditoría de OTRA
+ * organización. Un cliente no puede ponerla —PostgREST solo llama funciones de
+ * los esquemas expuestos, y `set_config` está en `pg_catalog`— pero el diseño no
+ * depende de eso: depende de la comparación por fila.
+ */
+create or replace function private.block_mutation()
+returns trigger language plpgsql as $$
+declare
+  v_purging text;
+begin
+  if tg_op = 'DELETE' then
+    v_purging := current_setting('attesta.purging_org', true);
+    if v_purging is not null
+       and v_purging <> ''
+       and old.organization_id is not null
+       and old.organization_id::text = v_purging then
+      return old;
+    end if;
+  end if;
+  raise exception 'audit_log es inmutable: no se permite % ', tg_op;
+end $$;
+
+-- ---------- 3. Solicitar la baja (propietario) ----------
+
+/**
+ * Marca la organización para su baja. Devuelve la fecha en que se purgará.
+ *
+ * Pide el NOMBRE de la organización como confirmación. No es teatro: es la única
+ * defensa barata contra el clic equivocado en la pantalla que destruye el
+ * expediente entero, y obliga a leer qué organización se está dando de baja
+ * cuando se pertenece a varias.
+ */
+create or replace function public.request_org_deletion(
+  p_org     uuid,
+  p_confirm text
+)
+returns timestamptz
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_uid  uuid := (select auth.uid());
+  v_name text;
+begin
+  if v_uid is null or p_org is null then
+    raise exception 'no autorizado';
+  end if;
+
+  -- Solo propietario. Un administrador puede gestionar la organización, no
+  -- disolverla.
+  if not exists (
+    select 1 from public.memberships m
+    where m.organization_id = p_org
+      and m.user_id = v_uid
+      and m.role = 'owner'::public.member_role
+  ) then
+    raise exception 'no autorizado';
+  end if;
+
+  select o.name into v_name from public.organizations o where o.id = p_org;
+  if v_name is null then
+    raise exception 'no autorizado';
+  end if;
+
+  if p_confirm is null or lower(trim(p_confirm)) <> lower(trim(v_name)) then
+    raise exception 'el nombre de confirmación no coincide';
+  end if;
+
+  update public.organizations
+  set deletion_requested_at = now(),
+      deletion_requested_by = v_uid
+  where id = p_org
+    and deletion_requested_at is null;  -- idempotente: no reinicia el plazo
+
+  return (
+    select o.deletion_requested_at + interval '7 days'
+    from public.organizations o where o.id = p_org
+  );
+end $$;
+
+revoke all on function public.request_org_deletion(uuid, text) from public, anon;
+grant execute on function public.request_org_deletion(uuid, text) to authenticated;
+
+-- ---------- 4. Cancelar la baja (propietario) ----------
+
+create or replace function public.cancel_org_deletion(p_org uuid)
+returns boolean
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_uid uuid := (select auth.uid());
+begin
+  if v_uid is null or p_org is null then
+    raise exception 'no autorizado';
+  end if;
+
+  if not exists (
+    select 1 from public.memberships m
+    where m.organization_id = p_org
+      and m.user_id = v_uid
+      and m.role = 'owner'::public.member_role
+  ) then
+    raise exception 'no autorizado';
+  end if;
+
+  update public.organizations
+  set deletion_requested_at = null,
+      deletion_requested_by = null
+  where id = p_org;
+
+  return true;
+end $$;
+
+revoke all on function public.cancel_org_deletion(uuid) from public, anon;
+grant execute on function public.cancel_org_deletion(uuid) to authenticated;
+
+-- ---------- 5. Purga (solo el cron / service_role) ----------
+
+/**
+ * Borra de verdad una organización y TODO lo suyo, auditoría incluida.
+ *
+ * No la puede llamar `authenticated` a propósito: si el propietario pudiera
+ * purgar en el acto, el periodo de gracia no existiría. La ejecuta el cron
+ * cuando el plazo ha vencido.
+ *
+ * EL ORDEN ES AL REVÉS DE LO QUE PARECE, y esto se descubrió probándolo, no
+ * razonándolo. La versión intuitiva —borrar la auditoría y luego la
+ * organización— deja la auditoría **repoblada**: el `on delete cascade` sobre
+ * `ai_systems`, `memberships` y compañía dispara sus triggers `write_audit`, que
+ * insertan una fila nueva por cada borrado. En la primera prueba la purga
+ * informó de 2 filas eliminadas y la organización volvió a tener 2. Así que
+ * primero se borra la organización, se deja que la cascada haga su ruido, y
+ * después se barre la auditoría, que a esas alturas ya está completa.
+ */
+create or replace function public.purge_organization(p_org uuid)
+returns integer
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_audit integer;
+begin
+  if p_org is null then
+    return 0;
+  end if;
+
+  -- `true` = solo durante esta transacción. Lleva el identificador dentro, así
+  -- que la excepción de inmutabilidad no se extiende a ninguna otra organización.
+  perform set_config('attesta.purging_org', p_org::text, true);
+
+  -- 1. La organización. La cascada arrastra el resto de tablas y, de paso,
+  --    dispara los `write_audit` que dejan la auditoría en su estado final.
+  --    La telemetría la referencia con `on delete set null`: los eventos son
+  --    agregados y sin PII, y su recuento no debe falsearse al dar de baja a
+  --    alguien. Lo que se va es el vínculo, que es lo identificable.
+  delete from public.organizations where id = p_org;
+
+  -- 2. Y ahora sí, la auditoría entera — incluida la que acaba de escribir la
+  --    cascada. Sin FK a `organizations`, estas filas sobrevivirían solas.
+  delete from public.audit_log where organization_id = p_org;
+  get diagnostics v_audit = row_count;
+
+  return v_audit;
+end $$;
+
+-- OJO: `revoke ... from public` NO BASTA en Supabase. Además del EXECUTE que
+-- PostgreSQL concede a PUBLIC, Supabase tiene `alter default privileges in
+-- schema public grant all on routines to anon, authenticated, service_role`, así
+-- que cada función NUEVA nace con un grant DIRECTO a esos tres roles, que
+-- sobrevive a revocárselo a PUBLIC. Se comprobó en el Postgres desechable
+-- (que sí replica esos default privileges): tras `revoke ... from public`,
+-- `has_function_privilege('authenticated', ...)` seguía dando `t`. Aquí eso no
+-- es un detalle: si un propietario pudiera llamar a `purge_organization`, el
+-- periodo de gracia entero sería decorativo. Hay que nombrarlos.
+revoke all on function public.purge_organization(uuid) from public, anon, authenticated;
+grant execute on function public.purge_organization(uuid) to service_role;
+
+/**
+ * Purga todas las que hayan cumplido el plazo. Es lo que llama el cron.
+ * Devuelve cuántas organizaciones se purgaron.
+ */
+create or replace function public.purge_due_organizations()
+returns integer
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_org   uuid;
+  v_count integer := 0;
+begin
+  for v_org in
+    select o.id from public.organizations o
+    where o.deletion_requested_at is not null
+      and o.deletion_requested_at < now() - interval '7 days'
+  loop
+    perform public.purge_organization(v_org);
+    v_count := v_count + 1;
+  end loop;
+  return v_count;
+end $$;
+
+revoke all on function public.purge_due_organizations() from public, anon, authenticated;
+grant execute on function public.purge_due_organizations() to service_role;
+
+comment on function public.purge_organization(uuid) is
+  'Borra una organización y todo lo suyo, auditoría incluida. Solo service_role: si el propietario pudiera llamarla, el periodo de gracia no existiría.';
+
+
+-- ============================================================
+-- 0036_billing_lifecycle.sql
+-- ============================================================
+
+-- 0036_billing_lifecycle.sql
+-- Ciclo de vida de facturación: idempotencia, orden y reconciliación.
+--
+-- LOS TRES AGUJEROS QUE CIERRA, todos del tipo "no se ve hasta que ya pasó":
+--
+-- 1. SIN IDEMPOTENCIA. Stripe REINTENTA los webhooks (ante un timeout, un 5xx, o
+--    simplemente porque sí). El `upsert` de la suscripción aguantaba el reintento
+--    por casualidad, pero el evento de telemetría `checkout_completed` no: cada
+--    reintento contaba un pago más. El embudo de activación —lo único que mide si
+--    el producto funciona— se falseaba solo, y hacia arriba, que es la dirección
+--    en la que nadie sospecha.
+--
+-- 2. SIN ORDEN. Stripe NO garantiza el orden de entrega. Un
+--    `customer.subscription.updated` viejo que llega después de uno nuevo
+--    sobrescribía el estado bueno con el caducado: una suscripción activa podía
+--    quedar marcada `past_due` porque el evento de hace dos minutos llegó tarde.
+--    Se arregla comparando la marca de tiempo DEL EVENTO, no la de recepción.
+--
+-- 3. EL FALLO PROPIO SE TRAGABA EL EVENTO. El webhook capturaba cualquier error y
+--    respondía 200. Un 200 le dice a Stripe "recibido, no lo reintentes": si la
+--    base de datos parpadeaba justo entonces, ese pago no se registraba **nunca**
+--    y nadie se enteraba. El cliente pagaba y se quedaba en el plan gratuito. Esto
+--    no lo arregla el SQL, lo arregla el webhook devolviendo 500; pero el registro
+--    de eventos de aquí es lo que hace seguro reintentar.
+--
+-- ADITIVO: sin aplicar, el webhook detecta que no existe el registro y sigue
+-- funcionando como hasta ahora (sin idempotencia, avisando en el log).
+
+-- ---------- 1. Registro de eventos procesados ----------
+
+create table if not exists public.stripe_events (
+  -- El id del evento de Stripe (`evt_...`). Es la clave de idempotencia.
+  id           text primary key,
+  type         text not null,
+  -- `event.created` de Stripe: cuándo OCURRIÓ, no cuándo nos llegó.
+  event_at     timestamptz not null,
+  processed_at timestamptz not null default now()
+);
+
+create index if not exists stripe_events_processed_idx
+  on public.stripe_events (processed_at);
+
+alter table public.stripe_events enable row level security;
+-- Sin policies: solo lo toca el webhook con service_role. Ni los clientes ni
+-- `anon` tienen nada que ver aquí.
+
+comment on table public.stripe_events is
+  'Eventos de Stripe ya procesados. Existe para que un reintento de Stripe no cuente dos veces el mismo pago.';
+
+-- ---------- 2. Marca de orden en la suscripción ----------
+
+alter table public.subscriptions
+  add column if not exists last_event_at timestamptz;
+
+comment on column public.subscriptions.last_event_at is
+  'Marca de tiempo del último evento de Stripe APLICADO. Impide que un evento que llega tarde sobrescriba un estado más nuevo.';
+
+-- ---------- 3. Aplicar un evento respetando el orden ----------
+
+/**
+ * Aplica el estado de una suscripción SOLO si el evento es más nuevo que el
+ * último aplicado. Devuelve `true` si se aplicó, `false` si se descartó por
+ * llegar tarde.
+ *
+ * La comparación va DENTRO del `on conflict`, en la misma sentencia, y no en un
+ * "lee, compara y escribe" desde la aplicación: dos entregas simultáneas de
+ * Stripe se resolverían mal en ese caso, y son justo lo que pasa cuando Stripe
+ * reintenta mientras el original todavía va en camino.
+ */
+create or replace function public.apply_subscription_event(
+  p_org                  uuid,
+  p_customer             text,
+  p_subscription         text,
+  p_status               text,
+  p_price                text,
+  p_period_end           timestamptz,
+  p_cancel_at_period_end boolean,
+  p_event_at             timestamptz
+)
+returns boolean
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_applied boolean := false;
+begin
+  if p_org is null or p_event_at is null then
+    return false;
+  end if;
+
+  insert into public.subscriptions (
+    organization_id, stripe_customer_id, stripe_subscription_id, status,
+    price_id, current_period_end, cancel_at_period_end, last_event_at
+  )
+  values (
+    p_org, p_customer, p_subscription, coalesce(p_status, 'inactive'),
+    p_price, p_period_end, coalesce(p_cancel_at_period_end, false), p_event_at
+  )
+  on conflict (organization_id) do update set
+    stripe_customer_id     = excluded.stripe_customer_id,
+    stripe_subscription_id = excluded.stripe_subscription_id,
+    status                 = excluded.status,
+    price_id               = excluded.price_id,
+    current_period_end     = excluded.current_period_end,
+    cancel_at_period_end   = excluded.cancel_at_period_end,
+    last_event_at          = excluded.last_event_at
+  -- LA LÍNEA QUE IMPIDE EL RETROCESO. Sin ella, un evento viejo que llega tarde
+  -- pisa el estado bueno.
+  where public.subscriptions.last_event_at is null
+     or public.subscriptions.last_event_at < excluded.last_event_at;
+
+  get diagnostics v_applied = row_count;
+  return v_applied;
+end $$;
+
+revoke all on function public.apply_subscription_event(
+  uuid, text, text, text, text, timestamptz, boolean, timestamptz
+) from public, anon, authenticated;
+grant execute on function public.apply_subscription_event(
+  uuid, text, text, text, text, timestamptz, boolean, timestamptz
+) to service_role;
+
+-- ---------- 4. Limpieza del registro de eventos ----------
+
+/**
+ * Borra los eventos procesados hace más de 30 días. Stripe deja de reintentar
+ * mucho antes (unas 72 h), así que pasado ese plazo el registro ya no protege de
+ * nada y solo crece. Lo llama el mismo cron que la purga de organizaciones.
+ */
+create or replace function public.prune_stripe_events()
+returns integer
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_count integer;
+begin
+  delete from public.stripe_events
+  where processed_at < now() - interval '30 days';
+  get diagnostics v_count = row_count;
+  return v_count;
+end $$;
+
+revoke all on function public.prune_stripe_events() from public, anon, authenticated;
+grant execute on function public.prune_stripe_events() to service_role;
+
+comment on function public.apply_subscription_event(
+  uuid, text, text, text, text, timestamptz, boolean, timestamptz
+) is
+  'Aplica un evento de suscripción de Stripe solo si es más nuevo que el último aplicado. false = descartado por llegar tarde.';
+
+
+-- ============================================================
+-- 0037_demo_requests.sql
+-- ============================================================
+
+-- 0037_demo_requests.sql
+-- Solicitudes de demo (venta asistida).
+--
+-- POR QUÉ NO VALE LA LISTA DE ESPERA QUE YA HAY. `waitlist` guarda un correo y de
+-- dónde vino. Sirve para "avísame cuando esté", que es la señal de alguien que
+-- todavía no ha decidido nada. Pero el plan Enterprise no se vende solo: alguien
+-- tiene que hablar con quien pregunta, y para decidir a quién llamar primero hace
+-- falta saber tres cosas que un correo suelto no dice — de qué organización es,
+-- qué papel ocupa y qué tamaño tiene. Sin eso, una bandeja de 40 correos
+-- idénticos se atiende por orden de llegada, que es el peor criterio posible.
+--
+-- LO QUE SE PIDE Y LO QUE NO. Solo cuatro campos obligatorios y dos opcionales.
+-- Cada campo de más en un formulario de la web pública cuesta solicitudes, y una
+-- solicitud perdida vale más que un dato de cualificación: lo que falte se
+-- pregunta en la llamada, que es justo para lo que existe la llamada.
+--
+-- MISMO MODELO DE SEGURIDAD QUE `waitlist`: `anon` puede INSERTAR y nada más. Sin
+-- policy de lectura, nadie puede sacar la lista de leads —que es información
+-- comercial sensible— aunque tenga el grant de tabla por defecto de Supabase. El
+-- fundador las consulta desde el SQL Editor con `service_role`.
+--
+-- ADITIVO: sin aplicar, el formulario informa del fallo y el correo al fundador
+-- sale igual, así que ninguna solicitud se pierde por no haber migrado todavía.
+
+create table if not exists public.demo_requests (
+  id           uuid primary key default gen_random_uuid(),
+  email        text not null check (char_length(email) between 3 and 254),
+  name         text check (char_length(name) <= 120),
+  company      text check (char_length(company) <= 160),
+  -- Papel de quien pregunta. Texto libre acotado, no un enum: los títulos reales
+  -- ("Head of People Ops", "DPO", "IT Manager") no caben en una lista cerrada, y
+  -- una lista cerrada obliga a elegir "Otro", que no informa de nada.
+  role         text check (char_length(role) <= 120),
+  -- Tamaño de la organización. Aquí sí conviene un catálogo: es lo que ordena la
+  -- bandeja, y para eso hace falta que sea comparable.
+  team_size    text check (team_size in ('1-50', '51-200', '201-1000', '1000+')),
+  -- Qué le trae. Es el campo que de verdad prepara la llamada.
+  context      text check (char_length(context) <= 2000),
+  -- De qué punto de la web salió, para saber qué sección genera conversaciones.
+  source       text check (char_length(source) <= 80),
+  locale       text check (locale in ('es', 'en')),
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists demo_requests_created_idx
+  on public.demo_requests (created_at desc);
+
+alter table public.demo_requests enable row level security;
+
+-- Solo INSERT, para anon y authenticated. Sin SELECT/UPDATE/DELETE: la lista de
+-- leads no la puede leer nadie desde la API pública.
+drop policy if exists demo_requests_insert_anyone on public.demo_requests;
+create policy demo_requests_insert_anyone on public.demo_requests
+  for insert to anon, authenticated
+  with check (true);
+
+comment on table public.demo_requests is
+  'Solicitudes de demo (venta asistida). Solo INSERT para anon: la lista no se puede leer desde la API pública.';
+
+
+-- ============================================================
+-- 0038_evidence_vault.sql
+-- ============================================================
+
+-- 0038_evidence_vault.sql
+-- Vault de evidencia: archivos reales adjuntos a los controles.
+--
+-- EL AGUJERO QUE CIERRA, y por qué es el mayor salto de defensibilidad del
+-- producto. Hoy cada control se marca «hecho» y no hay nada detrás: el «% listo»
+-- mide DECLARACIONES. Ante un auditor eso se cae en la primera pregunta —
+-- «enséñame el documento». Sin el archivo real, el porcentaje es una opinión bien
+-- presentada.
+--
+-- QUÉ NO CAMBIA, para que quede claro: seguir sin certificar nada. El vault
+-- guarda y demuestra CUSTODIA E INTEGRIDAD («este archivo, con este hash, estaba
+-- aquí en esta fecha»), nunca suficiencia ni conformidad. Attesta no abre los
+-- archivos ni los valora.
+--
+-- EL HASH SE CALCULA EN EL SERVIDOR AL SUBIR, no en el navegador. Un hash que
+-- aporta el cliente no prueba nada: quien quiera falsear evidencia mandaría el
+-- hash del documento bueno con el contenido malo. Es la diferencia entre un
+-- control y un adorno.
+--
+-- LA RUTA DE ALMACENAMIENTO EMPIEZA POR EL organization_id a propósito: es lo que
+-- permite que la policy del bucket compare la primera carpeta con las
+-- organizaciones del usuario. El aislamiento entre clientes de los ARCHIVOS
+-- descansa en esa convención, así que la ruta no es un detalle de nomenclatura.
+--
+-- ADITIVO: sin aplicar, la fachada degrada (`logDataFallback`) y la app funciona
+-- igual, sin sección de archivos.
+
+-- ---------- 1. Registro de archivos ----------
+
+create table if not exists public.evidence_files (
+  id              uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations (id) on delete cascade,
+
+  -- A qué se adjunta. Ambos opcionales: un archivo puede colgar de una brecha
+  -- concreta (lo normal) o del sistema entero (política general).
+  gap_item_id     uuid references public.gap_items (id) on delete cascade,
+  ai_system_id    uuid references public.ai_systems (id) on delete cascade,
+
+  -- Nombre ORIGINAL, para que el auditor reconozca el documento. No se usa para
+  -- construir la ruta de almacenamiento: ahí manda un uuid, porque un nombre de
+  -- fichero controlado por el usuario dentro de una ruta es una vía de escape.
+  filename        text not null check (char_length(filename) between 1 and 200),
+  mime            text check (char_length(mime) <= 120),
+  size_bytes      bigint not null check (size_bytes > 0 and size_bytes <= 26214400),
+
+  -- SHA-256 en hexadecimal minúscula. El CHECK impide que entre cualquier cosa:
+  -- un hash con formato libre convierte la verificación en un adorno.
+  sha256          text not null check (sha256 ~ '^[0-9a-f]{64}$'),
+
+  -- Ruta dentro del bucket. Única: dos filas apuntando al mismo objeto harían
+  -- que borrar una dejara la otra colgando de un archivo inexistente.
+  storage_path    text not null unique check (char_length(storage_path) <= 400),
+
+  uploaded_by     uuid references auth.users (id) on delete set null,
+  uploaded_at     timestamptz not null default now(),
+
+  -- Al menos un anclaje: un archivo suelto en el vault no lo encontraría nadie.
+  constraint evidence_files_anchored
+    check (gap_item_id is not null or ai_system_id is not null)
+);
+
+create index if not exists evidence_files_org_idx
+  on public.evidence_files (organization_id, uploaded_at desc);
+create index if not exists evidence_files_gap_idx
+  on public.evidence_files (gap_item_id);
+create index if not exists evidence_files_system_idx
+  on public.evidence_files (ai_system_id);
+
+alter table public.evidence_files enable row level security;
+
+drop policy if exists evidence_files_select on public.evidence_files;
+create policy evidence_files_select on public.evidence_files
+  for select to authenticated
+  using (organization_id in (select private.user_orgs()));
+
+drop policy if exists evidence_files_insert on public.evidence_files;
+create policy evidence_files_insert on public.evidence_files
+  for insert to authenticated
+  with check (organization_id in (select private.user_orgs()));
+
+-- Borrar sí, editar NO. Cambiar el `sha256` o el `filename` de una fila existente
+-- sería justo la manipulación contra la que existe todo esto: se borra y se sube
+-- de nuevo, y el registro de auditoría lo refleja como lo que es.
+drop policy if exists evidence_files_delete on public.evidence_files;
+create policy evidence_files_delete on public.evidence_files
+  for delete to authenticated
+  using (private.user_has_role(organization_id, array['owner','admin']::public.member_role[]));
+
+-- Entra en el registro de auditoría como cualquier otra tabla de negocio.
+drop trigger if exists audit_evidence_files on public.evidence_files;
+create trigger audit_evidence_files
+  after insert or update or delete on public.evidence_files
+  for each row execute function private.write_audit();
+
+comment on table public.evidence_files is
+  'Archivos de evidencia. El hash se calcula en el servidor al subir: un hash aportado por el cliente no probaría nada.';
+
+-- ---------- 2. Bucket privado ----------
+
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('evidence', 'evidence', false, 26214400)
+on conflict (id) do update set public = false, file_size_limit = 26214400;
+
+-- ---------- 3. Aislamiento de los ARCHIVOS ----------
+--
+-- Va al final a propósito: en algunos proyectos `storage.objects` pertenece a un
+-- rol distinto y crear policies sobre ella puede requerir permisos que el SQL
+-- Editor no siempre tiene. Si esta parte fallara, todo lo anterior ya está
+-- aplicado y solo habría que resolver este bloque — en vez de perder la
+-- migración entera.
+--
+-- La comparación se hace en TEXTO y no casteando a uuid: si alguien deja en el
+-- bucket un objeto cuya primera carpeta no es un uuid, el cast reventaría la
+-- policy y con ella el acceso de todo el mundo.
+
+drop policy if exists evidence_objects_select on storage.objects;
+create policy evidence_objects_select on storage.objects
+  for select to authenticated
+  using (
+    bucket_id = 'evidence'
+    and (storage.foldername(name))[1] in (
+      select o::text from private.user_orgs() o
+    )
+  );
+
+drop policy if exists evidence_objects_insert on storage.objects;
+create policy evidence_objects_insert on storage.objects
+  for insert to authenticated
+  with check (
+    bucket_id = 'evidence'
+    and (storage.foldername(name))[1] in (
+      select o::text from private.user_orgs() o
+    )
+  );
+
+drop policy if exists evidence_objects_delete on storage.objects;
+create policy evidence_objects_delete on storage.objects
+  for delete to authenticated
+  using (
+    bucket_id = 'evidence'
+    and (storage.foldername(name))[1] in (
+      select o::text from private.user_orgs() o
+    )
+  );
+
+-- No hay policy de UPDATE: sobrescribir un objeto dejaría el `sha256` de la fila
+-- apuntando a un contenido que ya no es ese. Reemplazar = borrar y subir.

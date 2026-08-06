@@ -6,7 +6,7 @@
 > - **[CLAUDE.md](./CLAUDE.md)** — mapa técnico del código.
 > - **[docs/supabase.md](./docs/supabase.md)** — backend/migraciones.
 >
-> Última actualización: **2026-07-30**.
+> Última actualización: **2026-08-04**.
 
 ---
 
@@ -103,8 +103,8 @@
 
 > **Cierre del Sprint 2 (6/6 ítems).** Todo verificado con lint + tsc + `check:copy` + **274 tests** + build,
 > y los caminos reales por curl contra el Supabase de producción. Las dos migraciones del sprint —**0026** (telemetría)
-> y **0027** (intake compartible)— están **aplicadas y verificadas por API** (§1.1-septies). Queda la **0028**
-> (endurecer permisos, §1.1-nonies): opcional, no bloquea nada. Lo aprendido en cada ítem está en `MEMORY.md §10`.
+> y **0027** (intake compartible)— están **aplicadas y verificadas por API** (§1.1-septies), igual que la
+> **0028** que salió de ellas (§1.1-nonies). Lo aprendido en cada ítem está en `MEMORY.md §10`.
 >
 > Novedad de método que conviene conservar: **toda migración nueva se valida antes en un Postgres desechable**
 > (ver gotcha en `CLAUDE.md`). En este sprint cazó tres bugs que habrían llegado al SQL Editor —`greatest`/`least`
@@ -128,8 +128,8 @@
 > repo** (`docs/research/`), después de perder un memo entero por un fallo de API justo antes de volcarlo. El
 > trabajo largo se guarda mientras se hace.
 >
-> ⚠️ **Pendiente del fundador, sin prisa:** migraciones **0028** (§1.1-nonies) y **0029** (§1.1-decies). Ninguna
-> bloquea nada.
+> ✅ **Nada pendiente del fundador en este sprint:** las migraciones **0028** y **0029** están aplicadas y
+> verificadas por API (2026-07-30). El metering está activo de punta a punta.
 
 
 - [x] **Metering por nº de sistemas/asientos + Enterprise a medida** — ✅ **HECHO (2026-07-30)**.
@@ -191,77 +191,507 @@
       record* (sin pronunciamiento del ED), y si el colegio puede consentir por los padres bajo COPPA (la FTC
       propuso codificar esa excepción y **no** la codificó). `medio · M`
 
-### 0.D · SPRINT 4 — producto/UX de profundidad ⬅️ SIGUIENTE
-- [ ] **Búsqueda / filtro / orden en el inventario + vista apilada en móvil** — una tabla plana no escala a
-      decenas de sistemas. `medio · M`
-- [ ] **Navegación móvil tipo drawer** — hoy 11 pestañas con scroll horizontal; los ítems Enterprise con candado
-      (upsell) quedan fuera de vista. `medio · M`
-- [ ] **Registro de incidentes + revisión periódica de la autoevaluación** — cubre obligación real del deployer
-      (Arts. 26.5 / 73) reusando audit-trail + recordatorios; añade recurrencia (retención). `medio · S`
-- [ ] **Registro de proveedores / terceros (Capa 8)** — materializa el reencuadre deployer que ya está en todos
-      los packs (marcado CE, model card, DPA, caducidad); palanca de expansión de plan. `medio · M`
-- [ ] **Streaming con Suspense en el dashboard** — que la query más lenta no bloquee el shell entero. `medio · M`
-- [ ] **Consolidar el onboarding** (modal + checklist + bienvenida compiten hoy en la 1ª sesión). `bajo · M`
-- [ ] **`lang="es"` en bloques regulatorios** — parche WCAG barato mientras el output legal no exista en EN.
-      `medio · S`
-- [ ] **i18n de los muros de pago restantes** (descubierto en el Sprint 1) — 7 `layout.tsx` de secciones de pago
-      (`plan`, `packs`, `vigilancia`, `equipo`, `actividad`, `organizaciones`, `seguridad`) tienen
-      `feature`/`description` **hardcodeados en español**; en `/en` el muro sale mezclado. El de `gap` ya se
-      migró al diccionario en el Sprint 1: replicar ese patrón. `medio · S`
-- [ ] **`viewport`/`themeColor` + manifest mínimo + `noindex` en rutas de auth.** `bajo · S`
-- [ ] **Sección "cómo verificamos el contenido legal"** — el mayor diferenciador honesto (determinista, doble
-      pasada del experto, citas verbatim) se afirma pero no se demuestra. `medio · M`
+### 0.D · SPRINT 4 — producto/UX de profundidad ✅ CERRADO (2026-08-03)
+- [x] **Búsqueda / filtro / orden en el inventario + vista apilada en móvil** — ✅ **HECHO (2026-08-02)**.
+      El estado vive en la **URL** (`?q=&risk=&evidence=&sort=&dir=`) y no en el cliente: el enlace es
+      compartible ("mándame los de alto riesgo sin clasificar"), el botón «atrás» hace lo que uno espera y todo
+      funciona **sin JavaScript** (la caja es un `<form method="GET">` y los chips son enlaces). Eso desbloquea
+      además que la tarjeta «Alto riesgo» del resumen lleve por fin al inventario **ya filtrado**, que era el
+      destino que esperaba a este sprint.
+      Decisiones que no se ven pero mandan: la búsqueda **pliega acentos** (en un inventario español, teclear
+      "seleccion" y no encontrar "Selección" se lee como buscador roto) y combina términos con **Y** ("cribado
+      ats" encuentra "Cribado de CVs — ATS"); el orden por riesgo usa el **orden regulatorio** y no el
+      alfabético (por enum, `minimal` iría antes que `unacceptable` y lo prohibido acabaría el último de la
+      lista); un parámetro **inválido enseña el inventario entero**, nunca cero filas —una pantalla vacía en una
+      herramienta de expediente se lee como pérdida de datos—; y el vacío por filtro es una pantalla **distinta**
+      del vacío por inventario. Lógica pura en `src/lib/inventory/filter.ts`, 35 tests, 6 mutaciones inyectadas
+      y 6 detectadas. Se filtra en memoria a propósito (topes de 3/25/pactado ⇒ decenas de filas): bajarlo a
+      Postgres duplicaría la lógica en los dos repos a cambio de nada medible.
+- [x] **Navegación móvil tipo drawer** — ✅ **HECHO (2026-08-03)**. Barra superior `sticky` + cajón lateral en un
+      **`<dialog>` nativo con `showModal()`**, que regala sin una línea de JS la trampa de foco, la inertización
+      del fondo, Escape, la devolución del foco, el bloqueo de scroll y la capa superior (que de paso deshace el
+      empate de cuatro `z-50` del repo). El upsell deja de depender del scroll: cabecera con el plan y «N
+      secciones requieren un plan superior», e insignia **visible** con el nombre del plan en cada destino
+      bloqueado. Siguen navegando al muro a propósito —ahí se emite `paywall_viewed` y vive el teaser con las
+      cifras reales—, con un test que congela esa decisión. El catálogo y las reglas de bloqueo salen a
+      `lib/dashboard/nav.ts` (puro) para poder probarlas: son reglas COMERCIALES y dentro de un componente
+      `"use client"` no se podían. Revisado después con 5 lentes adversariales (32 candidatos → 18 confirmados
+      tras doble verificación) y corregido todo; 18 mutaciones en total, 18 detectadas.
+      **Cambio visible en escritorio que conviene saber:** el candado del rail ya no tiene `title=` (tooltip al
+      pasar el ratón). Se quitó porque `title` no existe en táctil ni con teclado y duplicaba el anuncio del
+      lector de pantalla; el texto sigue estando, en `sr-only`. Si prefieres recuperar el tooltip para el
+      usuario de ratón, es una línea.
+- [x] **Registro de incidentes + revisión periódica de la autoevaluación** — ✅ **HECHO (2026-08-03)**.
+      Sección nueva `/dashboard/incidentes` (plan Preparación) + migración **0030** (`incidents` + columna
+      `organizations.review_cadence_days`), lógica pura en `src/lib/incidents/` con 46 tests y **13 mutaciones
+      inyectadas, 13 detectadas**.
+      **La consulta al experto de dominio cambió el diseño tres veces, y las tres importan:**
+      1. **Los plazos del Art. 73 (15 / 10 / 2 días) son DEL PROVEEDOR, no tuyos.** El deployer solo los asume
+         cuando **no consigue contactar con el proveedor** (el «mutatis mutandis» del último inciso del 26.5).
+         Un badge genérico de «te quedan 12 días» habría sido falso para casi todos los casos. Lo que hay: un
+         **cronómetro ascendente** desde la fecha de conocimiento (el 26.5 dice «inmediatamente», no da días) y,
+         cuando el incidente es grave, una referencia etiquetada **de quién es el plazo**. Solo al marcar
+         «no se ha podido contactar con el proveedor» pasa a presentarse como propio.
+      2. **La obligación de suspender el uso NO está en la rama del incidente grave**, sino en la del riesgo del
+         Art. 79.1. Suena al revés y es el error fácil; `suspensionRequired()` mira `riskArt79` y no mira la
+         gravedad, con test que rompe si alguien lo «arregla».
+      3. **No existe cadencia de revisión obligatoria** en el Reglamento: el 26.5 es deber continuo y el 27.2
+         dispara por cambio, no por calendario. La cadencia (6/12/24 meses, 12 por defecto) se presenta como
+         **buena práctica** citando ISO/IEC 42001 y NIST AI RMF GOVERN 1.5 — y hay un guard que **lee el
+         diccionario** y falla si ese copy se reescribe como obligación. Los **disparadores por evento** van en
+         primer plano porque son los que la norma sí reconoce; los que citan el Art. 27 llevan su condicional
+         (esa evaluación **no** la debe una empresa privada de RRHH).
+      Otras decisiones que no se ven: **tres fechas separadas** (hecho, conocimiento, nexo causal) porque la del
+      medio es la que arranca el reloj ajeno y es el dato de más valor probatorio; **cinco categorías** del
+      Art. 3.49 y no cuatro (la letra (a) se parte en muerte / daño a la salud porque el 73 les da plazos
+      distintos); `personal_data_breach` como bandera **independiente** para que nadie pierda las 72 h del RGPD
+      creyendo que el aviso al proveedor valía por el de protección de datos; `ai_system_id` con `on delete set
+      null` para que dar de baja la herramienta **no borre** el expediente. Encuadre temporal arriba del todo:
+      el Art. 26 no es exigible para el Anexo III hasta **2-dic-2027**, así que esto es preparación y no una
+      obligación vencida.
+      De paso, **corregido el copy del Art. 26.6** en `recommendations.ts` (ES y EN): decía *«salvo que otra
+      norma exija más»* y el texto legal dice *«salvo disposición en contrario»* — estrechaba la norma en una
+      sola dirección. Y **un sistema de la demo pasa a tener la revisión de hace más de un año**
+      (`SYS-003`, el peor preparado), porque si no la sección de revisión salía vacía en la demo.
+      **Corrección posterior (misma fecha), encontrada verificando contra el Supabase real:** guardar la
+      cadencia daba **42501 permission denied**. No era la RLS: la migración **0025** había restringido a
+      propósito el `UPDATE` de `organizations` a una lista blanca de columnas (`name, slug`) para que ningún
+      cliente pudiera escribirse su propia columna `plan` y ascenderse solo — y 0030 escribía por fuera de esa
+      lista. Arreglado con la migración **0031**: RPC `set_review_cadence` `security definer` con el guard de
+      owner/admin dentro, el mismo patrón que ya usaba `set_org_jurisdictions`. **El Postgres desechable no
+      podía cazarlo** (no reproduce los grants por defecto de Supabase, así que no puede concluir nada sobre
+      permisos); es la segunda vez que da un falso verde sobre permisos, después de 0026/0027 → 0028.
+      Queda como **`npm run verify:backend`** (`scripts/verify/backend.mjs`, fuera de CI porque necesita
+      credenciales reales): comprobaciones por API con dos usuarios `*@attesta-test.dev` en dos
+      organizaciones, centradas en el **aislamiento** —que B no alcance el expediente de A ni leyendo, ni por
+      id, ni escribiendo, ni por el audit-trail—. De paso destapó un test propio que **pasaba por el motivo
+      equivocado**: el rechazo de una cadencia inválida venía del 42501, no del CHECK.
+      **Ajustes de organización unificados (misma fecha).** La regla de "quién puede cambiar esto" vivía suelta
+      en cada pantalla; ahora está en `src/lib/dashboard/settings-access.ts` (pura, con tests y 4 mutaciones
+      detectadas) y la usan la cadencia de revisión y el nexo de jurisdicción. **Cambio de criterio visible:**
+      a quien no puede cambiarlo se le enseña **el valor**, no una pantalla vacía —vigilancia ocultaba el nexo
+      entero y el radar parecía incompleto sin explicación—. Es el mismo patrón que ya usaba el estado interno
+      de cada evento regulatorio. Ojo: esto es **presentación**, no autorización; quien manda son las funciones
+      `security definer` del servidor. Verificado forzando la rama de solo lectura sobre un build real, porque
+      en demo esa rama no se renderiza nunca.
+      **Deuda declarada del experto, antes de GA:** leer el **Art. 113 modificado** por el Reglamento (UE)
+      2026/1744 palabra por palabra para confirmar que el Art. 73 queda **fuera** del aplazamiento (hoy es
+      inferencia estructural, el mismo patrón ya abierto con el Art. 49); leer el **Art. 27.1 verbatim** para
+      confirmar el ámbito subjetivo de la evaluación de impacto; y comprobar si la guía de la Comisión sobre el
+      Art. 73 ya se adoptó (borrador de sep-2025, redactado solo para proveedores).
+- [x] **Registro de proveedores / terceros (Capa 8)** — ✅ **HECHO (2026-08-03)**. Sección
+      `/dashboard/proveedores` (plan Preparación) + migración **0032** (`suppliers` + `supplier_evidence`),
+      catálogo de evidencia puro con 25 tests y **9 mutaciones inyectadas, 9 detectadas**.
+      **El hallazgo del experto que cambió la feature entera:** el AI Act le da al responsable del despliegue
+      **muchísima menos capacidad de exigir de la que nuestro copy sugería**. El único documento que el
+      Reglamento le dirige son las **instrucciones de uso (Art. 13)** —que ya llevan dentro las métricas del
+      Art. 15, la supervisión humana del Art. 14 y los mecanismos de registro del Art. 12—. El Anexo IV, el
+      sistema de gestión de la calidad y el de gestión de riesgos van dirigidos a **autoridades y organismos
+      notificados**. Por eso cada elemento del catálogo lleva una **base jurídica** de la que sale el verbo de
+      la interfaz, y la pantalla agrupa por ese verbo: **exige** (4 elementos) · **verifica** en fuente pública
+      (4) · **pacta en contrato** (8) · **registra que existe** (2). Agrupar por el verbo *es* el mensaje.
+      **Palanca que no estábamos usando:** la base de datos del Art. 71 es **pública** e incluye copia de la
+      declaración de conformidad y las instrucciones electrónicas (Anexo VIII A.11 y A.12). Hay un canal de
+      verificación que no depende de la buena voluntad del proveedor, y ahora tiene estado propio.
+      **Lo que NO se modela, a propósito:** ninguna caducidad salvo el certificado de organismo notificado
+      (Art. 44) —ni el marcado CE, ni la declaración, ni las instrucciones, ni el registro en la BD de la UE
+      caducan, y los 10 años de los Arts. 18/23.5/47.1 son **conservación del proveedor**, no validez; el campo
+      de caducidad ni siquiera se ofrece donde no aplica, y el servidor lo descarta igual, así que hacen falta
+      dos errores para que salga un aviso falso—; ninguna puntuación ni «% de cumplimiento» de proveedor (sin
+      base normativa y copy prohibido: se cuentan elementos); y el desenlace del **Art. 25** es **texto fijo**
+      —«puede activar el Art. 25, requiere revisión jurídica»— y nunca un veredicto.
+      **Aviso que ahorra una discusión inútil:** para los puntos 2 a 8 del Anexo III (empleo, crédito,
+      educación, servicios públicos) la evaluación de conformidad es por control interno y **no interviene
+      ningún organismo notificado** (Art. 43.2). Si el proveedor no da número de certificado, casi nunca es que
+      lo esconda: es que no existe.
+      **Encuadre temporal:** los Arts. 23 y 24 (importador y distribuidor) también están aplazados a
+      **2-dic-2027**, así que hoy esto es **preparación contractual** — y ese es justo el argumento: hazlo
+      mientras renuevas contratos, que es cuando tienes palanca.
+      **Fuera de alcance, a Sprint 5:** las cuatro banderas del Art. 25 **persistidas por sistema** (aquí van
+      como bloque informativo, sin guardar) y el cruce sistema × proveedor × elemento (hoy la evidencia cuelga
+      del proveedor, con enlace opcional al sistema).
+- [x] **Streaming con Suspense en el dashboard** — ✅ **HECHO (2026-08-03)**. La portada hacía un solo
+      `Promise.all` de diez consultas y no pintaba **nada** hasta la última. Ahora solo se espera el camino
+      crítico —inventario, usuario y nombre de la organización— y de ahí salen ya la cabecera, tres de los
+      cuatro KPIs, el donut de riesgo y «requieren atención»; lo demás baja por `<Suspense>`.
+      **Medido, no supuesto:** inyectando una consulta lenta de 1,5 s, el shell pasa de **1742 ms a 321 ms**
+      (respuesta completa igual, ~1,74 s en ambos). La primera medición dio un falso «ya iba rápido antes»
+      porque el marcador que usé —el título de una sección— **también aparece en el diccionario serializado
+      del payload RSC**; hay que medir contra algo que solo exista en el HTML renderizado (se usó el `href` de
+      una tarjeta). Es la segunda vez que ese payload falsea una medición: conviene recordarlo.
+      Decisiones: el **inventario no se transmite** (decide si la página es un panel o una bienvenida, y eso no
+      se resuelve a medias) y baja por props a los bloques que lo necesitan, en vez de que cada uno lo vuelva a
+      pedir; `getGapItems` pasa a llevar `cache()` porque lo miran dos bloques y sin eso el streaming habría
+      duplicado la consulta —saldría más caro que lo que ahorra—; los esqueletos **reservan altura** salvo los
+      de avisos, que no se renderizan cuando no hay nada que avisar y dejarían un hueco permanente; y el `now`
+      baja por props para que dos `new Date()` no caigan a distinto lado de la medianoche y se contradigan en
+      la misma pantalla.
+- [x] **Consolidar el onboarding** — ✅ **HECHO (2026-08-03)**. El choque real era peor de lo que decía el
+      ticket: quien entraba por primera vez tenía **cero sistemas**, así que recibía la **bienvenida a pantalla
+      completa Y el modal del recorrido encima**. Dos bienvenidas simultáneas, una tapando a la otra, en el
+      momento en que menos se toleran. Regla nueva —**una a la vez**— en `src/lib/dashboard/onboarding.ts`
+      (pura, con tests y 3 mutaciones detectadas): con el inventario vacío manda la pantalla de bienvenida, que
+      ya dice lo mismo y además ofrece los caminos para empezar; el recorrido guiado espera a que haya algo por
+      lo que guiar, y ahí sí convive con el checklist, que no compite (uno explica, el otro sigue el avance).
+      `getAiSystems` pasa a llevar `cache()` para que gatear el modal no cueste una consulta extra por ruta.
+- [x] **~~`lang="es"` en bloques regulatorios~~ → 11 textos del pack de California sin traducir** —
+      ✅ **HECHO (2026-08-02)**. **La premisa del ticket había caducado**: se escribió cuando el output legal
+      solo existía en español, y desde entonces packs, clasificador, vigilancia, recomendaciones y audit-trail
+      se tradujeron. Comprobado sirviendo un build de producción en modo demo y barriendo el **texto renderizado**
+      (no el payload RSC, que engaña: lleva el `<title>` español del root layout) de 12 rutas del dashboard con
+      la cookie `NEXT_LOCALE=en`: todo salía en inglés **salvo el pack de California**. Poner `lang="es"` a ciegas
+      habría sido *peor* que no hacer nada — etiquetar como español un texto que ya es inglés estropea el lector
+      de pantalla en la dirección contraria.
+      Lo que sí había: **8 `conditional` + 2 `article` de `us-ca-admt` y 1 `article` de `us-ca-feha`** con el
+      español copiado tal cual en el espejo EN. Traducidos, y **guard nuevo en `packs.test.ts`** con dos reglas
+      —identidad literal ES/EN en `title`/`description`/`conditional`, y barrido de palabras funcionales
+      españolas en TODOS los campos EN (incluido `article`, donde la identidad es legítima)—. Validado con
+      3 mutaciones. Queda fuera, y es lo único que aún justificaría un `lang`: los **datos persistidos** del
+      cliente (brechas aplicadas desde un pack, notas, evidencia), cuyo idioma no consta en la BD; arreglarlo
+      de verdad es guardar el locale al escribir → **ticket propio, no un parche**.
+- [x] **i18n de los muros de pago restantes** (descubierto en el Sprint 1) — ✅ **HECHO (2026-08-02)**. Los 5 que
+      quedaban (`plan`, `packs`, `vigilancia`, `equipo`, `actividad`) ya leen del diccionario, replicando el
+      patrón de `gap`; `organizaciones` y `seguridad` ya estaban migrados. Con guard
+      (`src/lib/i18n/paywall.test.ts`): `tsc` solo cubre media regresión —deriva `Dictionary` de `es`, así que
+      falta una clave no compila, pero **pegar el español dentro de `en.ts` sí compila**—, de modo que el test
+      exige que las descripciones **difieran** entre lenguas y escanea los `layout.tsx` para que ningún muro
+      nuevo vuelva a llevar el copy a mano. 3 mutaciones, 3 detectadas.
+- [x] **`viewport`/`themeColor` + manifest mínimo + `noindex` en rutas de auth** — ✅ **HECHO (2026-08-02)**.
+      Lo no obvio fue el `noindex`: al ponerlo hubo que **sacar esas rutas de `Disallow` en robots.txt**, porque
+      `Disallow` prohíbe *rastrear* y no *indexar*, así que bloquearlas impedía que el buscador viera el propio
+      `noindex` (las dos directivas se estorbaban). Siguen bloqueados `/auth` y `/api`, que son route handlers
+      sin HTML donde colgar un meta. Verificado sobre el build servido en local.
+- [x] **Sección "cómo verificamos el contenido legal"** — ✅ **HECHO (2026-08-03)**. Sección nueva en la
+      landing (entre la de evidencia y la de honestidad), ES y EN. Cuatro pasos del proceso —fuente primaria
+      antes que código, segunda pasada adversarial, ensamblado determinista sin modelo, guardas automáticas que
+      se validan rompiéndolas a propósito—, un bloque de **lo que NO hacemos** (en esta categoría enumerar los
+      límites convence más que enumerar capacidades: lo segundo lo promete cualquiera) y **un ejemplo real**:
+      el régimen de IA de Colorado derogado, con media docena de obligaciones que dábamos por buenas y que
+      describían una norma que ya no existía. Se eligió ese ejemplo porque es verificable y porque enseña lo
+      que ninguna comprobación automática puede cazar: no es un fallo de código, es contenido.
+      **Decisión que te dejo a ti:** hay una versión más fuerte de esta sección, con ejemplos explícitos de
+      *«esto lo dijimos mal y lo corregimos»* (el «exige el Anexo IV» de anoche sería el mejor). Es más
+      creíble y encaja con la marca, pero publicar «nos equivocamos» en la portada es una decisión de
+      posicionamiento tuya, no mía, así que la sección va con el encuadre neutro («la ley cambia y lo
+      detectamos»). Cambiarlo es reescribir un párrafo.
 
-### 0.E · SPRINT 5 — deuda técnica y robustez restante
-- [ ] **Aislar la landing del `headers()` del root layout** — leer headers saca a TODA la app del render
-      estático/CDN, empezando por la página de mayor coste de conversión (route-group propio o locale por ruta).
-      `alto · L`
-- [ ] **Validación con Zod en Server Actions** — hoy es artesanal (enums sin whitelist, sin límites de longitud).
-      `medio · M`
-- [ ] **Rate-limit distribuido (Upstash / Vercel KV)** — el `Map` en memoria no protege en serverless
-      multi-instancia; crítico si se extiende a login/reset/checkout. `medio · M`
-- [ ] **Fail-fast del dominio en build (`NEXT_PUBLIC_APP_URL`)** — sin la var, canonical/hreflang/sitemap apuntan
-      al placeholder de Vercel y rompen la indexación **en silencio**. `medio · S`
-- [ ] **Revisar `force-dynamic` de más y consolidar N queries en RPC** — abre caché con invalidación por tag.
-      `bajo-medio · M/L`
-- [ ] **Adelgazar fuentes (Fraunces / Geist_Mono)** — KB en el critical path del LCP. `bajo · S`
+- [x] **Corrección de honestidad: el Anexo IV no es exigible** — ✅ **HECHO (2026-08-03)**, salida de la
+      investigación del registro de proveedores. Decíamos *«exige al proveedor la documentación técnica del
+      Anexo IV»* en recomendaciones, en dos packs, en el clasificador y en una tarea de la demo. **El
+      Reglamento dirige esa documentación a autoridades y organismos notificados, no al responsable del
+      despliegue.** Las citas eran correctas; lo que estaba mal era el **verbo**: le prometíamos al cliente una
+      palanca que descubre que no tiene en su primera negociación con un proveedor grande. Reescrito partiendo
+      por lo que se puede hacer de verdad con cada cosa: **exige** las instrucciones de uso (Art. 13, el único
+      documento que la norma le dirige, y que ya lleva dentro las métricas del Art. 15, la supervisión humana
+      del Art. 14 y los mecanismos de registro del Art. 12) · **verifica** lo público (marcado CE del Art. 48 y
+      la ficha en la base de datos de la UE de los Arts. 49 y 71, que incluye copia de la declaración de
+      conformidad) · **pacta en contrato** lo demás (Anexo IV, Arts. 9, 10, 17 y el acceso a los logs si el
+      sistema lo opera el proveedor). Corregida también la capa GPAI: el destinatario del **Art. 53.1.b es el
+      proveedor del SISTEMA que integra el modelo**, no el deployer — así que se bifurca según si el cliente
+      integra el modelo él mismo o usa un producto de terceros.
 
-### 0.F · SPRINT 6 — los 8 huecos que el propio panel se dejó fuera (crítico de completitud)
+### 0.E · SPRINT 5 — deuda técnica y robustez restante — ✅ COMPLETADO (7/7, 2026-08-04)
+- [x] **Guardar el idioma de lo que se escribe (`locale`)** — ✅ **HECHO (2026-08-04)**. Migración **0033**
+      (pendiente de pegar, §1.1-undecies) sobre `gap_items`, `risk_assessments` **y `action_tasks`: el mismo
+      defecto estaba en las tareas nacidas de una recomendación**, y dejarlo fuera habría obligado a una
+      segunda migración. Se escribe en `applyPolicyPack`, `saveRiskAssessment` y `createActionTask` — los tres
+      únicos momentos en que el idioma se sabe con certeza; después, la fila ya no lo dice.
+      **La decisión que sostiene todo lo demás: `null` significa «no consta» y NO se rellena hacia atrás.**
+      El default es español, pero rellenar a ciegas marcaría como españolas las filas de una organización que
+      trabajase en inglés, y un `lang` equivocado es **peor que ninguno** (el lector de pantalla cambia de voz
+      y pronuncia con la fonética que no es). Por eso `coerceStoredLocale` NO reutiliza `coerceLocale`: aquel
+      cae al default porque hay que renderizar algo; aquí caer al default sería inventarse un dato. Hay un test
+      que fija esa diferencia y una mutación que lo comprueba.
+      Lo guardado **no se traduce al vuelo** —sería reescribir evidencia—: se muestra literal, se etiqueta con
+      `lang` solo cuando el idioma consta Y difiere (WCAG 3.1.2), y un aviso por pantalla explica la mezcla para
+      que no parezca un fallo. 10 tests nuevos, 5 mutaciones inyectadas y las 5 fallaron.
+      Verificado en el HTML **renderizado** (no en el payload RSC, que contiene el diccionario y da falsos
+      positivos): interfaz EN + contenido ES → 10 nodos `lang="es"` y el aviso; interfaz ES → solo el `<html
+      lang="es">` del layout y ningún aviso. `verify:backend` pasa a 28/28 y se adapta solo a si la 0033 está
+      aplicada o no.
+- [x] **Aislar la landing del `headers()` del root layout** — ❌ **NO SE HACE. Decisión del fundador
+      (2026-08-04): seguridad antes que velocidad.** El ítem daba por hecho que era solo rendimiento y no lo era.
+      Un nonce es distinto en cada petición, así que **exige render dinámico**: la landing estática y la CSP con
+      nonce en la landing son excluyentes, y la CSP estricta (§0.4) es justo lo que está en cola por activar.
+      La alternativa que documenta Next —CSP por hashes con `experimental.sri`— es un flag **experimental** y
+      además del compilador antiguo, mientras el proyecto compila con **Turbopack**: lo más probable es que no
+      haga nada. En un producto de compliance, aflojar la CSP de la página pública para ganar milisegundos es
+      mal negocio de cara a una due-diligence.
+      **Y el premio era pequeño:** medido, renderizar la landing cuesta ~13 ms. Lo que de verdad pesa en esa
+      página son sus **247 KB de HTML** (el payload RSC va inline), que es una palanca distinta y sin este
+      conflicto — anotada abajo como ítem nuevo.
+      Lo que sí salió de este ticket: el fallo de `lang` en `/` y la corrección del diagnóstico de §0.4, los dos
+      ya arreglados y documentados.
+- [ ] **Adelgazar el HTML de la landing (247 KB)** — sale del ítem anterior. El payload RSC viaja inline en el
+      HTML, así que es coste en el critical path de la página de mayor valor de conversión. A investigar: cuánto
+      de eso es el diccionario i18n serializado (que ya nos ha dado dos falsos positivos al medir) y cuánto son
+      componentes cliente que podrían no serlo. `medio · M`
+- [x] **Validación de entrada en las Server Actions** — ✅ **HECHO (2026-08-04). Sin Zod, y el ticket estaba
+      medio equivocado.** Auditado sobre el código: los **enums SÍ tenían whitelist** en todas las acciones (eso
+      se arregló en el blindaje del Sprint 2). Lo que era cierto del todo es lo otro: **ningún campo de texto
+      tenía tope**. Un miembro autenticado —o una cuenta comprometida— podía escribir megabytes en la nota de un
+      proveedor o el título de una tarea: Postgres los acepta encantado, la factura sube y la pantalla que los
+      pinta revienta. Y había un defecto estructural detrás: los ayudantes (`uuid`, `date`, `text`, `on`) estaban
+      **copiados en cuatro ficheros**, así que arreglar uno no arreglaba los demás.
+      **Por qué no Zod:** hacía falta *un solo sitio con topes*, no un lenguaje de validación. Las acciones no
+      devuelven errores por campo (redirigen con un toast), así que los mensajes ricos de un validador aquí
+      valen cero, y el proyecto tiene seis dependencias directas a propósito. Si algún día hay que devolver
+      errores por campo al formulario, ese es el momento de reconsiderarlo — queda escrito en el módulo.
+      **`src/lib/data/form.ts`** con una regla de diseño explícita: **truncar el texto libre, rechazar lo que
+      tiene estructura.** Un texto largo casi siempre es alguien pegando de un documento y abortar sería
+      castigarle por un fallo nuestro de UI; en cambio un uuid, una fecha o una URL mal formados no tienen nada
+      que salvar. **Media URL no es una URL corta, es una URL a otro sitio**, así que esas se rechazan por
+      longitud en vez de recortarse.
+      **Tres agujeros reales cerrados de paso:** (1) `bias_audit_summary_url` y `evidenceUrl` aceptaban
+      cualquier esquema y acaban en un `href` del dossier — un `javascript:` ahí es un XSS almacenado firmado
+      por la propia organización; ahora solo http/https. (2) Fechas como `2026-02-31` pasaban la expresión
+      regular y llegaban a Postgres (`new Date` no falla: desborda a marzo); ahora se comprueban contra el
+      calendario. (3) Los `id` que se interpolan en rutas de redirección (`/inventario/${id}/editar`) se validan
+      como uuid: sin eso, un `../..` movía el destino.
+      **9 ficheros de acciones** pasan ya por el módulo, cero helpers duplicados. 19 tests, **7 mutaciones
+      inyectadas y las 7 fallaron**. Y un **guard sobre el código fuente** (`form.guard.test.ts`, se autoprueba)
+      que falla si una acción nueva vuelve a leer texto sin tope — verificado reintroduciendo la regresión a
+      mano: la caza y dice en qué fichero y en qué línea. `medio · M`
+- [x] **Rate-limit compartido entre instancias** — ✅ **HECHO (2026-08-04). Sobre Postgres, no sobre Upstash.**
+      Migración **0034** (pendiente de pegar, §1.1-duodecies). El diagnóstico del ticket era exacto: el `Map`
+      vive en la memoria de cada instancia, así que frenaba una ráfaga contra una misma instancia caliente pero
+      no a quien repartía sus intentos, porque Vercel le va dando instancias distintas. Con N instancias el
+      límite real era N veces el configurado y nadie sabía cuánto valía N.
+      **Por qué NO Upstash / Vercel KV:** un contador compartido no necesita un proveedor nuevo. Ya tienes un
+      estado compartido en la UE con su DPA firmado y sus copias de seguridad — esta misma base de datos. Redis
+      sería coste recurrente, **un subprocesador más que declarar** en la lista que Attesta todavía debe
+      publicar (§0.F), y otro sitio donde mirar cuando algo falle. Para tres superficies de baja frecuencia no
+      sale a cuenta. Si algún día hay que limitar login o checkout con miles de peticiones por minuto, se cambia
+      **solo el almacén**: la interfaz ya no dice dónde vive el contador.
+      **Dos capas:** memoria primero, y **solo puede denegar** (rechaza al abusador repetido sin gastar una
+      consulta); la compartida manda cuando la memoria deja pasar, porque es la única que ve las demás
+      instancias.
+      **A la base de datos NO va ninguna IP:** la clave viaja hasheada. Un limitador necesita distinguir
+      emisores, no registrarlos, y una tabla de direcciones IP en la UE es un dato personal más que custodiar
+      sin necesidad.
+      **Verificado donde importa:** ventana fija con `insert … on conflict`, que es **atómico** — 30 conexiones
+      simultáneas contra la misma clave con límite 10 dieron **exactamente 10 permitidas y 20 denegadas**. Eso
+      es justo lo que el limitador en memoria no podía garantizar. Más 8 tests y 5 mutaciones inyectadas (una se
+      escapó al principio porque el test no discriminaba; se rehízo hasta que discriminó).
+      **La telemetría se queda en memoria a propósito:** la llama un `sendBeacon` en cada vista de página, así
+      que una consulta compartida sería una ida y vuelta por navegación para proteger unas métricas internas
+      cuyo peor caso es ensuciar un embudo que solo mira el equipo. `medio · M`
+- [x] **Fail-fast del dominio en build (`NEXT_PUBLIC_APP_URL`)** — ✅ **HECHO (2026-08-04)**.
+      🔴 **Requiere una acción tuya antes de que esto llegue a `main` → §1.4.**
+      El problema no era que faltara una comprobación: era que había un **default plausible**. Los tres sitios
+      que necesitan la URL absoluta repetían `?? "https://attesta-io.vercel.app"`, así que el día que cambie
+      el dominio y se olvide la variable, la app **no se rompe** — sigue sirviendo canonical, hreflang, sitemap
+      y enlaces de correo apuntando al host viejo, que un buscador lee como «la buena está en otro sitio».
+      Ahora hay un único `src/lib/site-url.ts`: la variable manda, en un despliegue sin ella **no hay build**,
+      y fuera de un despliegue (tu portátil, CI) se usa `localhost` sin quejarse. Un valor mal escrito falla
+      siempre —barra final, ruta dentro, esquema raro—; se **rechaza** en vez de recortarlo, porque adivinar
+      la intención produce canonicals a medias que nadie mira hasta que cae el tráfico.
+      11 tests, 5 mutaciones inyectadas y las 5 fallaron (la que más importa: volver a poner un default).
+      Verificados los cuatro escenarios de build de verdad: despliegue sin variable → falla con el mensaje que
+      dice qué poner; con variable → compila y canonical/hreflang/sitemap/robots salen con ese dominio; typo
+      con ruta → falla; build local/CI → compila con `localhost`. `medio · S`
+- [x] **Revisar `force-dynamic` y consolidar consultas** — ✅ **HECHO (2026-08-04)**. Las dos mitades del
+      ticket acabaron en sitios distintos, una en código y otra en una decisión razonada.
+      **Lo que se arregló, y no era N+1:** la fachada ya agrupaba bien (cero consultas dentro de bucles; el
+      export usa `.in()` por lotes). El coste estaba en otro sitio y era **más caro**: cada getter que
+      necesitaba el id del usuario preguntaba a **Supabase Auth por red**, y en el layout eso pasaba **tres
+      veces** —`getCurrentUser`, `getUserOrgs` y `getCurrentRole`— antes de pedir un solo dato. Medida aislada
+      contra el Supabase real: esa ida y vuelta cuesta **~90 ms, tanto como una consulta de datos entera**.
+      Ahora se verifica el **JWT en local**, que es exactamente lo que ya hacía el middleware desde el Sprint 2,
+      y `cache()` lo deduplica: **de 3 idas y vueltas de autenticación a 0** en el camino de lectura.
+      **Medido, 21 muestras por ruta, con las distribuciones sin solaparse:** portada **505 → 402 ms (−20 %)**,
+      equipo **597 → 498 ms (−17 %)**. Verificado antes que nada que sigue funcionando: sesión real por curl,
+      `/dashboard` responde 200 y salen el correo, el nombre del perfil y el nombre de la organización.
+      **Sobre la seguridad, sin adornos:** `getUser()` detecta una sesión revocada y la verificación local no,
+      hasta que el token expira. Pero eso no protegía los datos — PostgREST valida el mismo JWT igual de local,
+      así que la RLS los serviría por API de todas formas. Cambiaba cuándo se redirige una pantalla, no a qué
+      se puede acceder.
+      **Lo que NO se hace, y por qué:** quitar los `force-dynamic` sería un no-op —el layout raíz lee `headers()`
+      y eso ya hace dinámica toda la app, decisión que tomaste tú al elegir seguridad en la landing— y abrir
+      caché de ruta con invalidación por tag significaría **cachear HTML por inquilino**: un error en la clave
+      de caché enseña el expediente de una organización a otra. En un producto multi-tenant de compliance esa
+      apuesta no compensa por unos milisegundos. `bajo-medio · M/L`
+- [x] **Adelgazar fuentes (Fraunces / Geist_Mono)** — ✅ **HECHO (2026-08-04)**. El peso no estaba donde
+      decía el ticket: las tres familias se usan de verdad en la landing (titulares, texto y las tres etiquetas
+      en mono), así que no sobraba ninguna. Lo que sobraba era un **eje**: Fraunces se cargaba con `SOFT`
+      declarado y **ni una regla de CSS lo usaba** en todo el repositorio, o sea que el navegador se bajaba un
+      eje entero para renderizarlo siempre en su valor por defecto. Quitarlo **no cambia un píxel** y baja el
+      fichero de **117,9 KB a 65,8 KB**: el critical path de fuentes de la landing pasa de **169,1 KB a
+      117,0 KB (−31 %)**, medido sobre los ficheros que la página referencia de verdad.
+      Comprobado de paso que `font-display: swap` ya estaba activo (es el defecto de `next/font`), así que no
+      hay texto invisible mientras cargan.
+      **Tercera opción medida y NO tomada, por si algún día se quiere:** renunciar también a `opsz` y fijar los
+      pesos deja el conjunto en **86,9 KB** (30 KB menos todavía). No se hace porque `opsz` es lo que hace que
+      un titular grande y un texto pequeño de la misma serif no se vean como la misma letra estirada — eso ya
+      no es optimizar, es cambiar el diseño, y es decisión tuya. `bajo · S`
+
+### 0.F · SPRINT 6 — los 8 huecos que el propio panel se dejó fuera ✅ COMPLETADO (2026-08-04)
+> **8/8.** Migraciones nuevas: **0035** (baja de organización), **0036** (facturación), **0037** (solicitudes
+> de demo) — las tres pendientes de aplicar (§1.5, §1.6, §1.8). Documentos nuevos: 4 legales × 2 idiomas,
+> centro de ayuda y `docs/runbook.md`. Verificación: **657 tests**, lint + tsc + check:copy + build en verde.
+> **Siguiente sprint → 0.G, que requiere checkpoint del fundador antes de arrancar.**
 > Confirmados contra el repo: **no hay** analítica, ni páginas legales/privacidad, ni Sentry, ni rutas de ayuda.
 - [x] **Telemetría de producto / funnel de activación** — ✅ **HECHO (2026-07-30, adelantado antes del Sprint 2)**.
       De **primera parte** (sin PostHog/Plausible/GA): migración `0026_telemetry.sql` (`product_events` + RPC
       `product_funnel`), catálogo cerrado de 13 eventos (`src/lib/telemetry/events.ts`), API `/api/telemetry`
       (whitelist de eventos de cliente + rate-limit + cuerpo acotado), y panel `/dashboard/telemetria` solo para
       `platform_admins`. Sin IP, sin user-agent, sin PII, y se respetan GPC/DNT. 0026 **aplicada** ✅ (2026-07-30): ya mide.
-- [ ] **Cumplimiento propio de Attesta** — no existe página de **privacidad**, **DPA**, lista de
-      **subprocesadores** (Supabase UE, Stripe, proveedor de email) ni aviso de cookies. Vender gobernanza de IA
-      a mid-market UE sin tu propio DPA **bloquea la compra** en due-diligence y es incoherente con la marca.
-      `alto · M`
-- [ ] **Ciclo de vida de facturación** (no solo el checkout) — pago fallido, reintentos, degradación de plan,
-      cancelación, **idempotencia del webhook** y reconciliación Stripe↔DB. Es donde se pierde MRR en silencio.
-      `alto · M`
-- [ ] **Borrado / exportación de datos por tenant (GDPR + offboarding)** — no hay derecho de supresión ni
-      portabilidad ni borrado de una org al darse de baja. Obligación legal directa **y** requisito que nuestros
-      propios packs exigen a los clientes. `alto · M`
-- [ ] **Soporte y documentación de usuario** — cero rutas help/docs y ningún canal de contacto in-app; el
-      onboarding cubre el primer minuto, no la retención. `medio · M`
-- [ ] **Backup / DR y runbook de incidentes** — sin política de backups verificados, RPO/RTO ni plan de
-      restauración probado, el audit-log inmutable y la hash-chain son inútiles. `medio · M`
-- [ ] **Motion GTM enterprise + captura de leads** — la landing solo tiene waitlist; el ACV de 30-50k $ no es
-      self-serve (falta "reservar demo", captura cualificada, handoff a venta asistida). `medio · S-M`
-- [ ] **Deliverability de email transaccional (SPF/DKIM/DMARC)** — recordatorios, invitaciones y reset dependen
-      del correo; sin dominio autenticado caen en spam y rompen invitaciones/verificación en silencio. Ligado al
-      SMTP pendiente del fundador (§1.3). `medio · S`
+- [x] ✅ **Cumplimiento propio de Attesta** (2026-08-04) — **4 documentos × 2 idiomas** en `/legal/[slug]` y
+      `/en/legal/[slug]` (slug distinto por idioma: `privacidad`↔`privacy`), enlazados desde el pie y con
+      canonical + hreflang recíproco: **aviso de privacidad**, **cookies**, **subprocesadores** y **DPA**
+      (art. 28 punto por punto, letras a–h). El texto vive en `src/lib/legal/` —no en el diccionario i18n—
+      por la frontera legal del proyecto, y es bilingüe en la misma estructura para que no puedan divergir.
+      **Lo que hace que esto no sea una plantilla:**
+      · **La lista de subprocesadores es código, no un documento** (`src/lib/legal/subprocessors.ts`), y de ella
+        salen a la vez la página y un **guard** que escanea el repo en busca de destinos de salida (`fetch(...)`
+        + allowlist de la CSP) y **falla si el producto habla con un host no declarado**. Verificado con 3
+        mutaciones: un `fetch` a PostHog, un host nuevo en la CSP y reclasificar un proveedor de IA — las 3
+        cayeron, y la primera además dice en qué fichero. Distingue *enviar datos* de *citar una URL*, así que
+        los ~40 enlaces a eur-lex/ilga.gov del contenido regulatorio no dan falsos positivos.
+      · **Separa subencargados de datos de cliente (Supabase, Vercel, Stripe, Resend) de los que solo ven el
+        corpus normativo público** (Voyage, NVIDIA NIM). Un test vigila que esa clasificación no se afloje: el
+        día que alguien mande el inventario de un cliente a un modelo, tiene que romper algo.
+      · **La identidad del responsable NO se inventa** (`src/lib/legal/entity.ts`), siguiendo el precedente de
+        `site-url.ts`. Sin los 4 datos del art. 13.1.a: aviso de borrador visible **arriba del todo**, `noindex`
+        y fuera del sitemap. Con ellos: página real e indexable, **sin tocar código**. Verificado arrancando el
+        servidor en los dos estados.
+      · De paso se cazó que **el sitemap se prerenderizaba en el build** y las páginas no: rellenar los datos en
+        Vercel habría dejado las páginas indexables y el sitemap sin listarlas hasta el siguiente despliegue.
+        Corregido con `force-dynamic` y comprobado en ambos estados.
+      · **El botón de rechazo de la medición existe y funciona** (`MeasurementOptOut`), no es solo texto: es lo
+        que sostiene la posición de "analítica de primera parte exenta de banner". Con `useSyncExternalStore`,
+        que además sincroniza pestañas.
+      · Corregido un fallo de accesibilidad heredado: `/legal/...` resolvía el `lang` por cookie, así que con la
+        cookie en inglés servía español etiquetado `lang="en"` — el mismo bug que se arregló en `/` en el
+        Sprint 5, ahora generalizado en el middleware.
+      **Pendiente del fundador** (§1.4): los 4 datos de la sociedad + decidir si hace falta representante en la
+      UE (art. 27) + revisión de abogado antes de publicar. `alto · M`
+- [x] ✅ **Ciclo de vida de facturación** (2026-08-04) — migración **0036** + webhook reescrito +
+      `/api/stripe/reconcile` (cron diario). Tres agujeros reales, los tres de la familia "no falla en pruebas,
+      falla en producción y no deja traza":
+      · **Stripe REINTENTA los webhooks.** El `upsert` de la suscripción aguantaba de casualidad, pero el evento
+        `checkout_completed` no: cada reintento contaba un pago más. El embudo —lo único que mide si el producto
+        funciona— se falseaba solo, **y hacia arriba**, la dirección en la que nadie sospecha. Ahora cada evento
+        se reclama por su id (`stripe_events`) antes de procesarse.
+      · **Stripe NO garantiza el orden.** Un `subscription.updated` viejo que llegaba tarde pisaba el estado
+        bueno: una suscripción activa podía quedar `past_due` porque el evento de hace dos minutos llegó el
+        último. Ahora manda `event.created`, y la comparación va **dentro del `on conflict`** de la RPC, en una
+        sola sentencia, porque dos entregas simultáneas es exactamente lo que ocurre al reintentar. Verificado en
+        el Postgres desechable: el evento tardío devuelve `false` y el estado no se mueve.
+      · **Un fallo nuestro se tragaba el evento.** El `catch` respondía **200**, y un 200 significa "no lo
+        reintentes". Si la base de datos parpadeaba, el pago no se registraba **nunca**: el cliente pagaba y se
+        quedaba en el plan gratuito, sin error en ningún sitio. Ahora suelta la reclamación y devuelve 500.
+      Añadido `invoice.payment_failed` (Stripe ya avisa al cliente; lo que faltaba era enterarnos nosotros) y la
+      **reconciliación** diaria contra Stripe, que es la red que recoge lo que el webhook no llegue a ver — el
+      caso de "endpoint mal configurado" no lo arregla ningún reintento. No borra nada: repara lo desactualizado
+      y **reporta** lo huérfano. **Pendiente del fundador** (§1.6): aplicar la 0036 y conectar Stripe. `alto · M`
+- [x] ✅ **Borrado / exportación de datos por tenant** (2026-08-04) — migración **0035** + zona de baja en
+      `/dashboard/organizaciones` + cron diario `/api/org-purge`. Se adelantó sobre facturación porque el DPA y el
+      aviso de privacidad que se publicaron esta misma sesión **prometen** supresión y portabilidad: una promesa
+      legal sin producto detrás no puede quedarse abierta.
+      **El fallo que se encontró comprobándolo, no razonándolo:** la hipótesis era que el trigger de inmutabilidad
+      impediría borrar una organización. Era falsa, y la realidad era peor — `audit_log` **no tiene clave ajena** a
+      `organizations`, así que el borrado funcionaba y dejaba las filas de auditoría **huérfanas**, con sus
+      `old_data`/`new_data`. La supresión parecía completa y no lo era.
+      **Diseño:** solicitud → **7 días de gracia** → purga por cron. No es borrado inmediato porque una sola sesión
+      de propietario comprometida no puede destruir el expediente entero sin vuelta atrás, y porque 7 días dejan
+      margen de sobra dentro de los 30 que promete el DPA. `purge_organization` está **revocada para
+      `authenticated`**: si el propietario pudiera purgar en el acto, la gracia sería decorativa.
+      **Segundo hallazgo, del mismo tipo:** el orden de borrado correcto es el contrario del intuitivo. Borrar la
+      auditoría y luego la organización la deja **repoblada**, porque la cascada dispara los `write_audit`. La
+      primera prueba informó de 2 filas borradas y la organización volvió a tener 2. Ahora: organización primero,
+      auditoría después.
+      **Tercer hallazgo, de permisos:** `revoke ... from public` **no basta en Supabase**. Además del EXECUTE de
+      PUBLIC, Supabase tiene `alter default privileges ... grant all on routines to anon, authenticated`, así que
+      cada función nueva nace con un grant **directo** a esos roles que sobrevive al revoke. Comprobado en el
+      Postgres desechable: `has_function_privilege('authenticated', ...)` seguía dando `t`. Corregido nombrándolos.
+      *(0028 está bien: `product_funnel` **necesita** `authenticated` porque un admin de plataforma es un usuario
+      autenticado, y el guard va dentro.)*
+      **Exportación:** ya existía, pero incompleta. Le faltaban **proveedores, incidentes y fichas de intake**, y el
+      registro de auditoría se cortaba en 500 filas **en silencio**. Ahora van los tres módulos y, si se alcanza el
+      tope, el propio paquete lo dice (`truncated`). Verificado sobre el JSON servido.
+      **Pendiente del fundador** (§1.5): aplicar la 0035. `alto · M`
+- [ ] **`supabase/setup.sql` no es re-ejecutable** — muere en `create type risk_level` sobre una BD que ya lo
+      tenga, y no ejecuta nada de lo que sigue. Contradice el flujo documentado ("el fundador re-pega el
+      fichero"). No son solo los tipos: también hay `create table` y `create policy` sin guardas. Arreglarlo es
+      envolver los `create type` en un bloque que capture `duplicate_object`, poner `if not exists` en las tablas
+      de 0001 y `drop policy if exists` delante de cada policy. Se intentó en la sesión del Sprint 6 y se revirtió
+      al ver que un arreglo parcial no entrega la propiedad. `medio · S-M`
+- [x] ✅ **Soporte y documentación de usuario** (2026-08-04) — `/dashboard/ayuda`, ES y EN, enlazada desde el
+      menú de cuenta (por delante de facturación: quien abre ese menú con una duda la tiene ahora). 12 preguntas
+      en 4 bloques, **organizadas por pregunta real y no por menú** — una ayuda ordenada como el menú solo la
+      encuentra quien ya sabe dónde mirar. Todo abierto, sin acordeones, para que funcione Ctrl+F. El contacto va
+      **arriba**, no al pie: quien no encuentra su respuesta abandona antes de llegar al final.
+      **La sección que la hace útil es "Lo que Attesta NO hace"** (no certifica / no sustituye a un abogado / no
+      escanea tu red): es la que más consultas de soporte ahorra y la que sostiene la regla nº 1. Un test vigila
+      que exista y que la respuesta sobre certificación siga empezando por un "no" explícito en ambos idiomas.
+      De paso, **el guard de copy prohibido cazó mi propio texto** al escribirla — exactamente para lo que existe.
+      `medio · M`
+- [x] ✅ **Backup / DR y runbook de incidentes** (2026-08-04) — **[docs/runbook.md](./docs/runbook.md)**:
+      qué hacer si la cadena de auditoría sale rota, si un cliente pagó y sigue en el plan gratuito, si una baja
+      se solicitó por error, y cómo leer los registros de degradación. Incluye el **ensayo de restauración**
+      paso a paso (proyecto nuevo, restaurar, comprobar recuento + `verify_all_audit_chains` + login, cronometrar)
+      y la tabla de crons con **qué significa que cada uno no corra** — los dos diarios no avisan de nada, *hacen*
+      algo prometido por contrato. Lo que NO puedo hacer yo y sigue abierto: fijar RPO/RTO y **probar una
+      restauración de verdad** (§1.7). Una copia que nunca se ha restaurado no es una copia, es una suposición.
+      `medio · M`
+- [x] ✅ **Motion GTM enterprise + captura de leads** (2026-08-04) — migración **0037** (`demo_requests`) +
+      sección `#demo` en la landing (ES y EN) + evento `demo_requested`. El plan **Enterprise ya no manda a la
+      lista de espera**: apunta a la demo. Era el fallo de fondo — el único plan que no es self-serve tenía como
+      siguiente paso "déjame tu correo y ya te avisaremos", que pierde justo la conversación que justifica un
+      contrato de ese tamaño.
+      **Decisiones:** solo dos campos obligatorios (correo y organización); el resto opcional, porque cada campo
+      de más cuesta solicitudes y **una solicitud perdida vale más que un dato de cualificación** — lo que falte
+      se pregunta en la llamada. Se piden tamaño y papel porque son lo que ordena la bandeja y lo que cambia cómo
+      se prepara la conversación. **El correo al fundador se envía ANTES de escribir en la base de datos**, y ese
+      orden es deliberado: si la migración no está o Supabase parpadea, el lead llega igual. Es el único sitio del
+      repo donde el correo es el sistema de registro y la base de datos el respaldo.
+      `demo_requested` es un evento **distinto** de `waitlist_submit`: la lista de espera es "avísame cuando esté"
+      y esto es "quiero hablar"; mezclarlos escondería la única señal que dice si la venta asistida funciona.
+      Mismo modelo de seguridad que la waitlist: `anon` inserta y **no puede leer** — verificado en el Postgres
+      desechable (inserta, y el SELECT devuelve 0). `medio · S-M`
+- [x] ✅ **Deliverability de email transaccional** (2026-08-04) — los registros DNS son tuyos (§1.7), pero la
+      parte de ingeniería sí estaba y faltaba: hoy, sin `RESEND_FROM`, los correos salen desde el dominio
+      compartido de pruebas de Resend **sin que nada lo diga** — la API responde 200 y los registros ponen
+      "enviado". Lo que se pierde en esa carpeta de spam no es un boletín: son invitaciones al equipo,
+      restablecimientos de contraseña y recordatorios de vencimiento. Ahora `src/lib/reminders/sender.ts` lo
+      clasifica (apagado / dominio prestado / propio), se registra al enviar y **sale un aviso en el panel interno
+      de telemetría**, que es una pantalla que sí se abre. Con 12 tests y 2 mutaciones cazadas. Nota de diseño: el
+      estado "apagado" **no** avisa — en desarrollo es lo normal, y un aviso que salta siempre se aprende a
+      ignorar. `medio · S`
 
 ### 0.G · APUESTAS GRANDES — requieren CHECKPOINT del fundador antes de arrancar
 - [ ] **⚠️ Test de sesgo EJECUTABLE (Fairlearn / Evidently)** — hoy solo se *registra* evidencia declarada; el
       cálculo (regla 4/5, paridad) lo hace un consultor a ~500 $/h. Integrarlo convierte a Attesta de "carpeta de
       evidencia" en herramienta que **produce** evidencia: la capa pegajosa de la cuña RRHH (NYC LL144 / FEHA).
       Riesgo: complejidad de integración y de encuadre ("tu organización declara", nunca "certificamos"). `alto · L`
-- [ ] **⚠️ Vault de evidencia + paquete de auditoría firmado** — hoy cada control es un "done" autodeclarado
-      **sin archivo adjunto**; sin el documento real el "% listo" no aguanta una auditoría. Incluye ZIP con
-      manifiesto **SHA-256** verificable (la hash-chain del audit-trail ya existe). **El mayor salto de
-      defensibilidad del producto.** `alto · L`
+- [x] ✅ **Vault de evidencia + paquete de auditoría firmado** (2026-08-04) — migración **0038** + sección
+      `/dashboard/evidencia` + `/api/vault/package` + `/api/vault/key` + `npm run vault:keygen`.
+      **La decisión que define el diseño: el adversario no es Attesta, es la organización auditada.** A un
+      auditor no le preocupa que nosotros mintamos; le preocupa que la empresa que audita fabrique o retoque
+      evidencia. Por eso el paquete lo firma **Attesta** con su clave (Ed25519): el cliente no puede producir
+      uno válido desde su portátil. Un manifiesto con hashes pero sin firma no resuelve nada contra ese
+      adversario — quien altera un archivo altera también su hash.
+      **Qué afirma la firma, redactado con cuidado porque roza la regla nº 1:** «estos archivos, con estos
+      hashes, estaban en la cuenta de esta organización en esta fecha». Es CUSTODIA E INTEGRIDAD, nunca
+      suficiencia ni conformidad. Y esa frontera va escrita **dentro del manifiesto** (`attests` /
+      `doesNotAttest`, en ES y EN) y en el README del ZIP, no solo en la pantalla: si alguien reenvía el JSON
+      suelto, el matiz viaja con él.
+      **El hash se calcula en el SERVIDOR** sobre los bytes que se guardan. Un hash aportado por el navegador
+      no probaría nada: quien quisiera falsear evidencia mandaría el hash del documento bueno con el contenido
+      malo. Y al empaquetar **se vuelve a hashear**, así que si un archivo cambió por debajo, no entra en el
+      paquete y el manifiesto declara la omisión.
+      **Cero dependencias nuevas** en la pieza más sensible del producto: el ZIP se escribe a mano (`zlib.crc32`
+      es nativo) y la firma va con Web Crypto. Sin compresión, a propósito: los bytes del ZIP son los del
+      archivo, así que un auditor puede extraer y comprobar con cualquier herramienta.
+      **Verificado por software ajeno, que es lo único que cuenta aquí:** `unzip` y la librería de Python abren
+      el ZIP y validan los CRC; **OpenSSL valida la firma** (`Signature Verified Successfully`) y **la rechaza**
+      al alterar un byte del manifiesto. Más 4 mutaciones cazadas sobre el núcleo (canonicalización superficial,
+      suplantación de clave pública, degradación silenciosa sin clave, desplazamientos del ZIP).
+      **La purga (0035) borra también los archivos**, y va ANTES que la base de datos: las filas caen en cascada
+      pero los objetos del almacenamiento no, y habrían quedado ahí tras decirle al cliente que sus datos se
+      eliminaron. Es exactamente el fallo que ya encontramos una vez.
+      **Pendiente del fundador** (§1.9): aplicar la 0038 y generar la clave de firma. `alto · L`
 - [ ] **⚠️ Crosswalk ISO 42001 / NIST AI RMF** — mapear cada control a otros marcos: una evidencia sirve para N
       normas. Foso de upsell para equipos GRC; requiere tabla de correspondencias curada por el experto. `alto · L`
 - [ ] **⚠️ Contenido regulatorio en INGLÉS (TAM EE. UU.)** — el chrome ya está traducido, pero el output legal se
@@ -273,7 +703,8 @@
 
 ### 0.H · Cómo retomar esta hoja de ruta tras un compact
 1. Lee esta sección §0 completa (es el plan maestro; no se descarta nada).
-2. El orden por defecto es **0.A → 0.B → 0.C → 0.D → 0.E → 0.F**, con **0.G** solo tras checkpoint del fundador.
+2. El orden por defecto era **0.A → 0.B → 0.C → 0.D → 0.E → 0.F**; todos completados. Queda **0.G**, que
+   son apuestas grandes y **requieren checkpoint del fundador** antes de arrancar ninguna.
 3. Excepción recomendada: **la telemetría de 0.F** conviene adelantarla (medir antes de optimizar).
 4. Cada ítem de *Foso/compliance* (packs, GPAI, crosswalk, corpus) pasa por el `compliance-domain-expert`
    **antes** de escribir texto regulatorio, y se registra en `MEMORY.md §10`.
@@ -310,9 +741,23 @@ El fundador las pegó en el SQL Editor. Con esto las 2 fallas HIGH quedan **cerr
 
 ### 0.4 · 🔴 PENDIENTE TUYO restante de seguridad
 - [ ] **Promover la CSP a `enforce`** — hoy la política estricta (anti-XSS) va en *Report-Only* (observa, no bloquea).
-  Es un cambio de **1 línea** en `src/lib/security/csp.ts` (mover el bloque `reportOnly` a `enforced`). **Antes:**
-  smoke-test en el preview de un PR → login (Supabase) + checkout (Stripe) + descargar radar, y confirmar que no hay
-  violaciones que rompan. Avísame y lo hago + valido.
+  Sigue siendo un cambio de **1 línea** en `src/lib/security/csp.ts`. **Avísame y lo hago + valido.**
+
+  **⚠️ Cómo leer el Report-Only de hoy (medido el 2026-08-04, no deducido).** Al mirarlo verás **violaciones de
+  `script-src` en todas las páginas**, y la conclusión intuitiva —"no se puede promover, rompería la app"— es
+  **exactamente la contraria a la verdad**. Lo que pasa: Next saca el nonce de la política que se manda como
+  `Content-Security-Policy` (la aplicada), y la aplicada hoy es la "sin riesgo", que no lleva `script-src`. Sin
+  nonce que encontrar, Next no se lo pone a sus ~44 scripts inline, y el Report-Only los reporta. **Al promover,
+  el nonce pasa a viajar en esa cabecera y Next empieza a inyectarlo solo.** Comprobado ejecutándolo: de 44
+  scripts inline sin nonce a **45 con él**, sin tocar una línea de la aplicación. Hay un test que vigila que el
+  nonce siga siendo encontrable por el algoritmo de Next (`src/lib/security/csp.test.ts`).
+
+  **El smoke-test sigue haciendo falta** —login (Supabase), checkout (Stripe), descargar radar— pero para cazar
+  allowlists que falten (un dominio de terceros, un iframe), no para el `script-src` de Next.
+
+  **Lo que la promoción SÍ decide, y es una elección tuya:** con nonce, la landing **no puede ser estática**
+  (un nonce es distinto en cada petición, y una página estática se genera una vez). Es el cruce del ítem de
+  rendimiento del Sprint 5 — ver §0.E.
 
 ### 0.5 · 🟡 PENDIENTE MÍO / higiene continua de seguridad
 - [ ] **Re-auditar tras conectar el flujo real de Stripe** (cobros/downgrades/reconciliación no se validan por código).
@@ -358,14 +803,291 @@ update public.organizations set plan = 'preparacion' where id = '<org-uuid>';
 -- o 'enterprise'
 ```
 
-### 1.1-decies · Aplicar migración 0029 (topes a medida para Enterprise) — RÁPIDO, no urgente
-El metering **ya funciona sin ella**: los cupos por plan (3/1 · 25/5 · sin tope) viven en el código. Lo que
-añade 0029 son dos columnas (`max_systems`, `max_seats`) en la organización para poder pactar los números de
-un Enterprise concreto ("hasta 200 sistemas y 40 asientos"). Sin aplicarla, la app lo detecta, lo registra
-como `migration-pending` y usa los cupos del plan — nadie se queda bloqueado.
+### 1.1-duodecies · ✅ Migración 0034 (rate limit compartido) — APLICADA Y VERIFICADA (2026-08-04)
+**Qué hace:** una tabla de contadores y una función que los incrementa de forma atómica. Nada más.
 
-1. Pega **`supabase/migrations/0029_org_limits.sql`** en el SQL Editor (solo ese archivo).
-2. Al cerrar un Enterprise, fija sus topes (el SQL está también dentro del propio archivo):
+**Por qué hace falta.** El freno anti-abuso de la lista de espera y del **formulario de intake** —la única
+pantalla donde alguien puede escribir sin tener cuenta— vivía en la memoria de cada servidor. Vercel arranca
+varios, cada uno con su propia cuenta, así que quien repartía sus intentos multiplicaba el límite sin
+esfuerzo. Ahora el contador es uno solo y compartido.
+
+**Cómo pegarla:** Supabase → SQL Editor → `supabase/migrations/0034_rate_limits.sql` (también al final de
+`supabase/setup.sql`). Validada en un Postgres 16 desechable en **dos pasadas**, y probada con **30
+conexiones simultáneas** contra la misma clave con límite 10: exactamente 10 pasaron.
+
+**Verificada tras aplicarla (2026-08-04),** y con la prueba que de verdad demuestra que sirve: se envió el
+formulario de la lista de espera hasta agotar el límite, **se reinició el servidor** —lo que borra la memoria
+del proceso, que era el único freno que había antes— y el siguiente envío **siguió bloqueado**. Eso solo puede
+venir del contador compartido. Por API se comprobó además que corta exactamente en el límite, que cada clave
+lleva su cuenta, que rechaza argumentos absurdos, que **`anon` puede consumir cuota** (es el caso del intake)
+y que **nadie puede leer la tabla de contadores**. Y la atomicidad: **20 llamadas simultáneas con límite 8 →
+exactamente 8 permitidas**.
+
+**Nota de privacidad, por si te la preguntan en una due-diligence:** esa tabla **no guarda direcciones IP**.
+Le llega un hash. Un limitador necesita distinguir a quién frena, no saber quién es.
+
+### 1.5 · ✅ Migración 0035 (baja de organización) — APLICADA Y VERIFICADA (2026-08-04)
+
+**Verificado contra el backend real** (`npm run verify:backend`, ahora **64 comprobaciones**, 0 fallos):
+el nombre de confirmación tiene que coincidir · un no-propietario no puede dar de baja la organización de
+otro *aunque sepa su nombre* · el plazo devuelto son ~7 días exactos · repetir la solicitud **no reinicia el
+plazo** · la cancelación funciona y solo la puede hacer el propietario.
+
+**Y la comprobación que sostiene el diseño entero:** un usuario con sesión recibe
+`403 permission denied for function purge_organization`. Lo contrasté con una función inventada, que da
+**404**: la diferencia demuestra que la función existe y está cerrada, no que falte. Si un propietario
+pudiera purgar en el acto, el periodo de gracia sería decorativo. `anon` tampoco puede.
+
+**De regalo:** la propia verificación ahora se limpia sola. Cada ejecución creaba dos organizaciones de
+prueba que se acumulaban en tu proyecto para siempre; ahora las da de baja con esta misma función y el cron
+las borra a los siete días.
+
+
+**Qué:** pega en el SQL Editor de Supabase el contenido de
+`supabase/migrations/0035_org_lifecycle.sql`. **Pega ese fichero, no `setup.sql` entero** (ver la nota de
+abajo).
+
+**Qué habilita:** que un propietario pueda dar de baja su organización y que se borre **de verdad** —
+inventario, evaluaciones, evidencia, proveedores, incidentes y registro de auditoría— pasados 7 días, con
+opción de cancelar. Es lo que hace ciertos el plazo del DPA y del aviso de privacidad.
+
+**Por qué importa más de lo que parece:** antes de esta migración, borrar una organización **funcionaba pero
+dejaba rastro**. La tabla del registro de auditoría no está enlazada a la de organizaciones, así que sus
+filas —que incluyen el contenido de cada cambio— sobrevivían al borrado. La supresión parecía completa y no
+lo era. Lo encontré probándolo en un Postgres desechable antes de escribir la migración.
+
+**Sin aplicarla no se rompe nada:** la zona de baja simplemente no encuentra las funciones y la app funciona
+igual que hoy. Pero el derecho de supresión sigue siendo manual (escribirte a ti) hasta que la apliques.
+
+**Verificado antes de dártela:** aplicada dos veces (correcta y re-ejecutable), purga probada con dos
+organizaciones para comprobar que borrar una **no toca** la otra, registro de auditoría comprobado inmutable
+antes y después, y permisos comprobados ejecutando como cada rol —un usuario normal recibe *permission
+denied* al intentar purgar.
+
+**Nota aparte, no bloqueante:** `supabase/setup.sql` **no se puede re-pegar** sobre una base de datos que ya
+lo tenga (muere en la primera línea, `type "risk_level" already exists`, y no ejecuta nada de lo que sigue).
+Es anterior a esta sesión —viene de la migración 0001— y contradice lo que dice la documentación interna.
+Intenté arreglarlo y el arreglo era mayor de lo que parecía (no solo los tipos: también tablas y policies),
+así que preferí no dejarlo a medias. Lo he anotado como tarea propia. **Mientras tanto: para una migración
+nueva, pega siempre el fichero de la migración, no `setup.sql`.** `setup.sql` sirve para montar un proyecto
+desde cero.
+
+### 1.8 · ✅ Migración 0037 (solicitudes de demo) — APLICADA Y VERIFICADA (2026-08-04)
+
+**Verificado contra el backend real** (`verify:backend`, ahora **75 comprobaciones**): `anon` **puede**
+enviar el formulario (es público) y **no puede** leer la lista, ni borrarla, ni modificarla — comprobado por
+**filas afectadas**, no por el código de estado, porque un borrado que la RLS deja sin efecto responde `204`
+igual que uno que sí borró. Los cuatro CHECK del esquema exigen ahora el **código de error concreto**
+(`23514`), y se comprueba además el **payload exacto de la app con los opcionales a `null`** — la trampa
+PGRST102 que ya nos mordió con la importación CSV.
+
+**Nota metodológica, porque casi me cuela un falso negativo.** La primera versión de esta verificación dio
+la migración por ROTA: `anon` no podía insertar. La causa era mía — le puse a la petición una cabecera que
+obliga a Postgres a **releer** la fila recién escrita, y no hay permiso de lectura, a propósito. El mensaje de
+error habla de la escritura, así que parecía otra cosa. Lo descubrí porque comprobé lo mismo contra la lista
+de espera, que lleva viva desde marzo: **fallaba igual**, y eso no podía ser. Los inserts de la aplicación no
+piden esa relectura, así que el producto nunca tuvo el problema.
+
+Y una segunda lección que ya está corregida: comprobar solo "dio error" **no discrimina**. Con `anon` sin
+poder insertar, los cuatro tests de CHECK pasaban en verde por el motivo equivocado.
+
+**Qué:** pega `supabase/migrations/0037_demo_requests.sql` en el SQL Editor.
+
+**Qué habilita:** guardar las solicitudes de demo de la landing en una tabla, para poder consultarlas y
+ordenarlas. **Sin aplicarla no se pierde ninguna solicitud**: el correo con los datos te llega igual, porque
+el aviso se manda *antes* de escribir en la base de datos, a propósito. La migración solo añade el registro
+ordenado.
+
+**Cómo consultarlas:** desde el SQL Editor de Supabase (`select * from public.demo_requests order by
+created_at desc;`). La lista **no se puede leer desde la web**, ni siquiera con sesión: es información
+comercial y no tiene por qué estar expuesta.
+
+### 1.9 · 🟡 Vault de evidencia: 0038 APLICADA ✅ · falta la clave de firma
+
+**La migración 0038 está aplicada y verificada** (2026-08-04, `verify:backend` → **86 comprobaciones**):
+rechaza un `sha256` que no lo es y un archivo por encima del tope · un usuario de otra organización no puede
+registrar evidencia en la tuya, ni verla pidiéndola por su id, ni listar tus archivos en el bucket · `anon` no
+puede listar el bucket · y **nadie puede cambiar el hash de un archivo ya registrado** (0 filas afectadas),
+que es justo la manipulación contra la que existe el vault.
+
+**Dos pasos, y el segundo importa tanto como el primero.**
+
+**a) Pega `supabase/migrations/0038_evidence_vault.sql`** en el SQL Editor. Crea la tabla de archivos, el
+bucket privado y el aislamiento entre organizaciones.
+
+**Un aviso sobre esta migración en concreto:** el último bloque crea las reglas de acceso sobre
+`storage.objects`, y en algunos proyectos esa tabla pertenece a otro rol y el SQL Editor puede no tener
+permiso. Lo he puesto **al final a propósito**: si esa parte fallara, todo lo anterior ya habría quedado
+aplicado y solo habría que resolver ese bloque, en vez de perder la migración entera. Si te da error ahí,
+pásame el mensaje.
+
+**b) Genera la clave de firma:**
+
+```bash
+npm run vault:keygen
+```
+
+Imprime dos variables. Pégalas en Vercel (Production) y **no las guardes en ningún fichero**: la privada es un
+secreto y en un fichero acabaría en un backup o en el historial de la terminal.
+
+**Por qué el paso (b) no es opcional si vas a enseñarle esto a un cliente.** Sin clave, el paquete se genera
+igual y los hashes se pueden comprobar, pero **no lleva firma**: nadie puede verificar que lo emitió Attesta.
+Sirve para uso interno y no para entregárselo a un tercero. La aplicación te lo dice en la propia pantalla,
+en el nombre del fichero (`-SIN-FIRMAR`) y dentro del ZIP — no se te va a colar por accidente.
+
+**No genero una clave automáticamente a propósito:** cada despliegue firmaría con una distinta y ninguna
+verificaría. Una firma que no se puede comprobar es peor que ninguna, porque aparenta garantía.
+
+**Al rotar la clave en el futuro:** guarda la anterior. Los paquetes ya entregados se verifican con la clave
+con la que se firmaron; sin ella, parecerán inválidos.
+
+**Comprobación rápida cuando termines:** abre `/api/vault/key` — debe devolver el mismo `keyId` que imprimió
+el generador.
+
+### 1.7 · 🟡 Operación: DNS del correo y ensayo de restauración
+
+Los dos están explicados paso a paso en **[docs/runbook.md](./docs/runbook.md)**. Resumen de por qué importan:
+
+**a) Autenticar el dominio del correo (SPF, DKIM, DMARC).** Hoy los correos salen desde el dominio compartido
+de pruebas de Resend. **Se envían** —la API responde bien, los registros dicen "enviado"— y acaban en spam.
+Lo que se pierde ahí son invitaciones al equipo (alguien no puede entrar y no sabe por qué),
+restablecimientos de contraseña (alguien se queda fuera de su cuenta) y recordatorios de vencimiento (el
+producto deja de hacer lo que se contrató). El síntoma visible desde dentro es **ninguno**, y por eso la app
+ahora te lo avisa sola en el panel interno de telemetría. Son tres registros DNS + `RESEND_FROM` en Vercel.
+Empieza el DMARC en `p=none` (solo observa); subir directo a `p=reject` deja de entregar correo sin que te
+enteres, que es justo el problema que venías a arreglar.
+
+**b) Probar una restauración de copia de seguridad, una vez.** Supabase hace copias, pero **nunca se ha
+restaurado ninguna**. Una copia que no se ha restaurado no es una copia, es una suposición: el día que haga
+falta es el peor momento para descubrir que faltaba algo. El ensayo son 20 minutos sobre un proyecto nuevo y
+vacío (no se toca producción) y de él salen los dos números que te va a pedir la revisión de proveedores de
+cualquier cliente: cuántos datos puedes perder como máximo y cuánto tardas en volver. Cuando los tengas,
+anótalos en el DPA.
+
+**Nota honesta:** esta es la casilla más floja que le queda al producto. Todo lo demás del expediente —el
+registro inmutable, la cadena de hashes, la verificación semanal— **no vale nada si un día no hay de dónde
+restaurar**. Un expediente demostrablemente íntegro que se ha perdido entero es tan inútil como uno
+manipulado.
+
+### 1.6 · ✅ Migración 0036 (facturación) — APLICADA Y VERIFICADA (2026-08-04)
+
+**Verificado contra el backend real.** Aquí lo que importaba no era la lógica —esa se probó contra un
+Postgres real antes de dártela— sino la **frontera**: que nadie pueda saltarse Stripe. Comprobado que un
+usuario con sesión **no puede regalarse una suscripción activa** (`403`, y la organización sigue sin
+suscripción después del intento), no puede inventarse un evento de Stripe, no puede leer el registro de
+eventos y no puede lanzar su limpieza. `anon` tampoco, en los cuatro casos.
+
+
+**Qué:** pega `supabase/migrations/0036_billing_lifecycle.sql` en el SQL Editor. Como la 0035: **el fichero
+de la migración, no `setup.sql`**.
+
+**Por qué te interesa aunque Stripe todavía no esté conectado:** el webhook que había tenía tres formas de
+perder dinero en silencio, y las tres solo se notan cuando ya ha pasado.
+
+1. **Stripe reintenta los avisos.** Cada reintento contaba un pago más en tus métricas. El embudo se
+   inflaba solo, así que habrías tomado decisiones con números mejores de los reales.
+2. **Stripe no los manda en orden.** Un aviso viejo que llega tarde pisaba el estado bueno: una suscripción
+   pagada podía quedar marcada como impagada porque el aviso de hace dos minutos llegó el último.
+3. **El peor:** si nuestra base de datos fallaba un instante al recibir un aviso, el código respondía "todo
+   bien" y Stripe no lo reintentaba nunca. Resultado: **el cliente paga y se queda en el plan gratuito**, sin
+   ningún error en ningún sitio. Nadie abre una incidencia por algo que no da error — la abre el cliente,
+   semanas después.
+
+**Además** he añadido aviso por correo cuando un cobro falla (Stripe ya avisa al cliente; lo que no había era
+que te enteraras tú) y una **reconciliación diaria** que compara lo que dice Stripe con lo que tenemos y
+repara lo que no cuadre. Esa es la red que recoge el caso "el endpoint estaba mal configurado", que ningún
+reintento arregla.
+
+**Sin aplicarla no se rompe nada:** el webhook detecta que la tabla no existe, lo anota en el log y sigue
+funcionando como hasta ahora.
+
+**Verificado:** migración aplicada dos veces (correcta y re-ejecutable) y las cuatro conductas probadas
+contra un Postgres real — evento nuevo se aplica, evento tardío se rechaza y **no** cambia el estado, evento
+posterior sí se aplica, y el mismo id de evento no puede entrar dos veces.
+
+### 1.4-ter · 🟡 Datos de la sociedad para las páginas legales (privacidad, DPA, subprocesadores)
+
+**Qué:** cuatro variables de entorno en Vercel (*Settings → Environment Variables*, Production y Preview):
+
+```
+LEGAL_ENTITY_NAME       = denominación social completa (p. ej. "Attesta, S.L.")
+LEGAL_ENTITY_ADDRESS    = domicilio social
+LEGAL_ENTITY_TAX_ID     = NIF / CIF / VAT
+LEGAL_PRIVACY_EMAIL     = correo de contacto para privacidad
+LEGAL_EU_REPRESENTATIVE = (opcional, ver abajo)
+```
+
+**Por qué no las he puesto yo:** son un hecho del mundo, no una decisión de diseño. Inventarlas produciría el
+peor resultado posible: una página que **parece** terminada, se indexa y se enseña en una due-diligence
+siendo falsa. Así que el código hace lo intermedio y honesto — mientras falten, las cuatro páginas legales
+salen con un **aviso de borrador visible arriba del todo**, con `noindex` y fuera del sitemap. En cuanto las
+definas, pasan a ser páginas reales e indexables **sin que yo toque nada**.
+
+**Estado hoy:** las páginas ya existen y son navegables (`/legal/privacidad`, `/legal/cookies`,
+`/legal/subprocesadores`, `/legal/tratamiento-de-datos`, y sus gemelas en `/en/legal/...`), pero se sirven
+como borrador. Puedes verlas y darme feedback del contenido antes de tener la sociedad.
+
+**Dos decisiones que solo puedes tomar tú:**
+
+1. **¿Dónde está constituida la sociedad?** En el pie de la web hay un correo `.mx` y un teléfono de México.
+   Si la entidad **no** está establecida en la UE pero ofrece el servicio a personas en la UE, el **art. 27
+   RGPD** obliga a designar un **representante en la Unión** por escrito, y hay que nombrarlo en el aviso de
+   privacidad (por eso existe `LEGAL_EU_REPRESENTATIVE`). Si la sociedad es española/UE, no aplica y se deja
+   vacía. **No lo he dado por supuesto en ningún sentido.**
+2. **Revisión de abogado antes de publicar.** El texto es correcto en los hechos técnicos —que es la parte
+   que normalmente sale mal en las plantillas descargadas, porque nadie las contrasta con el código— pero la
+   redacción contractual del DPA no se cierra sin jurista. Es barato: llevas un borrador completo y coherente,
+   no un folio en blanco.
+
+**Un punto que conviene que sepas aunque no sea bloqueante:** la web no lleva banner de cookies, y es una
+posición defendible (sin publicidad, sin terceros midiendo, sin cookies entre sitios, con rechazo explícito
+y respeto de la señal del navegador), pero **es una posición, no una certeza**. Está explicada en
+`src/lib/legal/cookies.ts` para que tu abogado la lea y la confirme o la corrija en cinco minutos.
+
+### 1.4-bis · 🔴 ANTES DE DESPLEGAR: define `NEXT_PUBLIC_APP_URL` en Vercel
+**Qué:** Vercel → tu proyecto → *Settings → Environment Variables* → `NEXT_PUBLIC_APP_URL` =
+`https://attesta-io.vercel.app` (o tu dominio propio cuando lo tengas), **sin barra final y sin ruta**.
+Márcala para *Production* y *Preview*.
+
+**Por qué ahora:** desde el commit del fail-fast, un despliegue **sin** esa variable **no compila** — a
+propósito. Antes había un dominio por defecto escondido en el código, y eso hacía que un cambio de dominio
+rompiera la indexación y los enlaces de los correos **sin dar ningún error**. Ahora avisa en el acto.
+
+**Riesgo si no la pones:** el build de Vercel falla y no se publica nada nuevo. **La web actual sigue en
+pie** (Vercel conserva el último despliegue bueno), así que no hay caída — pero tampoco despliegue, hasta
+que la definas. Son dos minutos.
+
+### 1.1-undecies · ✅ Migración 0033 (idioma del contenido guardado) — APLICADA Y VERIFICADA (2026-08-04)
+**Qué hace:** añade una columna `locale` a `gap_items`, `risk_assessments` y `action_tasks`. Nada más:
+tres `alter table … add column if not exists` y sus comentarios. Es **aditiva y re-ejecutable**.
+
+**Por qué hace falta.** El texto regulatorio que Attesta escribe en la base de datos —los controles de un
+policy pack, la motivación de una evaluación, las tareas nacidas de una recomendación— se queda congelado
+en el idioma en que se creó. Al cambiar la interfaz a inglés, ese texto seguía en español **y nadie sabía
+en qué idioma estaba**, así que no se podía ni traducir después ni avisar al lector de pantalla.
+
+**Cómo pegarla:** Supabase → SQL Editor → pegar `supabase/migrations/0033_content_locale.sql` (también está
+al final de `supabase/setup.sql`). Validada en un Postgres 16 desechable en **dos pasadas** (correcta y
+re-ejecutable) y comprobado que el CHECK acepta `null` y `es`/`en` y rechaza `fr` y `es-ES`.
+
+**Verificada tras aplicarla (2026-08-04).** `verify:backend` pasó de comprobar la degradación a comprobar
+la columna de verdad: acepta `es`/`en`, acepta `null`, rechaza `fr` y `es-ES`, y la RLS sigue aislando.
+Y se verificó **el camino de escritura desde la propia aplicación**, que es lo que ningún test podía cubrir:
+se guardaron dos evaluaciones reales desde el asistente de riesgo, una con la interfaz en español y otra en
+inglés, y la base de datos guardó `locale=es` y `locale=en` respectivamente. Es decir: el idioma se resuelve
+de verdad, no está fijo. Comprobado además que la app **ya no cae al reintento** — cero líneas de
+`migration-pending` en los logs del servidor tras recorrer portada, gap, plan e inventario.
+
+### 1.1-decies · Migración 0029 (topes a medida para Enterprise) — ✅ APLICADA (verificada 2026-07-30)
+**Verificada por API:** `organizations?select=plan,max_systems,max_seats` → **200**, mientras una columna
+inventada da `42703 does not exist` (prueba de contraste). Ya se pueden pactar topes por organización.
+
+*(Lo que NO se pudo verificar con la anon key: los dos `CHECK` de cordura. Si los quieres confirmar:
+`select conname, pg_get_constraintdef(oid) from pg_constraint where conname in
+('organizations_max_systems_check','organizations_max_seats_check');` — deben salir dos filas. No es crítico:
+el código ignora por su cuenta cualquier tope ≤ 0.)*
+
+Para cerrar un Enterprise a medida (el SQL está también dentro del propio archivo de migración):
    ```sql
    -- ver el consumo real de cada organización antes de pactar:
    select o.id, o.name, o.plan, o.max_systems, o.max_seats,
@@ -380,9 +1102,12 @@ como `migration-pending` y usa los cupos del plan — nadie se queda bloqueado.
 3. **Al terminar un contrato, limpia el pacto** (`set max_systems = null, max_seats = null`): el número
    pactado gana sobre el plan, así que si se queda puesto seguirá aplicándose bajo un plan que ya no toca.
 
-### 1.1-nonies · Aplicar migración 0028 (endurecer permisos) — RÁPIDO, no urgente
-**No arregla ninguna fuga: cierra una segunda cerradura que 0026/0027 dejaron sin echar.** Todo funciona
-igual con o sin ella; conviene aplicarla, pero no bloquea nada.
+### 1.1-nonies · Migración 0028 (endurecer permisos) — ✅ APLICADA (verificada 2026-07-30)
+**No arreglaba ninguna fuga: cerraba una segunda cerradura que 0026/0027 habían dejado sin echar.**
+**Verificada por API:** `anon` recibe ahora `42501 permission denied` en `intake_links`, `intake_submissions`,
+`product_events` (select) y en la función `product_funnel` — el corte ocurre en los permisos, antes de llegar
+a la RLS. Y siguen abiertos los dos que deben estarlo: el insert de telemetría (**201**) y `submit_intake`
+(**`false`/200**).
 
 Salió al verificar 0026/0027 contra el Supabase **real** (no contra el Postgres de pruebas), y son dos
 diferencias entre lo que el SQL *parecía* hacer y lo que hace:

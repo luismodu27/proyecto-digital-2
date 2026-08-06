@@ -21,6 +21,13 @@ const DANGER = new Set([
   "task-error",
   "vigia-error",
   "vigia-denied",
+  // La baja no es un "éxito" verde: es lo más destructivo que ofrece el
+  // producto y el aviso debe leerse como una alarma, no como una confirmación.
+  "deletion-requested",
+  "deletion-confirm",
+  "vault-error",
+  "vault-large",
+  "vault-forbidden",
 ]);
 
 /** Claves informativas (avisos de modo demo o duplicados) → tono neutro. */

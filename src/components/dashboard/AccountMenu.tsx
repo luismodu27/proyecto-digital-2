@@ -22,17 +22,25 @@ export function AccountMenu({
   userName,
   orgs = [],
   activeOrgId,
+  menuPlacement = "auto",
 }: {
   userEmail: string;
   userName?: string;
   orgs?: UserOrg[];
   activeOrgId?: string;
+  /**
+   * `"up"`: el panel abre siempre hacia arriba. Se usa dentro del cajón móvil,
+   * donde el bloque de cuenta va al fondo de un panel de altura completa y el
+   * `top-full` de móvil se saldría de la pantalla. `"auto"` = lo de siempre.
+   */
+  menuPlacement?: "auto" | "up";
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const t = useT();
   const locale = useLocale();
   const acc = t.dashboard.account;
+  const help = t.dashboard.help;
 
   useEffect(() => {
     if (!open) return;
@@ -40,7 +48,15 @@ export function AccountMenu({
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key !== "Escape") return;
+      // `preventDefault()` sobre el keydown ANULA la petición de cierre que el
+      // navegador generaría a continuación. Importa cuando este menú vive
+      // dentro del cajón de navegación (`<dialog>` modal): sin esto, un solo
+      // Escape cerraba el menú Y el cajón, porque el `cancel` del diálogo es la
+      // acción POR DEFECTO de esta misma pulsación y llega después. Reproducido
+      // en Chromium y Firefox.
+      e.preventDefault();
+      setOpen(false);
     };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
@@ -54,7 +70,7 @@ export function AccountMenu({
     <div ref={ref} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen(!open)}
         aria-haspopup="menu"
         aria-expanded={open}
         className="flex w-full items-center gap-3 rounded-xl border border-line bg-paper-sunken/60 p-3 text-left transition-colors hover:border-line-strong hover:bg-paper-sunken"
@@ -93,7 +109,13 @@ export function AccountMenu({
       {open && (
         <div
           role="menu"
-          className="absolute inset-x-0 top-full z-40 mt-2 origin-top overflow-hidden rounded-xl border border-line bg-paper-raised shadow-lg md:bottom-full md:top-auto md:mb-2 md:mt-0 md:origin-bottom"
+          // Dos literales completos, nunca interpolados: Tailwind v4 no ve las
+          // clases construidas en una plantilla y no generaría el CSS.
+          className={
+            menuPlacement === "up"
+              ? "absolute inset-x-0 bottom-full z-40 mb-2 origin-bottom overflow-hidden rounded-xl border border-line bg-paper-raised shadow-lg"
+              : "absolute inset-x-0 top-full z-40 mt-2 origin-top overflow-hidden rounded-xl border border-line bg-paper-raised shadow-lg md:bottom-full md:top-auto md:mb-2 md:mt-0 md:origin-bottom"
+          }
         >
           {orgs.length > 1 && (
             <div className="border-b border-line">
@@ -142,6 +164,29 @@ export function AccountMenu({
               labelToEs={t.locale.switchToEs}
             />
           </div>
+
+          {/*
+            Ayuda ANTES que facturación: quien abre este menú con una duda la
+            tiene ahora, y quien viene a mirar su plan sabe buscarlo. Ordenar por
+            frecuencia de la necesidad, no por importancia para nosotros.
+          */}
+          <Link
+            href="/dashboard/ayuda"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft transition-colors hover:bg-paper-sunken hover:text-ink"
+          >
+            <svg viewBox="0 0 24 24" className="size-4 shrink-0" fill="none" aria-hidden>
+              <path
+                d="M12 21a9 9 0 100-18 9 9 0 000 18Zm-2-11a2 2 0 113.5 1.3c-.7.7-1.5 1.1-1.5 2.2m0 3h.01"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {help.title}
+          </Link>
 
           <Link
             href="/dashboard/facturacion"

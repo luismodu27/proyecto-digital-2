@@ -9,9 +9,11 @@
 import type { Metadata } from "next";
 import type { Locale } from "./config";
 import { getDictionary } from "./index";
+import { SITE_URL } from "@/lib/site-url";
 
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://attesta-io.vercel.app";
+// Se reexporta para no tocar los importadores existentes (sitemap, robots), pero
+// la resolución y su fail-fast viven en un solo sitio.
+export { SITE_URL } from "@/lib/site-url";
 
 // hreflang recíproco compartido por ambas rutas (+ x-default apuntando a es).
 const LANGUAGES = { es: "/", en: "/en", "x-default": "/" };

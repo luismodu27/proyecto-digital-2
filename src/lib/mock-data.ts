@@ -4,6 +4,10 @@
  */
 import type { BiasAudit } from "./bias-audit";
 import type { Locale } from "./i18n/config";
+import type { StoredLocale } from "./i18n/stored-locale";
+import type { Incident } from "./incidents/incidents";
+import type { Supplier, SupplierEvidence } from "./suppliers/types";
+import type { IntakeSubmission } from "./intake/types";
 
 export type RiskLevel = "unacceptable" | "high" | "limited" | "minimal";
 
@@ -113,7 +117,7 @@ export const AI_SYSTEMS: AiSystem[] = [
     vendor: "VidAssess",
     risk: "high",
     compliance: 35,
-    lastReviewed: "2026-05-30",
+    lastReviewed: "2025-06-18",
   },
   {
     id: "SYS-004",
@@ -186,7 +190,7 @@ export const AI_SYSTEMS_EN: AiSystem[] = [
     vendor: "VidAssess",
     risk: "high",
     compliance: 35,
-    lastReviewed: "2026-05-30",
+    lastReviewed: "2025-06-18",
   },
   {
     id: "SYS-004",
@@ -272,6 +276,12 @@ export type GapItem = {
    * y se renderiza como Inaceptable / revisión jurídica (ver `PolicyControl`).
    */
   prohibited?: boolean;
+  /**
+   * Idioma en el que se escribió `requirement`/`article` (migración 0033).
+   * `null`/ausente = no consta, y entonces NO se etiqueta: ver
+   * `src/lib/i18n/stored-locale.ts`. No describe `remediationNote`.
+   */
+  locale?: StoredLocale;
 };
 
 /** Una evaluación de riesgo guardada (para el historial de un sistema). */
@@ -284,6 +294,8 @@ export type AssessmentRecord = {
   evidenceNote?: string | null;
   evidenceUrl?: string | null;
   assessedAt: string; // ISO
+  /** Idioma de `rationale` (migración 0033). Ausente = no consta. */
+  locale?: StoredLocale;
 };
 
 /** Todo lo necesario para generar el dossier de gobernanza de un sistema. */
@@ -682,6 +694,16 @@ export type ExportBundle = {
   members: OrgMember[];
   regulatoryAcks: Record<string, RegAck>;
   auditLog: AuditEntry[];
+  suppliers: Supplier[];
+  incidents: Incident[];
+  intakeSubmissions: IntakeSubmission[];
+  /**
+   * Aviso de truncamiento. El registro de auditoría se pide con un tope, y una
+   * exportación de portabilidad que se corta **sin decirlo** es peor que una que
+   * falla: quien la recibe cree tenerlo todo. Si se alcanzó el tope, aquí queda
+   * dicho, con el número de filas y a quién escribir para pedir el resto.
+   */
+  truncated: { auditLog: number } | null;
 };
 
 /** Registro de actividad de ejemplo (modo demo). */
@@ -1348,6 +1370,11 @@ export type ActionTask = {
   source: "manual" | "recommendation";
   sourceKey: string | null;
   createdAt: string; // ISO
+  /**
+   * Idioma del texto cuando lo generó Attesta (`source: "recommendation"`).
+   * En las tareas manuales es `null` a propósito: las escribe el usuario.
+   */
+  locale?: StoredLocale;
 };
 
 /** Tareas de ejemplo (modo demo) para enseñar el plan editable. */
@@ -1371,10 +1398,10 @@ export const SAMPLE_ACTION_TASKS: ActionTask[] = [
   },
   {
     id: "task-demo-2",
-    title: "Exigir al proveedor la documentación técnica (Anexo IV)",
+    title: "Pedir al proveedor las instrucciones de uso (Art. 13)",
     detail:
-      "Pedir al proveedor la documentación técnica e instrucciones de uso y conservarla como evidencia de auditoría.",
-    article: "Art. 11",
+      "Son el único documento que el Reglamento dirige al responsable del despliegue. La documentación técnica del Anexo IV no es exigible: si hace falta, se pacta en el contrato.",
+    article: "Art. 13",
     priority: "media",
     status: "todo",
     assigneeId: "demo-3",
@@ -1432,10 +1459,10 @@ export const SAMPLE_ACTION_TASKS_EN: ActionTask[] = [
   },
   {
     id: "task-demo-2",
-    title: "Require technical documentation from the provider (Annex IV)",
+    title: "Ask the provider for the instructions for use (Art. 13)",
     detail:
-      "Ask the provider for the technical documentation and instructions for use, and keep it as audit evidence.",
-    article: "Art. 11",
+      "They are the only document the Regulation addresses to the deployer. The Annex IV technical documentation is not something you can require: if you need it, negotiate it in the contract.",
+    article: "Art. 13",
     priority: "media",
     status: "todo",
     assigneeId: "demo-3",
@@ -1503,3 +1530,290 @@ export const AUDIT_READY_THRESHOLD = 80;
 export function isAuditReady(pct: number): boolean {
   return pct >= AUDIT_READY_THRESHOLD;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Registro de incidentes (Art. 26.5) — datos de ejemplo                       */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Tres expedientes de ejemplo elegidos para enseñar los tres estados que de
+ * verdad se dan, no tres variaciones del mismo:
+ *
+ *  1. Un evento **en evaluación**: todavía no se sabe si es grave. Es el estado
+ *     en el que nace casi todo incidente real.
+ *  2. Un caso con **riesgo del Art. 79.1**: uso suspendido, sin ser (aún) un
+ *     incidente grave. Enseña la regla contraintuitiva —quien obliga a
+ *     suspender es esta rama, no la del incidente grave—.
+ *  3. Un **incidente grave** ya notificado y cerrado, con las tres fechas en el
+ *     orden que manda el artículo (proveedor primero).
+ */
+export const SAMPLE_INCIDENTS: Incident[] = [
+  {
+    id: "inc-demo-1",
+    systemId: "SYS-003",
+    systemName: "Entrevistas por vídeo con IA",
+    title: "Transcripción errónea en entrevistas con acento no nativo",
+    detail:
+      "Dos personas candidatas reportan que la transcripción automática omitió partes de sus respuestas. Pendiente de comprobar si afectó a la puntuación.",
+    occurredOn: "2026-07-21",
+    awareOn: "2026-07-23",
+    causalLinkOn: null,
+    categories: [],
+    seriousness: "under_assessment",
+    riskArt79: false,
+    useSuspended: false,
+    providerUnreachable: false,
+    notifiedProviderOn: null,
+    notifiedDistributorOn: null,
+    notifiedAuthorityOn: null,
+    personalDataBreach: false,
+    status: "open",
+    createdAt: "2026-07-23T09:15:00Z",
+  },
+  {
+    id: "inc-demo-2",
+    systemId: "SYS-001",
+    systemName: "Cribado de CVs — ATS",
+    title: "Tasa de descarte anómala tras la actualización del proveedor",
+    detail:
+      "Tras la versión 4.2 el descarte automático sube del 38 % al 71 % en un perfil concreto. Uso suspendido mientras el proveedor investiga.",
+    occurredOn: "2026-07-15",
+    awareOn: "2026-07-16",
+    causalLinkOn: "2026-07-18",
+    categories: [],
+    seriousness: "under_assessment",
+    riskArt79: true,
+    useSuspended: true,
+    providerUnreachable: false,
+    notifiedProviderOn: "2026-07-16",
+    notifiedDistributorOn: null,
+    notifiedAuthorityOn: "2026-07-17",
+    personalDataBreach: false,
+    status: "open",
+    createdAt: "2026-07-16T11:40:00Z",
+  },
+  {
+    id: "inc-demo-3",
+    systemId: "SYS-005",
+    systemName: "Test psicométrico automatizado",
+    title: "Puntuaciones sesgadas por edad en una campaña de junio",
+    detail:
+      "Revisión interna confirma diferencia sistemática de puntuación por franja de edad. Se rehízo la evaluación de las 214 personas afectadas.",
+    occurredOn: "2026-06-02",
+    awareOn: "2026-06-09",
+    causalLinkOn: "2026-06-12",
+    categories: ["fundamental_rights"],
+    seriousness: "serious",
+    riskArt79: true,
+    useSuspended: true,
+    providerUnreachable: false,
+    notifiedProviderOn: "2026-06-09",
+    notifiedDistributorOn: "2026-06-10",
+    notifiedAuthorityOn: "2026-06-10",
+    personalDataBreach: false,
+    status: "closed",
+    createdAt: "2026-06-09T08:00:00Z",
+  },
+];
+
+/**
+ * Espejo INGLÉS de los incidentes de ejemplo. Solo se traduce el texto libre
+ * (título y detalle) y el nombre del sistema; fechas, categorías y banderas son
+ * idénticas: sostienen los mismos recuentos y el mismo semáforo en los dos
+ * idiomas, que es justo lo que un espejo debe garantizar.
+ */
+export const SAMPLE_INCIDENTS_EN: Incident[] = [
+  {
+    ...SAMPLE_INCIDENTS[0],
+    systemName: "AI video interviews",
+    title: "Faulty transcription in interviews with non-native accents",
+    detail:
+      "Two candidates report that the automatic transcription dropped parts of their answers. Pending checks on whether it affected scoring.",
+  },
+  {
+    ...SAMPLE_INCIDENTS[1],
+    systemName: "CV screening — ATS",
+    title: "Anomalous rejection rate after the provider's update",
+    detail:
+      "After release 4.2 automatic rejection rises from 38% to 71% for one profile. Use suspended while the provider investigates.",
+  },
+  {
+    ...SAMPLE_INCIDENTS[2],
+    systemName: "Automated psychometric test",
+    title: "Age-skewed scores in a June campaign",
+    detail:
+      "An internal review confirms a systematic score difference by age bracket. The assessment was redone for the 214 people affected.",
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Registro de proveedores (Capa 8) — datos de ejemplo                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Tres proveedores elegidos para enseñar los tres casos que de verdad cambian
+ * lo que el cliente puede hacer:
+ *
+ *  1. Uno **de fuera de la UE**, con representante autorizado verificado. Es
+ *     donde vive el Art. 22 y la señal de alarma del 22.4.
+ *  2. Uno **interno** (equipo propio): sin contrato ni representante, y con la
+ *     pregunta incómoda de si al desarrollarlo ya sois proveedores.
+ *  3. Uno con la **bandera roja del Art. 25.2**: el contrato excluye el uso en
+ *     casos de alto riesgo, y aun así se usa para cribar.
+ */
+export const SAMPLE_SUPPLIERS: Supplier[] = [
+  {
+    id: "sup-demo-1",
+    name: "HireFlow Inc.",
+    country: "Estados Unidos",
+    aiActRole: "provider",
+    outsideEu: true,
+    authorizedRep: "HireFlow Europe BV (Ámsterdam)",
+    authorizedRepCheckedOn: "2026-06-12",
+    gdprRole: "processor",
+    contact: "compliance@hireflow.example",
+    contractEndsOn: "2027-03-31",
+    dpaSigned: true,
+    excludesHighRiskUse: false,
+    note: null,
+  },
+  {
+    id: "sup-demo-2",
+    name: "Equipo de datos (interno)",
+    country: "España",
+    aiActRole: "unknown",
+    outsideEu: false,
+    authorizedRep: null,
+    authorizedRepCheckedOn: null,
+    gdprRole: "none",
+    contact: "datos@empresa-demo.com",
+    contractEndsOn: null,
+    dpaSigned: false,
+    excludesHighRiskUse: false,
+    note: "Desarrollo propio: revisar si al construirlo asumimos el papel de proveedor.",
+  },
+  {
+    id: "sup-demo-3",
+    name: "VidAssess",
+    country: "Irlanda",
+    aiActRole: "provider",
+    outsideEu: false,
+    authorizedRep: null,
+    authorizedRepCheckedOn: null,
+    gdprRole: "processor",
+    contact: "legal@vidassess.example",
+    contractEndsOn: "2026-11-15",
+    dpaSigned: true,
+    excludesHighRiskUse: true,
+    note: "Sus condiciones excluyen el uso en decisiones de empleo. Lo estamos usando para eso.",
+  },
+];
+
+export const SAMPLE_SUPPLIERS_EN: Supplier[] = [
+  {
+    ...SAMPLE_SUPPLIERS[0],
+    country: "United States",
+    authorizedRep: "HireFlow Europe BV (Amsterdam)",
+  },
+  {
+    ...SAMPLE_SUPPLIERS[1],
+    name: "Data team (in-house)",
+    country: "Spain",
+    note: "Built in-house: check whether building it makes us the provider.",
+  },
+  {
+    ...SAMPLE_SUPPLIERS[2],
+    country: "Ireland",
+    note: "Their terms exclude use in employment decisions. We are using it for exactly that.",
+  },
+];
+
+/**
+ * Evidencia de ejemplo. Enseña a propósito los cuatro estados que más dicen:
+ * lo entregado, lo verificado en fuente pública, lo que el proveedor **se negó**
+ * a dar (que es evidencia, no un hueco) y lo que sigue sin pedirse.
+ */
+export const SAMPLE_SUPPLIER_EVIDENCE: SupplierEvidence[] = [
+  {
+    id: "sev-1",
+    supplierId: "sup-demo-1",
+    systemId: "SYS-001",
+    systemName: "Cribado de CVs — ATS",
+    kind: "instructions",
+    status: "received",
+    requestedOn: "2026-05-04",
+    receivedOn: "2026-05-11",
+    documentVersion: "v4.2",
+    sourceUrl: null,
+    expiresOn: null,
+    note: null,
+  },
+  {
+    id: "sev-2",
+    supplierId: "sup-demo-1",
+    systemId: "SYS-001",
+    systemName: "Cribado de CVs — ATS",
+    kind: "technicalDocumentation",
+    status: "refused",
+    requestedOn: "2026-05-04",
+    receivedOn: null,
+    documentVersion: null,
+    sourceUrl: null,
+    expiresOn: null,
+    note: "Responden que el Anexo IV es para autoridades y lo cubre su NDA. Pendiente de llevarlo al contrato en la renovación de marzo.",
+  },
+  {
+    id: "sev-3",
+    supplierId: "sup-demo-1",
+    systemId: "SYS-001",
+    systemName: "Cribado de CVs — ATS",
+    kind: "ceMarking",
+    status: "verifiedPublicly",
+    requestedOn: null,
+    receivedOn: "2026-06-12",
+    documentVersion: null,
+    sourceUrl: null,
+    expiresOn: null,
+    note: null,
+  },
+  {
+    id: "sev-4",
+    supplierId: "sup-demo-1",
+    systemId: null,
+    systemName: null,
+    kind: "logAccess",
+    status: "requested",
+    requestedOn: "2026-07-20",
+    receivedOn: null,
+    documentVersion: null,
+    sourceUrl: null,
+    expiresOn: null,
+    note: null,
+  },
+  {
+    id: "sev-5",
+    supplierId: "sup-demo-3",
+    systemId: "SYS-003",
+    systemName: "Entrevistas por vídeo con IA",
+    kind: "instructions",
+    status: "notRequested",
+    requestedOn: null,
+    receivedOn: null,
+    documentVersion: null,
+    sourceUrl: null,
+    expiresOn: null,
+    note: null,
+  },
+];
+
+export const SAMPLE_SUPPLIER_EVIDENCE_EN: SupplierEvidence[] = [
+  { ...SAMPLE_SUPPLIER_EVIDENCE[0], systemName: "CV screening — ATS" },
+  {
+    ...SAMPLE_SUPPLIER_EVIDENCE[1],
+    systemName: "CV screening — ATS",
+    note: "They answer that Annex IV is for authorities and is covered by their NDA. To be taken to the contract at the March renewal.",
+  },
+  { ...SAMPLE_SUPPLIER_EVIDENCE[2], systemName: "CV screening — ATS" },
+  { ...SAMPLE_SUPPLIER_EVIDENCE[3] },
+  { ...SAMPLE_SUPPLIER_EVIDENCE[4], systemName: "AI video interviews" },
+];

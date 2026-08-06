@@ -35,6 +35,8 @@ export const getAiSystems = () => repo.getAiSystems();
 export const getGapItems = () => repo.getGapItems();
 export const getSystemsForSelect = () => repo.getSystemsForSelect();
 export const getOrganizationName = () => repo.getOrganizationName();
+export const getOrgDeletionState = () => repo.getOrgDeletionState();
+export const getEvidenceFiles = () => repo.getEvidenceFiles();
 export const getUserOrgs = () => repo.getUserOrgs();
 export const getSystemById = (id: string) => repo.getSystemById(id);
 export const getSystemBiasAudit = (id: string) => repo.getSystemBiasAudit(id);
@@ -57,6 +59,10 @@ export const getActionTasks = () => repo.getActionTasks();
 export const getProductFunnel = (days?: number) => repo.getProductFunnel(days);
 export const getIntakeLinks = () => repo.getIntakeLinks();
 export const getIntakeSubmissions = () => repo.getIntakeSubmissions();
+export const getIncidents = () => repo.getIncidents();
+export const getReviewCadenceDays = () => repo.getReviewCadenceDays();
+export const getSuppliers = () => repo.getSuppliers();
+export const getSupplierEvidence = () => repo.getSupplierEvidence();
 
 export { isSupabaseConfigured };
 export type {

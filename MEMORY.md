@@ -127,6 +127,429 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-04** · **Vault de evidencia firmado (§0.G). La pregunta que lo ordenó todo: ¿quién es el
+  adversario?**
+  La respuesta no es obvia y decide el diseño entero: **el adversario es la organización auditada, no
+  Attesta**. A un auditor no le preocupa que nosotros mintamos —si dudara de eso no usaría el producto—; le
+  preocupa que la empresa que está auditando fabrique o retoque evidencia y la presente como si llevara ahí
+  desde siempre. De ahí sale todo:
+  - **Un manifiesto con hashes SIN firma no resuelve nada** contra ese adversario: quien altera un archivo
+    altera también su hash y el manifiesto vuelve a ser coherente. La firma de **Attesta** sí, porque el
+    cliente no puede producir un paquete válido desde su portátil.
+  - **El hash se calcula en el servidor.** Uno aportado por el navegador sería un campo de texto, no un
+    control: bastaría mandar el hash del documento bueno con el contenido malo.
+  - **Y al empaquetar se vuelve a hashear**, aunque ya esté en la base de datos. Si el archivo cambió por
+    debajo, el manifiesto tomado de la BD daría fe de algo que ya no es cierto. Comparar convierte el
+    empaquetado en una verificación.
+  - **Qué afirma la firma**, redactado con cuidado porque roza la regla nº 1: custodia e integridad («estaba
+    aquí, con este hash, en esta fecha»), **nunca** suficiencia ni conformidad. Va escrito DENTRO del
+    manifiesto y del README del ZIP, no solo en la pantalla: un paquete que se puede malinterpretar fuera de
+    su pantalla es un pasivo.
+  - **Cero dependencias nuevas** en la pieza más sensible del producto: ZIP escrito a mano (`zlib.crc32` es
+    nativo) y Ed25519 por Web Crypto. Sin compresión a propósito — los bytes del ZIP son los del archivo, así
+    que comprobar es trivial, y en un paquete de evidencia eso vale más que unos megas.
+  - **Verificado por software AJENO, que es lo único que demuestra algo aquí:** `unzip` y Python abren el ZIP y
+    validan los CRC; **OpenSSL valida la firma y la rechaza** al alterar un byte. Un formato binario probado
+    solo con el parser propio no demuestra nada: si el escritor pone mal un desplazamiento y el lector lo lee
+    igual de mal, el test pasa y el auditor no puede abrir el paquete.
+  - **La lección que ya habíamos aprendido y se aplicó sola:** la purga borra también los archivos del
+    almacenamiento, y ANTES que la base de datos. Las filas caen en cascada; los objetos no. Sin esto habríamos
+    repetido la supresión incompleta de la 0035, esta vez con el contenido real de la evidencia dentro.
+
+- **2026-08-04** · **0035, 0036 y 0037 aplicadas. Y un falso negativo que casi doy por bueno.**
+  `verify:backend` sube a **75 comprobaciones**. Lo que este entorno demuestra y el Postgres desechable no
+  son los **permisos**: `purge_organization` responde `403 permission denied` a un usuario con sesión, y lo
+  contrasté con una función inventada, que da **404**. Esa diferencia es la que prueba que la función existe
+  y está cerrada, en vez de que falte — sin el contraste, la comprobación habría pasado igual con la
+  migración sin aplicar.
+  - **El falso negativo.** La primera versión del bloque de la 0037 dio la migración por ROTA: `anon` no
+    podía insertar. La causa era mía: puse `Prefer: return=representation`, que hace que PostgREST ejecute un
+    `INSERT ... RETURNING`, y eso exige una policy de SELECT que aquí NO existe a propósito. El error resultante
+    (`42501`, "new row violates row-level security policy") habla de la escritura, no de la relectura, así que
+    apunta al sitio equivocado. **Lo que lo desmontó fue comprobar lo mismo contra `waitlist`**, viva desde
+    hace meses: fallaba igual, y eso no podía ser cierto. Regla: cuando algo recién escrito parece roto, prueba
+    la MISMA comprobación contra algo que lleva tiempo funcionando; si también "falla", el roto es el test.
+  - **Y la lección de fondo: `status >= 400` no discrimina.** Con `anon` incapaz de insertar, los cuatro tests
+    de CHECK del esquema pasaban en verde por el motivo equivocado. Ahora exigen el CÓDIGO concreto (`23514`
+    violación de CHECK, `23502` nulo obligatorio), y los de borrado/modificación se comprueban por **filas
+    afectadas** —vía `content-range`— porque un DELETE que la RLS deja sin efecto responde `204` igual que uno
+    que sí borró.
+  - **Límite del banco de pruebas, anotado para no repetir el intento:** no se puede invocar por HTTP una
+    Server Action que recibe `FormData`. React codifica los argumentos con su propio esquema de nombres, así
+    que una petición hecha a mano da un `Connection closed` opaco. Lo que sí se verifica —y basta— es el
+    payload EXACTO que la acción construye, con los opcionales a `null`.
+
+- **2026-08-04** · **Sprint 6 cerrado 7/7. Y una regresión propia que rompió el panel entero con el build en
+  verde.**
+  Al verificar la página de ayuda en modo demo, `/dashboard/ayuda` devolvió **500**. La causa no estaba en la
+  ayuda: dos commits antes, al añadir la baja de organización, metí **funciones en el diccionario i18n**
+  (`graceNotice: (d) => ...`). El diccionario entero se pasa como prop a `I18nProvider`, que es un **Client
+  Component**, y una función no se puede serializar: *"Functions cannot be passed directly to Client
+  Components"*. **Rompía todo el panel, no solo la demo.**
+  - **Por qué se coló, que es lo aprovechable.** (1) Es un error de EJECUCIÓN: `tsc` y `next build` pasaron en
+    verde con el panel roto. (2) Los tests son de lógica pura y no renderizan. (3) En modo conectado sin
+    sesión el panel redirige a login, así que ninguna comprobación por curl llegó a renderizarlo. (4) Y el
+    encabezado del propio diccionario **invitaba a hacerlo** —"las cadenas con variables son funciones
+    tipadas"—, una convención que nunca se había usado: había **cero** funciones antes. Documentación que
+    describe algo que la arquitectura no admite.
+  - **Arreglo:** marcador de posición (`{days}`) + `replace` en el punto de uso, el comentario del diccionario
+    corregido, y un guard (`dictionaries.guard.test.ts`) que recorre el diccionario a cualquier profundidad
+    **y además comprueba el ida y vuelta por JSON** — la prueba definitiva, no una aproximación: si sobrevive
+    a `JSON.parse(JSON.stringify(x))`, cruza la frontera. Verificado reintroduciendo la regresión: la caza y
+    dice la ruta exacta.
+  - **La lección operativa, que vale más que el arreglo:** `build` + `tsc` + tests en verde **no son evidencia
+    de que una página renderice**. Hay que abrirla. Y en este repo, abrirla significa levantar el servidor en
+    **modo demo**, porque en modo conectado el panel redirige antes de renderizar nada.
+
+- **2026-08-04** · **Sprint 6.4 y 6.5 — correo y operación. El patrón que se repitió todo el sprint.**
+  Los cinco ítems del sprint acabaron encontrando la misma clase de fallo: **algo que no da error**. La
+  supresión que parecía completa y dejaba filas huérfanas. El webhook que respondía 200 a su propio fallo. El
+  embudo que se inflaba solo con los reintentos. Y ahora el correo: sin `RESEND_FROM`, sale desde el dominio
+  compartido de pruebas de Resend, la API responde 200, los registros dicen "enviado" y el correo se va a
+  spam. Lo que se pierde ahí no es un boletín: invitaciones (alguien no entra y no sabe por qué),
+  restablecimientos de contraseña (alguien se queda fuera) y recordatorios (el producto deja de hacer lo que
+  se contrató).
+  - **Dónde ponerlo importa tanto como detectarlo.** El aviso va al panel INTERNO de telemetría, no al de
+    seguridad del cliente —es operación nuestra, no una función que se vende— y no solo al log, porque el log
+    de un envío "correcto" no lo mira nadie. La única forma de enterarse de un fallo silencioso es que lo diga
+    una pantalla que sí se abre.
+  - **Decisión de diseño con criterio propio:** el estado "envío apagado" NO avisa. En desarrollo es lo
+    normal, y un aviso que salta siempre se aprende a ignorar — que es exactamente cómo se pierde el aviso que
+    sí importaba.
+  - **Runbook (`docs/runbook.md`).** Lo escrito con más convicción: el registro inmutable y la cadena de
+    hashes **no valen nada sin una copia de la que restaurar**. Un expediente demostrablemente íntegro que se
+    ha perdido entero es tan inútil como uno manipulado. Supabase hace copias, pero **nunca se ha restaurado
+    ninguna**, y una copia sin restaurar no es una copia: es una suposición. El ensayo está paso a paso y de
+    él salen el RPO y el RTO reales, que son lo que pregunta la revisión de proveedores de cualquier cliente.
+
+- **2026-08-04** · **Sprint 6.3 — facturación. El bug más caro era una respuesta HTTP.**
+  Tres agujeros en el webhook de Stripe, todos de la misma familia: no fallan en pruebas, fallan en
+  producción y no dejan traza. El tercero es el que merece recordarse.
+  - **El `catch` respondía 200.** Un 200 le dice a Stripe "recibido, no lo reintentes" — pero ese `catch`
+    cubría fallos NUESTROS (base de datos, red), que son exactamente los que el reintento arregla. Con la base
+    de datos parpadeando un segundo, el pago no se registraba **nunca**: el cliente pagaba y se quedaba en el
+    plan gratuito, sin un error en ningún log. **Nadie abre una incidencia por algo que no da error.** Ahora
+    suelta la reclamación del evento y devuelve 500.
+  - **Sin idempotencia**, cada reintento de Stripe sumaba un `checkout_completed`. El embudo se falseaba solo
+    y **hacia arriba**, que es la dirección en la que no se sospecha: los números salían mejores.
+  - **Sin orden.** Stripe no lo garantiza. El guard va DENTRO del `on conflict` de la RPC, en una sola
+    sentencia, no en un "lee, compara y escribe" desde la aplicación: dos entregas simultáneas son justo lo
+    que pasa cuando Stripe reintenta mientras el original va de camino, y ahí el patrón de tres pasos pierde.
+  - **La reconciliación no es redundancia del webhook.** Stripe se rinde tras ~72 h de reintentos, así que el
+    caso "endpoint mal configurado en el panel" no lo arregla ningún reintento — solo comparar contra Stripe.
+    Se decidió que **no borre nada**: repara lo desactualizado y reporta lo huérfano. Una reconciliación que
+    borra por su cuenta es peor que la deriva que arregla.
+
+- **2026-08-04** · **Sprint 6.2 — baja de organización. Tres fallos, los tres encontrados probando, ninguno
+  razonando.**
+  Se adelantó sobre facturación porque el DPA y el aviso de privacidad publicados el mismo día **prometen**
+  supresión y portabilidad. Una promesa legal sin producto detrás es deuda con fecha.
+  - **Fallo 1, el que motivó todo.** La hipótesis era que el trigger de inmutabilidad del `audit_log`
+    impediría borrar una organización. Falsa, y la realidad era peor: `audit_log` **no tiene clave ajena** a
+    `organizations`, así que el borrado funcionaba y dejaba las filas huérfanas, con `old_data`/`new_data`
+    dentro. La supresión parecía completa y no lo era. **Si me hubiera fiado de la hipótesis habría escrito
+    la migración equivocada.**
+  - **Fallo 2: el orden correcto es el contrario del intuitivo.** Borrar auditoría → organización deja la
+    auditoría **repoblada**, porque la cascada dispara los `write_audit`. La primera prueba informó de 2
+    filas borradas y la organización volvió a tener 2. El orden bueno es organización primero.
+  - **Fallo 3, de permisos, y es regla general:** `revoke ... from public` **NO BASTA en Supabase**. Aparte
+    del EXECUTE de PUBLIC, Supabase tiene `alter default privileges in schema public grant all on routines to
+    anon, authenticated, service_role`, así que cada función nueva nace con un grant DIRECTO a esos roles que
+    sobrevive al revoke. El scaffold desechable sí replica esos default privileges, y por eso salió. Corregido
+    nombrándolos. Revisado 0028: está bien — `product_funnel` **necesita** `authenticated` porque un admin de
+    plataforma es un usuario autenticado y el guard va dentro.
+  - **Diseño: gracia de 7 días, no borrado inmediato.** Attesta se vende como system-of-record de evidencia;
+    que una sesión de propietario comprometida lo destruya sin vuelta atrás sería absurdo. `purge_organization`
+    revocada para `authenticated`: si el propietario pudiera purgar en el acto, la gracia sería decorativa.
+  - **La exportación existía pero mentía por omisión:** le faltaban proveedores, incidentes y fichas de
+    intake, y cortaba el registro de auditoría en 500 filas **en silencio**. Lo peor de las tres opciones:
+    quien recibe el paquete cree tenerlo todo. Ahora se pide una fila de más para poder distinguir "hay 500"
+    de "hay más", y el propio paquete declara el truncamiento.
+  - **Lo que se decidió NO hacer:** `setup.sql` no es re-ejecutable (muere en `create type` de 0001), lo cual
+    contradice el flujo documentado. Empecé a arreglarlo, vi que no eran solo los tipos —también tablas y
+    policies— y **lo revertí**: un arreglo parcial que no entrega la propiedad es peor que una limitación
+    documentada, porque invita a confiar en ella. Queda como tarea propia en §0.F.
+
+- **2026-08-04** · **Sprint 6.1 — cumplimiento propio. La lista de subprocesadores se hizo código para que
+  no pueda mentir.**
+  El problema de una lista de subprocesadores no es escribirla, es que envejece: alguien añade un `fetch` a un
+  servicio nuevo para arreglar otra cosa y el documento legal se queda desactualizado sin que nadie se entere,
+  hasta que un cliente pregunta en la due-diligence. Así que la lista vive en `src/lib/legal/subprocessors.ts`
+  y de ella salen **a la vez** la página pública y un guard que escanea el repo buscando destinos de salida y
+  **falla si el producto habla con un host que no esté declarado**.
+  - **La distinción que lo hace utilizable sin falsos positivos:** enviar datos a un host ≠ citar una URL. El
+    repo está lleno de enlaces a eur-lex, ilga.gov y cppa.ca.gov porque el contenido regulatorio cita sus
+    fuentes; ninguno recibe nada. El guard mira solo dos sitios donde un host significa flujo real: el
+    argumento de `fetch(...)` y la allowlist de la CSP. Un guard con falsos positivos se acaba desactivando —
+    la misma lección que el de copy prohibido.
+  - **Verificado con 3 mutaciones**, no por deducción: un `fetch` a PostHog (cazado, con el fichero), un host
+    nuevo en la CSP (cazado) y reclasificar un proveedor de IA como si tratara datos de cliente (cazado por
+    dos tests distintos). Ese tercero es el que importa: la página afirma que los modelos solo ven texto
+    normativo público, y el día que alguien mande el inventario de un cliente a un modelo, esa frase pasa a
+    ser mentira **en una página legal**.
+  - **La identidad del responsable no se inventa** (`entity.ts`), aplicando el precedente de `site-url.ts`.
+    Pero aquí fallar el build habría bloqueado desplegar el resto del producto, así que se degrada de forma
+    que el hueco sea imposible de pasar por alto: aviso de borrador arriba del todo, `noindex`, y fuera del
+    sitemap. El modo de fallo temido no era una excepción, era **una página que parece terminada**.
+  - **Hallazgo colateral que se cazó por probar los dos estados, no uno:** las páginas legales son dinámicas y
+    el sitemap se prerenderizaba en el build. Rellenar los datos en Vercel habría dejado las páginas
+    indexables mientras el sitemap seguía sin listarlas hasta el siguiente despliegue — la divergencia
+    silenciosa exacta que el diseño pretendía evitar. Se arregló con `force-dynamic` y se comprobó levantando
+    el servidor **con y sin** las variables. Método que conviene repetir: verificar un fallback no es
+    comprobar que funciona sin los datos, es comprobar **las dos mitades del interruptor**.
+  - **Decisiones que se dejaron al fundador en vez de suponerlas** (§1.4-ter): dónde está constituida la
+    sociedad —hay un correo `.mx` en el pie, y si la entidad no está en la UE el art. 27 RGPD obliga a designar
+    representante— y la revisión de abogado. Y una posición que se dejó escrita para que un jurista la
+    confirme en cinco minutos: no hay banner de cookies, lo cual es defendible (primera parte, agregada, sin
+    cesión, sin cruce, con rechazo explícito y respeto de GPC/DNT) pero **es una posición, no una certeza**.
+
+- **2026-08-04** · **0033 y 0034 aplicadas. La verificación que valió fue la que apagó el servidor.**
+  El fundador pegó las dos migraciones. `verify:backend` sube a **43 comprobaciones** (de 28) porque sus dos
+  bloques adaptativos pasaron de comprobar la degradación a comprobar el comportamiento real.
+  - **Lo que ninguna prueba de API podía cubrir, y sí se hizo:** el camino de ESCRITURA desde la propia
+    aplicación. Se invocaron las Server Actions de verdad —con una sesión real, extrayendo el id de acción del
+    manifiesto del build— y se leyó lo que quedó en la base de datos. Dos evaluaciones guardadas desde el
+    asistente de riesgo, una con la interfaz en español y otra en inglés, dieron `locale=es` y `locale=en`. Sin
+    eso, lo único demostrado habría sido que la columna acepta valores, no que la app escribe el correcto.
+  - **La prueba decisiva de la 0034 fue apagar el servidor.** Que el límite corte al sexto intento no demuestra
+    nada: lo haría igual el limitador en memoria de antes. Lo que lo demuestra es **reiniciar el proceso** —que
+    borra esa memoria— y comprobar que el siguiente intento **sigue bloqueado**. Ese es exactamente el fallo que
+    la migración existe para cerrar, y es la única forma de verlo. Método que conviene repetir: **para probar
+    que algo es compartido, hay que destruir lo que no lo era.**
+  - Confirmado también que la app **dejó de usar los reintentos**: cero líneas `migration-pending` tras recorrer
+    portada, gap, plan e inventario. Un fallback que sigue disparándose en silencio es una migración a medias.
+
+- **2026-08-04** · **SPRINT 5 CERRADO (7/7).** Deuda técnica y robustez. Lo que más se repitió como método:
+  **auditar el ticket antes de ejecutarlo**. Tres de los siete estaban descritos con una premisa que ya no era
+  cierta, y en los tres el trabajo útil estaba al lado, no donde señalaba el enunciado.
+  - **«Enums sin whitelist» ya estaba resuelto; lo que faltaba eran los topes.** Ningún campo de texto tenía
+    límite: un miembro autenticado podía escribir megabytes en cualquier nota. Se resolvió con un módulo propio
+    y **no con Zod**, porque hacía falta *un sitio con topes*, no un lenguaje de validación — las acciones
+    redirigen con un toast, no devuelven errores por campo. Regla de diseño explícita: **truncar el texto libre,
+    rechazar lo que tiene estructura**; media URL no es una URL corta, es una URL a otro sitio. Cayeron tres
+    agujeros reales de camino: URL con esquema libre que acaban en un `href` del dossier (`javascript:` = XSS
+    almacenado firmado por el cliente), fechas como `2026-02-31` que pasaban la regex porque `new Date` no falla
+    con ellas, e `id` sin validar interpolados en rutas de redirección.
+  - **«N queries en RPC»: no había N+1.** La fachada ya agrupaba. El coste estaba en la autenticación: cada
+    getter que necesitaba el id del usuario preguntaba a Supabase Auth **por red**, y el layout lo hacía **tres
+    veces** antes de pedir un solo dato — ~90 ms cada una, tanto como una consulta entera, y en serie. Se pasó a
+    verificación local del JWT, que es lo que el middleware ya hacía desde el Sprint 2. Medido con 21 muestras y
+    distribuciones sin solapar: portada **505 → 402 ms**, equipo **597 → 498 ms**.
+  - **«Rate limit con Upstash»: se hizo con Postgres.** Un contador compartido no necesita un proveedor nuevo, y
+    añadir Redis significaba coste recurrente **y un subprocesador más que declarar** justo en el producto que
+    vende gobernanza. La propiedad que hacía falta era la atomicidad, y `insert … on conflict` la da: 30
+    conexiones simultáneas con límite 10 → exactamente 10 pasan. A la tabla no va ninguna IP, va un hash.
+  - **El que no se hizo, y es lo más valioso del sprint:** la landing estática chocaba de frente con la CSP con
+    nonce que está en cola por activar (un nonce cambia en cada petición; una página estática se genera una
+    vez). Se llevó al fundador como decisión y eligió seguridad. **El ítem se cierra sin código y con el motivo
+    escrito**, que vale más que haberlo hecho.
+  - **Y una alarma mía que resultó falsa, comprobada antes de contarla.** Ver la entrada de la CSP: probar en
+    vez de deducir cambió la conclusión por su contraria.
+  - **Dos migraciones pendientes de pegar** (0033 y 0034) y **una variable que definir en Vercel**
+    (`NEXT_PUBLIC_APP_URL`, sin la cual el build ahora falla a propósito). Las tres, en PENDIENTES §1.
+
+- **2026-08-04** · **Sprint 5 · la landing y la CSP con nonce no pueden ser las dos cosas — y de paso, una
+  alarma mía que resultó falsa.** Al ir a sacar la landing del `headers()` del layout raíz vi que los ~44
+  scripts inline de Next (el payload RSC) salían **sin nonce**, y solo el script de tema —que se lo pasamos a
+  mano— lo llevaba. Deduje que al promover la CSP a `enforce` el navegador los bloquearía y la app quedaría
+  muerta en todas las rutas. **Lo probé antes de contarlo y era al revés.** Next saca el nonce de la política
+  que se manda como `Content-Security-Policy` (la aplicada), no de `x-nonce` ni de la Report-Only; como la
+  aplicada hoy es la "sin riesgo" y no lleva `script-src`, no hay nonce que encontrar. Al poner la estricta en
+  esa cabecera, Next empieza a inyectarlo **solo**: de 44 sin nonce a 45 con él, sin tocar la aplicación.
+  - **Lo aprovechable:** las violaciones de `script-src` que el Report-Only reporta hoy son **esperadas** y
+    desaparecen al promover. Quien las mire para decidir si promover concluirá lo contrario de lo cierto. Queda
+    escrito en PENDIENTES §0.4 y hay un test que vigila que el nonce siga siendo encontrable por el algoritmo
+    de Next, porque si alguien reordena las directivas la promoción dejaría de funcionar **en silencio**.
+  - **El hallazgo que sí bloquea el ticket:** un nonce cambia en cada petición, así que **exige render
+    dinámico**. La landing estática y la CSP con nonce en la landing son excluyentes. La alternativa que
+    documenta Next es SRI con hashes (`experimental.sri`) — experimental, y en un producto de compliance
+    adoptar un flag experimental en la página pública es decisión del fundador, no de un commit. Queda como
+    checkpoint suyo.
+  - **Lo que sí se arregló de camino, y era un fallo real de accesibilidad:** `/` con la cookie en inglés se
+    anunciaba como `lang="en"` mientras servía la landing en español (el componente recibe `locale="es"` fijo).
+    En la web pública manda la RUTA en las dos direcciones, no solo en `/en`. La cookie sigue mandando en auth
+    y dashboard, que no llevan el idioma en la URL. Verificado sobre el HTML servido en los tres casos.
+
+- **2026-08-04** · **Sprint 5 · el bug no era la comprobación que faltaba, era el default que sobraba.**
+  Los tres sitios que necesitan la URL absoluta del sitio —`layout.tsx` (metadataBase/OG), `i18n/metadata.ts`
+  (canonical + hreflang, y de ahí sitemap y robots) y `reminders/email.ts` (enlaces de los correos)— repetían
+  `process.env.NEXT_PUBLIC_APP_URL ?? "https://attesta-io.vercel.app"`. Parece una red de seguridad y es lo
+  contrario: **hace que el fallo no se note**. El día que el dominio cambie y se olvide la variable, la app no
+  se rompe — sigue publicando canonical, hreflang, sitemap y enlaces de correo hacia el host viejo, que un
+  buscador lee como «la versión buena está en otro sitio» y deja de indexar la nueva. Se descubre semanas
+  después, mirando por qué no entra tráfico.
+  - **La regla:** en un despliegue, sin variable no hay build. Una build rota se arregla en dos minutos; una
+    indexación rota, no. Fuera de un despliegue (portátil, CI) se usa `localhost` y no se molesta a nadie:
+    ahí la URL absoluta no la ve nadie. La señal de «esto es un despliegue» es `VERCEL`, no `NODE_ENV` —
+    `next build` pone `NODE_ENV=production` también en CI, y usarlo habría roto CI sin motivo.
+  - **Un valor mal escrito se rechaza, no se recorta.** Barra final, una ruta dentro (`https://attesta.io/en`,
+    lo que sale de copiar la URL de una página), esquema raro. Recortar sería adivinar la intención, y adivinar
+    mal aquí produce canonicals a medias, que es exactamente el fallo silencioso que se quería eliminar. Si
+    alguien se molestó en poner la variable, un typo merece saberse en el acto.
+  - **El test que más importa** no comprueba un caso, comprueba que **ningún camino** devuelve un dominio de
+    producción que nadie declaró — el guard contra el «arreglo» tentador de volver a poner un default cuando
+    la build falle. 5 mutaciones inyectadas, las 5 detectadas.
+  - **Verificado ejecutando los cuatro builds**, no razonándolos: despliegue sin variable → falla con el
+    mensaje que dice qué poner; con variable → compila y canonical/hreflang/sitemap/robots salen con ese
+    dominio (comprobado sobre el HTML servido); typo con ruta → falla; build local → compila con localhost.
+  - **Deuda que crea, y es deliberada:** el fundador tiene que definir `NEXT_PUBLIC_APP_URL` en Vercel antes de
+    que esto llegue a `main` (§1.4-bis de PENDIENTES). Si no lo hace, el build falla y no se publica nada
+    nuevo — pero la web actual sigue en pie, porque Vercel conserva el último despliegue bueno.
+
+- **2026-08-04** · **Sprint 5 · el idioma de lo que se guarda: `null` no es «español», es «no consta».**
+  El texto regulatorio que Attesta escribe en la BD (controles de un pack, motivación de una evaluación,
+  tareas nacidas de una recomendación) se congela en el idioma en que se creó. Al cambiar la interfaz, salía
+  mezclado — y **nadie sabía en qué idioma estaba cada fila**, así que no se podía ni traducir después ni
+  etiquetar para el lector de pantalla. Migración **0033**: una columna `locale`, nullable, en `gap_items`,
+  `risk_assessments` y `action_tasks`.
+  - **La decisión que sostiene el resto: no rellenar hacia atrás.** Tentador: el default es español, así que
+    marcar todo lo viejo como `es` "arregla" el histórico de un `update`. Es exactamente el error: una org que
+    trabajase en inglés acabaría con filas inglesas marcadas como españolas, y **un `lang` equivocado es peor
+    que ninguno** — el lector de pantalla cambia de voz y pronuncia con la fonética que no es, mientras que sin
+    atributo hereda el de la página, que es el comportamiento de hoy. `null` = no consta, y no se etiqueta.
+  - **Corolario en código:** `coerceStoredLocale` **no** reutiliza `coerceLocale`. Parecen la misma función y
+    resuelven problemas opuestos: uno decide en qué idioma RENDERIZAR (caer al default es obligatorio, hay que
+    pintar algo), el otro describe un HECHO DEL PASADO (caer al default es inventarse un dato). Hay un test que
+    fija la diferencia poniendo las dos llamadas una al lado de la otra, para que quien "simplifique" el
+    duplicado vea por qué no lo es.
+  - **Y no se traduce al vuelo**, aunque ahora se sabría hacer: sería reescribir evidencia. Lo guardado es lo
+    que la organización declaró ese día y el expediente tiene que poder enseñarse tal cual. Se muestra literal,
+    se etiqueta con `lang` solo cuando el idioma consta **y** difiere (WCAG 3.1.2) y un aviso por pantalla
+    explica la mezcla — sin él, un usuario asume que la app está rota.
+  - **Alcance ampliado sobre el ticket, a propósito:** el ticket decía `gap_items` + autoevaluaciones, pero
+    `action_tasks` copia título y artículo igual que las brechas copian los del pack. Mismo defecto, misma
+    columna; dejarlo fuera solo habría comprado una segunda migración.
+  - **Método:** 0033 validada en el Postgres desechable en dos pasadas (correcta + re-ejecutable) y comprobado
+    que el CHECK acepta `null`/`es`/`en` y rechaza `fr` y **`es-ES`** (el error tentador: parece válido y no lo
+    es). 10 tests nuevos con **5 mutaciones inyectadas, las 5 fallaron**. `verify:backend` sube a 28/28 y ahora
+    **se adapta solo** a si la 0033 está aplicada: mientras esté pendiente comprueba que la degradación es el
+    camino activo y que la app no se rompe; al aplicarse, pasa a comprobar el CHECK.
+  - **Trampa de medición, otra vez:** buscar el texto del aviso en la respuesta da falso positivo, porque el
+    payload RSC lleva el diccionario serializado. Hay que anclarse en algo que solo exista si el nodo se pintó
+    (el `className` del aviso, el atributo `lang=` en los nodos). Con eso: interfaz EN + contenido ES → 10 nodos
+    `lang="es"` + aviso; interfaz ES → solo el `<html lang="es">` del layout y ningún aviso.
+
+- **2026-08-03** · **SPRINT 4 CERRADO (10/10).** Filtro de inventario, cajón móvil, registro de incidentes,
+  registro de proveedores, streaming con Suspense, i18n de muros, viewport/manifest, packs de California,
+  sección de «cómo verificamos» y consolidación del onboarding.
+  **Lo que más valió, otra vez, fue lo que se quitó.** Las dos consultas al experto de dominio no añadieron
+  features: cambiaron el **verbo**. En incidentes, quitaron una cuenta atrás que habría sido falsa para casi
+  todos los casos (los plazos del Art. 73 son del proveedor). En proveedores, quitaron el «exige» de media
+  docena de documentos que la norma dirige a las autoridades. Las citas siempre estaban bien; lo que fallaba
+  era la promesa que las acompañaba, y ese tipo de error no lo caza ningún test: se descubre delante de un
+  cliente.
+  **Dos lecciones de método que conviene no volver a aprender:** (1) el **payload RSC lleva el diccionario
+  serializado**, así que medir o buscar texto renderizado por coincidencia de cadena da falsos positivos —pasó
+  con el `lang` en julio y volvió a pasar midiendo el streaming—; hay que anclar en algo que solo exista en el
+  HTML. (2) el **Postgres desechable no dice nada sobre permisos** —no reproduce los grants por defecto de
+  Supabase—, y por segunda vez dio un verde falso: la cadencia de revisión era inescribible en producción por
+  el endurecimiento de 0025. Queda `npm run verify:backend` para no repetirlo.
+
+- **2026-08-03** · **El deployer puede exigir mucho menos de lo que decíamos.** Al investigar el registro de
+  proveedores salió que el AI Act dirige al responsable del despliegue **un solo documento**: las instrucciones
+  de uso (Art. 13). El Anexo IV (Art. 11), el sistema de gestión de la calidad (Art. 17) y el de gestión de
+  riesgos (Art. 9) van dirigidos a **autoridades y organismos notificados** — «to provide national competent
+  authorities and notified bodies with the necessary information». Nuestro copy decía «exige al proveedor la
+  documentación técnica del Anexo IV» en recomendaciones, dos packs, el clasificador y una tarea de la demo.
+  Las **citas eran correctas**; el error estaba en el **verbo**, que es peor: se descubre en la primera
+  negociación con un proveedor grande y ahí el producto pierde credibilidad entera. Corregido y codificado en
+  `src/lib/suppliers/evidence.ts`, donde cada elemento lleva su **base jurídica** (exige / verifica / pacta en
+  contrato / registra que existe) con tests que rompen si alguien vuelve a mover el Anexo IV a «exigible».
+  **Tres cosas más que conviene no volver a descubrir:**
+  (a) la **base de datos del Art. 71 es pública** e incluye copia de la declaración de conformidad y las
+  instrucciones electrónicas — hay un canal de verificación que no depende del proveedor y no lo estábamos
+  usando; (b) para los **puntos 2 a 8 del Anexo III** (todo nuestro catálogo salvo biometría) **no interviene
+  organismo notificado** (Art. 43.2), así que pedir un número de certificado genera una brecha falsa en casi
+  todos los clientes; (c) el destinatario del **Art. 53.1.b** (documentación GPAI) es el **proveedor del
+  sistema** que integra el modelo, no el deployer.
+  **Y una corrección de método sobre el aplazamiento:** el informe cierra —con fuentes secundarias, no con
+  lectura directa— que ni el Art. 49 ni el Art. 73 están aplazados, pero con un matiz que hay que conservar:
+  que la Sección 5 aplique no significa que haya declaraciones de conformidad desde 2026, porque el **deber**
+  de elaborarla vive en el Art. 16, que sí está aplazado. Sigue pendiente leer el **Art. 113 modificado
+  verbatim**; EUR-Lex aún no publica la versión consolidada.
+
+- **2026-08-03** · **Registro de proveedores (Capa 8): investigación regulatoria previa. Seis cosas que el
+  producto tiene HOY escritas de más, y una palanca que no estábamos usando.**
+  1. **La documentación técnica del Anexo IV NO es exigible por el deployer.** El Art. 11.1 la dirige, literal, a
+     *«national competent authorities and notified bodies»*, y el Art. 18 la pone a disposición de las autoridades
+     10 años. No hay ningún artículo que obligue al proveedor a enseñársela al cliente. Nuestro copy dice «exige al
+     proveedor esa documentación (Anexo IV)» en `recommendations.ts`, `rrhh.ts`, `gestion-trabajadores.ts`,
+     `mock-data.ts` y `risk-assessment.ts`. Es **pacta en contrato**, no «exige». Lo que sí es entregable al
+     deployer son las **instrucciones de uso** (Art. 13.2/13.3), que son el ÚNICO documento que el Reglamento
+     dirige expresamente a él — y dentro van la exactitud y sus métricas (15.3), las medidas de supervisión humana
+     que le tocan implementar (14.3.b vía 13.3.d), los mecanismos de logs (13.3.f), la identidad del proveedor y de
+     su representante autorizado (13.3.a) y los cambios predeterminados (13.3.c). El SGC del Art. 17 tampoco es
+     exigible.
+  2. **El Art. 53.1.b no es del deployer.** Su destinatario literal son *«providers of AI systems who intend to
+     integrate the general-purpose AI model into their AI systems»*. Un deployer que usa ChatGPT **no puede
+     invocarlo** frente a OpenAI; puede su proveedor de sistema. Solo si el cliente integra el modelo por API y
+     construye su propio sistema pasa a ser ese proveedor y sí es destinatario. Hay que precisar el texto de la
+     capa GPAI. Lo único público por norma en el Cap. V es el **resumen de datos de entrenamiento (53.1.d)** y la
+     **lista de modelos con riesgo sistémico (Art. 52.6)**.
+  3. **Palanca no usada: la base de datos de la UE es PÚBLICA (Art. 71.4) y contiene copia de la declaración UE de
+     conformidad (Anexo VIII A.11) y las instrucciones de uso electrónicas (A.12)**, más el tipo, número y **fecha
+     de expiración** del certificado del organismo notificado (A.8) y el representante autorizado (A.3). O sea: hay
+     un canal de verificación que **no depende de la buena voluntad del proveedor**. El registro debe tener un
+     estado `verificado_en_fuente_publica`, no solo `recibido`.
+  4. **La única caducidad real del catálogo UE es el certificado del organismo notificado** (Art. 44.2: ≤4 años
+     Anexo III, ≤5 Anexo I, prorrogable por reevaluación). **Marcado CE, declaración de conformidad, instrucciones
+     de uso y registro en la BD de la UE NO caducan.** Y los **10 años** de los Arts. 18, 23.5 y 47.1 son plazo de
+     **conservación** del proveedor/importador/representante, no de validez: convertirlos en caducidad es el error
+     clásico. Todo lo demás son **disparadores por evento** (nueva versión, modificación sustancial, aviso de acción
+     correctora del Art. 20.1 —que sí obliga al proveedor a informar al deployer—, cambio de representante
+     autorizado del Art. 22.4, cambio de subencargado del RGPD 28.2, suspensión de certificado del 44.3).
+  5. **`numero_organismo_notificado` no puede ser campo requerido.** Art. 43.2: para los puntos **2 a 8 del Anexo
+     III** —o sea RRHH, crédito, educación, servicios públicos: casi todo nuestro catálogo— la evaluación es
+     **control interno (Anexo VI), «which does not provide for the involvement of a notified body»**. Pedirlo
+     generaría una brecha falsa en la mayoría de los casos.
+  6. **El AI Act no impone NINGÚN contrato al deployer.** El Art. 26 no menciona contratos. El único deber
+     contractual de la cadena es el **Art. 25.4**, y obliga al **proveedor** frente a sus terceros suministradores
+     (además encarga a la Oficina de IA unas **cláusulas tipo voluntarias**, gratuitas — verificar si ya existen).
+     El derecho de auditoría sobre el proveedor viene del **RGPD 28.3.h**, no del AI Act. Las **MCC-AI** existen
+     pero son de la *Community of Practice on Public Procurement of AI*, **no vinculantes ni posición oficial de la
+     Comisión**, y pensadas para compradores públicos.
+  **Deuda del Art. 113 — avanzada, no cerrada.** Cuatro fuentes secundarias independientes (FPF, NicFab,
+  ictrechtswijzer, Modulos/HAQQ) coinciden: el Reglamento (UE) 2026/1744 aplaza **solo el Cap. III Secciones 1, 2 y
+  3** (salvo el Art. 6.5) → 2-dic-2027 (Art. 6.2/Anexo III) y 2-ago-2028 (Art. 6.1/Anexo I). **La Sección 5
+  (Arts. 40-49: evaluación de conformidad, certificados, marcado CE, declaración de conformidad, registro) y el
+  Cap. IX (Arts. 72-84, incl. el 73) NO están aplazados: 2-ago-2026.** Eso **cierra en la dirección contraria a la
+  esperada** las dos deudas abiertas (Art. 49 en `servicios-publicos.ts` y Art. 73 en incidentes): no están
+  aplazados. **Matiz que hay que decir siempre:** su efecto práctico es casi nulo antes de 2027, porque los
+  *deberes* de elaborar la declaración (16.g), colocar el marcado CE (16.h) y registrar (16.i) viven en el **Art.
+  16, que es Sección 3 y sí está aplazado**, y la clasificación (Art. 6) también. Y **los Arts. 23 y 24 (importador
+  y distribuidor) también son Sección 3** → hasta 2-dic-2027 **no hay deber legal** de que el sistema vaya
+  acompañado de la declaración de conformidad. **Conclusión de producto: todo el registro de proveedores es hoy
+  preparación CONTRACTUAL, no derecho exigible, y la UI debe decirlo.** Sigue faltando leer el Art. 113 **verbatim**
+  (las fuentes discrepan incluso en qué punto lo reescribe, y dos afirman que el gatillo condicional de decisión de
+  la Comisión del borrador de nov-2025 **desapareció** del texto final).
+  **Regla de copy que sale de aquí:** cada elemento de evidencia lleva un campo **`base_juridica`** con cuatro
+  valores —*entregable al deployer* / *obligación del proveedor sin entrega* / *solo por contrato* / *verificable en
+  fuente pública*— y de él sale el **verbo de la UI**: «exige» / «pacta en contrato» / «verifica». Sin ese campo, el
+  producto acaba diciendo «exige» de cosas que nadie está obligado a darte.
+
+- **2026-08-03** · **Registro de incidentes (Art. 26.5): tres reglas que el producto habría escrito al revés.**
+  La consulta al experto de dominio antes de tocar código cambió el diseño tres veces, y las tres son
+  reutilizables más allá de esta pantalla:
+  1. **El Art. 73 obliga al PROVEEDOR, no al deployer.** Sus plazos (15 / 10 / 2 días) solo pasan a ser del
+     cliente cuando **no consigue contactar con el proveedor** («mutatis mutandis», último inciso del 26.5).
+     Lo que sí aporta el deployer es la **fecha de conocimiento**, que arranca un reloj que corre para otro —
+     y eso, además de ser lo cierto, es mejor argumento: su expediente prueba cuándo empezó el plazo ajeno.
+     El Art. 26.5 **no tiene ni un solo plazo numérico**: dice «sin demora injustificada» e «inmediatamente».
+  2. **Suspender el uso lo obliga la rama del riesgo del Art. 79.1, no la del incidente grave.** Contraintuitivo
+     y protegido por test: quien lo «arregle» con un `|| seriousness === "serious"` rompe la suite.
+  3. **No existe cadencia de revisión obligatoria** para el deployer en el Reglamento (el 26.5 es continuo, el
+     27.2 dispara por cambio). Cualquier periodicidad que ofrezcamos es **buena práctica**, y así se etiqueta,
+     con guard que lee el diccionario. Ojo también con el **ámbito del Art. 27.1**: la evaluación de impacto en
+     derechos fundamentales **no** la debe una empresa privada de RRHH, así que no se le programa.
+  **Deuda de verificación bloqueante, heredada y ampliada:** sigue sin leerse el **Art. 113 tal como queda tras
+  el Reglamento (UE) 2026/1744**. De esa lectura depende si el Art. 73 (y el 79) quedan fuera del aplazamiento
+  —hoy es inferencia estructural—, exactamente el mismo patrón ya abierto con el **Art. 49**. Dos artículos
+  esperando la misma lectura: conviene hacerla de una vez.
+  **Aviso permanente:** la premisa *«Colorado obliga a avisar al AG en 90 días»* **volvió a aparecer** en la
+  redacción de este ticket. Ese régimen (SB 24-205) está **derogado** por la SB 26-189 y con él murieron el
+  aviso al AG, la evaluación de impacto y **la defensa afirmativa por NIST/ISO**. Es la segunda vez que
+  reaparece; que nadie la reintroduzca en un modelo de datos.
+
 - **2026-07-30** · **SPRINT 3 CERRADO (4/4). El catálogo pasa de 8 a 11 packs, y lo que más valió fue lo
   descartado.** Metering por sistemas y asientos + packs de Colorado, servicios públicos esenciales y educación
   de EE. UU.

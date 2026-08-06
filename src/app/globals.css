@@ -189,6 +189,19 @@
   to { transform: scaleX(1); }
 }
 
+/* Cajón de navegación móvil del dashboard. Solo entrada: transicionar la SALIDA
+   de un elemento de la capa superior depende de la propiedad `overlay`, que hoy
+   solo implementa Chromium — en Firefox y Safari desaparecería de golpe
+   igualmente y el código quedaría a medias. */
+@keyframes drawer-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+@keyframes drawer-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @layer utilities {
   /* Aparición al hacer scroll (lo activa el componente Reveal). */
   .reveal {
@@ -233,6 +246,18 @@
     transform-origin: left center;
     animation: guide-bar 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
+  /* Cajón de navegación (móvil, `<dialog>` + `showModal()`).
+     El velo va en `rgba()` LITERAL y no en `bg-ink/40`: `--color-ink` se
+     INVIERTE en tema oscuro, así que la utilidad daría un velo CLARO sobre
+     fondo oscuro; y `::backdrop` no hereda las custom properties de `:root` en
+     todos los motores, con lo que en los antiguos saldría transparente. */
+  .nav-drawer[open] {
+    animation: drawer-in 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .nav-drawer[open]::backdrop {
+    background: rgba(9, 14, 11, 0.55);
+    animation: drawer-backdrop-in 0.26s ease-out;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -251,8 +276,66 @@
     transform: none !important;
     opacity: 1 !important;
   }
+  .nav-drawer[open],
+  .nav-drawer[open]::backdrop {
+    animation: none !important;
+  }
   * {
     scroll-behavior: auto !important;
+  }
+}
+
+/* Cinturón de iOS Safari para el cajón. `showModal()` ya bloquea el scroll del
+   fondo en Chrome y Firefox; en iOS conviene reforzarlo. Acotado a < md porque
+   el cajón es `md:hidden`: sin la media query, rotar una tablet con el cajón
+   abierto dejaría el documento congelado. */
+@media (width < 48rem) {
+  html:has(dialog.nav-drawer[open]) {
+    overflow: hidden;
+  }
+}
+
+/* Nunca un botón muerto. Sin `<dialog>` modal (motores antiguos) o con el
+   scripting desactivado, el cajón no se puede abrir: degrada a la lista vertical
+   estática de siempre y el disparador desaparece. Son reglas de AUTOR, así que
+   vencen a `dialog:not([open]){display:none}` del UA por ORIGEN de cascada, no
+   por especificidad.
+   `screen` es obligatorio: sin él estos bloques ganarían a `print:hidden` (que
+   vive en `@layer utilities`) y el cajón saldría impreso en dossier e informe. */
+@media screen and (width < 48rem) {
+  @supports not selector(dialog:modal) {
+    .nav-drawer-trigger {
+      display: none;
+    }
+    dialog.nav-drawer {
+      position: static;
+      display: block;
+      inset: auto;
+      width: 100%;
+      max-width: none;
+      height: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--color-line);
+      box-shadow: none;
+      animation: none;
+    }
+  }
+}
+@media screen and (scripting: none) and (width < 48rem) {
+  .nav-drawer-trigger {
+    display: none;
+  }
+  dialog.nav-drawer {
+    position: static;
+    display: block;
+    inset: auto;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-line);
+    box-shadow: none;
+    animation: none;
   }
 }
 

@@ -362,6 +362,18 @@ export function WelcomeGuide({
     focusables()[0]?.focus();
 
     function onKey(e: KeyboardEvent) {
+      // Si hay OTRO diálogo modal encima —el cajón de navegación vive en la capa
+      // superior—, este panel no puede capturar ni Escape ni Tab: `inert` y el
+      // top layer bloquean foco e interacción, pero NO los listeners a nivel de
+      // `document`. Sin la guarda, un Escape cerraría el cajón Y descartaría
+      // para siempre la guía del primer login. Bug preexistente que el cajón
+      // solo hace visible.
+      //
+      // Se comprueba que exista un `dialog[open]` y NO que el foco esté fuera
+      // del panel: esto último dejaría muertas las ramas de recuperación del
+      // propio atrapa-foco de abajo, que existen justamente para el caso en que
+      // el foco se ha escapado.
+      if (document.querySelector("dialog[open]")) return;
       if (e.key === "Escape") {
         e.preventDefault();
         void dismiss();

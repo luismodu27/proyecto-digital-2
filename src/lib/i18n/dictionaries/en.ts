@@ -419,6 +419,44 @@ export const en: Dictionary = {
       note: "Evidence declared by your organization and orientative classification — not certification or legal advice.",
     },
 
+    verification: {
+      eyebrow: "How we verify it",
+      title: "A model does not write the legal text",
+      intro:
+        "This is the part of the product where a hallucination is not an annoying bug but a liability. So the regulatory content is not generated: it is assembled from your data and from text an expert has already checked against the law.",
+      steps: [
+        {
+          n: "01",
+          title: "Primary sources before code",
+          body: "Every new rule —an article, a state law, a deadline— is checked against the official text before a line is written. More than once that has changed the content before it existed, and almost always by removing rather than adding.",
+        },
+        {
+          n: "02",
+          title: "An adversarial second pass",
+          body: "The research is reviewed again looking for the mistake, not the confirmation: what has been over-cited, which obligation belongs to someone else, which deadline was taken as settled without reading it.",
+        },
+        {
+          n: "03",
+          title: "Deterministic assembly, zero model",
+          body: "The dossier, the report, the classification and the recommendations are composed only from your organization's data and already-verified text. Where there is automation —regulatory monitoring— the machine drafts and a person validates before anything is published.",
+        },
+        {
+          n: "04",
+          title: "Automatic guards on every change",
+          body: "Every change goes through checks that fail on their own: one watches that no copy implying certification slips in, others encode the regulatory expectation behind each rule. And they are validated by breaking them on purpose: a test that does not fail when the rule is broken protects nothing.",
+        },
+      ],
+      notTitle: "What we do not do",
+      not: [
+        "We do not generate regulatory text with a language model.",
+        "We do not state a date we have not read in the official text: if it is pending verification, we say so.",
+        "We do not score your compliance or your suppliers'. We count facts: what is on record and what is missing.",
+      ],
+      exampleLabel: "Evidence that it works",
+      exampleTitle: "Colorado changed its law and the content changed with it",
+      exampleBody:
+        "Colorado's AI regime was repealed and replaced by another. Half a dozen obligations we had taken as settled described a law that no longer existed —including one that was also a commercial argument—. They were caught by reading the new law, not by waiting for a customer to notice. No automated check would have caught that: it is not a code defect, it is content.",
+    },
     honestidad: {
       eyebrow: "Why you can trust it",
       title: "Zero hallucinations. By design.",
@@ -576,11 +614,92 @@ export const en: Dictionary = {
         "No commitment. Attesta provides governance guidance, not legal advice.",
     },
 
+    demo: {
+      eyebrow: "Assisted sales",
+      title: "Talk to us before you buy",
+      intro:
+        "If you manage AI across several teams, or you have to answer a vendor review, half an hour saves weeks. We walk through the product with your case, not with sample data.",
+      bullets: [
+        "A walkthrough of your case: which systems you would have to inventory and what an auditor would ask for.",
+        "A straight answer on what Attesta covers and what it does not.",
+        "No 40-slide sales deck.",
+      ],
+      emailLabel: "Work email",
+      nameLabel: "Name",
+      companyLabel: "Organization",
+      roleLabel: "Your role",
+      rolePlaceholder: "e.g. Head of People, DPO, IT",
+      sizeLabel: "Organization size",
+      sizePlaceholder: "Select",
+      contextLabel: "What brings you here? (optional)",
+      contextPlaceholder:
+        "e.g. we use a CV screening tool and we have been asked for evidence.",
+      optional: "optional",
+      cta: "Request a demo",
+      sending: "Sending…",
+      successTitle: "Got it.",
+      successBody:
+        "We will write to the address you gave us. If you are in a hurry, reply to that message and we will bring it forward.",
+      invalidEmail: "Enter a valid email address.",
+      rateError:
+        "You have sent several requests in a row. Wait a few minutes and try again.",
+      genericError: "Could not send. Please try again in a moment.",
+      privacy: "We use this only to reply to you. We do not share it with anyone.",
+      privacyLink: "Privacy notice",
+    },
     footer: {
       tagline:
         "Continuous AI governance for the mid-market: inventory, risk, evidence and regulatory watch, ready for audit.",
       contactHeading: "Contact",
+      legalHeading: "Legal and privacy",
       rights: "© 2026 Attesta. All rights reserved.",
+    },
+  },
+
+  legal: {
+    eyebrow: "Legal documentation",
+    updated: "Last updated",
+    contents: "On this page",
+    backToSite: "Back to Attesta",
+    otherDocs: "Other documents",
+    contact: "Contact for privacy matters",
+    draftTitle: "Draft: the data controller is not yet identified",
+    draftBody:
+      "This document does not yet name the company, registered address and tax identification of the controller, as required by Article 13 GDPR. While they are missing, the page is not indexed and should not be treated as the final version.",
+    draftMissing: "Pending details",
+    lawyerNote:
+      "Text prepared from how the product actually works. Pending review by a lawyer before final publication.",
+    controllerHeading: "Data controller",
+    controllerName: "Legal name",
+    controllerAddress: "Registered address",
+    controllerTaxId: "Tax identification",
+    controllerEmail: "Privacy email",
+    controllerEuRep: "EU representative (Art. 27 GDPR)",
+    subprocessors: {
+      customerHeading: "Process customer organizations' data",
+      customerIntro:
+        "Sub-processors within the meaning of Article 28 GDPR. Any new addition is announced 30 days in advance.",
+      corpusHeading: "Process only the public regulatory corpus",
+      corpusIntro:
+        "They take part in the regulatory monitoring radar. They receive no data from any customer organization.",
+      colProvider: "Provider",
+      colPurpose: "Purpose",
+      colData: "What it receives",
+      colLocation: "Where",
+      statusActive: "In use",
+      statusGated: "Not enabled",
+      statusGatedHint:
+        "Configured by environment variable: while it is not enabled, it receives no data at all.",
+      privacyLink: "Provider's privacy policy",
+    },
+    optOut: {
+      heading: "Audience measurement",
+      on: "Measurement is currently active in this browser.",
+      off: "You have opted out of measurement in this browser. No events are emitted.",
+      browser:
+        "Your browser sends a do-not-track signal (GPC or DNT) and it is being honoured: no events are emitted, you need do nothing.",
+      disable: "Opt out of measurement",
+      enable: "Allow it again",
     },
   },
 
@@ -765,12 +884,28 @@ export const en: Dictionary = {
   dashboard: {
     skipToContent: "Skip to content",
 
+    // Notice for content stored in another language (migration 0033). See
+    // `src/lib/i18n/stored-locale.ts`: it only shows when the language IS known
+    // and differs from the interface. It explains the mix instead of letting it
+    // look like a bug.
+    storedLocale: {
+      es: "Spanish",
+      en: "English",
+      noticeOne:
+        "Some of this content was recorded in {lang} and is shown as it was written: translating it now would change the evidence on file.",
+      noticeMany:
+        "Some of this content was recorded in other languages ({langs}) and is shown as it was written: translating it now would change the evidence on file.",
+    },
+
     nav: {
       overview: "Overview",
       inventory: "Inventory",
       risk: "Risk",
       gap: "Gap assessment",
+      vault: "Evidence vault",
       plan: "Action plan",
+      incidents: "Incidents",
+      suppliers: "Suppliers",
       packs: "Policy packs",
       monitoring: "Monitoring",
       team: "Team",
@@ -780,7 +915,16 @@ export const en: Dictionary = {
       telemetry: "Telemetry",
       lockedTitle: "Readiness plan feature",
       lockedTitleEnterprise: "Enterprise plan feature",
-      lockedLabel: "Locked",
+    },
+
+    navDrawer: {
+      title: "Navigation",
+      openMenu: "Open navigation",
+      closeMenu: "Close navigation",
+      planLabel: "Your plan",
+      lockedCountOne: "1 section requires a higher plan",
+      lockedCountMany: "{n} sections require a higher plan",
+      seePlans: "See plans",
     },
 
     sidebar: {
@@ -790,6 +934,83 @@ export const en: Dictionary = {
       backToSite: "← Back to site",
     },
 
+    help: {
+      title: "Help",
+      subtitle: "The questions that come up most, and what Attesta does not do.",
+      contactTitle: "Not here?",
+      contactBody:
+        "Write to us and we will reply. Tell us what you were trying to do and which screen you got stuck on: that usually lets us solve it in the first message.",
+      contactCta: "Email support",
+      goTo: "Go to section",
+      legalTitle: "Legal documentation",
+      legalBody:
+        "Privacy notice, cookies, sub-processors and the Data Processing Agreement.",
+    },
+    vault: {
+      title: "Evidence vault",
+      keygen: {
+        title: "Generate the signing key",
+        body:
+          "Attesta needs a key pair to sign audit packages. This button generates it right here; you then paste the two values into your deployment's environment variables.",
+        privacyNote:
+          "The private key is generated in this browser and is sent nowhere: not to Attesta, not to anyone. It only leaves this screen when you paste it into your deployment panel.",
+        cta: "Generate key pair",
+        warning:
+          "Copy them NOW. They disappear when you reload this page and you would have to generate new ones. Also store the private key in your password manager: if you lose it, packages already delivered cannot be verified.",
+        keyIdLabel: "Key fingerprint (keyId)",
+        privateLabel: "Private · a secret, server only",
+        publicLabel: "Public · not secret, used to verify",
+        copy: "Copy",
+        copied: "Copied",
+        steps: [
+          "Paste each value into its variable, in Vercel → Settings → Environment Variables, marked for Production.",
+          "Copy only the value: do not include the variable name or the equals sign.",
+          "Redeploy (Deployments → latest → Redeploy). Variables only take effect on a new deployment.",
+          "Check that /api/vault/key returns the same fingerprint shown above.",
+        ],
+        unsupported:
+          "This browser does not support the key type we use (Ed25519). Try an up-to-date Chrome or Edge.",
+      },
+      subtitle:
+        "The actual documents behind each control, and the package you hand to an auditor.",
+      why: "A control marked as done with no document behind it is a statement. With the file inside, it is evidence someone can check.",
+      empty: "You have not uploaded any documents yet.",
+      emptyHint:
+        "Start with what an auditor asks for first: your AI usage policy, the human oversight log, and the evidence your vendor gave you.",
+      uploadTitle: "Upload a document",
+      fileLabel: "File",
+      fileHint: "Up to 25 MB per file.",
+      anchorLabel: "What does it correspond to?",
+      anchorHint: "Pick the gap or the system this document belongs to.",
+      anchorPlaceholder: "Select",
+      groupGaps: "Gaps",
+      groupSystems: "Systems",
+      uploadCta: "Upload document",
+      uploading: "Uploading…",
+      listTitle: "Stored documents",
+      colFile: "File",
+      colAttached: "Corresponds to",
+      colHash: "SHA-256 fingerprint",
+      colUploaded: "Uploaded",
+      delete: "Delete",
+      packageTitle: "Audit package",
+      packageBody:
+        "A ZIP with the documents, a manifest listing each one's SHA-256 fingerprint, and instructions to check it. Whoever receives it can verify it themselves, with no Attesta account.",
+      packageCta: "Download package",
+      packageEmpty: "Upload at least one document to generate the package.",
+      signedTitle: "Signed by Attesta",
+      signedBody:
+        "The manifest is signed, so whoever receives it can check that Attesta issued it and that nobody has modified it since.",
+      unsignedTitle: "No signing key configured",
+      unsignedBody:
+        "The package is still generated and the hashes can be checked, but it carries no signature: nobody will be able to verify that Attesta issued it. Configure the signing key before handing it to a third party.",
+      attests: "What this package states",
+      attestsBody:
+        "That these files, with these fingerprints, were stored in your account on the date shown.",
+      notAttests: "What it does NOT state",
+      notAttestsBody:
+        "It is not a certification or an audit. Attesta does not open the files and does not assess whether the evidence is sufficient: that is judged by whoever audits you.",
+    },
     account: {
       organization: "Organization",
       billing: "Plan and billing",
@@ -817,6 +1038,17 @@ export const en: Dictionary = {
 
     toasts: {
       "system-created": "System registered in the inventory.",
+      "vault-uploaded": "Document stored in the vault.",
+      "vault-deleted": "Document deleted.",
+      "vault-empty": "Choose a file and what it corresponds to.",
+      "vault-large": "The file is larger than 25 MB.",
+      "vault-forbidden": "Only an owner or admin can delete evidence.",
+      "vault-error": "Could not store the document. Please try again.",
+      "deletion-requested":
+        "Closure requested. You can cancel it during the next 7 days.",
+      "deletion-cancelled": "Closure cancelled. Your organization is still active.",
+      "deletion-confirm":
+        "The name does not match. Type it exactly as shown to confirm closure.",
       "system-updated": "System updated.",
       "system-deleted": "System deleted.",
       "system-error": "Couldn't save the system. Please try again.",
@@ -870,6 +1102,17 @@ export const en: Dictionary = {
       "vigia-demo": "The Watcher requires connecting your organization.",
       "vigia-denied": "Only Attesta's review team can run the Watcher.",
       "vigia-error": "The Watcher couldn't complete the review. Please try again.",
+      "incident-created": "Incident recorded in the register.",
+      "incident-updated": "Incident record updated.",
+      "incident-demo": "The incident register requires connecting your organization.",
+      "incident-error": "The action couldn't be completed. Please try again.",
+      "cadence-updated": "Review cadence updated.",
+      "supplier-created": "Supplier added to the register.",
+      "supplier-updated": "Supplier updated.",
+      "supplier-deleted": "Supplier removed from the register.",
+      "evidence-updated": "Evidence item updated.",
+      "supplier-demo": "The supplier register requires connecting your organization.",
+      "supplier-error": "The action couldn't be completed. Please try again.",
     },
 
     units: {
@@ -1071,6 +1314,28 @@ export const en: Dictionary = {
       emptyDemo:
         "The demo view doesn't include multiple organizations. Create your account to manage your real entities.",
       roles: { owner: "Owner", admin: "Admin", member: "Member" },
+      deletion: {
+        title: "Close this organization",
+        intro:
+          "This deletes the inventory, assessments, declared evidence, action plan, suppliers, incidents and audit log. There is no way to recover it afterwards.",
+        exportFirst:
+          "Before continuing, download your full record. It is the same bundle you can request at any time for portability.",
+        exportCta: "Download my record (JSON)",
+        graceNotice:
+          "Closure is not immediate: you have {days} days to cancel it. After that, deletion is final.",
+        ownerOnly: "Only the organization's owner can close it.",
+        confirmLabel: "Type the organization's name to confirm",
+        confirmHint: "It must match “{name}”.",
+        requestCta: "Request closure",
+        requestingCta: "Requesting…",
+        pendingTitle: "Closure requested",
+        pendingBody:
+          "This organization and all its data will be deleted in {days} day(s), on {date}. You can cancel until then.",
+        pendingBodyToday:
+          "This organization and all its data will be deleted today ({date}). Cancel now if this was a mistake.",
+        cancelCta: "Cancel closure",
+        cancellingCta: "Cancelling…",
+      },
     },
 
     security: {
@@ -1182,6 +1447,25 @@ export const en: Dictionary = {
       },
       classify: "Classify",
       dossier: "Dossier",
+      filters: {
+        searchLabel: "Search the inventory",
+        searchPlaceholder: "Name, code, owner, vendor…",
+        searchAction: "Search",
+        clearSearch: "Clear",
+        riskLabel: "Risk",
+        evidenceLabel: "Backing",
+        all: "All",
+        evidenceNone: "Unclassified",
+        clear: "Clear filters",
+        countOne: "1 system of {total}",
+        countOther: "{n} systems of {total}",
+        countAllOne: "1 system",
+        countAllOther: "{n} systems",
+        sortAria: "Sort by {column}",
+        noResultsTitle: "No system matches that search",
+        noResultsBody:
+          "Try fewer words or remove a filter. Your inventory is untouched: you are only looking at a subset.",
+      },
       addTitle: "Add systems to the inventory",
       addSubtitle:
         "Two paths: ask each team with a link, or upload the list you already have in a spreadsheet.",
@@ -1350,6 +1634,9 @@ export const en: Dictionary = {
     team: {
       title: "Team",
       subtitle: "Invite your team (HR, Legal, audit) and manage their roles.",
+      paywallFeature: "Team and roles",
+      paywallDesc:
+        "Invite your team, assign roles (owner/admin/member) and manage who sees and attests your organization's evidence.",
       demoBefore: "You're in ",
       demoMode: "demo mode",
       demoAfter:
@@ -1512,7 +1799,10 @@ export const en: Dictionary = {
         hint: "Where you operate · tune the radar",
         body: "Check the territories where your organization hires or has employees. The radar will prioritize the rules of those jurisdictions.",
         save: "Save",
+        readonlyTitle: "Your organization's jurisdictions",
+        readonlyEmpty: "Not configured",
       },
+      ownerAdminOnly: "Only an owner or an admin can change this.",
       task: {
         statusAria: "Status",
         assigneeAria: "Assignee",
@@ -1608,10 +1898,18 @@ export const en: Dictionary = {
         },
       },
 
+      vault: {
+        paywallFeature: "Evidence vault",
+        paywallDesc:
+          "Store the actual documents behind each control and generate the package you hand to an auditor, with each file's SHA-256 fingerprint.",
+      },
       plan: {
         title: "Action plan",
         subtitle:
           "Prioritized tasks to close your gaps: assign an owner, date and status.",
+        paywallFeature: "Action plan",
+        paywallDesc:
+          "Turn gaps into tasks with owners and due dates, and track their progress until they are closed.",
         exportEvidence: "⬇ Export evidence",
         statOpen: "open",
         statInProgress: "in progress",
@@ -1639,10 +1937,328 @@ export const en: Dictionary = {
         addSuggestionToPlan: "+ Add to plan",
       },
 
+      // Incident register (Art. 26(5)) + periodic review.
+      // Careful when editing: the numeric deadlines (15/10/2 days) belong to
+      // Art. 73 and are the PROVIDER's; Art. 26(5) only says "without undue
+      // delay" and "immediately". And the review cadence is good practice, not
+      // an obligation — a test breaks if it is rewritten as mandatory.
+      incidents: {
+        title: "Incidents",
+        subtitle:
+          "A record of what happened, of whom your organization states it informed, and when. Art. 26(5) of the AI Act.",
+        paywallFeature: "Incident register",
+        paywallDesc:
+          "Open a record for every incident, log whom you informed and when, and preserve the date of knowledge that starts the deadlines.",
+        legalFrame:
+          "Art. 26 becomes enforceable for Annex III high-risk systems on 2 December 2027. Recording incidents today is preparation, not an overdue obligation.",
+
+        statOpen: "open",
+        statSerious: "classified as serious",
+        statAttention: "with notifications to record",
+        statUnsuspended: "at risk with no suspension recorded",
+
+        newIncident: "+ Open a record",
+        newIncidentHint: "Log an incident",
+        fieldTitle: "What happened",
+        fieldTitlePlaceholder: "Summarise the event in one line",
+        fieldDetail: "Detail (optional)",
+        fieldSystem: "System affected",
+        fieldOccurredOn: "Date of occurrence",
+        fieldAwareOn: "Date of knowledge",
+        fieldAwareOnHint:
+          "The most important date in the record: Art. 73 counts its deadlines from the moment the provider —or, where applicable, your organization— becomes aware.",
+        fieldCausalLinkOn: "Causal link established",
+        fieldCausalLinkOnHint:
+          "When the link to the system was established, or its reasonable likelihood. The definition covers direct and indirect causation.",
+        fieldSeriousness: "Classification",
+        fieldCategories: "Categories under Art. 3(49)",
+        categoriesHint:
+          "Only if you have classified it as serious. Tick every one that applies: when several concur, the reference deadline is the shortest.",
+        create: "Open the record",
+        saveAssessment: "Save classification",
+
+        emptyTitle: "No records yet",
+        emptyBody:
+          "Open one as soon as you spot something, even if you don't yet know whether it is serious. Almost all of them start under assessment.",
+
+        seriousnessLabel: {
+          under_assessment: "Under assessment",
+          serious: "Serious incident",
+          not_serious: "Not a serious incident",
+        },
+        seriousnessHint:
+          "You can start under assessment and escalate later: the record keeps both dates.",
+
+        categoryLabel: {
+          death: "Death of a person",
+          serious_health_harm: "Serious harm to health",
+          critical_infrastructure:
+            "Serious and irreversible disruption of critical infrastructure",
+          fundamental_rights:
+            "Infringement of Union law obligations intended to protect fundamental rights",
+          property_or_environment: "Serious harm to property or the environment",
+        },
+
+        stageLabel: {
+          attention: "Notifications to record",
+          notified: "Notifications recorded",
+          logged: "Recorded",
+          closed: "Closed",
+        },
+
+        targetLabel: {
+          provider: "Provider",
+          distributor: "Importer or distributor",
+          authority: "Market surveillance authority",
+        },
+
+        notifyTitle: "Whom to inform",
+        notifyOrderedNote:
+          "Serious incident: Art. 26(5) sets the order — first the provider, then the importer or distributor and the authorities, immediately.",
+        notifySimultaneousNote:
+          "Art. 79(1) risk: inform the provider or distributor and the market surveillance authority, without undue delay.",
+        notifyNothing:
+          "While the record is under assessment and no Art. 79(1) risk is stated, Art. 26(5) does not trigger any notification yet.",
+        notifyDisclaimer:
+          "Attesta transmits nothing to any authority or provider: what is stored here is what your organization states it has done.",
+        notifyDeclared: "Stated on",
+        notifyPending: "Not recorded",
+        markNotified: "Record notification",
+        undoNotified: "Undo",
+
+        elapsedPrefix: "Known for ",
+        elapsedToday: "Known today",
+
+        flagRisk79: "There are grounds to consider an Art. 79(1) risk",
+        flagRisk79Hint:
+          "A risk to health, safety or fundamental rights. It counts even when the system is used in accordance with the instructions: misuse is not required.",
+        flagSuspended: "Your organization has suspended use",
+        flagSuspendedHint:
+          "Art. 26(5) requires suspending use in the Art. 79(1) risk branch — not because the incident is serious.",
+        flagProviderUnreachable: "The provider could not be reached",
+        flagProviderUnreachableHint:
+          "Only then does Art. 26(5) apply Art. 73 «mutatis mutandis» and its deadlines become your organization's.",
+        flagPersonalData: "It also involves personal data",
+        flagPersonalDataHint:
+          "A separate flag on purpose: the GDPR clocks (72 h to the data protection authority) run in parallel and neither replaces the other.",
+
+        suspendRequired: "Suspension of use still to be recorded",
+        suspendDone: "Use suspended, as stated",
+
+        deadlineProviderTitle: "The provider's deadline (Art. 73)",
+        deadlineProviderBody:
+          "Art. 73 binds the provider, not your organization. It runs from your date of knowledge, so your record is the proof of when it started.",
+        deadlineSelfTitle: "Deadline applicable to your organization (Art. 73)",
+        deadlineSelfBody:
+          "By stating that you could not reach the provider, Art. 26(5) applies Art. 73 and the deadline becomes yours. The channel is defined by your national market surveillance authority.",
+        deadlineRef: "Reference: ",
+        deadlineDaysSuffix: " days from knowledge",
+
+        gdprTitle: "Two separate clocks",
+        gdprBody:
+          "A serious incident under the AI Act is not a personal data breach, nor the other way round. If it is also one, the GDPR deadlines (Arts. 33 and 34) run in parallel with different recipients.",
+
+        close: "Close the record",
+        reopen: "Reopen",
+        openBadge: "Open",
+        closedBadge: "Closed",
+        detailsToggle: "Classification and notifications",
+
+        // --- Periodic review of the self-assessment ---
+        reviewTitle: "Self-assessment review",
+        reviewSubtitle:
+          "Systems whose self-assessment is worth revisiting, according to the cadence your organization has set.",
+        cadenceLabel: "Cadence",
+        cadenceNote:
+          "Good practice: the AI Act sets no review frequency for the deployer. Art. 26(5) calls for continuous monitoring and Art. 27(2) is triggered by change, not by the calendar; ISO/IEC 42001 speaks of «planned intervals» and NIST AI RMF (GOVERN 1.5) leaves the frequency to the organization.",
+        cadence180: "Every 6 months",
+        cadence365: "Every 12 months",
+        cadence730: "Every 24 months",
+        saveCadence: "Save",
+        reviewEmpty: "No system is in the review window yet.",
+        reviewStateLabel: {
+          overdue: "Past the date",
+          unknown: "No review recorded",
+          due_soon: "Coming up",
+          ok: "Up to date",
+        },
+        reviewViewAll: "See reviews",
+        reviewMorePrefix: "And ",
+        reviewMoreSuffix: " more systems in the review window.",
+        reviewLastPrefix: "Last review: ",
+        reviewNever: "not recorded",
+        reviewDuePrefix: "Due on ",
+
+        triggersTitle: "What should trigger a review",
+        triggersNote:
+          "These are the triggers the law does recognise. The cadence above is only the safety net.",
+        art27Note:
+          "Those marked Art. 27 only bind those subject to the fundamental rights impact assessment: public bodies, private entities providing public services and points 5(b) and 5(c) of Annex III. A private HR company does not owe that assessment.",
+        triggers: {
+          incident: "An incident has been recorded for this system",
+          substantialChange: "Substantial modification of the system",
+          vendorOrModel: "Change of provider or of model version",
+          purpose: "The processes or the intended purpose change",
+          affectedGroups: "The persons or groups affected change",
+          newRisks: "Risks of harm appear that were not previously recorded",
+          humanOversight: "Human oversight measures change",
+          regulatory: "Regulatory news from the monitoring radar",
+        },
+      },
+
+      // Supplier and third party register (Layer 8).
+      // When editing: the VERB follows the legal basis of the item
+      // (`src/lib/suppliers/evidence.ts`). Only the instructions for use can be
+      // required; Annex IV, the QMS and risk management are addressed to
+      // authorities and notified bodies. And never score a supplier.
+      suppliers: {
+        title: "Suppliers",
+        subtitle:
+          "Who sells you each AI system, what evidence they have given you and what is missing. The design obligation is theirs; the record is yours.",
+        paywallFeature: "Supplier register",
+        paywallDesc:
+          "Inventory your AI suppliers, track what evidence each one has handed over, and keep at hand what must be negotiated into the next contract.",
+        legalFrame:
+          "Importer and distributor obligations (Arts. 23 and 24) become enforceable for Annex III high-risk systems on 2 December 2027, like those of Art. 26. Until then this is contractual preparation: do it while you renew contracts, which is when you have leverage.",
+
+        statSuppliers: "suppliers",
+        statCovered: "items with evidence",
+        statPending: "pending",
+        statRefused: "refusals recorded",
+
+        addSupplier: "+ Add supplier",
+        addSupplierHint: "Register a third party",
+        fieldName: "Name",
+        fieldNamePlaceholder: "Supplier's legal name",
+        fieldCountry: "Country of establishment",
+        fieldRole: "Role under the Regulation",
+        fieldGdprRole: "Role under data protection law",
+        fieldContact: "Compliance contact",
+        fieldContractEnds: "Contract ends",
+        fieldNote: "Notes",
+        flagOutsideEu: "Established outside the EU",
+        flagOutsideEuHint:
+          "Then it must have an authorised representative in the Union (Art. 22). If the representative steps down it is a warning sign: Art. 22(4) requires them to terminate the mandate when they believe the provider is not complying.",
+        fieldAuthorizedRep: "Authorised representative",
+        fieldAuthorizedRepChecked: "Checked on",
+        flagDpa: "A data processing agreement is in place (GDPR Art. 28)",
+        flagDpaHint:
+          "Only relevant if the supplier processes personal data on your behalf. Many declare themselves controllers in order to train or improve their product: the role is a fact to record, not an assumption.",
+        flagExcludesHighRisk: "The contract excludes high-risk use",
+        flagExcludesHighRiskHint:
+          "Art. 25(2) red flag. If your contract excludes it and you use the tool for a high-risk case anyway, you take on the provider's obligations and lose the right to the initial provider's cooperation.",
+        create: "Add supplier",
+        save: "Save",
+        remove: "Remove supplier",
+
+        emptyTitle: "No suppliers recorded",
+        emptyBody:
+          "Start with whoever sells you the highest-risk system. The evidence you ask for today is what you will not have to improvise when an audit arrives.",
+
+        roles: {
+          provider: "Provider",
+          importer: "Importer",
+          distributor: "Distributor",
+          model_provider: "Model provider",
+          third_party: "Other third party",
+          unknown: "Not determined",
+        },
+        gdprRoles: {
+          controller: "Controller",
+          processor: "Processor",
+          joint: "Joint controller",
+          none: "Does not process personal data",
+          unknown: "Not determined",
+        },
+
+        verbs: {
+          deliverable: "Require",
+          publicSource: "Verify",
+          contractOnly: "Negotiate in the contract",
+          existsNoAccess: "Record that it exists",
+        },
+        verbHints: {
+          deliverable: "The Regulation obliges the provider to hand it to you.",
+          publicSource:
+            "It is public: you can check it without depending on the supplier's goodwill.",
+          contractOnly:
+            "You cannot require it by law. You get it by negotiating, and renewal is the moment.",
+          existsNoAccess:
+            "It must exist, but it is addressed to someone else (authorities or notified bodies).",
+        },
+
+        kinds: {
+          instructions: "Instructions for use",
+          correctiveActions: "Notice of corrective action or withdrawal",
+          authorizedRep: "Authorised representative in the Union",
+          ceMarking: "CE marking",
+          declarationOfConformity: "EU declaration of conformity",
+          euDatabase: "Entry in the EU database",
+          notifiedBodyCertificate: "Notified body certificate",
+          technicalDocumentation: "Technical documentation (Annex IV)",
+          qualityManagement: "Quality management system",
+          riskManagement: "Risk management system",
+          dataGovernance: "Data governance and quality",
+          logAccess: "Access to and export of logs",
+          dataProcessingAgreement: "Data processing agreement",
+          versionChangeNotice: "Version change notice",
+          importerRecords: "Documentation kept by the importer",
+          distributorChecks: "Distributor's verifications",
+          gpaiIntegratorDocs: "Documentation for model integrators",
+          gpaiTrainingSummary: "Public summary of training content",
+        },
+        statuses: {
+          notRequested: "Not requested",
+          requested: "Requested",
+          received: "Received",
+          verifiedPublicly: "Verified in a public source",
+          refused: "The supplier refused",
+          notApplicable: "Not applicable",
+        },
+        statusHintRefused:
+          "Write down what they answered and when: a refusal in writing is evidence, and good evidence.",
+
+        evidenceTitle: "Evidence",
+        fieldVersion: "Document or system version",
+        fieldVersionHint:
+          "More useful than a date: what invalidates a set of instructions is not the passing of time, it is a new version.",
+        fieldSourceUrl: "Link or reference",
+        fieldExpires: "Expires on",
+        fieldExpiresHint:
+          "Only the notified body certificate expires (Art. 44). The CE marking, the declaration of conformity, the instructions for use and the EU database entry do not.",
+        addEvidence: "Add item",
+        certWarning: "Certificate expiring soon",
+        certExpired: "Certificate expired",
+
+        noNotifiedBody:
+          "Worth knowing: for points 2 to 8 of Annex III —employment, credit, education, public services— conformity assessment is based on internal control and NO notified body is involved (Art. 43(2)). If your provider gives you no certificate number, in most cases they are not hiding it: it does not exist.",
+
+        art25Title: "When you stop being a deployer",
+        art25Note:
+          "Four situations turn whoever uses a system into its provider, with every obligation of Art. 16 on top. The third is the most common in the mid-market and requires touching nothing technical.",
+        art25Outcome:
+          "This may trigger Art. 25: it requires legal review. Attesta does not rule on whether you have become a provider.",
+        art25: {
+          whiteLabel:
+            "You put your name or trademark on a high-risk system already placed on the market",
+          substantialModification:
+            "You substantially modify the system, beyond the changes the provider had already foreseen",
+          purposeChange:
+            "You change the intended purpose of a system that was not high-risk —including a general-purpose one— and it becomes high-risk",
+          fineTuning:
+            "You fine-tune a general-purpose model yourself",
+        },
+        art25CarveOut:
+          "The only one with a contractual nuance: Art. 25(1)(a) allows an agreement to allocate the obligations between the parties.",
+      },
+
       activity: {
         title: "Activity log",
         subtitle:
           "Every change is recorded and chained with SHA-256: any later alteration is detectable. Who did what and when.",
+        paywallFeature: "Activity log",
+        paywallDesc:
+          "Your organization's immutable audit trail: who created, changed or attested each system, assessment and gap, with date and author.",
         chainOk: "Chain intact",
         chainBroken: "Integrity broken",
         filterAll: "All",
@@ -1680,6 +2296,9 @@ export const en: Dictionary = {
         title: "Regulatory monitoring",
         subtitle:
           "A radar of deadlines and regulatory changes affecting your AI systems.",
+        paywallFeature: "Regulatory monitoring",
+        paywallDesc:
+          "The radar that watches official sources and warns you about every EU AI Act deadline and change before it affects you.",
         watchedSources: "Watched sources →",
         validationInbox: "Validation inbox →",
         jurisdictionFilter: "Jurisdiction",
@@ -1967,6 +2586,9 @@ export const en: Dictionary = {
         title: "Policy packs",
         subtitle:
           "Control templates by use case and framework. Apply one to preload a system's gaps.",
+        paywallFeature: "Policy packs",
+        paywallDesc:
+          "Ready-made policy templates for your vertical (starting with HR) to speed up your evidence.",
         controlsUnit: "controls",
         applies: "Applies:",
         applyToSystem: "Apply to a system",

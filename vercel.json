@@ -13,6 +13,14 @@
     {
       "path": "/api/audit-verify",
       "schedule": "0 7 * * 1"
+    },
+    {
+      "path": "/api/org-purge",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/stripe/reconcile",
+      "schedule": "0 4 * * *"
     }
   ]
 }
