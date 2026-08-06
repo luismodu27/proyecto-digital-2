@@ -46,6 +46,22 @@ npm run test:watch
 La verificación completa es **lint + tsc + `check:copy` + `test` + build** (los cinco están en CI)
 y, para el backend real, **curl por API** (usuarios `*@attesta-test.dev`) — ver gotchas.
 
+```bash
+npm run verify:deploy   # ¿lo que dice el repo está PUBLICADO? (ver abajo)
+```
+
+**⚠️ SUBIDO ≠ PUBLICADO. Léelo antes de decir "hecho".** Vercel publica **`main`**, y el trabajo
+se hace en ramas. Durante seis semanas se dio por bueno que `commit + push` equivalía a
+producción: los tests pasaban, las migraciones se aplicaban y la web servía el código de julio.
+El fundador aplicó migraciones y buscó funciones que no existían en el aire. Nadie mintió — es
+que la pregunta "¿esto está publicado?" no tenía forma barata de responderse, así que no se
+hacía. Ahora sí: `npm run verify:deploy` compara el commit publicado (`/api/version`, que Vercel
+rellena solo) con el local, y comprueba que las rutas públicas respondan. **Ejecutarlo al cerrar
+cualquier trabajo que el fundador vaya a mirar**, y no decir "está en producción" sin él.
+Ojo: NO incluye rutas de `/dashboard` — el middleware redirige a login antes de resolverlas, así
+que un 307 no distingue "existe" de "no existe"; la primera versión las incluía y pasaban en
+verde con el vault sin publicar.
+
 **Tests (`npm test`, Vitest, `src/**/*.test.ts`).** Cubren solo **lógica pura** (nada de componentes
 ni de Supabase; entorno `node`, sin jsdom, para que la suite corra en <1 s y nadie la desactive).
 Existen porque `build`/`lint`/`tsc` compilan tan felices una **regla legal mal editada**: un `if`
