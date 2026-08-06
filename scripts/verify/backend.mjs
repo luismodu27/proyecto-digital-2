@@ -1153,5 +1153,87 @@ if (!has0037) {
   );
 }
 
+/* ==========================================================================
+   0039 · Permisos de las funciones: cerradas a `anon`, abiertas con sesión
+   ==========================================================================
+
+   POR QUÉ ESTE BLOQUE, y por qué está escrito así. Una auditoría comprobó que
+   `verify_all_audit_chains` respondía **200 con 81 filas** a cualquiera con la
+   clave pública y sin cuenta: el identificador de cada organización cliente y el
+   estado de su cadena de auditoría. Causa: `revoke ... from anon` sobre una
+   función es un no-op (Postgres concede EXECUTE a PUBLIC y `anon` lo hereda). La
+   0028 lo documentó y lo arregló en dos funciones de diecisiete; la 0039 barre el
+   resto.
+
+   Y AQUÍ ESTÁ LA PARTE QUE IMPORTA PARA ESTE FICHERO. Al verificar la 0039, esta
+   suite dio 86/86 en verde — pero no probaba nada, porque **siete de las nueve
+   funciones cuyos permisos cambiaron no las llamaba nadie**. Un "todo correcto"
+   sobre código que no se ejecuta es exactamente el tipo de tranquilidad falsa que
+   este proyecto ya ha pagado dos veces.
+
+   CADA COMPROBACIÓN TIENE LAS DOS MITADES, y por eso distingue:
+     · sin sesión  -> `42501 permission denied`  (el permiso está revocado)
+     · con sesión  -> cualquier OTRA cosa        (el grant funciona)
+   Comprobar solo la primera mitad dejaría pasar el fallo opuesto —revocar de más
+   y romper el producto— que es igual de grave y mucho más fácil de cometer.
+
+   Se llaman con un uuid INEXISTENTE a propósito: la función corre y responde con
+   su propio error de autorización, así que se mide el permiso sin tocar ni un
+   dato real. */
+{
+  const NADA = "00000000-0000-0000-0000-000000000000";
+  const rpc = (fn, body, token) =>
+    api(`/rest/v1/rpc/${fn}`, { method: "POST", body, token });
+
+  const CERRADAS = [
+    ["verify_audit_chain", { org: NADA }],
+    ["list_audit_log", { org: NADA, lim: 1 }],
+    ["list_org_members", { org: NADA }],
+    ["org_has_active_subscription", { org: NADA }],
+    ["set_org_jurisdictions", { org: NADA, jur: ["ES"] }],
+    ["claim_invitations", {}],
+    ["invite_member", { org: NADA, invitee_email: "x@attesta-test.dev", invitee_role: "member" }],
+  ];
+
+  for (const [fn, body] of CERRADAS) {
+    const sin = await rpc(fn, body);
+    check(
+      `${fn}: anon NO puede ejecutarla`,
+      errCode(sin) === "42501",
+      `${sin.status} code=${errCode(sin)} — si es PGRST202, el nombre de un parámetro está mal y la comprobación NO mide nada`,
+    );
+    const con = await rpc(fn, body, tokenA);
+    check(
+      `${fn}: con sesión sí (el grant no se pasó de frenada)`,
+      errCode(con) !== "42501",
+      `${con.status} code=${errCode(con)}`,
+    );
+  }
+
+  // La que filtraba. Ni siquiera con sesión: es exclusiva del cron.
+  const vaSin = await rpc("verify_all_audit_chains", {});
+  check(
+    "verify_all_audit_chains: anon NO puede (era la fuga de 81 organizaciones)",
+    errCode(vaSin) === "42501",
+    `${vaSin.status} code=${errCode(vaSin)} ${vaSin.text.slice(0, 60)}`,
+  );
+  const vaCon = await rpc("verify_all_audit_chains", {}, tokenA);
+  check(
+    "verify_all_audit_chains: un usuario con sesión tampoco (solo el cron)",
+    errCode(vaCon) === "42501",
+    `${vaCon.status} code=${errCode(vaCon)}`,
+  );
+
+  // CONTROL POSITIVO. Sin esto, un fallo de red o una clave caducada haría que
+  // TODO respondiera 401 y el bloque entero pasaría en verde por el motivo
+  // equivocado. `btrim_safe` está abierta a `anon` a propósito (la usa el intake).
+  const abierta = await rpc("btrim_safe", { p: "  hola  " });
+  check(
+    "control: `btrim_safe` sigue abierta a anon (si esto falla, la sonda está rota, no el permiso)",
+    abierta.status === 200,
+    `${abierta.status} ${abierta.text.slice(0, 40)}`,
+  );
+}
+
 console.log(`\n${pass} correctas · ${fail} fallos`);
 process.exit(fail === 0 ? 0 : 1);
