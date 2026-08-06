@@ -1,0 +1,128 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../web.css">
+<style>
+  html,body{margin:0;padding:0}
+  #stage{position:relative;width:100vw;height:100vh;overflow:hidden;font-family:"Geist",sans-serif;--k:1}
+  #stage[data-fmt="square"]{--k:.76}
+  #stage[data-fmt="wide"]{--k:.82}
+  #stage[data-fmt="square"] #s2{justify-content:center;padding-top:0}
+  #bg{position:absolute;inset:0;z-index:0}
+  .scene{position:absolute;inset:0;z-index:10;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 80px;box-sizing:border-box;font-family:"Geist",sans-serif}
+  .eyebrow{font-size:calc(24px*var(--k));margin:0}
+  h2.disp{margin:calc(18px*var(--k)) 0 0;font-size:calc(76px*var(--k))}
+  h2.disp .em{font-style:italic;color:var(--brand)}
+  .sub{margin-top:calc(28px*var(--k));font-size:calc(32px*var(--k));color:var(--ink-soft);line-height:1.4;max-width:calc(840px*var(--k))}
+  .sub .em{color:var(--brand);font-style:italic;font-family:"Fraunces",serif}
+  /* S2 radar mockup */
+  #s2{justify-content:flex-start;padding-top:calc(150px*var(--k))}
+  #stage[data-fmt="wide"] #s2{justify-content:center;padding-top:0}
+  #s2 .cap{font-size:calc(23px*var(--k));margin:0;font-family:"Geist Mono",monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--brand)}
+  #s2 .capt{margin:calc(14px*var(--k)) 0 calc(40px*var(--k));font-family:"Fraunces",serif;font-weight:600;font-size:calc(52px*var(--k));color:var(--ink);letter-spacing:-.015em}
+  .mock{width:calc(900px*var(--k));background:var(--paper-raised);border:2px solid var(--line-strong);border-radius:calc(26px*var(--k));padding:calc(16px*var(--k));box-shadow:var(--shadow-float);text-align:left}
+  .mbar{display:flex;align-items:center;gap:calc(12px*var(--k));padding:calc(12px*var(--k)) calc(14px*var(--k))}
+  .mbar .dot{width:calc(16px*var(--k));height:calc(16px*var(--k));border-radius:50%}
+  .murl{margin-left:calc(14px*var(--k));flex:1;background:var(--paper-sunken);border-radius:calc(9px*var(--k));padding:calc(9px*var(--k)) calc(16px*var(--k));font-size:calc(20px*var(--k));color:var(--muted)}
+  .mapp{border:1px solid var(--line);border-radius:calc(18px*var(--k));background:var(--paper);padding:calc(26px*var(--k))}
+  .rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:calc(18px*var(--k))}
+  .rh .t{font-family:"Fraunces",serif;font-weight:600;font-size:calc(28px*var(--k));color:var(--ink)}
+  .chips{display:flex;gap:calc(10px*var(--k))}
+  .chip{font-family:"Geist Mono",monospace;font-size:calc(15px*var(--k));letter-spacing:.06em;text-transform:uppercase;padding:calc(8px*var(--k)) calc(15px*var(--k));border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .chip.on{background:var(--brand-soft);color:var(--brand-strong);border-color:var(--good-bd)}
+  .frow{display:flex;align-items:center;justify-content:space-between;gap:calc(14px*var(--k));padding:calc(17px*var(--k)) calc(20px*var(--k));border:1px solid var(--line);background:var(--paper-raised);border-radius:calc(12px*var(--k));margin-bottom:calc(11px*var(--k))}
+  .frow .nm{font-size:calc(23px*var(--k));color:var(--ink);font-weight:500}
+  .jb{font-family:"Geist Mono",monospace;font-size:calc(14px*var(--k));letter-spacing:.06em;text-transform:uppercase;padding:calc(6px*var(--k)) calc(13px*var(--k));border-radius:999px;border:1px solid;white-space:nowrap}
+  .jb.eu{background:var(--good-bg);color:var(--good-fg);border-color:var(--good-bd)}
+  .jb.us{background:var(--gold-bg);color:var(--gold-fg);border-color:var(--gold-bd)}
+  /* S3 close */
+  #s3 .l1{font-size:calc(82px*var(--k))}
+  #s3 .l1 .em{font-style:italic;color:var(--brand)}
+  #s3 .seal{width:calc(112px*var(--k));height:calc(112px*var(--k));margin:calc(46px*var(--k)) 0 calc(10px*var(--k))}
+  #s3 .url{margin-top:calc(30px*var(--k));font-family:"Geist Mono",monospace;font-size:calc(25px*var(--k));letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  /* cursor */
+  #cursor{position:absolute;left:0;top:0;z-index:80;width:calc(46px*var(--k));height:calc(46px*var(--k));opacity:0;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(15,26,20,.35));transform-origin:6px 4px}
+  #cursor .ring{position:absolute;left:50%;top:44%;width:calc(60px*var(--k));height:calc(60px*var(--k));margin-left:calc(-30px*var(--k));margin-top:calc(-30px*var(--k));border-radius:50%;border:2px solid var(--brand);opacity:0}
+</style></head>
+<body>
+<div id="stage" class="gridbg light" data-fmt="story">
+  <div id="bg" class="gridbg"></div>
+
+  <div class="scene" id="s1">
+    <p class="eyebrow w a">No solo Europa</p>
+    <h2 class="disp w a">Un radar.<br>Todos tus <span class="em">marcos.</span></h2>
+    <p class="sub w b">Si usas IA para contratar, no es solo el EU AI Act. Attesta vigila <span class="em">los marcos que te aplican</span>, por jurisdicción — también en EE.UU.</p>
+  </div>
+
+  <div class="scene" id="s2">
+    <p class="cap w t">Dentro del producto</p>
+    <p class="capt w t">Vigilancia multi-marco</p>
+    <div class="mock w m">
+      <div class="mbar"><span class="dot" style="background:#e4b0aa"></span><span class="dot" style="background:#e6cfa0"></span><span class="dot" style="background:#bfdccf"></span><div class="murl">app.attesta.io/vigilancia</div></div>
+      <div class="mapp">
+        <div class="rh"><span class="t">Marcos vigilados</span><div class="chips"><span class="chip on" id="chip-all">Todas</span><span class="chip" id="chip-eu">UE</span><span class="chip" id="chip-us">EE.UU.</span></div></div>
+        <div class="frow f"><span class="nm">EU AI Act</span><span class="jb eu">Unión Europea</span></div>
+        <div class="frow f"><span class="nm">NYC Local Law 144 (AEDT)</span><span class="jb us">EE.UU. · Nueva York</span></div>
+        <div class="frow f"><span class="nm">Colorado AI Act (SB 26-189)</span><span class="jb us">EE.UU. · Colorado</span></div>
+        <div class="frow f"><span class="nm">Illinois AI Video Interview Act</span><span class="jb us">EE.UU. · Illinois</span></div>
+        <div class="frow f"><span class="nm">Illinois Human Rights Act (HB 3773)</span><span class="jb us">EE.UU. · Illinois</span></div>
+        <div class="frow f"><span class="nm">EEOC — orientación federal</span><span class="jb us">EE.UU. · Federal</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene" id="s3">
+    <h2 class="disp l1 w a">La ley cambia.<br>Tú <span class="em">ya lo sabes.</span></h2>
+    <div class="seal w c"></div>
+    <p class="url w c">attesta-io.vercel.app · @attesta.io</p>
+  </div>
+
+  <div id="cursor"><span class="ring"></span><svg viewBox="0 0 24 24" fill="none"><path d="M5 2.5l14.5 8.2-6.3 1.4-3.4 6.2L5 2.5z" fill="#faf8f2" stroke="#0f1a14" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+  <div id="grain" style="position:absolute;inset:0;pointer-events:none;z-index:60;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22180%22 height=%22180%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22 stitchTiles=%22stitch%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/></svg>');opacity:.02;mix-blend-mode:multiply"></div>
+</div>
+<script src="../vlib.js"></script>
+<script>
+  const q=new URLSearchParams(location.search), stage=document.getElementById('stage');
+  const theme=q.get('theme')||'light'; stage.classList.remove('light'); stage.classList.add(theme); stage.dataset.fmt=q.get('fmt')||'story';
+  const grain=document.getElementById('grain'); grain.style.mixBlendMode=theme==='dark'?'screen':'multiply'; grain.style.opacity=theme==='dark'?'0.03':'0.02';
+  window.DURATION=22.5;
+  const V=window.V,E=V.E,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+  const bg=$('#bg'),cursor=$('#cursor'),ring=cursor.querySelector('.ring');
+  const S={s1:{el:$('#s1'),a:0,b:5.0},s2:{el:$('#s2'),a:5.0,b:17.5},s3:{el:$('#s3'),a:17.5,b:22.5}};
+  function vis(sc,t,fin=0.55,fout=0.5){const{a,b,el}=sc;if(t<a-0.02||t>b+0.02){el.style.opacity=0;return null;}
+    let o=1,y=0;if(t<a+fin){const u=E.web(V.p(t,a,a+fin));o=u;y=V.lerp(60,0,u);}else if(t>b-fout){const u=E.web(V.p(t,b-fout,b));o=1-u;y=V.lerp(0,-52,u);}
+    el.style.opacity=o;el.style.transform=`translateY(${y}px)`;return t-a;}
+  function reveal(el,t,t0,dur=0.7,dist=18){const u=V.p(t,t0,t0+dur);el.style.opacity=E.web(u);el.style.transform=`translateY(${V.lerp(dist,0,E.web(u))}px)`;}
+  function group(sel,t,t0,st=0.14,dur=0.7,dist=20){$$(sel).forEach((el,i)=>reveal(el,t,t0+i*st,dur,dist));}
+  const rectC=el=>{const r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};};
+  function cursorShow(o){cursor.style.opacity=o;} function cursorTo(x,y,s=1){cursor.style.transform=`translate(${x}px,${y}px) scale(${s})`;}
+  function cursorMove(t,t0,t1,from,to){const u=E.web(V.p(t,t0,t1));return {x:V.lerp(from.x,to.x,u),y:V.lerp(from.y,to.y,u)};}
+  function clickPulse(t,tc){const rp=V.p(t,tc,tc+0.5);ring.style.opacity=(rp>0&&rp<1)?(1-rp)*0.9:0;ring.style.transform=`scale(${V.lerp(0.2,1.4,E.web(rp))})`;
+    const d=V.p(t,tc,tc+0.1)-V.p(t,tc+0.1,tc+0.22);return 1-0.16*Math.max(0,d);}
+
+  window.SEEK=function(t){
+    const drift=-t*5; stage.style.backgroundPosition=`0px ${drift}px`; bg.style.backgroundPosition=`0px ${drift}px`;
+    // S1
+    let lt=vis(S.s1,t);
+    if(lt!=null){ group('#s1 .a',t,0.2,0.16,0.7,24); reveal($('#s1 .b'),t,1.0,0.8,26); }
+    // S2 radar
+    lt=vis(S.s2,t);
+    if(lt!=null){
+      group('#s2 .t',t,5.3,0.16,0.7,22); reveal($('#s2 .m'),t,6.0,0.8,40);
+      $$('#s2 .frow').forEach((r,i)=>{ const u=E.web(V.p(t,7.0+i*0.32,7.7+i*0.32)); r.style.opacity=u; r.style.transform=`translateY(${V.lerp(20,0,u)}px)`; });
+      // cursor clicks "EE.UU." chip to emphasize US coverage; US rows briefly highlight
+      const CLICK=10.4, chip=$('#chip-us');
+      if(t>=9.3 && t<11.8){ cursorShow(E.web(V.p(t,9.3,9.7))*(1-V.p(t,11.3,11.8)));
+        const c=rectC(chip); const start={x:c.x+120,y:c.y+220}; const pos=cursorMove(t,9.5,10.3,start,c); const sc=clickPulse(t,CLICK); cursorTo(pos.x,pos.y,sc);
+      } else cursorShow(0);
+      const usOn=t>=CLICK; $('#chip-us').classList.toggle('on',usOn); $('#chip-all').classList.toggle('on',!usOn);
+      $$('#s2 .frow').forEach(r=>{ const isUs=!!r.querySelector('.jb.us'); r.style.borderColor = (usOn&&isUs)?'var(--gold-bd)':'var(--line)'; r.style.background=(usOn&&isUs)?'var(--gold-bg)':'var(--paper-raised)'; });
+    } else cursorShow(0);
+    // S3
+    lt=vis(S.s3,t);
+    if(lt!=null){ reveal($('#s3 .a'),t,17.8,0.8,30);
+      const cs=V.p(t,18.8,19.5); $('#s3 .seal').style.opacity=E.web(cs); $('#s3 .seal').style.transform=`scale(${V.lerp(0.7,1,E.outBack(cs))})`;
+      group('#s3 .c',t,19.3,0.16,0.7,22);
+    }
+  };
+  window.SEEK(0);
+</script>
+</body></html>

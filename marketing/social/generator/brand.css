@@ -1,0 +1,106 @@
+/* ============================================================
+   ATTESTA — Sistema de diseño para redes sociales
+   Fuentes y tokens IDÉNTICOS al producto (globals.css)
+   Display: Fraunces · Sans: Geist · Mono: Geist Mono
+   ============================================================ */
+
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-500.woff2") format("woff2");font-weight:500;font-style:normal;font-display:block}
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-600.woff2") format("woff2");font-weight:600;font-style:normal;font-display:block}
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-900.woff2") format("woff2");font-weight:900;font-style:normal;font-display:block}
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-400-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:block}
+@font-face{font-family:"Fraunces";src:url("fonts/Fraunces-600-italic.woff2") format("woff2");font-weight:600;font-style:italic;font-display:block}
+@font-face{font-family:"Geist";src:url("fonts/Geist.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:block}
+@font-face{font-family:"Geist Mono";src:url("fonts/GeistMono.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:block}
+
+:root{
+  --paper:#faf8f2; --paper-raised:#ffffff; --paper-sunken:#f3f0e7;
+  --ink:#0f1a14; --ink-soft:#38443d; --muted:#6b756e;
+  --line:#e6e1d4; --line-strong:#d6d0bf;
+  --brand:#0b6b4e; --brand-strong:#084d38; --brand-bright:#11a071; --brand-soft:#e4efe9;
+  --seal:#b0824a; --seal-soft:#f0e7d7;
+  --risk-unacceptable:#b4322a; --risk-high:#c9761f; --risk-limited:#b0824a; --risk-minimal:#0b6b4e;
+  --seal-img:url("assets/sealmark.png");
+}
+.canvas.dark{
+  --paper:#0e1512; --paper-raised:#151f19; --paper-sunken:#0a0f0c;
+  --ink:#eef2ee; --ink-soft:#aeb9b2; --muted:#79857e;
+  --line:#232e28; --line-strong:#33413a;
+  --brand:#12946a; --brand-strong:#7fd8b4; --brand-bright:#22b581; --brand-soft:#16271f;
+  --seal:#c79a5f; --seal-soft:#241d12;
+  --seal-img:url("assets/sealmark-dark.png");
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#3a3a3a}
+
+.canvas{
+  position:relative;width:1080px;height:1350px;   /* 4:5 feed */
+  background:var(--paper);color:var(--ink);overflow:hidden;
+  font-family:"Geist",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;
+  font-feature-settings:"kern" 1,"liga" 1;
+}
+.canvas.story{height:1920px}   /* 9:16 stories/reels */
+.canvas.sq{height:1080px}      /* 1:1 */
+
+/* Grano editorial muy sutil */
+.canvas::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity:.022;mix-blend-mode:multiply;
+}
+.canvas.dark::after{mix-blend-mode:screen;opacity:.028}
+
+.frame{position:absolute;inset:0;padding:92px 96px;display:flex;flex-direction:column;z-index:2}
+
+/* ---------- Cabecera / pie de marca ---------- */
+.brandbar{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brandmark{display:flex;align-items:center;gap:15px}
+.seal{width:56px;height:56px;flex:none;background:var(--seal-img) center/contain no-repeat}
+.seal.sm{width:40px;height:40px}
+.wordmark{font-family:"Fraunces",serif;font-weight:600;font-size:33px;letter-spacing:-.01em;color:var(--ink)}
+.kicker{font-family:"Geist Mono",monospace;font-size:15px;letter-spacing:.26em;text-transform:uppercase;color:var(--brand);font-weight:500}
+.kicker.bronze{color:var(--seal)}
+.kicker.faint{color:var(--muted)}
+
+/* ---------- Tipografía de contenido ---------- */
+.display{font-family:"Fraunces",serif;font-weight:600;color:var(--brand);line-height:.98;letter-spacing:-.018em}
+.stat{font-family:"Fraunces",serif;font-weight:600;color:var(--brand);line-height:.86;font-size:380px;letter-spacing:-.03em}
+.headline{font-family:"Fraunces",serif;font-weight:600;color:var(--ink);line-height:1.04;letter-spacing:-.012em;font-size:76px}
+.headline .em{color:var(--brand);font-style:italic;font-weight:600}
+.quote{font-family:"Fraunces",serif;font-style:italic;font-weight:500;color:var(--ink);line-height:1.16;font-size:62px;letter-spacing:-.015em}
+.serif{font-family:"Fraunces",serif}
+.lead{font-family:"Geist",sans-serif;font-size:32px;line-height:1.5;color:var(--ink-soft);font-weight:400;letter-spacing:-.005em}
+.lead b,.lead strong{color:var(--ink);font-weight:600}
+.small{font-family:"Geist",sans-serif;font-size:25px;line-height:1.55;color:var(--muted)}
+
+/* Reglas / estructura */
+.rule{height:2px;background:var(--seal);border:0;width:104px}
+.rule.full{width:100%;height:1px;background:var(--line)}
+.spacer{flex:1 1 auto}
+
+/* Pie */
+.footer{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.handle{font-family:"Geist",sans-serif;font-weight:600;font-size:23px;color:var(--ink);letter-spacing:-.01em}
+.footnote{font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+
+/* Listas / filas */
+.row{display:flex;align-items:center;gap:20px}
+.row .ic{width:52px;height:52px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--brand)}
+.row .tx{font-family:"Geist",sans-serif;font-size:30px;color:var(--ink);font-weight:500;letter-spacing:-.01em}
+
+/* Chips / etiquetas */
+.tag{display:inline-flex;align-items:center;gap:11px;font-family:"Geist Mono",monospace;font-size:16px;
+  letter-spacing:.12em;text-transform:uppercase;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--ink-soft)}
+.tag.jade{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.tag.bronze{border-color:var(--seal);color:var(--seal);background:var(--seal-soft)}
+.tag.risk{border-color:var(--risk-high);color:var(--risk-high);background:#f7ead8}
+.tag.faint{color:var(--muted);border-color:var(--line)}
+.dot{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none}
+
+/* Utilidades */
+.mt-s{margin-top:20px}.mt-m{margin-top:36px}.mt-l{margin-top:56px}.mt-xl{margin-top:76px}
+.jade{color:var(--brand)}.bronze{color:var(--seal)}.ink{color:var(--ink)}.soft{color:var(--ink-soft)}.muted{color:var(--muted)}
+.cta{display:inline-flex;align-items:center;gap:12px;font-family:"Geist",sans-serif;font-weight:600;font-size:26px;color:var(--brand)}

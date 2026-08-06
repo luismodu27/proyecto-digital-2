@@ -1,0 +1,186 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../web.css">
+<style>
+  html,body{margin:0;padding:0}
+  #stage{position:relative;width:100vw;height:100vh;overflow:hidden;font-family:"Geist",sans-serif;--k:1}
+  #stage[data-fmt="square"]{--k:.76}
+  #stage[data-fmt="wide"]{--k:.82}
+  #stage[data-fmt="square"] .secw{justify-content:center;padding-top:0}
+  #bg{position:absolute;inset:0;z-index:0}
+  #badge{position:absolute;top:calc(52px*var(--k));right:calc(56px*var(--k));z-index:70;font-family:"Geist Mono",monospace;
+    font-size:calc(17px*var(--k));letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:calc(9px*var(--k)) calc(18px*var(--k));background:var(--paper-raised);opacity:0}
+  .scene{position:absolute;inset:0;z-index:10;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 80px;box-sizing:border-box;font-family:"Geist",sans-serif}
+  .eyebrow{font-size:calc(24px*var(--k))}
+  h2.disp{margin:calc(18px*var(--k)) 0 0;font-size:calc(74px*var(--k))}
+  h2.disp .em{font-style:italic;color:var(--brand)}
+  /* S1 case */
+  #s1 .org{font-family:"Fraunces",serif;font-weight:600;font-size:calc(96px*var(--k));color:var(--ink);letter-spacing:-.02em;line-height:1}
+  #s1 .meta{margin-top:calc(20px*var(--k));font-size:calc(30px*var(--k));color:var(--muted)}
+  #s1 .tl{margin-top:calc(44px*var(--k));font-family:"Fraunces",serif;font-weight:600;font-size:calc(56px*var(--k));color:var(--ink);line-height:1.1}
+  #s1 .tl .em{font-style:italic;color:var(--brand)}
+  /* generic browser mockup */
+  .secw{justify-content:flex-start;padding-top:calc(140px*var(--k))}
+  #stage[data-fmt="wide"] .secw{justify-content:center;padding-top:0}
+  .cap{font-size:calc(23px*var(--k));margin:0;font-family:"Geist Mono",monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--brand)}
+  .capt{margin:calc(14px*var(--k)) 0 calc(38px*var(--k));font-family:"Fraunces",serif;font-weight:600;font-size:calc(50px*var(--k));color:var(--ink);letter-spacing:-.015em;line-height:1.05}
+  .capt .em{font-style:italic;color:var(--brand)}
+  .mock{width:calc(900px*var(--k));background:var(--paper-raised);border:2px solid var(--line-strong);border-radius:calc(26px*var(--k));padding:calc(16px*var(--k));box-shadow:var(--shadow-float);text-align:left}
+  .mbar{display:flex;align-items:center;gap:calc(12px*var(--k));padding:calc(12px*var(--k)) calc(14px*var(--k))}
+  .mbar .dot{width:calc(16px*var(--k));height:calc(16px*var(--k));border-radius:50%}
+  .murl{margin-left:calc(14px*var(--k));flex:1;background:var(--paper-sunken);border-radius:calc(9px*var(--k));padding:calc(9px*var(--k)) calc(16px*var(--k));font-size:calc(20px*var(--k));color:var(--muted)}
+  .mapp{border:1px solid var(--line);border-radius:calc(18px*var(--k));background:var(--paper);padding:calc(28px*var(--k))}
+  .mh{font-family:"Fraunces",serif;font-weight:600;font-size:calc(28px*var(--k));color:var(--ink)}
+  /* meter */
+  #meterhead{margin-top:calc(20px*var(--k));display:flex;justify-content:space-between;align-items:baseline}
+  #meterhead .lb{font-family:"Geist Mono",monospace;font-size:calc(19px*var(--k));text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  #meterhead .pct{font-family:"Fraunces",serif;font-weight:600;font-size:calc(56px*var(--k));color:var(--brand);line-height:1}
+  #meter{margin-top:calc(12px*var(--k));position:relative;height:calc(26px*var(--k));border-radius:999px;background:var(--paper-sunken);overflow:visible}
+  #mfill{height:100%;border-radius:999px;background:var(--brand);width:0}
+  #mtar{position:absolute;top:calc(-7px*var(--k));bottom:calc(-7px*var(--k));left:80%;width:calc(3px*var(--k));background:var(--seal)}
+  #mtarlb{position:absolute;top:calc(34px*var(--k));left:80%;transform:translateX(-50%);font-family:"Geist Mono",monospace;font-size:calc(14px*var(--k));color:var(--seal);letter-spacing:.06em;white-space:nowrap}
+  #tasks{margin-top:calc(48px*var(--k));display:flex;flex-direction:column;gap:calc(13px*var(--k))}
+  .task{display:flex;align-items:center;gap:calc(16px*var(--k));border:1px solid var(--line);background:var(--paper-raised);border-radius:calc(11px*var(--k));padding:calc(16px*var(--k)) calc(20px*var(--k))}
+  .task .ck{flex:none;width:calc(34px*var(--k));height:calc(34px*var(--k));border-radius:calc(9px*var(--k));border:2px solid var(--line);display:flex;align-items:center;justify-content:center}
+  .task .ck svg{width:62%;height:62%;opacity:0}
+  .task .tx{font-size:calc(23px*var(--k));color:var(--ink);font-weight:500}
+  .mcap{margin-top:calc(22px*var(--k));font-size:calc(21px*var(--k));color:var(--muted)}
+  /* dossier doc */
+  .doc{display:flex;align-items:center;gap:calc(24px*var(--k));border:1px solid var(--line);background:var(--paper-raised);border-radius:calc(14px*var(--k));padding:calc(28px*var(--k))}
+  .doc .ic{flex:none;width:calc(70px*var(--k));height:calc(70px*var(--k));border-radius:calc(14px*var(--k));background:var(--good-bg);display:flex;align-items:center;justify-content:center;color:var(--brand)}
+  .doc .ic svg{width:50%;height:50%}
+  .doc .t1{font-family:"Geist",sans-serif;font-weight:600;font-size:calc(27px*var(--k));color:var(--ink)}
+  .doc .t2{margin-top:calc(6px*var(--k));font-size:calc(22px*var(--k));color:var(--muted)}
+  .doc .dl{margin-left:auto;background:var(--brand);color:#fff;border-radius:calc(11px*var(--k));padding:calc(13px*var(--k)) calc(22px*var(--k));font-size:calc(20px*var(--k));font-weight:600;white-space:nowrap}
+  .dark .doc .dl{color:#04150f}
+  .radar{margin-top:calc(20px*var(--k));display:flex;align-items:center;justify-content:space-between;gap:calc(12px*var(--k));border:1px solid var(--good-bd);background:color-mix(in srgb,var(--brand-soft) 55%,transparent);border-radius:calc(13px*var(--k));padding:calc(18px*var(--k)) calc(22px*var(--k))}
+  .radar .l{display:flex;align-items:center;gap:calc(12px*var(--k))}
+  .radar svg{width:calc(26px*var(--k));height:calc(26px*var(--k));color:var(--brand-strong);flex:none}
+  .radar .tx{font-size:calc(22px*var(--k));font-weight:500;color:var(--ink)}
+  .radar .cd{font-size:calc(22px*var(--k));font-weight:600;color:var(--brand-strong);white-space:nowrap}
+  /* S5 close */
+  #s5 .seal{width:calc(118px*var(--k));height:calc(118px*var(--k));margin-bottom:calc(14px*var(--k))}
+  #s5 .l1{font-size:calc(72px*var(--k))}
+  #s5 .l1 .em{font-style:italic;color:var(--brand)}
+  #s5 .url{margin-top:calc(40px*var(--k));font-family:"Geist Mono",monospace;font-size:calc(25px*var(--k));letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  #cursor{position:absolute;left:0;top:0;z-index:80;width:calc(46px*var(--k));height:calc(46px*var(--k));opacity:0;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(15,26,20,.35));transform-origin:6px 4px}
+  #cursor .ring{position:absolute;left:50%;top:44%;width:calc(60px*var(--k));height:calc(60px*var(--k));margin-left:calc(-30px*var(--k));margin-top:calc(-30px*var(--k));border-radius:50%;border:2px solid var(--brand);opacity:0}
+</style></head>
+<body>
+<div id="stage" class="gridbg light" data-fmt="story">
+  <div id="bg" class="gridbg"></div>
+  <div id="badge">Ejemplo ilustrativo</div>
+
+  <div class="scene" id="s1">
+    <p class="eyebrow w a" style="margin:0">Caso · agencia de selección</p>
+    <p class="org w a">Talenta RH</p>
+    <p class="meta w a">140 personas · usa IA para contratar</p>
+    <p class="tl w b">Una tarde. De la duda<br>a la <span class="em">evidencia.</span></p>
+  </div>
+
+  <div class="scene secw" id="s2">
+    <p class="cap w t">Cierra las brechas</p>
+    <p class="capt w t">Sube tu <span class="em">preparación</span>, tarea a tarea.</p>
+    <div class="mock w m">
+      <div class="mbar"><span class="dot" style="background:#e4b0aa"></span><span class="dot" style="background:#e6cfa0"></span><span class="dot" style="background:#bfdccf"></span><div class="murl">app.attesta.io/gap</div></div>
+      <div class="mapp">
+        <div class="mh">Preparación para auditoría · Cribado de CVs</div>
+        <div id="meterhead"><span class="lb">% listo · preparación</span><span class="pct"><span class="v">41</span>%</span></div>
+        <div id="meter"><div id="mfill"></div><div id="mtar"></div><div id="mtarlb">objetivo 80%</div></div>
+        <div id="tasks">
+          <div class="task"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span class="tx">Supervisión humana documentada (Art. 14)</span></div>
+          <div class="task"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span class="tx">Aviso de transparencia a candidatos (Art. 50)</span></div>
+          <div class="task"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span class="tx">Registro de logs conservado (Art. 26)</span></div>
+        </div>
+        <div class="mcap">Preparación para auditoría — no es un juicio de cumplimiento.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene secw" id="s3">
+    <p class="cap w t">Evidencia lista</p>
+    <p class="capt w t">Dossier y radar, <span class="em">automáticos.</span></p>
+    <div class="mock w m">
+      <div class="mbar"><span class="dot" style="background:#e4b0aa"></span><span class="dot" style="background:#e6cfa0"></span><span class="dot" style="background:#bfdccf"></span><div class="murl">app.attesta.io/inventario/dossier</div></div>
+      <div class="mapp">
+        <div class="doc">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg></span>
+          <div><div class="t1">Dossier de evidencia · Cribado de CVs.pdf</div><div class="t2">Generado y listo para el auditor.</div></div>
+          <span class="dl">Descargar</span>
+        </div>
+        <div class="radar">
+          <div class="l"><svg viewBox="0 0 24 24" fill="none"><path d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="tx">El radar detectó un cambio · Transparencia (Art. 50)</span></div>
+          <span class="cd">en 16 días</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene" id="s5">
+    <div class="seal w s"></div>
+    <h2 class="disp l1 w s">De la duda a la evidencia<br>— en una <span class="em">tarde.</span></h2>
+    <p class="url w a">attesta-io.vercel.app · @attesta.io</p>
+  </div>
+
+  <div id="cursor"><span class="ring"></span><svg viewBox="0 0 24 24" fill="none"><path d="M5 2.5l14.5 8.2-6.3 1.4-3.4 6.2L5 2.5z" fill="#faf8f2" stroke="#0f1a14" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+  <div id="grain" style="position:absolute;inset:0;pointer-events:none;z-index:60;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22180%22 height=%22180%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22 stitchTiles=%22stitch%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/></svg>');opacity:.02;mix-blend-mode:multiply"></div>
+</div>
+<script src="../vlib.js"></script>
+<script>
+  const q=new URLSearchParams(location.search), stage=document.getElementById('stage');
+  const theme=q.get('theme')||'light'; stage.classList.remove('light'); stage.classList.add(theme); stage.dataset.fmt=q.get('fmt')||'story';
+  const grain=document.getElementById('grain'); grain.style.mixBlendMode=theme==='dark'?'screen':'multiply'; grain.style.opacity=theme==='dark'?'0.03':'0.02';
+  window.DURATION=28.5;
+  const V=window.V,E=V.E,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+  const bg=$('#bg'),badge=$('#badge'),cursor=$('#cursor'),ring=cursor.querySelector('.ring');
+  const S={s1:{el:$('#s1'),a:0,b:5.0},s2:{el:$('#s2'),a:5.0,b:16.5},s3:{el:$('#s3'),a:16.5,b:23.5},s5:{el:$('#s5'),a:23.5,b:28.5}};
+  function vis(sc,t,fin=0.55,fout=0.5){const{a,b,el}=sc;if(t<a-0.02||t>b+0.02){el.style.opacity=0;return null;}
+    let o=1,y=0;if(t<a+fin){const u=E.web(V.p(t,a,a+fin));o=u;y=V.lerp(60,0,u);}else if(t>b-fout){const u=E.web(V.p(t,b-fout,b));o=1-u;y=V.lerp(0,-52,u);}
+    el.style.opacity=o;el.style.transform=`translateY(${y}px)`;return t-a;}
+  function reveal(el,t,t0,dur=0.7,dist=18){const u=V.p(t,t0,t0+dur);el.style.opacity=E.web(u);el.style.transform=`translateY(${V.lerp(dist,0,E.web(u))}px)`;}
+  function group(sel,t,t0,st=0.14,dur=0.7,dist=20){$$(sel).forEach((el,i)=>reveal(el,t,t0+i*st,dur,dist));}
+  const rectC=el=>{const r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};};
+  function cursorShow(o){cursor.style.opacity=o;} function cursorTo(x,y,s=1){cursor.style.transform=`translate(${x}px,${y}px) scale(${s})`;}
+  function cursorMove(t,t0,t1,from,to){const u=E.web(V.p(t,t0,t1));return {x:V.lerp(from.x,to.x,u),y:V.lerp(from.y,to.y,u)};}
+  function clickPulse(t,tc){const rp=V.p(t,tc,tc+0.5);ring.style.opacity=(rp>0&&rp<1)?(1-rp)*0.9:0;ring.style.transform=`scale(${V.lerp(0.2,1.4,E.web(rp))})`;
+    const d=V.p(t,tc,tc+0.1)-V.p(t,tc+0.1,tc+0.22);return 1-0.16*Math.max(0,d);}
+
+  window.SEEK=function(t){
+    const drift=-t*5; stage.style.backgroundPosition=`0px ${drift}px`; bg.style.backgroundPosition=`0px ${drift}px`;
+    badge.style.opacity = t<0.4?V.p(t,0,0.4):(t>=S.s5.a+0.3?1-V.p(t,S.s5.a+0.3,S.s5.a+0.8):1);
+    // S1
+    let lt=vis(S.s1,t);
+    if(lt!=null){ group('#s1 .a',t,0.2,0.16,0.7,24); reveal($('#s1 .b'),t,1.0,0.8,26); }
+    // S2 gap: meter fills as tasks check (cursor checks first task)
+    lt=vis(S.s2,t);
+    if(lt!=null){
+      group('#s2 .t',t,5.3,0.16,0.7,22); reveal($('#s2 .m'),t,6.0,0.8,40);
+      const fill=V.tw(t,7.4,12.0,41,78,E.inOut); $('#mfill').style.width=fill+'%'; $('#s2 .pct .v').textContent=Math.round(fill);
+      const checks=[8.2,9.9,11.2];
+      $$('#s2 .task').forEach((tk,i)=>{const on=t>=checks[i];const ck=tk.querySelector('.ck');ck.style.borderColor=on?'var(--brand)':'var(--line)';ck.style.background=on?'var(--good-bg)':'transparent';ck.querySelector('svg').style.opacity=on?1:0;});
+      // cursor checks the first task (~8.2)
+      const CLICK=8.2, ck0=$('#s2 .task .ck');
+      if(t>=7.0 && t<9.6){ cursorShow(E.web(V.p(t,7.0,7.4))*(1-V.p(t,9.1,9.6)));
+        const c=rectC(ck0); const start={x:c.x+220,y:c.y+240}; const pos=cursorMove(t,7.2,8.1,start,c); const sc=clickPulse(t,CLICK); cursorTo(pos.x,pos.y,sc);
+      } else if(t>13.4) cursorShow(0);
+      reveal($('#s2 .mcap'),t,12.2,0.6);
+    }
+    // S3 dossier: cursor clicks Descargar
+    lt=vis(S.s3,t);
+    if(lt!=null){
+      group('#s3 .t',t,16.8,0.16,0.7,22); reveal($('#s3 .m'),t,17.5,0.8,40);
+      reveal($('#s3 .radar'),t,19.6,0.7,24);
+      const CLICK=19.0, dl=$('#s3 .dl');
+      if(t>=18.2 && t<20.2){ cursorShow(E.web(V.p(t,18.2,18.6))*(1-V.p(t,19.7,20.2)));
+        const c=rectC(dl); const start={x:c.x+120,y:c.y+200}; const pos=cursorMove(t,18.4,18.9,start,c); const sc=clickPulse(t,CLICK); cursorTo(pos.x,pos.y,sc);
+        dl.style.transform=`scale(${t>=CLICK&&t<CLICK+0.14?0.96:1})`;
+      } else cursorShow(0);
+    } else if(t<16.5||t>23.5) { if(t<7||t>20.2) cursorShow(0); }
+    // S5 close
+    lt=vis(S.s5,t);
+    if(lt!=null){ const cs=V.p(t,23.9,24.6); $('#s5 .seal').style.opacity=E.web(cs); $('#s5 .seal').style.transform=`scale(${V.lerp(0.7,1,E.outBack(cs))})`;
+      group('#s5 .s',t,24.2,0.16,0.7,24); reveal($('#s5 .a'),t,25.2,0.7,22); }
+  };
+  window.SEEK(0);
+</script>
+</body></html>

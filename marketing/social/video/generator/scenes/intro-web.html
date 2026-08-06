@@ -1,0 +1,293 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../web.css">
+<style>
+  html,body{margin:0;padding:0}
+  #stage{position:relative;width:100vw;height:100vh;overflow:hidden;font-family:"Geist",sans-serif;--k:1}
+  #stage[data-fmt="square"]{--k:.76}
+  #stage[data-fmt="wide"]{--k:.82}
+  #stage[data-fmt="square"] #s1{justify-content:center;padding-top:0}
+  #bg{position:absolute;inset:0;z-index:0}
+  .scene{position:absolute;inset:0;z-index:10;opacity:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:0 80px;box-sizing:border-box;font-family:"Geist",sans-serif}
+  /* body-text elements: force Geist (Fraunces reserved for headlines/numbers) */
+  .stat .c,.mod .md,.kpi .k,.radar .tx,.radar .cd,.murl,.nav .it,.rrow .rl,.rdist .lb,#s5 .field .ph{font-family:"Geist",sans-serif}
+  .w{will-change:transform,opacity}
+  /* HERO */
+  #s1{justify-content:flex-start;padding-top:calc(150px*var(--k))}
+  #s1 .eyebrow{font-size:calc(25px*var(--k))}
+  #s1 h1{margin:calc(24px*var(--k)) 0 0;font-family:"Fraunces",serif;font-weight:600;font-size:calc(88px*var(--k));
+    color:var(--ink);line-height:1.02;letter-spacing:-.02em}
+  #s1 h1 .b{color:var(--brand)}
+  #mock-wrap{margin-top:calc(64px*var(--k));width:100%;display:flex;justify-content:center}
+  /* dashboard mockup — fiel a HeroPreview */
+  .mock{width:calc(900px*var(--k));background:var(--paper-raised);border:2px solid var(--line-strong);border-radius:calc(26px*var(--k));
+    padding:calc(16px*var(--k));box-shadow:var(--shadow-float);text-align:left;transform-origin:50% 30%}
+  .mbar{display:flex;align-items:center;gap:calc(12px*var(--k));padding:calc(12px*var(--k)) calc(14px*var(--k))}
+  .mbar .dot{width:calc(16px*var(--k));height:calc(16px*var(--k));border-radius:50%}
+  .murl{margin-left:calc(14px*var(--k));flex:1;background:var(--paper-sunken);border-radius:calc(9px*var(--k));
+    padding:calc(9px*var(--k)) calc(16px*var(--k));font-size:calc(20px*var(--k));color:var(--muted);font-family:"Geist",sans-serif}
+  .mapp{border:1px solid var(--line);border-radius:calc(18px*var(--k));background:var(--paper);overflow:hidden;display:flex}
+  .side{width:calc(210px*var(--k));flex:none;border-right:1px solid var(--line);background:var(--paper-raised);padding:calc(18px*var(--k))}
+  .side .brand{display:flex;align-items:center;gap:calc(9px*var(--k));margin-bottom:calc(16px*var(--k))}
+  .side .brand .s{width:calc(26px*var(--k));height:calc(26px*var(--k))}
+  .side .brand .t{font-family:"Fraunces",serif;font-weight:600;font-size:calc(23px*var(--k));color:var(--ink)}
+  .nav{display:flex;flex-direction:column;gap:calc(6px*var(--k))}
+  .nav .it{border-radius:calc(9px*var(--k));padding:calc(9px*var(--k)) calc(12px*var(--k));font-size:calc(20px*var(--k));color:var(--ink-soft)}
+  .nav .it.on{background:var(--brand-soft);color:var(--brand-strong);font-weight:600}
+  .cont{flex:1;padding:calc(26px*var(--k))}
+  .cont .h{font-family:"Fraunces",serif;font-weight:600;font-size:calc(28px*var(--k));color:var(--ink)}
+  .kpis{margin-top:calc(18px*var(--k));display:grid;grid-template-columns:repeat(3,1fr);gap:calc(14px*var(--k))}
+  .kpi{border:1px solid var(--line);background:var(--paper-raised);border-radius:calc(13px*var(--k));padding:calc(16px*var(--k))}
+  .kpi .v{font-family:"Fraunces",serif;font-weight:600;font-size:calc(40px*var(--k));color:var(--ink);line-height:1}
+  .kpi .v.warn{color:#a3271f} .dark .kpi .v.warn{color:#f0a89f}
+  .kpi .k{margin-top:calc(6px*var(--k));font-size:calc(17px*var(--k));color:var(--muted)}
+  .radar{margin-top:calc(16px*var(--k));display:flex;align-items:center;justify-content:space-between;gap:calc(12px*var(--k));
+    border:1px solid var(--good-bd);background:color-mix(in srgb,var(--brand-soft) 55%,transparent);border-radius:calc(13px*var(--k));padding:calc(14px*var(--k)) calc(18px*var(--k))}
+  .radar .l{display:flex;align-items:center;gap:calc(10px*var(--k))}
+  .radar svg{width:calc(24px*var(--k));height:calc(24px*var(--k));color:var(--brand-strong);flex:none}
+  .radar .tx{font-size:calc(19px*var(--k));font-weight:500;color:var(--ink)}
+  .radar .cd{font-size:calc(19px*var(--k));font-weight:600;color:var(--brand-strong);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .rdist{margin-top:calc(16px*var(--k));border:1px solid var(--line);background:var(--paper-raised);border-radius:calc(13px*var(--k));padding:calc(20px*var(--k))}
+  .rdist .lb{font-size:calc(19px*var(--k));font-weight:500;color:var(--ink)}
+  .rrow{margin-top:calc(14px*var(--k));display:flex;align-items:center;gap:calc(14px*var(--k))}
+  .rrow .rl{width:calc(150px*var(--k));flex:none;font-size:calc(17px*var(--k));color:var(--ink-soft)}
+  .rrow .track{flex:1;height:calc(11px*var(--k));background:var(--paper-sunken);border-radius:999px;overflow:hidden}
+  .rrow .fill{height:100%;border-radius:999px;width:0}
+  /* mockup views (mini-tour: cursor cambia de sección) */
+  .cont{position:relative}
+  .view{position:absolute;inset:calc(26px*var(--k));}
+  .view.resumen{position:static;inset:auto}
+  .invlist{margin-top:calc(16px*var(--k));display:flex;flex-direction:column;gap:calc(11px*var(--k))}
+  .irow{display:flex;align-items:center;justify-content:space-between;gap:calc(12px*var(--k));
+    border:1px solid var(--line);background:var(--paper-raised);border-radius:calc(11px*var(--k));padding:calc(15px*var(--k)) calc(18px*var(--k))}
+  .irow .inm{font-size:calc(21px*var(--k));color:var(--ink);font-weight:500;font-family:"Geist",sans-serif}
+  .irow .ib{font-family:"Geist Mono",monospace;font-size:calc(14px*var(--k));letter-spacing:.06em;text-transform:uppercase;padding:calc(6px*var(--k)) calc(13px*var(--k));border-radius:999px;border:1px solid;white-space:nowrap}
+  .ib.warn{background:var(--warn-bg);color:var(--warn-fg);border-color:var(--warn-bd)}
+  .ib.good{background:var(--good-bg);color:var(--good-fg);border-color:var(--good-bd)}
+  .ib.neutral{background:var(--neutral-bg);color:var(--neutral-fg);border-color:var(--neutral-bd)}
+  /* cursor */
+  #cursor{position:absolute;left:0;top:0;z-index:80;width:calc(46px*var(--k));height:calc(46px*var(--k));opacity:0;pointer-events:none;
+    filter:drop-shadow(0 3px 5px rgba(15,26,20,.35));transform-origin:6px 4px}
+  #cursor .ring{position:absolute;left:50%;top:44%;width:calc(60px*var(--k));height:calc(60px*var(--k));margin-left:calc(-30px*var(--k));margin-top:calc(-30px*var(--k));
+    border-radius:50%;border:2px solid var(--brand);opacity:0}
+  /* SECTION generic (problema, módulos, foso, cta) */
+  .sec .eyebrow{font-size:calc(24px*var(--k))}
+  .sec h2{margin:calc(18px*var(--k)) 0 0;font-family:"Fraunces",serif;font-weight:600;font-size:calc(72px*var(--k));color:var(--ink);line-height:1.04;letter-spacing:-.018em}
+  .sec h2 .em{font-style:italic;color:var(--brand)}
+  /* S2 stat grid */
+  #grid2{margin-top:calc(60px*var(--k));display:grid;grid-template-columns:1fr 1fr;gap:calc(24px*var(--k));width:100%;max-width:calc(880px*var(--k))}
+  .stat{border:1px solid var(--line);background:var(--paper-raised);border-radius:calc(18px*var(--k));padding:calc(38px*var(--k));text-align:left;box-shadow:var(--shadow-card)}
+  .stat .n{font-family:"Fraunces",serif;font-weight:600;font-size:calc(94px*var(--k));color:var(--brand);line-height:.9;letter-spacing:-.03em}
+  .stat .c{margin-top:calc(16px*var(--k));font-size:calc(24px*var(--k));color:var(--ink-soft);line-height:1.35}
+  /* S3 modules */
+  #mods{margin-top:calc(56px*var(--k));display:flex;flex-direction:column;gap:calc(22px*var(--k));width:100%;max-width:calc(880px*var(--k))}
+  .mod{border:1px solid var(--line);background:var(--paper-raised);border-radius:calc(18px*var(--k));padding:calc(34px*var(--k));text-align:left;display:flex;gap:calc(28px*var(--k));align-items:flex-start;box-shadow:var(--shadow-card)}
+  .mod .no{font-family:"Geist Mono",monospace;font-size:calc(24px*var(--k));color:var(--seal);font-weight:600;flex:none;padding-top:calc(6px*var(--k))}
+  .mod .mt{font-family:"Fraunces",serif;font-weight:600;font-size:calc(42px*var(--k));color:var(--ink);line-height:1}
+  .mod .md{margin-top:calc(12px*var(--k));font-size:calc(26px*var(--k));color:var(--muted);line-height:1.35}
+  /* S5 CTA */
+  #s5 .seal{width:calc(120px*var(--k));height:calc(120px*var(--k));margin-bottom:calc(10px*var(--k))}
+  #s5 .field{margin-top:calc(48px*var(--k));display:flex;align-items:center;gap:calc(14px*var(--k));background:var(--paper-raised);
+    border:1px solid var(--line-strong);border-radius:999px;padding:calc(14px*var(--k)) calc(14px*var(--k)) calc(14px*var(--k)) calc(30px*var(--k));box-shadow:var(--shadow-card)}
+  #s5 .field .ph{font-size:calc(28px*var(--k));color:var(--muted);font-family:"Geist",sans-serif}
+  #s5 .field .btn{margin-left:calc(20px*var(--k));background:var(--brand);color:#fff;border-radius:999px;padding:calc(16px*var(--k)) calc(30px*var(--k));font-size:calc(26px*var(--k));font-weight:600}
+  .dark #s5 .field .btn{color:#04150f}
+  #s5 .url{margin-top:calc(40px*var(--k));font-family:"Geist Mono",monospace;font-size:calc(26px*var(--k));letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+</style></head>
+<body>
+<div id="stage" class="gridbg">
+  <div id="bg" class="gridbg"></div>
+
+  <!-- HERO -->
+  <div class="scene" id="s1">
+    <p class="eyebrow w he" style="margin:0">Gobernanza de IA para RRHH · EU AI Act</p>
+    <h1 class="w hh">Contrata con IA<br><span class="b">sin miedo a la auditoría.</span></h1>
+    <div id="mock-wrap"><div class="mock w" id="mock">
+      <div class="mbar">
+        <span class="dot" style="background:#e4b0aa"></span><span class="dot" style="background:#e6cfa0"></span><span class="dot" style="background:#bfdccf"></span>
+        <div class="murl">app.attesta.io/dashboard</div>
+      </div>
+      <div class="mapp">
+        <div class="side">
+          <div class="brand"><div class="s seal"></div><div class="t">Attesta</div></div>
+          <div class="nav">
+            <div class="it on">Resumen</div><div class="it">Inventario</div><div class="it">Riesgo</div><div class="it">Vigilancia</div><div class="it">Equipo</div>
+          </div>
+        </div>
+        <div class="cont">
+          <div class="view resumen">
+            <div class="h">Resumen de gobernanza</div>
+            <div class="kpis">
+              <div class="kpi"><div class="v" data-to="6">0</div><div class="k">Sistemas</div></div>
+              <div class="kpi"><div class="v warn" data-to="4">0</div><div class="k">Alto riesgo</div></div>
+              <div class="kpi"><div class="v" data-to="59" data-suf="%">0</div><div class="k">% listo</div></div>
+            </div>
+            <div class="radar">
+              <div class="l"><svg viewBox="0 0 24 24" fill="none"><path d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="tx">Próximo hito · Transparencia (Art. 50)</span></div>
+              <span class="cd">en 16 días</span>
+            </div>
+            <div class="rdist">
+              <div class="lb">Distribución de riesgo</div>
+              <div class="rrow"><span class="rl">Alto riesgo</span><div class="track"><div class="fill" data-w="67" style="background:#c9761f"></div></div></div>
+              <div class="rrow"><span class="rl">Riesgo limitado</span><div class="track"><div class="fill" data-w="17" style="background:#b0824a"></div></div></div>
+              <div class="rrow"><span class="rl">Riesgo mínimo</span><div class="track"><div class="fill" data-w="17" style="background:#0b6b4e"></div></div></div>
+            </div>
+          </div>
+          <div class="view inventario" style="opacity:0">
+            <div class="h">Inventario de IA</div>
+            <div class="invlist">
+              <div class="irow"><span class="inm">Cribado de CVs</span><span class="ib warn">Alto riesgo</span></div>
+              <div class="irow"><span class="inm">Scoring de candidatos</span><span class="ib warn">Alto riesgo</span></div>
+              <div class="irow"><span class="inm">Entrevistas por vídeo</span><span class="ib warn">Alto riesgo</span></div>
+              <div class="irow"><span class="inm">Chatbot de selección</span><span class="ib good">Limitado</span></div>
+              <div class="irow"><span class="inm">Agenda de entrevistas</span><span class="ib neutral">Mínimo</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- PROBLEMA -->
+  <div class="scene sec" id="s2">
+    <p class="eyebrow w e2" style="margin:0">El problema</p>
+    <h2 class="w e2">La regulación llegó.<br>La mayoría <span class="em">no está lista.</span></h2>
+    <div id="grid2">
+      <div class="stat w"><div class="n"><span class="v" data-to="77" data-suf="%">0</span></div><div class="c">reconoce que su adopción de IA avanza más rápido que su capacidad de gobernarla.</div></div>
+      <div class="stat w"><div class="n">&gt;<span class="v" data-to="50" data-suf="%">0</span></div><div class="c">no tiene un inventario formal de sus sistemas de IA.</div></div>
+      <div class="stat w"><div class="n">€35M</div><div class="c">7% de la facturación · sanción máxima del AI Act.</div></div>
+      <div class="stat w"><div class="n">$500<span style="font-size:.5em">/h</span></div><div class="c">es lo que cuesta hoy con consultores.</div></div>
+    </div>
+  </div>
+
+  <!-- MÓDULOS -->
+  <div class="scene sec" id="s3">
+    <p class="eyebrow w e3" style="margin:0">El producto</p>
+    <h2 class="w e3">Tu sistema de registro<br>de la <span class="em">gobernanza de IA.</span></h2>
+    <div id="mods">
+      <div class="mod w"><div class="no">01</div><div><div class="mt">Inventario de sistemas de IA</div><div class="md">Un catálogo vivo de cada modelo en uso. El 83% no lo tiene; tú sí.</div></div></div>
+      <div class="mod w"><div class="no">02</div><div><div class="mt">Clasificación de riesgo</div><div class="md">Cada sistema según el EU AI Act, con las obligaciones del deployer.</div></div></div>
+      <div class="mod w"><div class="no">03</div><div><div class="mt">Gap assessment y plan</div><div class="md">Qué te falta, priorizado, con plan de acción por artículo.</div></div></div>
+    </div>
+  </div>
+
+  <!-- FOSO -->
+  <div class="scene sec" id="s4">
+    <p class="eyebrow w e4" style="margin:0">El foso</p>
+    <h2 class="w e4">Gobernanza continua,<br>no la <span class="em">foto de un día.</span></h2>
+    <div id="mods" style="max-width:calc(880px*var(--k))">
+      <div class="mod w" style="align-items:center"><div class="no">◎</div><div><div class="mt" style="font-size:calc(38px*var(--k))">Vigilancia regulatoria</div><div class="md">Un radar de plazos y cambios del EU AI Act mapeados a tus sistemas.</div></div></div>
+      <div class="mod w" style="align-items:center"><div class="no">▤</div><div><div class="mt" style="font-size:calc(38px*var(--k))">Dossier e informes automáticos</div><div class="md">La evidencia lista para el auditor, generada con un clic.</div></div></div>
+      <div class="mod w" style="align-items:center"><div class="no">⛌</div><div><div class="mt" style="font-size:calc(38px*var(--k))">Registro inmutable</div><div class="md">Quién hizo qué y cuándo, sin poder editarlo ni borrarlo.</div></div></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="scene sec" id="s5">
+    <div class="seal w c1"></div>
+    <h2 class="w c1" style="margin-top:calc(20px*var(--k))">Ve por delante<br>de la <span class="em">auditoría.</span></h2>
+    <div class="field w c2"><span class="ph">tu@empresa.com</span><span class="btn">Solicitar acceso</span></div>
+    <p class="url w c2">attesta-io.vercel.app · @attesta.io</p>
+  </div>
+
+  <div id="cursor"><span class="ring"></span><svg viewBox="0 0 24 24" fill="none"><path d="M5 2.5l14.5 8.2-6.3 1.4-3.4 6.2L5 2.5z" fill="#faf8f2" stroke="#0f1a14" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+
+  <div id="grain" style="position:absolute;inset:0;pointer-events:none;z-index:60;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22180%22 height=%22180%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22 stitchTiles=%22stitch%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/></svg>');opacity:.02;mix-blend-mode:multiply"></div>
+</div>
+<script src="../vlib.js"></script>
+<script>
+  const q=new URLSearchParams(location.search), stage=document.getElementById('stage');
+  const theme=q.get('theme')||'light'; stage.classList.add(theme); stage.dataset.fmt=q.get('fmt')||'story';
+  const grain=document.getElementById('grain');
+  grain.style.mixBlendMode = theme==='dark'?'screen':'multiply'; grain.style.opacity = theme==='dark'?'0.03':'0.02';
+  window.DURATION=30.8;
+  const V=window.V,E=V.E,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+  const bg=$('#bg'), cursor=$('#cursor'), ring=cursor.querySelector('.ring');
+  const S={s1:{el:$('#s1'),a:0,b:9.0},s2:{el:$('#s2'),a:9.0,b:15.0},s3:{el:$('#s3'),a:15.0,b:21.0},
+    s4:{el:$('#s4'),a:21.0,b:26.2},s5:{el:$('#s5'),a:26.2,b:30.8}};
+  // scroll-push transition: incoming rises from below, outgoing pushes up (feels like scrolling)
+  function vis(sc,t,fin=0.55,fout=0.5){const{a,b,el}=sc;if(t<a-0.02||t>b+0.02){el.style.opacity=0;return null;}
+    let o=1,y=0;
+    if(t<a+fin){const u=E.web(V.p(t,a,a+fin));o=u;y=V.lerp(60,0,u);}
+    else if(t>b-fout){const u=E.web(V.p(t,b-fout,b));o=1-u;y=V.lerp(0,-52,u);}
+    el.style.opacity=o; el.style.transform=`translateY(${y}px)`; return t-a;}
+  function reveal(el,t,t0,dur=0.7,dist=18){const u=V.p(t,t0,t0+dur);el.style.opacity=E.web(u);el.style.transform=`translateY(${V.lerp(dist,0,E.web(u))}px)`;}
+  function group(sel,t,t0,st=0.14,dur=0.7,dist=20){$$(sel).forEach((el,i)=>reveal(el,t,t0+i*st,dur,dist));}
+  const setNum=(el,val,suf)=>{el.textContent=Math.round(val)+(suf||'');};
+  const rectC=el=>{const r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};};
+  // cursor: position + click pulse (ring expands, pointer dips)
+  function cursorShow(o){cursor.style.opacity=o;}
+  function cursorTo(x,y,s=1){cursor.style.transform=`translate(${x}px,${y}px) scale(${s})`;}
+  function cursorMove(t,t0,t1,from,to){const u=E.web(V.p(t,t0,t1));return {x:V.lerp(from.x,to.x,u),y:V.lerp(from.y,to.y,u)};}
+  function clickPulse(t,tc){ // returns cursor scale + drives ring
+    const rp=V.p(t,tc,tc+0.5); ring.style.opacity=(rp>0&&rp<1)?(1-rp)*0.9:0;
+    const rs=V.lerp(0.2,1.4,E.web(rp)); ring.style.transform=`scale(${rs})`;
+    const d=V.p(t,tc,tc+0.1)-V.p(t,tc+0.1,tc+0.22); return 1-0.16*Math.max(0,d);
+  }
+
+  window.SEEK=function(t){
+    // PARALLAX: slow grid drift (both layers)
+    const drift = -t*5; stage.style.backgroundPosition=`0px ${drift}px`; bg.style.backgroundPosition=`0px ${drift}px`;
+
+    // ---- S1 HERO (con mini-tour: cursor cambia de sección) ----
+    let lt=vis(S.s1,t);
+    if(lt!=null){
+      reveal($('#s1 .he'),t,0.2); reveal($('#s1 .hh'),t,0.45,0.8,26);
+      const mk=$('#mock'); const mu=V.p(t,1.1,1.9); mk.style.opacity=E.web(mu);
+      const floatY = t>1.9 ? Math.sin((t-1.9)*2*Math.PI/7)*7 : 0;
+      mk.style.transform=`translateY(${V.lerp(40,0,E.web(mu))+floatY}px) scale(${V.lerp(0.96,1,E.web(mu))})`;
+      $$('#s1 .nav .it').forEach((it,i)=>{ it.style.opacity=E.web(V.p(t,1.9+i*0.08,2.3+i*0.08)); });
+      $$('#s1 .kpi .v').forEach((v,i)=>{ const to=+v.dataset.to, suf=v.dataset.suf||''; setNum(v,V.tw(t,2.5+i*0.15,3.5+i*0.15,0,to,E.web),suf); });
+      const rd=$('#s1 .radar'); rd.style.opacity=E.web(V.p(t,3.4,4.0)); rd.style.transform=`translateX(${V.lerp(16,0,E.web(V.p(t,3.4,4.0)))}px)`;
+      $$('#s1 .rdist .fill').forEach((f,i)=>{ f.style.width=V.tw(t,3.9+i*0.12,4.9+i*0.12,0,+f.dataset.w,E.web)+'%'; });
+      // --- mini-tour: cursor clicks "Inventario", dashboard switches view ---
+      const nav=$$('#s1 .nav .it'), CLICK=5.5;
+      const invTarget=rectC(nav[1]);
+      if(t>=4.4){
+        cursorShow(E.web(V.p(t,4.4,4.8)) * (1-V.p(t,6.3,6.9)));
+        const start={x:invTarget.x+180,y:invTarget.y+240};
+        const pos=cursorMove(t,4.6,5.4,start,invTarget);
+        const sc=clickPulse(t,CLICK);
+        cursorTo(pos.x,pos.y,sc);
+      } else cursorShow(0);
+      // nav active swap + view crossfade at click
+      const sw=V.p(t,CLICK,CLICK+0.4);
+      nav[0].classList.toggle('on', sw<0.5); nav[1].classList.toggle('on', sw>=0.5);
+      $('#s1 .view.resumen').style.opacity = 1-sw;
+      const inv=$('#s1 .view.inventario'); inv.style.opacity=sw;
+      $$('#s1 .invlist .irow').forEach((r,i)=>{ const u=E.web(V.p(t,CLICK+0.35+i*0.1,CLICK+0.95+i*0.1)); r.style.opacity=u; r.style.transform=`translateY(${V.lerp(16,0,u)}px)`; });
+    } else cursorShow(0);
+
+    // ---- S2 PROBLEMA ----
+    lt=vis(S.s2,t);
+    if(lt!=null){
+      group('#s2 .e2',t,9.3,0.16,0.7,22);
+      group('#s2 .stat',t,10.0,0.16,0.7,24);
+      $$('#s2 .stat .v').forEach((v,i)=>{ const to=+v.dataset.to,suf=v.dataset.suf||''; setNum(v,V.tw(t,10.3+i*0.16,11.5+i*0.16,0,to,E.web),suf); });
+    } else { $$('#s2 .stat .v').forEach(v=>setNum(v,+v.dataset.to,v.dataset.suf||'')); }
+    // ---- S3 MÓDULOS ----
+    lt=vis(S.s3,t);
+    if(lt!=null){ group('#s3 .e3',t,15.3,0.16,0.7,22); group('#s3 .mod',t,16.1,0.2,0.7,24); }
+    // ---- S4 FOSO ----
+    lt=vis(S.s4,t);
+    if(lt!=null){ group('#s4 .e4',t,21.3,0.16,0.7,22); group('#s4 .mod',t,22.1,0.2,0.7,24); }
+    // ---- S5 CTA (cursor clicks "Solicitar acceso") ----
+    lt=vis(S.s5,t);
+    if(lt!=null){
+      const cs=V.p(t,26.5,27.2); $('#s5 .seal').style.opacity=E.web(cs); $('#s5 .seal').style.transform=`scale(${V.lerp(0.7,1,E.outBack(cs))})`;
+      group('#s5 .c1',t,26.9,0.16,0.7,24); group('#s5 .c2',t,27.9,0.16,0.7,22);
+      const btn=$('#s5 .field .btn'), CLICK=29.2, bt=rectC(btn);
+      if(t>=28.2){
+        cursorShow(E.web(V.p(t,28.2,28.6)));
+        const start={x:bt.x+150,y:bt.y+180};
+        const pos=cursorMove(t,28.4,29.1,start,bt);
+        const sc=clickPulse(t,CLICK); cursorTo(pos.x,pos.y,sc);
+        btn.style.transform=`scale(${t>=CLICK&&t<CLICK+0.14?0.96:1})`;
+      } else cursorShow(0);
+    } else if(t<26.2) cursorShow(0);
+  };
+  window.SEEK(0);
+</script>
+</body></html>
