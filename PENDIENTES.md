@@ -926,7 +926,24 @@ ordenado.
 created_at desc;`). La lista **no se puede leer desde la web**, ni siquiera con sesión: es información
 comercial y no tiene por qué estar expuesta.
 
-### 1.9 · 🟡 Vault de evidencia: 0038 APLICADA ✅ · falta la clave de firma
+### 1.9 · ✅ Vault de evidencia — COMPLETO (2026-08-06)
+
+**Migración 0038 aplicada, vault publicado y clave de firma configurada.** `/api/vault/key` responde
+`configured: true` con `keyId` **`924cb4d271e7130e506e97fe27521245`**. Verificado con herramientas ajenas: la
+clave pública son 32 bytes exactos, `sha256sum` reproduce ese mismo `keyId` y OpenSSL la acepta como Ed25519
+válida.
+
+**Lo único que queda por tu parte:** que la clave privada esté guardada en tu gestor de contraseñas. No por si
+se pierde el despliegue, sino porque **los paquetes ya entregados se verifican con la clave con la que se
+firmaron**. Si algún día la rotas sin conservar la anterior, esos paquetes parecerán inválidos — justo el
+resultado que el vault existe para evitar.
+
+**Sobre el `keyId`:** anótalo. Es lo que un auditor compara entre el `signature.json` del paquete y
+`/api/vault/key` para saber que lo firmó Attesta y no quien le entregó el ZIP.
+
+<details>
+<summary>Histórico: cómo se llegó hasta aquí</summary>
+
 
 **La migración 0038 está aplicada y verificada** (2026-08-04, `verify:backend` → **86 comprobaciones**):
 rechaza un `sha256` que no lo es y un archivo por encima del tope · un usuario de otra organización no puede
@@ -945,7 +962,7 @@ permiso. Lo he puesto **al final a propósito**: si esa parte fallara, todo lo a
 aplicado y solo habría que resolver ese bloque, en vez de perder la migración entera. Si te da error ahí,
 pásame el mensaje.
 
-**b) Genera la clave de firma — 🔴 ES LO ÚNICO QUE FALTA (2026-08-06: el vault ya está publicado).**
+**b) Genera la clave de firma — ✅ HECHO (2026-08-06).**
 
 Entra en **`/dashboard/evidencia`** y pulsa **«Generar la clave de firma»**. El botón solo lo ves tú
 (administrador de plataforma) y solo mientras no haya clave. Genera el par en tu propio navegador, con la
@@ -980,6 +997,8 @@ con la que se firmaron; sin ella, parecerán inválidos.
 
 **Comprobación rápida cuando termines:** abre `/api/vault/key` — debe devolver el mismo `keyId` que imprimió
 el generador.
+
+</details>
 
 ### 1.10 · 🟡 Pack de redes sociales: citar la fuente del 78 % / 83 % antes de publicar
 
