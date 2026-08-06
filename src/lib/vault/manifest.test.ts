@@ -13,6 +13,8 @@ import { buildManifest, canonicalJson, manifestBytes, type ManifestFile } from "
 
 const FILE: ManifestFile = {
   path: "evidencia/politica.pdf",
+  // `path` es ASCII; `filename` conserva el nombre real que subió la organización.
+  filename: "Política de supervisión.pdf",
   sha256: "a".repeat(64),
   bytes: 1024,
   uploadedAt: "2026-08-01T10:00:00.000Z",

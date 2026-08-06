@@ -82,6 +82,7 @@ describe("firmar y verificar", () => {
         files: [
           {
             path: "a.pdf",
+            filename: "a.pdf",
             sha256: "a".repeat(64),
             bytes: 10,
             uploadedAt: "2026-08-01T00:00:00.000Z",

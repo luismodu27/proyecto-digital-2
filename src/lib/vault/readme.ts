@@ -61,6 +61,13 @@ Descomprime el paquete y ejecuta, en su carpeta:
     EOF
 
 Si sale "Problemas: ninguno", el contenido coincide con el manifiesto.
+
+Sobre los nombres de archivo
+  Las rutas dentro de "evidencia/" van sin acentos y sin caracteres especiales, a
+  propósito: así son idénticas en Windows, macOS y Linux, y la comprobación de
+  arriba funciona en cualquier máquina sin depender de la configuración regional.
+  El nombre original con el que la organización subió cada documento se conserva
+  íntegro en el campo "filename" del manifiesto.
 `;
 
   const paso2 = firmado

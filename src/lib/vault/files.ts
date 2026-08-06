@@ -48,16 +48,63 @@ export function safeFilename(raw: string): string {
   return /[\p{L}\p{N}]/u.test(limpio) ? limpio : "archivo";
 }
 
+/**
+ * El mismo nombre, reducido a ASCII imprimible.
+ *
+ * POR QUÉ EXISTE, y es una lección que costó un CI en rojo. El ZIP declara sus
+ * nombres en UTF-8 correctamente (bit 11 de la cabecera), y un lector estricto
+ * —Python, 7-Zip, el Finder— los lee exactos. Pero el `unzip` de Info-ZIP, que es
+ * el que va a usar medio mundo desde una terminal, TRADUCE el nombre al juego de
+ * caracteres del entorno al escribirlo en disco. En una máquina sin locale UTF-8
+ * (un servidor, un contenedor, el runner de CI) «política.pdf» aterriza en el
+ * disco como «pol├нtica.pdf».
+ *
+ * Y ahí está el daño, que no es cosmético: el manifiesto dice `política.pdf`, en
+ * el disco hay otro nombre, y el paso 1 de las instrucciones de verificación
+ * —comprobar el SHA-256 de cada ruta del manifiesto— falla sobre un paquete
+ * PERFECTAMENTE legítimo. Un archivo de evidencia cuyo modo de fallar es acusar
+ * de manipulación a quien no ha tocado nada no sirve para lo que existe.
+ *
+ * Se corrige donde se puede corregir de verdad: la ruta DENTRO del ZIP es ASCII,
+ * así que todo extractor de todo sistema produce exactamente la ruta que el
+ * manifiesto declara. El nombre original, con sus acentos, no se pierde: viaja
+ * íntegro en el campo `filename` del manifiesto.
+ *
+ * Los diacríticos latinos se transliteran («política» → «politica»), que es
+ * legible. Lo que no se descompone a ASCII —cirílico, griego, CJK, árabe— pasa a
+ * `_`: un nombre en chino queda irreconocible dentro del ZIP y eso es una pérdida
+ * real, asumida a cambio de que la comprobación del auditor nunca dé un falso
+ * positivo. El nombre completo sigue en el manifiesto.
+ */
+export function asciiPathSegment(name: string): string {
+  const plano = name
+    // NFD separa la letra de su tilde; el rango de combinantes las borra. Los
+    // escapes son EXPLÍCITOS por la misma razón que en `safeFilename`: escritos
+    // literales, estos caracteres no se ven al leer el fichero y el rango acaba
+    // siendo otra cosa.
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    // Lo que sigue sin ser ASCII imprimible no tiene equivalente: se marca.
+    .replace(/[^\x20-\x7e]/g, "_")
+    // Varias sustituciones seguidas («日本語» → «___») se colapsan.
+    .replace(/_{2,}/g, "_")
+    .trim();
+
+  return /[a-zA-Z0-9]/.test(plano) ? plano : "archivo";
+}
 
 /**
- * Ruta dentro del ZIP, única por archivo.
+ * Ruta dentro del ZIP, única por archivo y en ASCII.
  *
  * Lleva el id delante porque dos documentos pueden llamarse igual («política.pdf»
  * en dos sistemas distintos) y un ZIP con rutas repetidas es ambiguo — el
- * escritor de `zip.ts` lo rechaza, así que aquí hay que garantizar unicidad.
+ * escritor de `zip.ts` lo rechaza, así que aquí hay que garantizar unicidad. El
+ * id va delante también por esto: al reducir a ASCII, dos nombres distintos
+ * pueden converger («política.pdf» y «politica.pdf»), y sin el prefijo el
+ * paquete se caería al construirse.
  */
 export function packagePath(file: EvidenceFile): string {
-  return `evidencia/${file.id.slice(0, 8)}-${safeFilename(file.filename)}`;
+  return `evidencia/${file.id.slice(0, 8)}-${asciiPathSegment(safeFilename(file.filename))}`;
 }
 
 /** SHA-256 en hexadecimal minúscula, el formato que exige el CHECK de la 0038. */

@@ -76,6 +76,9 @@ export async function GET() {
     entries.push({ path, data: bytes });
     manifestFiles.push({
       path,
+      // `path` va en ASCII para que la ruta del manifiesto y la del disco sean la
+      // misma en cualquier máquina; el nombre real se conserva aquí.
+      filename: file.filename,
       sha256: file.sha256,
       bytes: file.bytes,
       uploadedAt: file.uploadedAt,

@@ -70,6 +70,7 @@ async function armarPaquete(alterarUnByte = false) {
     generatedAt,
     files: files.map((f) => ({
       path: packagePath(f),
+      filename: f.filename,
       sha256: f.sha256,
       bytes: f.bytes,
       uploadedAt: f.uploadedAt,
@@ -142,6 +143,23 @@ describe("paquete de auditoría · verificado por herramientas ajenas", () => {
       }
       expect(manifest.files.length).toBe(2);
       expect(manifest.truncated).toBeNull();
+
+      /**
+       * De extremo a extremo, la propiedad que hace que el bucle de arriba
+       * funcione en CUALQUIER máquina: la ruta del manifiesto es la misma que
+       * `unzip` deja en el disco porque es ASCII, y el nombre original —con su
+       * acento— no se ha perdido, viaja en `filename`.
+       *
+       * Antes de esto, «registro supervisión.csv» se extraía como
+       * «registro supervisi├│n.csv» en un entorno sin locale UTF-8 y `sha256sum`
+       * respondía «No such file or directory» sobre un paquete impecable.
+       */
+      for (const f of manifest.files) {
+        expect(f.path, "la ruta del ZIP debe ser ASCII").toMatch(/^[\x20-\x7e]+$/);
+      }
+      expect(manifest.files.map((f: { filename: string }) => f.filename)).toContain(
+        "registro supervisión.csv",
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

@@ -40,8 +40,21 @@
 export const MANIFEST_VERSION = 1;
 
 export type ManifestFile = {
-  /** Ruta dentro del ZIP. Única dentro del paquete. */
+  /**
+   * Ruta dentro del ZIP. Única dentro del paquete y **en ASCII** (ver
+   * `asciiPathSegment` en `files.ts`): tiene que ser byte a byte la ruta que
+   * cualquier extractor deja en el disco, o la comprobación del hash falla sobre
+   * un paquete legítimo.
+   */
   path: string;
+  /**
+   * El nombre tal y como lo subió la organización, con acentos y con el alfabeto
+   * que sea. Está aquí porque `path` lo reduce a ASCII y ese nombre original es
+   * parte de la evidencia: un documento llamado «Política de supervisión humana»
+   * dice algo que «politica de supervision humana» dice peor, y nada de lo que la
+   * organización aportó debería perderse por una limitación de un formato de 1989.
+   */
+  filename: string;
   /** SHA-256 del contenido, en hexadecimal minúscula. */
   sha256: string;
   bytes: number;

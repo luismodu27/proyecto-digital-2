@@ -102,11 +102,42 @@ describe("buildZip · lo abre software ajeno", () => {
     { path: "vacio.txt", data: new Uint8Array(0) },
   ];
 
+  /**
+   * ESTE TEST USA RUTAS ASCII A PROPÓSITO, y merece la explicación porque la
+   * versión anterior no las usaba y se cayó en CI.
+   *
+   * El escritor pone bien el bit 11 (nombres en UTF-8) y Python —el test de
+   * abajo— los lee exactos. Pero `unzip` de Info-ZIP TRADUCE el nombre al juego
+   * de caracteres del entorno al escribirlo en disco: en una máquina sin locale
+   * UTF-8, «política.pdf» sale como «pol├нtica.pdf». No es un fallo del ZIP; es
+   * comportamiento documentado de esa herramienta.
+   *
+   * Poner acentos aquí convertiría este test en una medida del locale del runner
+   * en vez de una medida del escritor. La consecuencia de producto —que el
+   * auditor extraiga un nombre distinto al del manifiesto— se resuelve donde toca:
+   * `packagePath` genera rutas ASCII, y `files.test.ts` lo vigila. Aquí se
+   * comprueba lo que este módulo debe garantizar: estructura, contenido y CRC.
+   */
+  const ascii = entradas.map((e) => ({
+    ...e,
+    path: e.path === "evidencia/política de RRHH.pdf" ? "evidencia/politica de RRHH.pdf" : e.path,
+  }));
+
   it("`unzip` lo extrae con el contenido intacto", () => {
-    const salida = extraerCon("unzip", buildZip(entradas, FECHA));
-    expect(Object.keys(salida).sort()).toEqual(entradas.map((e) => e.path).sort());
-    expect(salida["evidencia/política de RRHH.pdf"]).toBe("contenido con acentos: ñáéíóú");
+    const salida = extraerCon("unzip", buildZip(ascii, FECHA));
+    expect(Object.keys(salida).sort()).toEqual(ascii.map((e) => e.path).sort());
+    expect(salida["evidencia/politica de RRHH.pdf"]).toBe("contenido con acentos: ñáéíóú");
     expect(salida["vacio.txt"]).toBe("");
+  });
+
+  /**
+   * Y esto es lo que demuestra que el escritor SÍ es correcto con nombres no
+   * ASCII: un lector estricto e independiente del locale los recupera exactos.
+   * Sin este test, la decisión de arriba parecería tapar un bug del escritor.
+   */
+  it("un lector estricto recupera los nombres no ASCII exactos (bit 11 de UTF-8)", () => {
+    const salida = extraerCon("python", buildZip(entradas, FECHA));
+    expect(Object.keys(salida)).toContain("evidencia/política de RRHH.pdf");
   });
 
   /**
