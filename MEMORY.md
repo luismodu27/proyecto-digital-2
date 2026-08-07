@@ -127,6 +127,42 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-06** · **«Se aplica sin error» y «funciona» son afirmaciones distintas. Tres veces en un
+  día.** Una auditoría 360° encontró una fuga real —`verify_all_audit_chains` devolvía **200 con 81
+  organizaciones** a cualquiera con la clave pública, porque el `revoke ... from anon` de la 0023 es
+  un no-op que la 0028 solo arregló en dos funciones de diecisiete—. Al cerrarla, la migración 0039
+  introdujo un fallo peor por un rato: al redefinir la función para añadirle el guard, su cuerpo se
+  **transcribió a mano** desde un fragmento leído a medias y quedó `private.audit_hash(r, v_prev)`
+  cuando la función pide **diez** argumentos; de paso se perdió la comprobación de `prev_hash`, la
+  mitad del control de la cadena.
+
+  **Por qué no se notó, que es la lección técnica:** PostgreSQL **no valida el cuerpo de una función
+  plpgsql al crearla**. La migración se aplicó sin una queja y superó las dos pasadas del banco de
+  pruebas desechable. El error solo aparece al EJECUTARLA. Y la verificación que se hizo comprobaba
+  *permisos* —quién puede llamarla— sin llegar a llamarla con éxito ni una vez. Todo verde, y el cron
+  que promete detectar manipulación del registro de auditoría llevaba horas sin detectar nada. Lo
+  encontró la fase adversarial de la auditoría, no la verificación propia.
+
+  **Tres verificaciones del mismo día que parecían concluyentes y no lo eran:** (1) la 0037 se declaró
+  rota estando perfecta, porque la prueba forzaba un `RETURNING` que necesita una policy que
+  deliberadamente no existe; (2) `verify:backend` dio 86/86 sin ejercitar **siete de las nueve**
+  funciones cuyos permisos acababan de cambiar; (3) esta. El patrón único: **una comprobación que no
+  distingue no es una comprobación.** Y el corolario práctico: *nunca transcribir a mano el cuerpo de
+  algo que ya existe* — se extrae con un script y se le inyecta el cambio.
+
+  **La comprobación buena, para repetirla:** no «¿se aplicó el SQL?», sino abrir `/api/audit-verify`
+  con sesión de administrador y exigir **`checkedOrgs` mayor que cero**. Verificado así:
+  `{"checkedOrgs":87,"brokenOrgs":0}`.
+
+  **Y el patrón de fondo que la auditoría nombró:** el modo de fallo dominante del proyecto no es
+  «código malo», es **«la decisión no llegó a todos sus sitios»** — trece instancias encontradas por
+  diez auditores que no se hablaron entre sí (el `revoke` en 2 de 17, el Anexo IV en 3 de 6, la marca
+  de práctica prohibida en 4 pantallas de 8, `withGpai` en 3 ramas de 4…). El antídoto ya estaba
+  inventado dos veces sin generalizarse: `subprocessors.test.ts` y `nav-gate.test.ts` escanean el
+  repositorio. Ahora son cuatro, con `db-grants.test.ts` (permisos) y `db-function-arity.test.ts`
+  (aridad). **Regla nueva: un arreglo que toca más de un fichero no está terminado hasta que existe un
+  guard que busque las instancias que no tocaste.**
+
 - **2026-08-06** · **SUBIDO ≠ PUBLICADO. El fallo más caro del proyecto, y no fue de código.**
   Durante **seis semanas** (desde el 22 de julio) todo el trabajo se fue a la rama `claude/init-3bwfhm` y
   **`main` no se tocó**. Vercel publica `main`. El resultado: el fundador aplicaba migraciones, redesplegaba,

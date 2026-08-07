@@ -1035,9 +1035,34 @@ bloque que comprueba las dos mitades —sin sesión da `42501`, con sesión da c
 porque comprobar solo la primera dejaría pasar el fallo opuesto (revocar de más y romper el
 producto). La suite pasa de 86 a **103 comprobaciones**.
 
+**⚠️ La 0039 se pegó DOS veces, y la primera estaba rota.** Al redefinir
+`verify_all_audit_chains` para añadirle el guard, su cuerpo se transcribió a mano y quedó una llamada
+de 2 argumentos a `private.audit_hash`, que pide 10. **PostgreSQL no valida el cuerpo de una función
+plpgsql al crearla**, así que la migración se aplicó sin una queja y pasó las dos pasadas del banco de
+pruebas; el error solo aparece al EJECUTARLA. Durante unas horas, el cron que detecta manipulación del
+registro de auditoría no detectaba nada. Lo encontró la verificación adversarial de la auditoría 360°.
+
+**Verificado tras repegar la versión corregida**, abriendo `/api/audit-verify` con sesión de
+administrador de plataforma:
+
+```json
+{"checkedAt":"2026-08-07T02:09:10.705Z","checkedOrgs":87,"brokenOrgs":0,"alerted":false,"broken":[]}
+```
+
+`checkedOrgs: 87` es lo que prueba que el cuerpo se ejecuta —con la versión rota devolvía el error de
+`audit_hash`— y `brokenOrgs: 0` confirma que ninguna cadena está alterada.
+
+**La comprobación que hay que repetir en el futuro no es «¿se aplicó el SQL sin error?» sino
+«¿devuelve `checkedOrgs` mayor que cero?».** Son preguntas distintas y la primera no implica la
+segunda.
+
 **La tercera pieza, la que impide que vuelva:** `src/lib/security/db-grants.test.ts` escanea las
 migraciones y falla si alguna función queda sin revocar de PUBLIC, con una lista de excepciones que
 exige motivo escrito. Quitando la 0039, el test lista las 14 funciones abiertas. Habría cazado esto.
+
+Y `src/lib/security/db-function-arity.test.ts` cubre el segundo fallo: escanea las migraciones y falla
+si una función interna se llama con un número de argumentos imposible. Reintroduciendo la llamada de 2
+argumentos, el test la nombra.
 
 ### 1.10 · 🟡 Pack de redes sociales: citar la fuente del 78 % / 83 % antes de publicar
 
