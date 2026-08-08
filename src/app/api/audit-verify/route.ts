@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getIsPlatformAdmin } from "@/lib/data";
 import { sendEmail } from "@/lib/reminders/email";
+import { logDataFallback } from "@/lib/observability/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -50,6 +51,10 @@ async function handle(request: Request) {
   const { data, error } = await svc.rpc("verify_all_audit_chains");
   if (error) {
     // La migración 0023 puede no estar aplicada todavía: no romper, informar.
+    // Y REGISTRAR: si la propia verificación de integridad no puede correr, es un
+    // silencio de primer orden (nadie mira el 500 de un cron). `logDataFallback`
+    // clasifica solo: 0023 sin aplicar → warn; cualquier otro fallo → incidente.
+    logDataFallback("audit-verify", error, "no se pudo correr verify_all_audit_chains");
     return NextResponse.json(
       { error: "no se pudo verificar", detail: error.message },
       { status: 500 },

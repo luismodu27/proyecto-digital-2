@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getIsPlatformAdmin } from "@/lib/data";
 import { runVigia } from "@/lib/reg-watch/run";
+import { logIncident } from "@/lib/observability/log";
 
 // node:crypto (hash) → runtime Node, no Edge.
 export const runtime = "nodejs";
@@ -93,6 +94,9 @@ export async function GET(request: Request) {
     const summary = await runVigia(svc);
     return NextResponse.json(summary);
   } catch (e) {
+    // Cron desatendido: si toda la corrida revienta, nadie mira el 500. Se
+    // registra para que un fallo de la vigilancia regulatoria no sea silencioso.
+    logIncident("vigia-cron", e);
     const msg = e instanceof Error ? e.message : "error";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
