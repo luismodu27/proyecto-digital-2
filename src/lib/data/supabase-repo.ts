@@ -111,7 +111,7 @@ export const getAiSystems = cache(getAiSystemsUncached);
 /** Historial de evaluaciones de un sistema (más recientes primero). */
 /** Columnas de `risk_assessments` que consumen el dossier y la exportación. */
 const ASSESSMENT_COLS =
-  "id, ai_system_id, level, rationale, evidence_state, attested_by_name, evidence_note, evidence_url, assessed_at";
+  "id, ai_system_id, level, rationale, citations, obligations, evidence_state, attested_by_name, evidence_note, evidence_url, assessed_at";
 /** `locale` la aporta la 0033: se pide aparte para poder reintentar sin ella. */
 const ASSESSMENT_COLS_FULL = `${ASSESSMENT_COLS}, locale`;
 
@@ -120,6 +120,8 @@ type AssessmentRow = {
   ai_system_id?: string;
   level: string;
   rationale: string;
+  citations?: unknown;
+  obligations?: unknown;
   evidence_state: string | null;
   attested_by_name: string | null;
   evidence_note: string | null;
@@ -128,11 +130,30 @@ type AssessmentRow = {
   locale?: string | null;
 };
 
+/** Normaliza un jsonb que debería ser array de citas `{article, text}`. */
+function asCitations(v: unknown): { article: string; text: string }[] {
+  if (!Array.isArray(v)) return [];
+  return v.flatMap((x) => {
+    if (x && typeof x === "object") {
+      const o = x as Record<string, unknown>;
+      if (typeof o.article === "string" && typeof o.text === "string") {
+        return [{ article: o.article, text: o.text }];
+      }
+    }
+    return [];
+  });
+}
+
 function mapAssessmentRow(r: AssessmentRow): AssessmentRecord {
   return {
     id: r.id,
     level: r.level as RiskLevel,
     rationale: r.rationale,
+    // Citas y obligaciones CONGELADAS en el momento de la evaluación (incluye las
+    // capas que classify() añade, p. ej. GPAI). El dossier las lee de aquí en vez
+    // de recalcular una lista genérica por nivel, que perdía esos añadidos.
+    citations: asCitations(r.citations),
+    obligations: asStringArray(r.obligations),
     evidenceState: (r.evidence_state ?? "declared") as EvidenceState,
     attestedByName: r.attested_by_name ?? null,
     evidenceNote: r.evidence_note ?? null,
