@@ -309,7 +309,8 @@ export type DossierData = {
 export const GAP_ITEMS: GapItem[] = [
   {
     id: "GAP-01",
-    requirement: "Documentación técnica del sistema (Anexo IV)",
+    requirement:
+      "Exigir al proveedor la documentación técnica (Anexo IV) y pactar su acceso por contrato",
     article: "Art. 11",
     status: "missing",
     severity: "alta",
@@ -359,7 +360,8 @@ export const GAP_ITEMS: GapItem[] = [
 export const GAP_ITEMS_EN: GapItem[] = [
   {
     id: "GAP-01",
-    requirement: "System technical documentation (Annex IV)",
+    requirement:
+      "Require the provider's technical documentation (Annex IV) and secure contractual access",
     article: "Art. 11",
     status: "missing",
     severity: "alta",
