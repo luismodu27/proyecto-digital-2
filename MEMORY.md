@@ -127,6 +127,34 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-08** · **Barrido de la auditoría 360°: Bloques 1 y 2 (rama `claude/init-3bwfhm`).**
+  Cerrados, con su verificación y —donde tocaba— su guard que escanea el repositorio:
+  · **Bloque 1** (código, sin migración): el Vigía trata el `202` del muro anti-bot de EUR-Lex como
+  error, no como "sin cambios" (antes `res.ok`, true para todo 2xx); deduplicación de packs por
+  identidad para que reaplicar en otro idioma no duplique y parta el "% listo"; guardas de rol en el
+  portal de facturación (solo owner/admin cancela) y de pertenencia al subir evidencia; logs en tres
+  silencios (facturación, cron de audit-verify, cron del Vigía); Anexo IV deja de figurar como brecha
+  del cliente en la demo (confusión provider/deployer); `?toast=demo/error` dejaban acciones sin
+  feedback → añadidos + **guard nuevo** `toasts.guard.test.ts`; el email de alerta hardcodeado se
+  sustituye por `FOUNDER_NOTIFY_EMAIL` obligatorio (antipatrón de `site-url.ts`); el seed recalcula
+  el "% listo" para que no dé un salto en la primera edición.
+  · **Bloque 2**: **migración 0040** (probada 2× + ejecutada en PG16) — borrar el archivo del bucket
+  exige owner/admin (antes un `member` lo borraba por la API de storage, dejando la fila colgando) +
+  columnas de identidad `pack_id`/`control_id`; el dossier lee **citas y obligaciones del expediente**
+  (incl. GPAI), no una lista genérica por nivel; las prácticas prohibidas (Art. 5) dejan de contar
+  como brechas "cubribles" en los dos informes.
+  · **H20 · migración 0041** (aprobada por el fundador): el hash del audit-trail dependía de la zona
+  horaria de la sesión (`timestamptz` → jsonb usa el `TimeZone`), y estaba marcado `immutable` sin
+  serlo; hoy no ardía por el UTC por defecto de Supabase, pero una conexión no-UTC habría reportado la
+  cadena ROTA sin manipulación —falsa alarma—. Se serializa el instante en UTC fijo y se re-calcula
+  toda la cadena (backfill determinista como 0020). **Demostrado por ejecución**: hash idéntico bajo
+  UTC y bajo America/Mexico_City (el viejo difería). Lección reforzada: probar EJECUTANDO la propiedad,
+  no solo aplicando el SQL.
+  · **Facturación (H5)**: revisada, el núcleo ya estaba completo (resolución de plan, ciclo del webhook,
+  portal, reconcile); el fundador confirma que no faltaba nada concreto.
+  · **Cola de baja severidad no tocada** (falta el detalle exacto del informe): H14 (normalizador
+  Colorado) y H19d/e (estados vacíos) — no se hallaron defectos reales al buscarlos.
+
 - **2026-08-06** · **«Se aplica sin error» y «funciona» son afirmaciones distintas. Tres veces en un
   día.** Una auditoría 360° encontró una fuga real —`verify_all_audit_chains` devolvía **200 con 81
   organizaciones** a cualquiera con la clave pública, porque el `revoke ... from anon` de la 0023 es
