@@ -308,6 +308,20 @@ export async function seedSampleData() {
   if (gapRows.length > 0) {
     const { error } = await supabase.from("gap_items").insert(gapRows as never[]);
     if (error) redirect("/dashboard/inventario?toast=seed-error");
+
+    // Recalcula el "% listo" de cada sistema que recibió brechas, a partir de esas
+    // brechas. El upsert de arriba fijó un compliance_pct HARDCODEADO del mock, pero
+    // el informe de gap lo calcula en vivo (done/total): si no se recalcula, el %
+    // de portada contradice al informe y DA UN SALTO en cuanto se toca la primera
+    // brecha. Es la misma llamada que hacen applyPolicyPack y las ediciones de gap;
+    // el seed era el único write-path que se la saltaba. Los sistemas SIN brechas
+    // conservan su compliance_pct ilustrativo (no tienen informe que contradecir).
+    const seededSystemIds = new Set(
+      (gapRows as Array<{ ai_system_id: string }>).map((g) => g.ai_system_id),
+    );
+    for (const id of seededSystemIds) {
+      await recomputeReadiness(supabase, org, id);
+    }
   }
 
   revalidatePath("/dashboard");
