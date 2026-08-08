@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getIsPlatformAdmin } from "@/lib/data";
 import { sendEmail } from "@/lib/reminders/email";
-import { logDataFallback } from "@/lib/observability/log";
+import { logDataFallback, logIncident } from "@/lib/observability/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,8 +73,20 @@ async function handle(request: Request) {
 
   // Alerta: si alguna cadena está rota, avisa al fundador.
   let alerted = false;
-  if (broken.length > 0) {
-    const to = process.env.FOUNDER_NOTIFY_EMAIL ?? "attesta.io.mx@gmail.com";
+  const to = process.env.FOUNDER_NOTIFY_EMAIL;
+  if (broken.length > 0 && !to) {
+    // NO se inventa un destinatario. Igual que `site-url.ts` no tiene dominio por
+    // defecto: una alerta de integridad del audit-trail enviada a una dirección
+    // adivinada y hardcodeada es peor que no enviarla —da falsa tranquilidad y
+    // puede acabar en un buzón que nadie mira—. Sin `FOUNDER_NOTIFY_EMAIL` no se
+    // manda, pero el fallo de entrega se registra para que tampoco sea silencioso.
+    logIncident(
+      "audit-verify",
+      new Error("cadena de auditoría rota pero FOUNDER_NOTIFY_EMAIL no está configurado"),
+      `${broken.length} org(s) afectadas`,
+    );
+  }
+  if (broken.length > 0 && to) {
     const lines = broken
       .map((r) => `• org ${r.organization_id} — rota en audit_log id ${r.broken_id}`)
       .join("\n");

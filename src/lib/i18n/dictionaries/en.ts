@@ -1037,6 +1037,12 @@ export const en: Dictionary = {
     },
 
     toasts: {
+      // Generic: used by several actions (organizations, vault). Without them a
+      // `?toast=demo` / `?toast=error` matched no message and NO toast appeared
+      // —an action with no feedback—, because the Toaster silently ignores a key
+      // that isn't in the map. `toasts.guard.test.ts` keeps this from regressing.
+      demo: "This is a demo: the action isn't saved.",
+      error: "Something went wrong. Please try again.",
       "system-created": "System registered in the inventory.",
       "vault-uploaded": "Document stored in the vault.",
       "vault-deleted": "Document deleted.",
