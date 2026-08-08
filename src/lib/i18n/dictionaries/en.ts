@@ -1674,6 +1674,8 @@ export const en: Dictionary = {
       okBanner:
         "Payment received! Your subscription will activate in a few seconds. If you don't see the change, reload the page.",
       canceledBanner: "Checkout canceled. No charge was made.",
+      forbiddenBanner:
+        "Only the owner or an administrator can manage the organization's billing.",
       planPrefix: "Plan ",
       badgeEnterprise: "Enterprise",
       badgeUnlocked: "Unlocked",

@@ -33,6 +33,42 @@ import { MAX_FILE_BYTES, sha256Hex, validateUpload } from "@/lib/vault/files";
  * es un objeto huérfano en el bucket, que no engaña a nadie y lo barre la purga.
  */
 
+/**
+ * ¿El ancla (brecha o sistema) pertenece a la organización activa? Arriba solo se
+ * valida el FORMATO uuid; esto valida la PERTENENCIA. Sin ello se podría colgar
+ * evidencia de una brecha o un sistema de OTRO tenant: la fila llevaría el
+ * `organization_id` propio pero su clave foránea apuntaría a algo ajeno, y la RLS
+ * del insert no lo caza porque solo compara la columna `organization_id`, no el
+ * dueño de lo que se referencia. Mismo criterio que `systemBelongsToOrg` en
+ * data/actions.ts.
+ */
+async function anchorBelongsToOrg(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  org: string,
+  anchor: { gapItemId: string | null; aiSystemId: string | null },
+): Promise<boolean> {
+  if (anchor.gapItemId) {
+    const { data } = await supabase
+      .from("gap_items")
+      .select("id")
+      .eq("organization_id", org)
+      .eq("id", anchor.gapItemId)
+      .maybeSingle();
+    return !!data;
+  }
+  if (anchor.aiSystemId) {
+    const { data } = await supabase
+      .from("ai_systems")
+      .select("id")
+      .eq("organization_id", org)
+      .eq("id", anchor.aiSystemId)
+      .maybeSingle();
+    return !!data;
+  }
+  // `validateUpload` ya garantiza que hay ancla; esto es defensa en profundidad.
+  return false;
+}
+
 export async function uploadEvidence(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/dashboard/gap?toast=demo");
 
@@ -58,6 +94,14 @@ export async function uploadEvidence(formData: FormData) {
   const org = await getActiveOrg();
   if (!org) redirect("/dashboard");
 
+  const supabase = await createClient();
+
+  // La pertenencia del ancla se comprueba ANTES de subir nada: así un ancla ajena
+  // ni siquiera deja un objeto huérfano en el bucket.
+  if (!(await anchorBelongsToOrg(supabase, org, { gapItemId, aiSystemId }))) {
+    redirect(`${back}?toast=vault-forbidden`);
+  }
+
   const bytes = new Uint8Array(await file.arrayBuffer());
   // Se vuelve a comprobar sobre los bytes REALES: `file.size` lo dice el cliente.
   if (bytes.length === 0 || bytes.length > MAX_FILE_BYTES) {
@@ -66,8 +110,6 @@ export async function uploadEvidence(formData: FormData) {
 
   const sha256 = await sha256Hex(bytes);
   const storagePath = `${org}/${crypto.randomUUID()}`;
-
-  const supabase = await createClient();
 
   const up = await supabase.storage.from("evidence").upload(storagePath, bytes, {
     contentType: file.type || "application/octet-stream",

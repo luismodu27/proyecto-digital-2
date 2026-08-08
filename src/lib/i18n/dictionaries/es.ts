@@ -1708,6 +1708,8 @@ export const es = {
       okBanner:
         "¡Pago recibido! Tu suscripción se activará en unos segundos. Si no ves el cambio, recarga la página.",
       canceledBanner: "Checkout cancelado. No se realizó ningún cargo.",
+      forbiddenBanner:
+        "Solo el propietario o un administrador pueden gestionar la facturación de la organización.",
       planPrefix: "Plan ",
       badgeEnterprise: "Enterprise",
       badgeUnlocked: "Desbloqueado",
