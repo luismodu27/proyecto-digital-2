@@ -120,14 +120,19 @@ export function policyPackById(id: string, locale: Locale = "es"): PolicyPack | 
  * `requirement` ya guardado a su id mirando los títulos del pack en AMBOS idiomas
  * y se descartan los controles cuyo id ya existe.
  *
- * `existingRequirements` puede traer títulos de OTROS packs o de brechas manuales:
- * los que no correspondan a un control de ESTE pack no resuelven a ningún id y no
- * afectan — que es lo correcto, no se dedupica contra ellos.
+ * Cada brecha existente se pasa como `{ requirement, controlId }`. Desde la
+ * migración 0040 las brechas de pack guardan `control_id` (identidad estable): si
+ * viene, se dedupica por ÉL directamente —exacto, inmune a que el título cambie—.
+ * Las brechas SIN `control_id` (manuales, o anteriores a 0040) se resuelven por
+ * título contra el catálogo en ambos idiomas, como antes. Un título de otro pack o
+ * de una brecha manual no resuelve a ningún id de ESTE pack y no afecta.
  */
+export type ExistingGap = { requirement: string; controlId?: string | null };
+
 export function pendingControls(
   packCurrent: PolicyPack,
   packOther: PolicyPack | null,
-  existingRequirements: string[],
+  existing: ExistingGap[],
 ): PolicyControl[] {
   const titleToId = new Map<string, string>();
   // El idioma actual primero: si un mismo texto fuese título de dos controles en
@@ -137,8 +142,9 @@ export function pendingControls(
     if (!titleToId.has(c.title)) titleToId.set(c.title, c.id);
   }
   const seenIds = new Set<string>();
-  for (const req of existingRequirements) {
-    const id = titleToId.get(req);
+  for (const g of existing) {
+    // Identidad estable primero; si no la hay, se resuelve por título.
+    const id = g.controlId ?? titleToId.get(g.requirement);
     if (id) seenIds.add(id);
   }
   return packCurrent.controls.filter((c) => !seenIds.has(c.id));
