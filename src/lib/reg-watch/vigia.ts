@@ -70,7 +70,14 @@ export async function fetchAndHash(
           "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       },
     });
-    if (!res.ok) {
+    // 200 EXACTO, no `res.ok`. `res.ok` es true para todo 2xx, y ahí se cuela el
+    // 202: los muros anti-bot de CloudFront/AWS responden `202 Accepted` con una
+    // página de *challenge* en el cuerpo, no la norma. Con `res.ok` ese challenge
+    // se hasheaba y se marcaba como éxito — de modo que un cambio real en la norma
+    // quedaría enmascarado tras el hash estable del muro, y el Vigía nunca lo vería.
+    // Un 204 (sin cuerpo) o un 206 (parcial) tampoco son la página que vigilamos.
+    // `redirect: "follow"` ya resolvió los 3xx, así que aquí solo el 200 es señal.
+    if (res.status !== 200) {
       return { ok: false, error: `HTTP ${res.status}`, httpStatus: res.status };
     }
     const body = await res.text();

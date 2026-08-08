@@ -5,7 +5,7 @@
 
 export type { PolicySeverity, PolicyControl, PolicyPack } from "./types";
 
-import type { PolicyPack } from "./types";
+import type { PolicyControl, PolicyPack } from "./types";
 import type { Locale } from "../i18n/config";
 import { RRHH_PACK, RRHH_PACK_EN } from "./rrhh";
 import {
@@ -101,4 +101,45 @@ export function getPolicyPack(id: string): PolicyPack | null {
 /** Devuelve un pack por su id en el idioma indicado (o null si no existe). */
 export function policyPackById(id: string, locale: Locale = "es"): PolicyPack | null {
   return policyPacks(locale).find((p) => p.id === id) ?? null;
+}
+
+/**
+ * Controles de un pack que AÚN NO están precargados como brechas del sistema,
+ * deduplicando por IDENTIDAD ESTABLE (`control.id`), no por título.
+ *
+ * POR QUÉ NO POR TÍTULO. Los `gap_items` guardan el texto en el idioma en que se
+ * aplicó el pack (migración 0033: en EN se persisten los títulos EN). Deduplicar
+ * por el título del idioma ACTUAL —lo que se hacía— significaba que, al reaplicar
+ * el mismo pack con la UI en el otro idioma, ningún título coincidía con lo ya
+ * guardado y se reinsertaba el pack ENTERO: cada control quedaba duplicado (una
+ * fila ES + una EN), el total de brechas se doblaba y, como los duplicados entran
+ * en estado "missing", el "% listo" (done/total) se partía a la mitad de golpe.
+ *
+ * La identidad estable es `control.id`, que ES y EN comparten (mismo orden e ids,
+ * garantizado por la paridad de `packs.test.ts`). Aquí se resuelve cada
+ * `requirement` ya guardado a su id mirando los títulos del pack en AMBOS idiomas
+ * y se descartan los controles cuyo id ya existe.
+ *
+ * `existingRequirements` puede traer títulos de OTROS packs o de brechas manuales:
+ * los que no correspondan a un control de ESTE pack no resuelven a ningún id y no
+ * afectan — que es lo correcto, no se dedupica contra ellos.
+ */
+export function pendingControls(
+  packCurrent: PolicyPack,
+  packOther: PolicyPack | null,
+  existingRequirements: string[],
+): PolicyControl[] {
+  const titleToId = new Map<string, string>();
+  // El idioma actual primero: si un mismo texto fuese título de dos controles en
+  // idiomas distintos (improbable), gana el del idioma en el que insertamos.
+  for (const c of packCurrent.controls) titleToId.set(c.title, c.id);
+  for (const c of packOther?.controls ?? []) {
+    if (!titleToId.has(c.title)) titleToId.set(c.title, c.id);
+  }
+  const seenIds = new Set<string>();
+  for (const req of existingRequirements) {
+    const id = titleToId.get(req);
+    if (id) seenIds.add(id);
+  }
+  return packCurrent.controls.filter((c) => !seenIds.has(c.id));
 }

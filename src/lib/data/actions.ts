@@ -7,7 +7,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
 import type { Answers, ClassificationResult } from "@/lib/risk-assessment";
 import { AI_SYSTEMS, GAP_ITEMS, RISK_ORDER } from "@/lib/mock-data";
-import { policyPackById } from "@/lib/policy-packs";
+import { pendingControls, policyPackById } from "@/lib/policy-packs";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { trackServer } from "@/lib/telemetry/server";
 import { logDataFallback, logIncident } from "@/lib/observability/log";
@@ -132,11 +132,15 @@ export async function applyPolicyPack(formData: FormData) {
     .select("requirement")
     .eq("organization_id", org)
     .eq("ai_system_id", systemId);
-  const seen = new Set((existing ?? []).map((r) => r.requirement));
-
-  const rows = pack.controls
-    .filter((c) => !seen.has(c.title))
-    .map((c) => ({
+  // Deduplicación por IDENTIDAD del control, no por título (los títulos se
+  // traducen y reaplicar el pack en el otro idioma duplicaba todo). Se resuelve
+  // contra los títulos del pack en AMBOS idiomas. Ver `pendingControls`.
+  const packOther = policyPackById(pack.id, locale === "es" ? "en" : "es");
+  const rows = pendingControls(
+    pack,
+    packOther,
+    (existing ?? []).map((r) => String(r.requirement)),
+  ).map((c) => ({
       organization_id: org,
       ai_system_id: systemId,
       requirement: c.title,
