@@ -7,7 +7,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg } from "./context";
 import type { Answers, ClassificationResult } from "@/lib/risk-assessment";
 import { AI_SYSTEMS, GAP_ITEMS, RISK_ORDER } from "@/lib/mock-data";
-import { policyPackById } from "@/lib/policy-packs";
+import { pendingControls, policyPackById } from "@/lib/policy-packs";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { trackServer } from "@/lib/telemetry/server";
 import { logDataFallback, logIncident } from "@/lib/observability/log";
@@ -127,16 +127,36 @@ export async function applyPolicyPack(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: existing } = await supabase
+  // Se pide `control_id` (0040): si la fila lo tiene, la deduplicación es exacta;
+  // si no (brecha manual o anterior a 0040), `pendingControls` cae al título. Si la
+  // columna aún no existe, el select falla y se reintenta sin ella (degradación).
+  let existing: { requirement: string; control_id?: string | null }[] = [];
+  const withId = await supabase
     .from("gap_items")
-    .select("requirement")
+    .select("requirement, control_id")
     .eq("organization_id", org)
     .eq("ai_system_id", systemId);
-  const seen = new Set((existing ?? []).map((r) => r.requirement));
-
-  const rows = pack.controls
-    .filter((c) => !seen.has(c.title))
-    .map((c) => ({
+  if (withId.error) {
+    const base = await supabase
+      .from("gap_items")
+      .select("requirement")
+      .eq("organization_id", org)
+      .eq("ai_system_id", systemId);
+    existing = base.data ?? [];
+  } else {
+    existing = withId.data ?? [];
+  }
+  // Deduplicación por IDENTIDAD del control (0040: `control_id`), con caída a título
+  // resuelto contra AMBOS idiomas para las filas heredadas. Ver `pendingControls`.
+  const packOther = policyPackById(pack.id, locale === "es" ? "en" : "es");
+  const rows = pendingControls(
+    pack,
+    packOther,
+    (existing ?? []).map((r) => ({
+      requirement: String(r.requirement),
+      controlId: r.control_id ?? null,
+    })),
+  ).map((c) => ({
       organization_id: org,
       ai_system_id: systemId,
       requirement: c.title,
@@ -150,6 +170,10 @@ export async function applyPolicyPack(formData: FormData) {
       // sabe con certeza —lo acabamos de elegir tres líneas más arriba— y es el
       // único momento en el que se sabe: después, la fila ya no lo dice.
       locale,
+      // Identidad estable del control (0040): deduplicar sin depender del título.
+      // Van con las demás opcionales en el reintento de degradación de abajo.
+      pack_id: pack.id,
+      control_id: c.id,
       created_by: user?.id,
     }));
 
@@ -159,16 +183,18 @@ export async function applyPolicyPack(formData: FormData) {
       logDataFallback(
         "applyPolicyPack",
         error,
-        "reintento sin las columnas opcionales (prohibited 0022 / locale 0033)",
+        "reintento sin las columnas opcionales (prohibited 0022 / locale 0033 / identidad 0040)",
       );
-      // Degradación: si falta alguna columna opcional (0022 o 0033 sin aplicar),
-      // se reinserta sin ellas. Se sueltan las DOS a la vez a propósito: el error
-      // de PostgREST no dice cuál falta, y encadenar reintentos por columna
+      // Degradación: si falta alguna columna opcional (0022, 0033 o 0040 sin
+      // aplicar), se reinserta sin ellas. Se sueltan TODAS a la vez a propósito: el
+      // error de PostgREST no dice cuál falta, y encadenar reintentos por columna
       // multiplicaría los inserts para ahorrar un dato accesorio.
       const legacy = rows.map((r) => {
         const rest: Record<string, unknown> = { ...r };
         delete rest.prohibited;
         delete rest.locale;
+        delete rest.pack_id;
+        delete rest.control_id;
         return rest;
       });
       const retry = await supabase.from("gap_items").insert(legacy);
@@ -304,6 +330,20 @@ export async function seedSampleData() {
   if (gapRows.length > 0) {
     const { error } = await supabase.from("gap_items").insert(gapRows as never[]);
     if (error) redirect("/dashboard/inventario?toast=seed-error");
+
+    // Recalcula el "% listo" de cada sistema que recibió brechas, a partir de esas
+    // brechas. El upsert de arriba fijó un compliance_pct HARDCODEADO del mock, pero
+    // el informe de gap lo calcula en vivo (done/total): si no se recalcula, el %
+    // de portada contradice al informe y DA UN SALTO en cuanto se toca la primera
+    // brecha. Es la misma llamada que hacen applyPolicyPack y las ediciones de gap;
+    // el seed era el único write-path que se la saltaba. Los sistemas SIN brechas
+    // conservan su compliance_pct ilustrativo (no tienen informe que contradecir).
+    const seededSystemIds = new Set(
+      (gapRows as Array<{ ai_system_id: string }>).map((g) => g.ai_system_id),
+    );
+    for (const id of seededSystemIds) {
+      await recomputeReadiness(supabase, org, id);
+    }
   }
 
   revalidatePath("/dashboard");

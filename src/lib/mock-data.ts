@@ -289,6 +289,14 @@ export type AssessmentRecord = {
   id: string;
   level: RiskLevel;
   rationale: string;
+  /**
+   * Citas legales congeladas en la evaluación (incluye capas como GPAI). Forma
+   * estructural de `Citation` de risk-assessment (se declara inline para no crear
+   * un import circular: risk-assessment ya importa de este módulo).
+   */
+  citations?: { article: string; text: string }[];
+  /** Obligaciones congeladas en la evaluación (las reales, no una lista por nivel). */
+  obligations?: string[];
   evidenceState: EvidenceState;
   attestedByName: string | null;
   evidenceNote?: string | null;
@@ -309,7 +317,8 @@ export type DossierData = {
 export const GAP_ITEMS: GapItem[] = [
   {
     id: "GAP-01",
-    requirement: "Documentación técnica del sistema (Anexo IV)",
+    requirement:
+      "Exigir al proveedor la documentación técnica (Anexo IV) y pactar su acceso por contrato",
     article: "Art. 11",
     status: "missing",
     severity: "alta",
@@ -359,7 +368,8 @@ export const GAP_ITEMS: GapItem[] = [
 export const GAP_ITEMS_EN: GapItem[] = [
   {
     id: "GAP-01",
-    requirement: "System technical documentation (Annex IV)",
+    requirement:
+      "Require the provider's technical documentation (Annex IV) and secure contractual access",
     article: "Art. 11",
     status: "missing",
     severity: "alta",
@@ -456,6 +466,10 @@ export const SAMPLE_ASSESSMENTS: Record<string, AssessmentRecord[]> = {
       level: "high",
       rationale:
         "El sistema opera en un área de alto riesgo del Anexo III (empleo y gestión de trabajadores) y no le aplica ninguna excepción del Art. 6(3).",
+      citations: [
+        { article: "Art. 6 + Anexo III", text: "Clasificación como sistema de alto riesgo." },
+        { article: "Arts. 9–15", text: "Requisitos para sistemas de alto riesgo." },
+      ],
       evidenceState: "evidenced",
       attestedByName: "Ana López · Responsable de RRHH",
       evidenceNote: "DPIA y prueba de sesgo del proveedor archivadas en el expediente.",
@@ -514,6 +528,10 @@ export const SAMPLE_ASSESSMENTS_EN: Record<string, AssessmentRecord[]> = {
       level: "high",
       rationale:
         "The system operates in a high-risk area of Annex III (employment and worker management) and none of the exceptions in Art. 6(3) apply to it.",
+      citations: [
+        { article: "Art. 6 + Annex III", text: "Classification as a high-risk system." },
+        { article: "Arts. 9–15", text: "Requirements for high-risk systems." },
+      ],
       evidenceState: "evidenced",
       attestedByName: "Ana López · HR Lead",
       evidenceNote: "Provider's DPIA and bias test filed in the record.",

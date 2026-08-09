@@ -6,7 +6,7 @@
 > - **[CLAUDE.md](./CLAUDE.md)** — mapa técnico del código.
 > - **[docs/supabase.md](./docs/supabase.md)** — backend/migraciones.
 >
-> Última actualización: **2026-08-06**.
+> Última actualización: **2026-08-08**.
 
 ---
 
@@ -31,6 +31,25 @@ npm run verify:deploy      # commit publicado vs local + rutas públicas reales
   cubre esas rutas es la comparación de commits.
 
 **Estado actual: ✅ `main` = `f7f12dc`, publicado y verificado el 2026-08-06 (11/11).**
+
+> ⚠️ **Nota (2026-08-08):** el trabajo de los Bloques 1 y 2 (abajo) vive en la rama
+> `claude/init-3bwfhm`, **no en `main`** → todavía **no está publicado**. Se publicará al
+> abrir/fusionar el PR. Está todo en verde (766 tests, lint, tsc, check:copy, build).
+
+---
+
+## 🗄️ 0-pre.5. MIGRACIONES PENDIENTES DE APLICAR (fundador, Supabase SQL Editor)
+
+Pega `supabase/setup.sql` entero (es re-ejecutable) en el **SQL Editor** para aplicar todo, o
+los bloques sueltos. Añadidas en la sesión 2026-08-08:
+
+- **`0040_bucket_role_and_gap_identity`** — borrar el archivo de evidencia del bucket exige
+  owner/admin (antes un `member` podía borrarlo por la API de storage); + columnas `pack_id`/
+  `control_id` en `gap_items`. Probada 2× + ejecutada en PG16. Sin aplicar, la app degrada sola.
+- **`0041_audit_hash_utc`** — el hash del audit-trail deja de depender de la zona horaria.
+  **Re-calcula toda la cadena del `audit_log`** (backfill determinista como el de 0020; no toca
+  datos, solo los hashes). Solo BD, sin cambio de código. Tras aplicarla, `/api/audit-verify`
+  debe seguir dando `brokenOrgs: 0`. Probada 2× + ejecutada (independencia de zona demostrada).
 
 ---
 

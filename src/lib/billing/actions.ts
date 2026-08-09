@@ -7,9 +7,11 @@ import { STRIPE_PRICE_ID, isStripeConfigured } from "@/lib/stripe/config";
 import {
   getCurrentUser,
   getActiveOrg,
+  getActiveRole,
   ACTIVE_ORG_COOKIE,
 } from "@/lib/data/context";
 import { getOrgSubscription } from "./subscription";
+import { canManageBilling } from "./roles";
 import { trackServer } from "@/lib/telemetry/server";
 
 async function baseUrl(): Promise<string> {
@@ -25,6 +27,11 @@ export async function startCheckout() {
   const user = await getCurrentUser();
   const orgId = await getActiveOrg();
   if (!user || !orgId) redirect("/login");
+  // Contratar compromete un pago recurrente de la organización: no es una acción
+  // de cualquier miembro. La UI ya oculta el botón; esto es la frontera real.
+  if (!canManageBilling(await getActiveRole())) {
+    redirect("/dashboard/facturacion?estado=sinpermiso");
+  }
 
   const stripe = getStripe();
   const url = await baseUrl();
@@ -70,6 +77,12 @@ export async function openBillingPortal() {
   if (!isStripeConfigured) throw new Error("Stripe no está configurado.");
   const orgId = await getActiveOrg();
   if (!orgId) redirect("/login");
+  // El portal permite CANCELAR la suscripción. Sin esta guarda, cualquier
+  // miembro (incluido un `member`/observador) podía dejar a la organización sin
+  // plan. Solo owner/admin.
+  if (!canManageBilling(await getActiveRole())) {
+    redirect("/dashboard/facturacion?estado=sinpermiso");
+  }
 
   const sub = await getOrgSubscription(orgId);
   if (!sub?.stripeCustomerId) redirect("/dashboard/facturacion");

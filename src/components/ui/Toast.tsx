@@ -28,6 +28,8 @@ const DANGER = new Set([
   "vault-error",
   "vault-large",
   "vault-forbidden",
+  // Error genérico (organizaciones, etc.): también en tono de alarma.
+  "error",
 ]);
 
 /** Claves informativas (avisos de modo demo o duplicados) → tono neutro. */

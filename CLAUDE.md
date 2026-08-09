@@ -226,7 +226,7 @@ src/
     policy-packs/rrhh.ts  task-reminders.ts
     telemetry/     # events (catálogo cerrado) + server/service/client + actions
 supabase/
-  migrations/*.sql   # 0001..0013 (esquema, RLS, audit, RPCs)
+  migrations/*.sql   # 0001..0039 (esquema, RLS, audit, RPCs, vault, facturación, endurecimiento de grants)
   setup.sql          # todas las migraciones concatenadas (el fundador las pega en SQL Editor)
 docs/{supabase.md,thesis.md}
 ```

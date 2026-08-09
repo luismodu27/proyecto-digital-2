@@ -1062,6 +1062,12 @@ export const es = {
     },
 
     toasts: {
+      // Genéricos: los usan varias acciones (organizaciones, vault). Sin ellos, un
+      // `?toast=demo` / `?toast=error` no encontraba mensaje y el toast NO aparecía
+      // —acción sin feedback—, porque el Toaster ignora en silencio una clave que
+      // no está en el mapa. El guard `toasts.guard.test.ts` vela por que no vuelva.
+      demo: "Es una demostración: esta acción no se guarda.",
+      error: "Ocurrió un error inesperado. Inténtalo de nuevo.",
       "system-created": "Sistema registrado en el inventario.",
       "vault-uploaded": "Documento guardado en el vault.",
       "vault-deleted": "Documento eliminado.",
@@ -1708,6 +1714,8 @@ export const es = {
       okBanner:
         "¡Pago recibido! Tu suscripción se activará en unos segundos. Si no ves el cambio, recarga la página.",
       canceledBanner: "Checkout cancelado. No se realizó ningún cargo.",
+      forbiddenBanner:
+        "Solo el propietario o un administrador pueden gestionar la facturación de la organización.",
       planPrefix: "Plan ",
       badgeEnterprise: "Enterprise",
       badgeUnlocked: "Desbloqueado",

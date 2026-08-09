@@ -196,9 +196,21 @@ export default async function DossierPage({
     latest?.rationale ??
     (locale === "en" ? RATIONALE_FALLBACK_EN : RATIONALE_FALLBACK)[level];
   const evidenceState: EvidenceState = system.evidenceState ?? "declared";
-  const obligations = (
-    locale === "en" ? OBLIGATIONS_BY_LEVEL_EN : OBLIGATIONS_BY_LEVEL
-  )[level];
+  // Obligaciones y citas REALES de la evaluación (congeladas al evaluar, incluyen
+  // capas como GPAI). Se leen del expediente; solo si no hay evaluación guardada se
+  // cae a la lista genérica por nivel. Antes SIEMPRE se mostraba la genérica, así
+  // que los añadidos específicos del sistema (p. ej. Art. 53.1.b de GPAI) no salían.
+  const usingPersistedObligations = !!(
+    latest?.obligations && latest.obligations.length > 0
+  );
+  const obligations = usingPersistedObligations
+    ? latest!.obligations!
+    : (locale === "en" ? OBLIGATIONS_BY_LEVEL_EN : OBLIGATIONS_BY_LEVEL)[level];
+  // Idioma en que se congelaron: si son las persistidas, el de la evaluación.
+  const obligationsLang = usingPersistedObligations
+    ? langAttr(latest!.locale, locale)
+    : undefined;
+  const citations = latest?.citations ?? [];
   const recs = recommendationsForLevel(level, locale);
   // Las prácticas prohibidas (Art. 5) no son "brechas abiertas": no se preparan.
   // Se excluyen del recuento de brechas y se rotulan aparte en la tabla.
@@ -418,12 +430,31 @@ export default async function DossierPage({
               </p>
             )}
           </div>
+          {/* Citas legales de la evaluación (congeladas, incluyen capas como GPAI).
+              Se leen del expediente; no se muestran si la evaluación no las tiene. */}
+          {citations.length > 0 && (
+            <div className="mt-4">
+              <p className="text-[11px] uppercase tracking-wide text-muted">
+                {locale === "en" ? "Legal references cited" : "Referencias legales citadas"}
+              </p>
+              <ul className="mt-2 space-y-1.5" lang={langAttr(latest?.locale, locale)}>
+                {citations.map((c) => (
+                  <li key={`${c.article}-${c.text}`} className="flex gap-2 text-sm text-ink-soft">
+                    <span className="mt-0.5 shrink-0 font-mono text-xs text-seal">
+                      {c.article}
+                    </span>
+                    <span>{c.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
 
         {/* 3 · Obligaciones aplicables */}
         <section className="mt-9 break-inside-avoid">
           <SectionTitle n={3}>{td.sec3}</SectionTitle>
-          <ul className="space-y-2">
+          <ul className="space-y-2" lang={obligationsLang}>
             {obligations.map((o) => (
               <li key={o} className="flex gap-2.5 text-sm text-ink-soft">
                 <span

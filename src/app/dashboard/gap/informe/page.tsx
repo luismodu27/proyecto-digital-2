@@ -62,6 +62,7 @@ export default async function InformeGapPage() {
   const tp = dd.pages;
   const tg = tp.gapReport;
   const rc = tp.reportChrome;
+  const gp = dd.gap.prohibited;
   const statusLabel = {
     missing: rc.statusMissing,
     partial: rc.statusPartial,
@@ -69,25 +70,33 @@ export default async function InformeGapPage() {
   } as const;
 
   const nameById = new Map(systems.map((s) => [s.id, s.name]));
-  const total = gapItems.length;
-  const open = gapItems.filter((g) => g.status !== "done").length;
+  // Las prácticas prohibidas (Art. 5) NO son brechas "cubribles": no se preparan
+  // para auditoría, se cesan. Quedan FUERA del cómputo de cobertura —igual que en
+  // `recomputeReadiness` y en el dossier— y se rotulan aparte en la tabla. Antes se
+  // contaban como brechas ordinarias y el "% cubierto" contradecía al "% listo".
+  const countable = gapItems.filter((g) => !g.prohibited);
+  const hasProhibited = gapItems.some((g) => g.prohibited);
+  const total = countable.length;
+  const open = countable.filter((g) => g.status !== "done").length;
   const done = total - open;
-  const openAlta = gapItems.filter(
+  const openAlta = countable.filter(
     (g) => g.status !== "done" && g.severity === "alta",
   ).length;
   const coveragePct = total ? Math.round((done / total) * 100) : 0;
 
   // Agrupa las brechas por sistema (estructura auditable). Ordena los sistemas
-  // por urgencia: más brechas abiertas de severidad alta primero.
+  // por urgencia: más brechas abiertas de severidad alta primero. Las prohibidas
+  // se muestran dentro del grupo pero no entran en sus contadores.
   const groups = [...new Set(gapItems.map((g) => g.system))]
     .map((sysId) => {
       const items = [...gapItems.filter((g) => g.system === sysId)].sort(orderGaps);
-      const gOpen = items.filter((i) => i.status !== "done").length;
-      const gAlta = items.filter(
+      const countableItems = items.filter((i) => !i.prohibited);
+      const gOpen = countableItems.filter((i) => i.status !== "done").length;
+      const gAlta = countableItems.filter(
         (i) => i.status !== "done" && i.severity === "alta",
       ).length;
-      const gCov = items.length
-        ? Math.round(((items.length - gOpen) / items.length) * 100)
+      const gCov = countableItems.length
+        ? Math.round(((countableItems.length - gOpen) / countableItems.length) * 100)
         : 0;
       return {
         sysId,
@@ -296,18 +305,33 @@ export default async function InformeGapPage() {
                         <td lang={langAttr(g.locale, locale)} className="py-3 pr-3">
                           {g.requirement}
                         </td>
-                        <td className="py-3 pr-3">
-                          <Chip tone={SEVERITY_TONE[g.severity]}>
-                            <span className="capitalize">
-                              {severityLabel(g.severity, locale)}
-                            </span>
-                          </Chip>
-                        </td>
-                        <td className="py-3">
-                          <Chip tone={STATUS_TONE[g.status]}>
-                            {statusLabel[g.status]}
-                          </Chip>
-                        </td>
+                        {g.prohibited ? (
+                          // Práctica prohibida (Art. 5): no lleva severidad ni estado
+                          // de preparación; se rotula "Inaceptable" y la acción debida.
+                          <>
+                            <td className="py-3 pr-3">
+                              <Chip tone="danger">{gp.level}</Chip>
+                            </td>
+                            <td className="py-3">
+                              <Chip tone="danger">{gp.actionShort}</Chip>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="py-3 pr-3">
+                              <Chip tone={SEVERITY_TONE[g.severity]}>
+                                <span className="capitalize">
+                                  {severityLabel(g.severity, locale)}
+                                </span>
+                              </Chip>
+                            </td>
+                            <td className="py-3">
+                              <Chip tone={STATUS_TONE[g.status]}>
+                                {statusLabel[g.status]}
+                              </Chip>
+                            </td>
+                          </>
+                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -315,6 +339,9 @@ export default async function InformeGapPage() {
                 </div>
               </section>
             ))}
+            {hasProhibited && (
+              <p className="text-xs text-muted">{gp.note}</p>
+            )}
           </div>
         )}
 

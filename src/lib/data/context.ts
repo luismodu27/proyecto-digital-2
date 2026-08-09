@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { logDataFallback } from "@/lib/observability/log";
+import type { MemberRole } from "@/lib/mock-data";
 
 /** Nombre de la cookie que guarda la organización activa elegida por el usuario. */
 export const ACTIVE_ORG_COOKIE = "attesta_org";
@@ -104,4 +105,26 @@ export const getActiveOrg = cache(async (): Promise<string | null> => {
 
   // 3) Por defecto, la primera (orden estable).
   return orgIds[0];
+});
+
+/**
+ * Rol del usuario actual en su organización activa (`owner` | `admin` | `member`),
+ * o null si no hay sesión/org. Es la fuente única para las guardas de rol del
+ * lado servidor: hasta ahora cada acción repetía este mismo SELECT a `memberships`
+ * (equipo, vigilancia, facturación…), y una guarda olvidada no se veía en ningún
+ * sitio. Igual que las demás, es la PRIMERA cerradura: la RLS y las funciones
+ * `security definer` siguen aplicando la suya. `cache()` deduplica en un render.
+ */
+export const getActiveRole = cache(async (): Promise<MemberRole | null> => {
+  const user = await getCurrentUser();
+  const org = await getActiveOrg();
+  if (!user || !org) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("memberships")
+    .select("role")
+    .eq("organization_id", org)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  return (data?.role ?? null) as MemberRole | null;
 });

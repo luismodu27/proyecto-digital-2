@@ -80,7 +80,10 @@ export default async function InformeEjecutivoPage() {
   const highRisk = counts.high + counts.unacceptable;
   const total = systems.length;
 
-  const openGaps = gaps.filter((g) => g.status !== "done");
+  // Las prácticas prohibidas (Art. 5) no son "brechas abiertas" que se resuelvan
+  // cubriendo un control: se excluyen del recuento (los sistemas inaceptables ya se
+  // surfacean por nivel de riesgo). Mismo criterio que el dossier y el informe de gap.
+  const openGaps = gaps.filter((g) => g.status !== "done" && !g.prohibited);
   const criticalGaps = openGaps.filter((g) => g.severity === "alta");
 
   const backed = systems.filter(

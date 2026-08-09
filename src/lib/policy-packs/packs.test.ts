@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   POLICY_PACKS,
   POLICY_PACKS_EN,
+  pendingControls,
   policyPackById,
   policyPacks,
 } from "./index";
@@ -235,5 +236,62 @@ describe("copy de marca dentro de los packs", () => {
         );
       }
     }
+  });
+});
+
+describe("pendingControls: deduplicación bilingüe por identidad (H2)", () => {
+  const rrhhEs = policyPackById("rrhh", "es")!;
+  const rrhhEn = policyPackById("rrhh", "en")!;
+  /** Filas heredadas: solo título, sin control_id (brechas anteriores a 0040). */
+  const porTitulo = (titulos: string[]) => titulos.map((requirement) => ({ requirement }));
+
+  it("sistema virgen: devuelve TODOS los controles", () => {
+    expect(pendingControls(rrhhEs, rrhhEn, [])).toHaveLength(
+      rrhhEs.controls.length,
+    );
+  });
+
+  it("reaplicar en EN sobre lo ya aplicado en ES no reinserta NADA (el bug)", () => {
+    // El sistema tiene el pack aplicado en español: los gap_items guardan los
+    // títulos ES. Ahora se reaplica con la UI en inglés (packCurrent = EN). Si se
+    // dedujera por título, ninguno coincidiría y se duplicaría todo el pack.
+    const yaGuardadosEnEs = porTitulo(rrhhEs.controls.map((c) => c.title));
+    const pend = pendingControls(rrhhEn, rrhhEs, yaGuardadosEnEs);
+    expect(pend).toEqual([]);
+  });
+
+  it("y al revés: aplicado en EN, reaplicado en ES, tampoco duplica", () => {
+    const yaGuardadosEnEn = porTitulo(rrhhEn.controls.map((c) => c.title));
+    expect(pendingControls(rrhhEs, rrhhEn, yaGuardadosEnEn)).toEqual([]);
+  });
+
+  it("dedupica por control_id (0040) aunque el título no coincida con NINGÚN idioma", () => {
+    // Filas con identidad estable pero un título editado a mano/antiguo: la
+    // deduplicación por texto fallaría, la de control_id no.
+    const conId = rrhhEs.controls.map((c) => ({
+      requirement: "título que ya no existe en el catálogo",
+      controlId: c.id,
+    }));
+    expect(pendingControls(rrhhEs, rrhhEn, conId)).toEqual([]);
+  });
+
+  it("solo devuelve los controles que faltan (aplicación parcial)", () => {
+    // Ya existen los títulos ES de todos MENOS el último.
+    const guardados = porTitulo(rrhhEs.controls.slice(0, -1).map((c) => c.title));
+    const pend = pendingControls(rrhhEs, rrhhEn, guardados);
+    expect(pend).toHaveLength(1);
+    expect(pend[0]!.id).toBe(rrhhEs.controls.at(-1)!.id);
+  });
+
+  it("títulos de otros packs o brechas manuales no dedupican este pack", () => {
+    const ajenos = porTitulo(["Una brecha escrita a mano", "Control de otro pack cualquiera"]);
+    expect(pendingControls(rrhhEs, rrhhEn, ajenos)).toHaveLength(
+      rrhhEs.controls.length,
+    );
+  });
+
+  it("sin pack en el otro idioma, dedupica al menos por el idioma actual", () => {
+    const guardados = porTitulo(rrhhEs.controls.map((c) => c.title));
+    expect(pendingControls(rrhhEs, null, guardados)).toEqual([]);
   });
 });

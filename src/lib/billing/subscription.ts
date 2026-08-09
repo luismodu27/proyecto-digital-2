@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { logDataFallback, logIncident } from "@/lib/observability/log";
 
 export type OrgSubscription = {
   status: string;
@@ -24,7 +25,16 @@ export const getOrgSubscription = cache(
         )
         .eq("organization_id", orgId)
         .maybeSingle();
-      if (error || !data) return null;
+      if (error) {
+        // Un fallo de la tabla `subscriptions` degradaba a "sin suscripción" SIN
+        // una línea de log: una org que paga podía verse como free y nadie se
+        // enteraba (su hermano `getOrgPlan` sí registra la degradación). `!data`
+        // aparte: no tener fila es lo normal, no un error. `logDataFallback`
+        // clasifica solo (0017 sin aplicar → warn; error real → incidente).
+        logDataFallback("getOrgSubscription", error, "sin 0017 no hay suscripciones");
+        return null;
+      }
+      if (!data) return null;
       return {
         status: data.status,
         stripeCustomerId: data.stripe_customer_id,
@@ -33,8 +43,11 @@ export const getOrgSubscription = cache(
         currentPeriodEnd: data.current_period_end,
         cancelAtPeriodEnd: data.cancel_at_period_end,
       };
-    } catch {
-      // Tabla aún no creada u otro fallo: degradamos a "sin suscripción".
+    } catch (err) {
+      // Fallo inesperado (createClient, red): degradamos a "sin suscripción",
+      // pero se registra — degradar el plan de facturación en silencio es
+      // justamente lo que no debe pasar inadvertido.
+      logIncident("getOrgSubscription", err, "degradado a sin suscripción");
       return null;
     }
   },

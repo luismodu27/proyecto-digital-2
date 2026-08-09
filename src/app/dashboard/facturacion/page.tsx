@@ -1,9 +1,10 @@
 import { PageHeader } from "@/components/dashboard/parts";
 import { Button } from "@/components/ui/Button";
-import { getActiveOrg } from "@/lib/data/context";
+import { getActiveOrg, getActiveRole } from "@/lib/data/context";
 import { getOrgSubscription } from "@/lib/billing/subscription";
 import { getOrgPlan } from "@/lib/billing/plan";
 import { startCheckout, openBillingPortal } from "@/lib/billing/actions";
+import { canManageBilling as roleCanManageBilling } from "@/lib/billing/roles";
 import { PLAN_PRICE_LABEL, isStripeConfigured } from "@/lib/stripe/config";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
@@ -29,14 +30,18 @@ export default async function FacturacionPage({
   const locale = await resolveLocale();
   const t = getDictionary(locale).dashboard.billing;
   const orgId = await getActiveOrg();
-  const [sub, plan] = await Promise.all([
+  const [sub, plan, role] = await Promise.all([
     orgId ? getOrgSubscription(orgId) : Promise.resolve(null),
     orgId ? getOrgPlan(orgId) : Promise.resolve("free" as const),
+    getActiveRole(),
   ]);
   const hasStripeSub = sub?.status === "active" || sub?.status === "trialing";
   // "Desbloqueado" = alcanza Preparación o más (por Stripe, plan manual o Enterprise).
   const unlocked = plan === "preparacion" || plan === "enterprise";
   const isEnterprise = plan === "enterprise";
+  // Gestionar la facturación (contratar/cancelar) es de owner/admin. Se oculta el
+  // control a los demás; la guarda real vive en las server actions.
+  const canManageBilling = roleCanManageBilling(role);
 
   return (
     <>
@@ -50,6 +55,11 @@ export default async function FacturacionPage({
       {estado === "cancelado" && (
         <div className="mb-6 rounded-xl border border-line bg-paper-sunken px-4 py-3 text-sm text-ink-soft">
           {t.canceledBanner}
+        </div>
+      )}
+      {estado === "sinpermiso" && (
+        <div className="mb-6 rounded-xl border border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] px-4 py-3 text-sm text-[var(--tone-warn-fg)]">
+          {t.forbiddenBanner}
         </div>
       )}
 
@@ -87,14 +97,22 @@ export default async function FacturacionPage({
                       ? `${t.willCancelBefore}${fmtDate(sub.currentPeriodEnd, locale)}${t.willCancelAfter}`
                       : `${t.renewsBefore}${fmtDate(sub?.currentPeriodEnd ?? null, locale)}${t.renewsAfter}`}
                   </p>
-                  <form action={openBillingPortal} className="mt-5">
-                    <Button type="submit" variant="outline">
-                      {t.manageSubscription}
-                    </Button>
-                  </form>
-                  <p className="mt-3 text-xs text-muted">
-                    {t.portalHint}
-                  </p>
+                  {canManageBilling ? (
+                    <>
+                      <form action={openBillingPortal} className="mt-5">
+                        <Button type="submit" variant="outline">
+                          {t.manageSubscription}
+                        </Button>
+                      </form>
+                      <p className="mt-3 text-xs text-muted">
+                        {t.portalHint}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="mt-5 text-xs text-muted">
+                      {t.forbiddenBanner}
+                    </p>
+                  )}
                 </>
               ) : (
                 <p className="mt-2 text-sm text-ink-soft">
@@ -114,11 +132,17 @@ export default async function FacturacionPage({
                 <span className="text-sm text-muted">{t.perMonth}</span>
               </div>
               {isStripeConfigured ? (
-                <form action={startCheckout} className="mt-5">
-                  <Button type="submit" className="w-full sm:w-auto">
-                    {t.subscribeCta}
-                  </Button>
-                </form>
+                canManageBilling ? (
+                  <form action={startCheckout} className="mt-5">
+                    <Button type="submit" className="w-full sm:w-auto">
+                      {t.subscribeCta}
+                    </Button>
+                  </form>
+                ) : (
+                  <p className="mt-5 rounded-lg border border-line bg-paper-sunken px-4 py-3 text-sm text-muted">
+                    {t.forbiddenBanner}
+                  </p>
+                )
               ) : (
                 <p className="mt-5 rounded-lg border border-line bg-paper-sunken px-4 py-3 text-sm text-muted">
                   {t.checkoutInactive}
