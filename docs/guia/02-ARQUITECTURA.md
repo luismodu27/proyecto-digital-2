@@ -198,7 +198,8 @@ la sección de reglas de `CLAUDE.md`; hay dos guards que lo hacen verificable:
 La verificación completa es **lint + tsc + `check:copy` + `test` + build** (los cinco en CI),
 y para el backend real, **`curl` por API** (Playwright headless no alcanza Supabase por el
 proxy). Los tests (`npm test`, Vitest, `src/**/*.test.ts`) cubren **solo lógica pura**
-(entorno `node`, <1 s) y codifican la **expectativa regulatoria**, no la implementación.
+(entorno `node`, ~775 tests en unos segundos) y codifican la **expectativa regulatoria**,
+no la implementación.
 
 **SUBIDO ≠ PUBLICADO:** Vercel publica `main` y el trabajo va en ramas. `npm run verify:deploy`
 compara el commit publicado (`/api/version`) con el local y comprueba rutas públicas (no las de

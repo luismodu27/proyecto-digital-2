@@ -320,9 +320,9 @@ Co-Authored-By: Claude <modelo> <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_<id>
 ```
 
-- **`Co-Authored-By:`** atribuye la coautoría. **Usa el mismo valor que ya aparece en
-  `git log`** para no romper la convención del repo — revisa el historial (`git log -1`)
-  y copia el formato exacto vigente en vez de inventar uno nuevo.
+- **`Co-Authored-By:`** atribuye la coautoría, con la forma `Claude <modelo>` (revisa
+  `git log` para ver el estilo del repo y mantén ese formato). Basta con **generalizar
+  el modelo**; no hace falta clavar una versión concreta.
 - **`Claude-Session:`** enlaza la sesión de trabajo que produjo el commit, para poder
   reconstruir el contexto después.
 - **Nunca pegues secretos** en el commit ni en el chat (claves `sk_live`, `service_role`,
