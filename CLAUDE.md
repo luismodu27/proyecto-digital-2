@@ -2,9 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **¿Primera vez en el proyecto? Empieza por la guía de onboarding →
+> [docs/guia/00-INICIO.md](./docs/guia/00-INICIO.md)** (qué es Attesta, dónde está todo,
+> cómo trabajamos, el rol del agente y las decisiones clave, separado por temas).
+>
 > La memoria completa del proyecto vive en **[MEMORY.md](./MEMORY.md)** — **léela siempre
 > antes de trabajar** y **actualízala** (bitácora §10) cuando el fundador dé una corrección o
-> se tome una decisión clave. Este CLAUDE.md es solo el mapa técnico; el "por qué" está en MEMORY.
+> se tome una decisión clave. Este CLAUDE.md es solo el mapa técnico; el "por qué" está en MEMORY
+> (histórico) y en [docs/guia/05-DECISIONES.md](./docs/guia/05-DECISIONES.md) (resumen vigente).
 >
 > **Tareas abiertas y cómo retomar → [PENDIENTES.md](./PENDIENTES.md)** (pendientes del fundador
 > —Stripe, dominio/SMTP— y míos; consúltalo al empezar cada sesión).
@@ -39,7 +44,7 @@ npm run check:copy   # guard de COPY PROHIBIDO (regla #1: Attesta NO certifica)
 ```
 
 ```bash
-npm test          # Vitest sobre la lógica pura (221 tests, <1 s)
+npm test          # Vitest sobre la lógica pura (~775 tests, unos segundos)
 npm run test:watch
 ```
 
