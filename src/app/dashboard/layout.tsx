@@ -10,6 +10,8 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getActiveOrg, getCurrentUser } from "@/lib/data/context";
 import { getIsPlatformAdmin, getUserOrgs } from "@/lib/data";
 import { getOrgPlan, type PlanTier } from "@/lib/billing/plan";
+import { getOrgSubscription } from "@/lib/billing/subscription";
+import { isInDunning } from "@/lib/billing/dunning";
 import type { UserOrg } from "@/lib/mock-data";
 import { I18nProvider } from "@/lib/i18n/provider";
 import { getDictionary } from "@/lib/i18n";
@@ -30,6 +32,8 @@ export default async function DashboardLayout({
   let orgs: UserOrg[] = [];
   let activeOrgId: string | undefined;
   let isPlatformAdmin = false;
+  // Estado de suscripción para el aviso de morosidad global (solo modo conectado).
+  let subStatus: string | null = null;
 
   // En modo conectado, exige sesión y organización. En modo demo, abierto.
   if (isSupabaseConfigured) {
@@ -42,10 +46,14 @@ export default async function DashboardLayout({
     activeOrgId = org;
     // `getIsPlatformAdmin` es una lectura indexada de una fila; solo sirve para
     // añadir los paneles internos a la navegación del equipo de Attesta.
-    [plan, orgs, isPlatformAdmin] = await Promise.all([
+    // `getOrgSubscription` lleva `cache()` y `getOrgPlan` ya lo consulta para la
+    // mayoría de orgs, así que en la práctica esta lectura es gratis (misma
+    // petición). Solo se usa para el aviso de "pago pendiente" en todo el shell.
+    [plan, orgs, isPlatformAdmin, subStatus] = await Promise.all([
       getOrgPlan(org),
       getUserOrgs(),
       getIsPlatformAdmin().catch(() => false),
+      getOrgSubscription(org).then((s) => s?.status ?? null),
     ]);
     const meta = user.user_metadata ?? {};
     const rawName =
@@ -67,6 +75,7 @@ export default async function DashboardLayout({
 
   const locale = await resolveLocale();
   const dict = getDictionary(locale);
+  const inDunning = isInDunning(subStatus);
 
   return (
     <I18nProvider locale={locale} dict={dict}>
@@ -93,6 +102,19 @@ export default async function DashboardLayout({
           id="contenido"
           className="flex-1 scroll-mt-14 md:h-dvh md:overflow-y-auto md:scroll-mt-0"
         >
+          {inDunning && (
+            <div className="border-b border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] px-5 py-2.5 text-sm text-[var(--tone-warn-fg)] sm:px-8">
+              <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
+                <span>{dict.dashboard.billing.dunningBanner}</span>
+                <a
+                  href="/dashboard/facturacion"
+                  className="shrink-0 font-medium underline underline-offset-2"
+                >
+                  {dict.dashboard.billing.dunningManageCta}
+                </a>
+              </div>
+            </div>
+          )}
           <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">{children}</div>
         </main>
         {showGuide && <WelcomeGuide show userId={userId} />}

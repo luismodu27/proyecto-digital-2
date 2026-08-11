@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { getActiveOrg, getActiveRole } from "@/lib/data/context";
 import { getOrgSubscription } from "@/lib/billing/subscription";
 import { getOrgPlan } from "@/lib/billing/plan";
+import { isInDunning } from "@/lib/billing/dunning";
 import { startCheckout, openBillingPortal } from "@/lib/billing/actions";
 import { canManageBilling as roleCanManageBilling } from "@/lib/billing/roles";
 import { PLAN_PRICE_LABEL, isStripeConfigured } from "@/lib/stripe/config";
@@ -36,6 +37,10 @@ export default async function FacturacionPage({
     getActiveRole(),
   ]);
   const hasStripeSub = sub?.status === "active" || sub?.status === "trialing";
+  // Morosidad: pago fallido con Stripe reintentando. Conserva acceso (unlocked
+  // sigue true por la gracia de dunning.ts) pero se avisa para que actualice la
+  // tarjeta antes de que se cancele.
+  const inDunning = isInDunning(sub?.status);
   // "Desbloqueado" = alcanza Preparación o más (por Stripe, plan manual o Enterprise).
   const unlocked = plan === "preparacion" || plan === "enterprise";
   const isEnterprise = plan === "enterprise";
@@ -62,6 +67,11 @@ export default async function FacturacionPage({
           {t.forbiddenBanner}
         </div>
       )}
+      {inDunning && (
+        <div className="mb-6 rounded-xl border border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] px-4 py-3 text-sm text-[var(--tone-warn-fg)]">
+          {t.dunningBanner}
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         {/* Estado actual */}
@@ -72,12 +82,14 @@ export default async function FacturacionPage({
             </h2>
             <span
               className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${
-                unlocked
-                  ? "border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)]"
-                  : "border-line-strong bg-paper-sunken text-muted"
+                inDunning
+                  ? "border-[var(--tone-warn-bd)] bg-[var(--tone-warn-bg)] text-[var(--tone-warn-fg)]"
+                  : unlocked
+                    ? "border-[var(--tone-good-bd)] bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)]"
+                    : "border-line-strong bg-paper-sunken text-muted"
               }`}
             >
-              {hasStripeSub
+              {hasStripeSub || inDunning
                 ? t.status[sub!.status as keyof typeof t.status] ??
                   t.badgeActiveFallback
                 : isEnterprise
@@ -88,7 +100,21 @@ export default async function FacturacionPage({
             </span>
           </div>
 
-          {unlocked ? (
+          {inDunning ? (
+            <>
+              <p className="mt-2 text-sm text-ink-soft">{t.dunningBody}</p>
+              {canManageBilling ? (
+                <>
+                  <form action={openBillingPortal} className="mt-5">
+                    <Button type="submit">{t.updatePaymentCta}</Button>
+                  </form>
+                  <p className="mt-3 text-xs text-muted">{t.portalHint}</p>
+                </>
+              ) : (
+                <p className="mt-5 text-xs text-muted">{t.forbiddenBanner}</p>
+              )}
+            </>
+          ) : unlocked ? (
             <>
               {hasStripeSub ? (
                 <>

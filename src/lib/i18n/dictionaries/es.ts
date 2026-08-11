@@ -1743,6 +1743,12 @@ export const es = {
       manageSubscription: "Gestionar suscripción",
       portalHint:
         "Cambiar método de pago, ver facturas o cancelar — todo en el portal seguro de Stripe.",
+      dunningBanner:
+        "Tu último pago no se ha procesado. Actualiza tu método de pago para no perder el acceso: conservas la preparación mientras Stripe reintenta el cobro.",
+      dunningBody:
+        "Hubo un problema con tu último cobro. Mantienes el acceso completo mientras Stripe reintenta; actualiza tu tarjeta para evitar que la suscripción se cancele.",
+      updatePaymentCta: "Actualizar método de pago",
+      dunningManageCta: "Revisar facturación",
       enterpriseBody:
         "Tu organización tiene el plan Enterprise: acceso completo, varias entidades, SSO y soporte prioritario.",
       unlockedBody:

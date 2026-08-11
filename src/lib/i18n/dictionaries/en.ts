@@ -1709,6 +1709,12 @@ export const en: Dictionary = {
       manageSubscription: "Manage subscription",
       portalHint:
         "Change payment method, view invoices or cancel — all in Stripe's secure portal.",
+      dunningBanner:
+        "Your last payment didn't go through. Update your payment method to keep access: you keep Readiness while Stripe retries the charge.",
+      dunningBody:
+        "There was a problem with your last charge. You keep full access while Stripe retries; update your card to avoid the subscription being canceled.",
+      updatePaymentCta: "Update payment method",
+      dunningManageCta: "Review billing",
       enterpriseBody:
         "Your organization is on the Enterprise plan: full access, multiple entities, SSO and priority support.",
       unlockedBody:

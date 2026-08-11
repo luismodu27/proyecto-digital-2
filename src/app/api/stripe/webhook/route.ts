@@ -194,6 +194,23 @@ export async function POST(req: NextRequest) {
             `Pago fallido. Cliente ${customer ?? "desconocido"} · ${amount} ${(invoice.currency ?? "eur").toUpperCase()}.`,
           );
         }
+        // Churn por impago, medible en el embudo: antes solo se enteraba el
+        // fundador por correo. La org se resuelve desde el customer de Stripe; la
+        // reclamación por id (arriba) garantiza que un reintento del webhook no lo
+        // cuente dos veces. `trackService` nunca lanza, así que no arriesga el 200.
+        let failedOrgId: string | null = null;
+        if (customer) {
+          const { data } = await db
+            .from("subscriptions")
+            .select("organization_id")
+            .eq("stripe_customer_id", customer)
+            .maybeSingle();
+          failedOrgId = (data?.organization_id as string | undefined) ?? null;
+        }
+        await trackService("subscription_payment_failed", {
+          organizationId: failedOrgId,
+          props: { attempt: invoice.attempt_count },
+        });
         break;
       }
 

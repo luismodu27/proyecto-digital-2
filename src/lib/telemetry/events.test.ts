@@ -45,6 +45,7 @@ describe("catálogo de eventos", () => {
     for (const e of [
       "checkout_completed",
       "checkout_started",
+      "subscription_payment_failed",
       "org_created",
       "system_created",
       "risk_assessed",

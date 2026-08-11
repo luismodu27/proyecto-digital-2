@@ -65,6 +65,13 @@ export const PRODUCT_EVENTS = [
   "checkout_started",
   /** Stripe confirmó el pago por webhook (servidor). */
   "checkout_completed",
+  /**
+   * Un cobro recurrente falló (servidor, webhook `invoice.payment_failed`). Es la
+   * señal de churn por impago: antes solo se enteraba el fundador por un correo.
+   * Se emite en cada intento fallido de Stripe; `attempt` distingue el primer
+   * fallo de los reintentos del dunning. props: `{ attempt }`.
+   */
+  "subscription_payment_failed",
 
   // --- Señales de valor / expansión --------------------------------------
   /** Descarga del paquete de evidencia (servidor). */
