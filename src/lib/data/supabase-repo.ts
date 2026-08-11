@@ -913,6 +913,13 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
   if (!org) return null;
 
   const supabase = await createClient();
+
+  // El tope de `list_audit_log` es 500. Se pide uno más para poder DISTINGUIR
+  // "hay exactamente 500" de "hay más y se cortó": sin ese +1 no habría forma de
+  // saberlo, y una exportación truncada en silencio es la peor de las tres
+  // opciones — quien la recibe cree tenerlo todo.
+  const AUDIT_LIMIT = 500;
+
   const [
     orgName,
     systems,
@@ -924,6 +931,7 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
     suppliers,
     incidents,
     intakeSubmissions,
+    rawLog,
   ] = await Promise.all([
     getOrganizationName(),
     getAiSystems(),
@@ -939,17 +947,15 @@ export async function getExportBundle(): Promise<ExportBundle | null> {
     getSuppliers().catch(() => []),
     getIncidents().catch(() => []),
     getIntakeSubmissions().catch(() => []),
+    // El audit-trail solo depende de `org` (no de `systems`), así que entra en el
+    // MISMO lote que lo anterior en vez de ir en una consulta aparte después:
+    // −1 round-trip en la exportación. Se toma solo `.data` (el error se degrada
+    // a `[]` abajo, igual que antes con `{ data: rawLog }`).
+    supabase
+      .rpc("list_audit_log", { org, lim: AUDIT_LIMIT + 1 })
+      .then((r) => r.data),
   ]);
 
-  // El tope de `list_audit_log` es 500. Se pide uno más para poder DISTINGUIR
-  // "hay exactamente 500" de "hay más y se cortó": sin ese +1 no habría forma de
-  // saberlo, y una exportación truncada en silencio es la peor de las tres
-  // opciones — quien la recibe cree tenerlo todo.
-  const AUDIT_LIMIT = 500;
-  const { data: rawLog } = await supabase.rpc("list_audit_log", {
-    org,
-    lim: AUDIT_LIMIT + 1,
-  });
   const rawRows = (rawLog ?? []) as RawAudit[];
   const auditTruncated = rawRows.length > AUDIT_LIMIT;
   const auditLog = rawRows.slice(0, AUDIT_LIMIT).map((r) => toAuditEntry(r));
