@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getIsPlatformAdmin } from "@/lib/data";
 import { getOrgSubscription } from "@/lib/billing/subscription";
+import { subscriptionGrantsAccess } from "@/lib/billing/dunning";
 import { logDataFallback, logIncident } from "@/lib/observability/log";
 
 /** Niveles de plan, en orden de acceso creciente. */
@@ -75,10 +76,14 @@ export const getOrgPlan = cache(async (orgId: string): Promise<PlanTier> => {
     plan = "free";
   }
 
-  // Una suscripción Stripe activa sube a Preparación como mínimo.
+  // Una suscripción Stripe que da acceso sube a Preparación como mínimo. "Que da
+  // acceso" incluye la MOROSIDAD (`past_due`) dentro de su ventana de gracia: un
+  // pago fallido no expulsa a un cliente que paga mientras Stripe reintenta (ver
+  // dunning.ts). Solo `active`/`trialing` o `past_due` en gracia desbloquean; un
+  // impago definitivo (`unpaid`/`canceled`) no.
   if (planRank(plan) < planRank("preparacion")) {
     const sub = await getOrgSubscription(orgId);
-    if (sub && (sub.status === "active" || sub.status === "trialing")) {
+    if (sub && subscriptionGrantsAccess(sub.status, sub.currentPeriodEnd, new Date())) {
       plan = "preparacion";
     }
   }
