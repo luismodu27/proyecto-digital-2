@@ -6,7 +6,7 @@
 > - **[CLAUDE.md](./CLAUDE.md)** — mapa técnico del código.
 > - **[docs/supabase.md](./docs/supabase.md)** — backend/migraciones.
 >
-> Última actualización: **2026-08-08**.
+> Última actualización: **2026-08-11**.
 
 ---
 
@@ -30,26 +30,43 @@ npm run verify:deploy      # commit publicado vs local + rutas públicas reales
   de que Next resuelva la ruta, así que una página inexistente responde 307 igual que una que sí está. Lo que
   cubre esas rutas es la comparación de commits.
 
-**Estado actual: ✅ `main` = `f7f12dc`, publicado y verificado el 2026-08-06 (11/11).**
+**Estado actual: ✅ `main` = `8f0ff6b`, publicado y verificado el 2026-08-08 (11/11).**
+Los **Bloques 1 y 2** ya están fusionados (PR #32) y publicados.
 
-> ⚠️ **Nota (2026-08-08):** el trabajo de los Bloques 1 y 2 (abajo) vive en la rama
-> `claude/init-3bwfhm`, **no en `main`** → todavía **no está publicado**. Se publicará al
-> abrir/fusionar el PR. Está todo en verde (766 tests, lint, tsc, check:copy, build).
+> ⚠️ **Nota (2026-08-11):** el **Bloque 3 · morosidad** (abajo) vive en la rama
+> `claude/init-3bwfhm` reiniciada desde `main`, **aún no en `main`** → todavía **no publicado**.
+> Se publicará al fusionar su PR. Todo en verde (775 tests, lint, tsc, check:copy, build). Sin migración.
 
 ---
 
 ## 🗄️ 0-pre.5. MIGRACIONES PENDIENTES DE APLICAR (fundador, Supabase SQL Editor)
 
-Pega `supabase/setup.sql` entero (es re-ejecutable) en el **SQL Editor** para aplicar todo, o
-los bloques sueltos. Añadidas en la sesión 2026-08-08:
+**✅ Nada pendiente.** `0040` y `0041` (Bloques 1-2) las aplicó el fundador el 2026-08-08 →
+`/api/audit-verify` dio `brokenOrgs: 0`. El **Bloque 3 · morosidad NO lleva migración** (la lógica
+de acceso vive solo en `getOrgPlan` JS). Cuando se añada una nueva, concaténala en `supabase/setup.sql`
+y anótala aquí.
 
-- **`0040_bucket_role_and_gap_identity`** — borrar el archivo de evidencia del bucket exige
-  owner/admin (antes un `member` podía borrarlo por la API de storage); + columnas `pack_id`/
-  `control_id` en `gap_items`. Probada 2× + ejecutada en PG16. Sin aplicar, la app degrada sola.
-- **`0041_audit_hash_utc`** — el hash del audit-trail deja de depender de la zona horaria.
-  **Re-calcula toda la cadena del `audit_log`** (backfill determinista como el de 0020; no toca
-  datos, solo los hashes). Solo BD, sin cambio de código. Tras aplicarla, `/api/audit-verify`
-  debe seguir dando `brokenOrgs: 0`. Probada 2× + ejecutada (independencia de zona demostrada).
+---
+
+## 🧩 0-pre.6. BLOQUE 3 — estado (2026-08-11)
+
+- ✅ **Morosidad estándar** — hecho, en rama `claude/init-3bwfhm`, **pendiente de PR/fusión**. Un pago
+  fallido ya no expulsa al cliente; banner + CTA + telemetría de impago. Sin migración.
+- ✅ **Cookie de idioma** — ya resuelta: `NEXT_LOCALE` solo se escribe al cambiar idioma a mano (cookie
+  funcional, sin banner de consentimiento), y la página legal de cookies ya lo declara. **Nada que hacer.**
+- ✅ **Baja de organización self-service** — ya completa y aplicada (2026-08-04): UI, gracia 7 d, purga
+  por cron, orden vault→BD→audit. **Nada que hacer** (mejoras opcionales a futuro: export automático,
+  legal-hold; no urgentes).
+- 🔭 **Vigía — 3 fuentes bloqueadas por IP desde Vercel** (diagnóstico 2026-08-11): EUR-Lex (Reglamento
+  2024/1689) y las dos de Illinois (ilga.gov) dan `error` desde la IP de Vercel aunque sirven `200` a
+  otras IPs. El catálogo curado cubre al cliente; el Vigía solo pierde detección automática en esas 3.
+  **TAREA APARTE, no urgente:** fallback para EUR-Lex (otra salida/IP o vía oficial machine-readable);
+  el bloqueo es por IP, así que no lo arregla un cambio de cabeceras.
+- 🤔 **Observabilidad externa (Sentry)** — **decisión del fundador**: coste + nuevo subprocesador (DPA +
+  `subprocessors.ts` + su guard + CSP). Enganche técnico listo (sustituir `emit` en `observability/log.ts`).
+- ✔ **Stripe webhook (fundador)** — endpoint ya importado; **verificar** que escuche
+  `customer.subscription.*`, `checkout.session.completed`, `invoice.payment_succeeded/failed`, y que el
+  signing secret sea el de `STRIPE_WEBHOOK_SECRET` en Vercel.
 
 ---
 

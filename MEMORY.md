@@ -127,6 +127,31 @@ diseño, nombre, features grandes); autónomo en lo demás.
 
 > Cada entrada: fecha · qué se decidió/corrigió · por qué.
 
+- **2026-08-11** · **Bloque 3 arrancado (rama `claude/init-3bwfhm`).**
+  · **Morosidad estándar del sector** (decisión del fundador: "lo que hagan las demás empresas de
+  suscripción"). ANTES `getOrgPlan` solo desbloqueaba con `active`/`trialing`, así que al marcar Stripe
+  `past_due` (un cobro fallido, casi siempre transitorio) el cliente caía a 'free' al instante y veía
+  "Suscríbete" como si nunca hubiera pagado (las etiquetas "Pago pendiente" ya traducidas eran código
+  muerto). AHORA un pago fallido **no corta el acceso**: `billing/dunning.ts` (lógica pura, test con
+  ritual de mutación) concede acceso en `past_due` hasta `current_period_end + 14 d` de gracia —tope de
+  seguridad; normalmente Stripe cancela antes y el corte lo decide el estado—; solo `unpaid`/`canceled`
+  retiran. UI: banner + estado real + CTA "Actualizar método de pago" en facturación **y** banner global
+  en el shell. **Sin migración** (el gating vive solo en `getOrgPlan` JS; `org_has_active_subscription`
+  SQL no está en ese camino). Además, evento `subscription_payment_failed` (server-only) para que el
+  churn por impago deje de ser invisible en el embudo.
+  · **Vigía — diagnóstico en PRODUCCIÓN** (consulta de `reg_sources` corrida por el fundador). El cron
+  **está vivo** (`last_checked_at` reciente en las 8 fuentes). **5/8 funcionan**; **3 dan `error` desde
+  la IP de Vercel**: EUR-Lex (Reglamento 2024/1689, `fail_count` 1) y las dos de Illinois (ilga.gov,
+  `fail_count` 10). Una sonda con `curl` desde OTRA IP alcanzó las 8 con `200` → **el bloqueo es por IP
+  en la salida de Vercel**, no que las webs estén caídas. El caso EUR-Lex confirma el valor del arreglo
+  del 202: antes hasheábamos su muro anti-bot `202` como "ok" (vigilancia falsa); el fix lo destapó
+  (`error` honesto). **El cliente NO se ve afectado**: el catálogo curado (experto) siempre gana y el
+  Vigía solo señala a la bandeja interna. **EUR-Lex fallback = tarea aparte, no urgente** (cambia rara
+  vez, curado lo cubre; el bloqueo por IP exige otra salida/vía oficial, un mini-proyecto).
+  · **Stripe webhook**: el fundador tenía el endpoint (solo faltaba importarlo al Workbench). Recordado
+  verificar que escuche `customer.subscription.*`, `checkout.session.completed` e
+  `invoice.payment_failed`, y que el signing secret sea el de `STRIPE_WEBHOOK_SECRET`.
+
 - **2026-08-08** · **Barrido de la auditoría 360°: Bloques 1 y 2 (rama `claude/init-3bwfhm`).**
   Cerrados, con su verificación y —donde tocaba— su guard que escanea el repositorio:
   · **Bloque 1** (código, sin migración): el Vigía trata el `202` del muro anti-bot de EUR-Lex como
