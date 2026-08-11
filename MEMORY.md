@@ -8,7 +8,12 @@
 > **Regla de oro:** No repetir errores ya corregidos. Toda corrección se anota en
 > el §9 (Bitácora de decisiones y correcciones).
 >
-> Última actualización: 2026-07-17
+> **¿Onboarding?** El estado VIGENTE por temas (producto, arquitectura, flujo, rol del
+> agente, decisiones) vive en **[docs/guia/00-INICIO.md](./docs/guia/00-INICIO.md)**. Este
+> `MEMORY.md` es la **memoria completa + bitácora histórica**: manda para el "porqué"
+> original y el registro cronológico; la guía manda para la visión de conjunto actual.
+>
+> Última actualización: 2026-08-11
 
 ---
 
