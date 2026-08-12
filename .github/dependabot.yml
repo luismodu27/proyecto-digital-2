@@ -1,0 +1,23 @@
+# Actualizaciones automáticas de dependencias (avisos de seguridad + versiones).
+# Abre PRs que pasan por la misma puerta de CI (`verify`) antes de mergear.
+version: 2
+updates:
+  # Dependencias npm de la app.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      # Agrupa los parches/minors no-mayores en un solo PR para no inundar.
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Las propias GitHub Actions (mantiene los SHA fijados al día).
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5

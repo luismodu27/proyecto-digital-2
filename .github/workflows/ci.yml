@@ -20,10 +20,13 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # Acciones fijadas a SHA (no a tag móvil): un tag como @v4 lo puede
+      # re-apuntar el dueño de la acción a cualquier commit; el SHA es inmutable.
+      # Dependabot (github-actions) mantiene estos SHA al día por PR.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
