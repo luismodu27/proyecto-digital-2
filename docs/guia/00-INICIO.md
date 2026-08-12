@@ -31,6 +31,7 @@ El detalle está en [`01-PRODUCTO.md`](./01-PRODUCTO.md).
 | **03** | [`03-FLUJO-DE-TRABAJO.md`](./03-FLUJO-DE-TRABAJO.md) | **Cómo trabajamos** (mecánica): el loop, los 5 checks de CI, tests + ritual de mutación, guards, migraciones manuales, "subido ≠ publicado". |
 | **04** | [`04-ROL-DEL-AGENTE.md`](./04-ROL-DEL-AGENTE.md) | **Tu rol y cómo trabaja el fundador**: proactividad con checkpoints, disciplina anti-errores, comunicación, cómo arrancar cada sesión. |
 | **05** | [`05-DECISIONES.md`](./05-DECISIONES.md) | Las **decisiones clave** con su **qué / por qué / para qué**. El "porqué" del proyecto. |
+| **06** | [`06-ENTORNO-Y-HERRAMIENTAS.md`](./06-ENTORNO-Y-HERRAMIENTAS.md) | **Entorno Windows** (setup) + **capacidades del agente**: subagentes, MCP y skills — qué viaja con el clon y qué se configura por máquina. |
 
 **Si solo vas a leer dos:** [`04-ROL-DEL-AGENTE.md`](./04-ROL-DEL-AGENTE.md) (cómo
 comportarte) y [`03-FLUJO-DE-TRABAJO.md`](./03-FLUJO-DE-TRABAJO.md) (cómo no romper nada).

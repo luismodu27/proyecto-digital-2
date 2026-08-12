@@ -39,7 +39,7 @@
  */
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, sep } from "node:path";
 
 const ROOT = process.cwd();
 /**
@@ -375,7 +375,11 @@ const files = SCAN_TARGETS.flatMap(({ dir, extensions }) => {
 const violations = [];
 
 for (const file of files) {
-  const rel = relative(ROOT, file);
+  // Se normaliza a "/" para que la exclusión funcione en Windows: `relative()`
+  // devuelve separadores "\" allí, y `SKIP_FILES` está escrito con "/". Sin esto,
+  // el guard NO excluía su propia lista negra (`analista/llm.ts`) en Windows y se
+  // marcaba a sí mismo con falsos positivos. En Linux/macOS es un no-op.
+  const rel = relative(ROOT, file).split(sep).join("/");
   if (SKIP_FILES.includes(rel)) continue;
 
   const lines = readFileSync(file, "utf8").split("\n");
