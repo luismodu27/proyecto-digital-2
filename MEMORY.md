@@ -156,6 +156,15 @@ diseño, nombre, features grandes); autónomo en lo demás.
   · **Stripe webhook**: el fundador tenía el endpoint (solo faltaba importarlo al Workbench). Recordado
   verificar que escuche `customer.subscription.*`, `checkout.session.completed` e
   `invoice.payment_failed`, y que el signing secret sea el de `STRIPE_WEBHOOK_SECRET`.
+  · **⤷ FUSIONADO Y PUBLICADO (act. 2026-08-11).** El **Bloque 3 · morosidad** dejó la rama
+  `claude/init-3bwfhm` y entró en `main` vía **PR #33** (`ef7271c`); y la **guía por temas `docs/guia/`**
+  vía **PR #34** (`b6577ea`, punta actual de `main`). Ninguno lleva migración. **Verificado** (equivalente a
+  `verify:deploy`, 11/11 en verde): el commit publicado en `/api/version` = `b6577ea` = `HEAD` local (rama
+  `main`, `builtFrom: vercel`), y las 9 rutas públicas (`/`, `/en`, las 4 `/legal/*`, `/en/legal/privacy`,
+  `/api/version`, `/api/vault/key`) responden `200`. Comprobado con `curl` porque en el entorno de esa sesión
+  no había `node`/`npm` en el PATH (el script `verify:deploy` hace exactamente estas dos comprobaciones). Con
+  esto queda cerrado el aviso de "Bloque 3 sin publicar" de `PENDIENTES` §0-pre. *(Nota: las fechas de commit
+  de git de #33/#34 leen 2026-08-10; se conserva 2026-08-11 por coherencia con esta entrada.)*
 
 - **2026-08-08** · **Barrido de la auditoría 360°: Bloques 1 y 2 (rama `claude/init-3bwfhm`).**
   Cerrados, con su verificación y —donde tocaba— su guard que escanea el repositorio:

@@ -30,12 +30,13 @@ npm run verify:deploy      # commit publicado vs local + rutas públicas reales
   de que Next resuelva la ruta, así que una página inexistente responde 307 igual que una que sí está. Lo que
   cubre esas rutas es la comparación de commits.
 
-**Estado actual: ✅ `main` = `8f0ff6b`, publicado y verificado el 2026-08-08 (11/11).**
-Los **Bloques 1 y 2** ya están fusionados (PR #32) y publicados.
+**Estado actual: ✅ `main` = `b6577ea`, publicado y verificado el 2026-08-11 (11/11).**
+Los **Bloques 1 y 2** (PR #32, `8f0ff6b`), el **Bloque 3 · morosidad** (PR #33, `ef7271c`) y la **guía de
+onboarding `docs/guia/`** (PR #34, `b6577ea`) están **todos fusionados en `main` y publicados**.
 
-> ⚠️ **Nota (2026-08-11):** el **Bloque 3 · morosidad** (abajo) vive en la rama
-> `claude/init-3bwfhm` reiniciada desde `main`, **aún no en `main`** → todavía **no publicado**.
-> Se publicará al fusionar su PR. Todo en verde (775 tests, lint, tsc, check:copy, build). Sin migración.
+> ✅ **Resuelto (2026-08-11):** el **Bloque 3 · morosidad** ya se fusionó en `main` (**PR #33**, `ef7271c`)
+> y está **publicado**, junto con la **guía de onboarding `docs/guia/`** (**PR #34**, `b6577ea`, punta de
+> `main`). Ambos sin migración. Verificado por `/api/version` (= `b6577ea`) + las 9 rutas públicas en `200`.
 
 ---
 
@@ -50,8 +51,8 @@ y anótala aquí.
 
 ## 🧩 0-pre.6. BLOQUE 3 — estado (2026-08-11)
 
-- ✅ **Morosidad estándar** — hecho, en rama `claude/init-3bwfhm`, **pendiente de PR/fusión**. Un pago
-  fallido ya no expulsa al cliente; banner + CTA + telemetría de impago. Sin migración.
+- ✅ **Morosidad estándar** — hecho, **fusionado (PR #33, `ef7271c`) y PUBLICADO** (verificado 2026-08-11).
+  Un pago fallido ya no expulsa al cliente; banner + CTA + telemetría de impago. Sin migración.
 - ✅ **Cookie de idioma** — ya resuelta: `NEXT_LOCALE` solo se escribe al cambiar idioma a mano (cookie
   funcional, sin banner de consentimiento), y la página legal de cookies ya lo declara. **Nada que hacer.**
 - ✅ **Baja de organización self-service** — ya completa y aplicada (2026-08-04): UI, gracia 7 d, purga
