@@ -1217,7 +1217,11 @@ posición defendible (sin publicidad, sin terceros midiendo, sin cookies entre s
 y respeto de la señal del navegador), pero **es una posición, no una certeza**. Está explicada en
 `src/lib/legal/cookies.ts` para que tu abogado la lea y la confirme o la corrija en cinco minutos.
 
-### 1.4-bis · 🔴 ANTES DE DESPLEGAR: define `NEXT_PUBLIC_APP_URL` en Vercel
+### 1.4-bis · ✅ HECHO: `NEXT_PUBLIC_APP_URL` definido en Vercel
+> **Estado (2026-08-12):** resuelto. Como el fail-fast (abajo) impide compilar sin esta variable y
+> `main` **sí se despliega y publica** en Vercel (`a0800b2`, verificado con `verify:deploy`), la variable
+> **está necesariamente puesta**. Se deja la explicación como referencia de por qué existe.
+
 **Qué:** Vercel → tu proyecto → *Settings → Environment Variables* → `NEXT_PUBLIC_APP_URL` =
 `https://attesta-io.vercel.app` (o tu dominio propio cuando lo tengas), **sin barra final y sin ruta**.
 Márcala para *Production* y *Preview*.
