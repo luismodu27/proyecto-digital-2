@@ -22,8 +22,23 @@
  */
 import { readFileSync } from "node:fs";
 
+// `.env.local` se resuelve RELATIVO a este fichero (scripts/verify/ -> ../../),
+// no con una ruta absoluta fija: así funciona en cualquier máquina y sistema
+// operativo, no solo en el sandbox de Linux donde se escribió originalmente.
+const envPath = new URL("../../.env.local", import.meta.url);
+let envRaw;
+try {
+  envRaw = readFileSync(envPath, "utf8");
+} catch {
+  console.error(
+    "No encuentro .env.local en la raíz del proyecto. Créalo (copia .env.example)\n" +
+      "con al menos NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY antes\n" +
+      "de correr verify:backend.",
+  );
+  process.exit(1);
+}
 const env = Object.fromEntries(
-  readFileSync("/home/user/proyecto-digital-2/.env.local", "utf8")
+  envRaw
     .split("\n")
     .filter((l) => l.includes("="))
     .map((l) => [l.slice(0, l.indexOf("=")).trim(), l.slice(l.indexOf("=") + 1).trim()]),
