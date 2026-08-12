@@ -343,6 +343,7 @@ export const en: Dictionary = {
         "Here's how a mid-market company goes from “I think we use AI in hiring” to having everything classified, gaps closed and evidence ready for the auditor.",
       inventory: {
         header: "Inventory · 3 systems",
+        badge: "AI",
         rows: [
           { name: "CV screening", tag: "High risk" },
           { name: "Candidate scoring", tag: "High risk" },

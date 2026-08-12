@@ -23,7 +23,10 @@ export function CountUp({
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [display, setDisplay] = useState(0);
+  // Arranca en el valor final: así el HTML del servidor y el estado sin-JS
+  // muestran la cifra real (nunca "0"/"€0M"), y la animación es una mejora
+  // progresiva que solo ocurre en el cliente.
+  const [display, setDisplay] = useState(value);
 
   useEffect(() => {
     const el = ref.current;
@@ -33,11 +36,19 @@ export function CountUp({
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
+    // Sin movimiento (o preferencia de reducirlo): se queda en el valor final.
+    if (reduce) return;
+
     let raf = 0;
     let start = 0;
     // easeOutCubic para un cierre suave.
     const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 
+    // La primera frame de run() deja el display en ~0 y cuenta hacia arriba, de
+    // modo que la animación arranca desde 0 SIN un setState síncrono en el
+    // cuerpo del effect (evita react-hooks/set-state-in-effect). Ambos usos de
+    // CountUp están below-the-fold: el salto value→0 dura una sola frame justo
+    // al entrar en viewport (imperceptible), y el SSR/sin-JS ya muestra la cifra.
     const run = (now: number) => {
       if (!start) start = now;
       const t = Math.min(1, (now - start) / duration);
@@ -48,10 +59,7 @@ export function CountUp({
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // El setState vive en el callback del observer (no en el cuerpo del
-          // effect): sin movimiento, salta al valor final; si no, anima.
-          if (reduce) setDisplay(value);
-          else raf = requestAnimationFrame(run);
+          raf = requestAnimationFrame(run);
           io.disconnect();
         }
       },

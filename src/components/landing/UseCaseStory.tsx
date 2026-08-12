@@ -27,7 +27,7 @@ function InventoryVisual({ t }: { t: L["inventory"] }) {
           >
             <span className="flex items-center gap-2 text-sm text-ink">
               <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-brand-soft text-[10px] font-semibold text-brand-strong">
-                IA
+                {t.badge}
               </span>
               {r.name}
             </span>
