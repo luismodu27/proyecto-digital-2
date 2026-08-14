@@ -34,10 +34,20 @@ export function buildLandingMetadata(locale: Locale): Metadata {
       description: m.description,
       locale: locale === "en" ? "en_US" : "es_ES",
       url: `${SITE_URL}${path}`,
+      // Imagen social explícita para AMBOS locales. La convención
+      // `opengraph-image.png` solo se adjunta al segmento raíz (`/`), dejando
+      // `/en` sin tarjeta al compartir; declararla aquí la emite en los dos.
+      images: [
+        { url: `${SITE_URL}/opengraph-image.png`, width: 2400, height: 1260, alt: m.ogTitle },
+      ],
     },
     twitter: {
+      // La imagen es 2400x1260 (apaisada) → tarjeta grande, no el thumbnail
+      // recortado de `summary`.
+      card: "summary_large_image",
       title: m.ogTitle,
       description: m.description,
+      images: [`${SITE_URL}/twitter-image.png`],
     },
   };
 }

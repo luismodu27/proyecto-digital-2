@@ -355,6 +355,7 @@ export const es = {
         "Así es como una empresa mid-market pasa de «creo que usamos IA en contratación» a tener todo clasificado, con brechas cerradas y evidencia lista para el auditor.",
       inventory: {
         header: "Inventario · 3 sistemas",
+        badge: "IA",
         rows: [
           { name: "Cribado de CVs", tag: "Alto riesgo" },
           { name: "Scoring de candidatos", tag: "Alto riesgo" },
