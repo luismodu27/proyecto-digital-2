@@ -18,6 +18,7 @@ import {
 } from "@/lib/mock-data";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n";
+import { milestoneView } from "@/lib/showcase-milestone";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getDictionary(await resolveLocale()).dashboard.demoPage;
@@ -73,7 +74,10 @@ function LockedCard({
 
 export default async function DemoPage() {
   const locale = await resolveLocale();
-  const t = getDictionary(locale).dashboard.demoPage;
+  const dict = getDictionary(locale);
+  const t = dict.dashboard.demoPage;
+  // Hito real del radar (fecha + cuenta atrás por request), no un texto fijo.
+  const milestone = milestoneView(locale, dict.common);
   const systems = aiSystems(locale);
   const counts = riskCounts(systems);
   const avg = avgCompliance(systems);
@@ -236,10 +240,13 @@ export default async function DemoPage() {
               </p>
               <p className="mt-2 text-sm text-ink-soft">
                 {t.lockWatchPreviewMilestone}
+                {milestone && ` · ${milestone.dateLabel}`}
               </p>
-              <p className="mt-2 font-display text-2xl font-semibold text-brand-strong">
-                {t.lockWatchPreviewCountdown}
-              </p>
+              {milestone && (
+                <p className="mt-2 font-display text-2xl font-semibold text-brand-strong">
+                  {milestone.countdown}
+                </p>
+              )}
             </LockedCard>
             <LockedCard
               title={t.lockDossierTitle}

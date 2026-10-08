@@ -16,6 +16,9 @@ export const en: Dictionary = {
     loading: "Loading…",
     seeAll: "See all",
     skipToContent: "Skip to content",
+    inDaysPrefix: "in ",
+    dayOne: "day",
+    dayOther: "days",
   },
 
   locale: {
@@ -111,8 +114,7 @@ export const en: Dictionary = {
         { k: "High risk", v: "4" },
         { k: "% ready", v: "59%" },
       ],
-      milestoneLabel: "Next milestone · Transparency (Art. 50)",
-      countdown: "in 16 days",
+      milestoneLabel: "Key deadline · High-risk (Annex III)",
       distributionTitle: "Risk distribution",
       riskLabels: ["High risk", "Limited risk", "Minimal risk"],
     },
@@ -313,14 +315,14 @@ export const en: Dictionary = {
         " (~30–36% CAGR). Whoever becomes the system of record for governance today, stays.",
       milestones: [
         {
-          date: "Feb 2025 · in force",
+          date: "Feb 2025 · applicable",
           title: "AI literacy (Art. 4)",
-          body: "Already enforceable: your organization must ensure that those operating these tools have sufficient AI training. It's a deployer's own duty, not the provider's.",
+          body: "Already enforceable: your organization must take measures that support the AI literacy of those who use or operate these tools on its behalf, tailored to their background and the context of use. It's a deployer's own duty, judged by the measures taken: the law does not require a specific level for each person.",
         },
         {
-          date: "2 Aug 2026",
+          date: "2 Aug 2026 · applicable",
           title: "Transparency (Art. 50)",
-          body: "The nearest deadline: transparency duties begin to apply to AI that interacts with candidates or generates content. It directly affects an AI-driven hiring process.",
+          body: "Transparency duties now apply: a chatbot that talks to candidates must tell them it is an AI. That is a design duty of the provider (or yours, if you developed it): check that it does so before using it. The Digital Omnibus did not defer this notice.",
         },
         {
           date: "Dec 2027",
@@ -367,8 +369,7 @@ export const en: Dictionary = {
       evidence: {
         fileTitle: "Evidence dossier · CV screening.pdf",
         fileSubtitle: "Generated and ready for the auditor.",
-        radar: "The radar detected a change · Transparency (Art. 50)",
-        countdown: "in 16 days",
+        radar: "Key deadline · High-risk (Annex III)",
       },
       steps: [
         {
@@ -570,7 +571,7 @@ export const en: Dictionary = {
         },
         {
           q: "The deadline moved to 2027 — why start now?",
-          a: "Exactly because of that: you get a wider window to prepare well, without rushing or last-minute expensive consultants. The deferral of Annex III high-risk to December 2027 comes from the Digital Omnibus, agreed by the Parliament and the Council in June 2026 and pending formal publication in the OJEU. The obligation remains unavoidable; getting ahead is cheaper and less risky. (Note: AI literacy and the Art. 5 prohibitions have been enforceable since February 2025.)",
+          a: "Exactly because of that: you get a wider window to prepare well, without rushing or last-minute expensive consultants. The deferral of Annex III high-risk to December 2027 comes from the Digital Omnibus, published in the OJEU on 24 July 2026 (Regulation (EU) 2026/1744). The obligation remains unavoidable; getting ahead is cheaper and less risky. (Note: AI literacy and the Art. 5 prohibitions have been enforceable since February 2025; the Omnibus adds two more prohibitions from 2 December 2026.)",
         },
         {
           q: "How is it different from a consultant or a spreadsheet?",
@@ -1260,8 +1261,7 @@ export const en: Dictionary = {
           { t: "Document human oversight", who: "Ana · Jul 12" },
           { t: "Publish transparency notice", who: "Luis · Jul 20" },
         ],
-        radarMilestone: "Next milestone · Transparency (Art. 50)",
-        radarCountdown: "in 16 days",
+        radarMilestone: "Key deadline · High-risk (Annex III)",
         radarSources: "8 official sources watched · no changes",
         teamMembers: "3 members · roles by email",
         activityLabel: "Activity ·",
@@ -2699,9 +2699,8 @@ export const en: Dictionary = {
       lockWatchTitle: "Regulatory monitoring",
       lockWatchDesc:
         "A radar of official sources that alerts you to every change and deadline.",
-      lockWatchPreviewLabel: "Next milestone",
-      lockWatchPreviewMilestone: "Transparency (Art. 50)",
-      lockWatchPreviewCountdown: "in 16 days",
+      lockWatchPreviewLabel: "Key deadline",
+      lockWatchPreviewMilestone: "High-risk (Annex III)",
       lockDossierTitle: "Dossier and report (PDF)",
       lockDossierDesc: "Auditor-ready evidence, generated in one click.",
       ctaTitle: "Use it with your own AI systems.",

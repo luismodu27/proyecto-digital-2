@@ -70,3 +70,54 @@ describe("guard · el diccionario cruza a un Client Component", () => {
     expect(findFunctions({ a: { b: "texto" } })).toEqual([]);
   });
 });
+
+/**
+ * GUARD: ninguna cadena del diccionario lleva una cuenta atrás con número fijo.
+ *
+ * EL FALLO QUE ESTE TEST EXISTE PARA IMPEDIR, y que estuvo dos meses en
+ * producción. En julio se escribió «Próximo hito · Transparencia (Art. 50) · en
+ * 16 días» en el hero (con la etiqueta «En vivo»), en «En acción», en /demo y en
+ * la guía del panel. El Art. 50 empezó a aplicarse el 2-ago-2026 y la landing de
+ * un producto de preparación regulatoria siguió anunciándolo como futuro. Un
+ * número de días escrito a mano caduca solo: la cuenta atrás se calcula en cada
+ * request desde el catálogo del radar (`milestoneView`, `i18n/countdown.ts`).
+ *
+ * Si algún día hace falta una duración fija (no una cuenta atrás), escríbela sin
+ * la forma «en N días» —«tras 30 días»— o con plantilla (`{days}`).
+ */
+const FIXED_COUNTDOWN = /\b(?:en|in) \d+ (?:días?|days?)\b/i;
+
+function findFixedCountdowns(value: Json, path = ""): string[] {
+  if (typeof value === "string") {
+    return FIXED_COUNTDOWN.test(value) ? [`${path}: «${value}»`] : [];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap((v, i) => findFixedCountdowns(v, `${path}[${i}]`));
+  }
+  if (value && typeof value === "object") {
+    return Object.entries(value as Record<string, Json>).flatMap(([k, v]) =>
+      findFixedCountdowns(v, path ? `${path}.${k}` : k),
+    );
+  }
+  return [];
+}
+
+describe("guard · cuentas atrás escritas a mano", () => {
+  it("el diccionario español no contiene ninguna", () => {
+    expect(findFixedCountdowns(es)).toEqual([]);
+  });
+
+  it("el diccionario inglés no contiene ninguna", () => {
+    expect(findFixedCountdowns(en)).toEqual([]);
+  });
+
+  it("se autoprueba: caza el texto que se coló y deja pasar plantillas", () => {
+    expect(findFixedCountdowns({ a: ["Próximo hito · en 16 días"] })).toEqual([
+      "a[0]: «Próximo hito · en 16 días»",
+    ]);
+    expect(findFixedCountdowns({ b: "Next milestone · in 16 days" })).toHaveLength(1);
+    expect(findFixedCountdowns({ c: "en 1 día" })).toHaveLength(1);
+    expect(findFixedCountdowns({ d: "dispones de {days} días para cancelarla" })).toEqual([]);
+    expect(findFixedCountdowns({ e: "se purga tras 30 días" })).toEqual([]);
+  });
+});

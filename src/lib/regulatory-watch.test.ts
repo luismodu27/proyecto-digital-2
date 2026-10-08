@@ -8,6 +8,7 @@ import {
   REGULATORY_EVENTS_EN,
   REG_KIND_LABEL,
   REG_KIND_LABEL_EN,
+  SHOWCASE_MILESTONE_ID,
   affectedSystems,
   daysUntil,
   frameworkLabel,
@@ -16,6 +17,7 @@ import {
   mergeCatalog,
   regKindLabel,
   regulatoryEventsBase,
+  showcaseMilestone,
   sortByDate,
   upcomingDeadlines,
   type RegulatoryEvent,
@@ -228,5 +230,43 @@ describe("etiquetas con reserva segura", () => {
       expect(regKindLabel(kind, "es").trim().length).toBeGreaterThan(0);
       expect(regKindLabel(kind, "en").trim().length).toBeGreaterThan(0);
     }
+  });
+});
+
+/**
+ * Las ilustraciones de producto (hero, «En acción», /demo y la guía del panel)
+ * dicen «Plazo clave · … · en N días». Antes era texto fijo («Próximo hito ·
+ * Transparencia (Art. 50) · en 16 días») y caducó: anunció el Art. 50 como
+ * futuro dos meses después de que empezara a aplicarse. Ahora el hito sale del
+ * catálogo y la cuenta atrás se calcula por request.
+ */
+describe("hito destacado de las ilustraciones (showcaseMilestone)", () => {
+  const OCT_2026 = new Date("2026-10-07T15:00:00Z");
+
+  it("sale del catálogo curado: el alto riesgo del Anexo III, igual en ES y EN", () => {
+    const curado = REGULATORY_EVENTS.find((e) => e.id === SHOWCASE_MILESTONE_ID);
+    expect(curado?.date).toBe("2027-12-02");
+    expect(showcaseMilestone("es", OCT_2026)).toMatchObject({ date: "2027-12-02", days: 421 });
+    expect(showcaseMilestone("en", OCT_2026)).toMatchObject({ date: "2027-12-02", days: 421 });
+  });
+
+  it("formatea la fecha por idioma", () => {
+    expect(showcaseMilestone("es", OCT_2026)?.dateLabel).toMatch(/^2 dic\.? 2027$/);
+    expect(showcaseMilestone("en", OCT_2026)?.dateLabel).toBe("Dec 2, 2027");
+  });
+
+  it("nunca muestra un hito pasado: el día del plazo y después devuelve null", () => {
+    expect(showcaseMilestone("es", new Date("2027-12-01T23:00:00Z"))?.days).toBe(1);
+    expect(showcaseMilestone("es", new Date("2027-12-02T08:00:00Z"))).toBeNull();
+    expect(showcaseMilestone("en", new Date("2028-03-01T00:00:00Z"))).toBeNull();
+  });
+
+  /**
+   * Alarma deliberada: usa la fecha REAL. Si falla, el hito destacado ha
+   * caducado y las ilustraciones han dejado de mostrarlo. Elige otro en
+   * SHOWCASE_MILESTONE_ID (con validación experta) antes de que se note.
+   */
+  it("el hito destacado sigue en el futuro hoy (si falla: elige otro)", () => {
+    expect(showcaseMilestone("es")).not.toBeNull();
   });
 });

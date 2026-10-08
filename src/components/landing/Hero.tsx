@@ -1,13 +1,16 @@
 import { CtaLink } from "@/components/telemetry/CtaLink";
 import { HeroPreview } from "./HeroPreview";
 import type { Dictionary } from "@/lib/i18n";
+import type { MilestoneView } from "@/lib/showcase-milestone";
 
 export function Hero({
   t,
   preview,
+  milestone,
 }: {
   t: Dictionary["landing"]["hero"];
   preview: Dictionary["landing"]["heroPreview"];
+  milestone: MilestoneView | null;
 }) {
   return (
     <section className="relative overflow-hidden">
@@ -80,7 +83,7 @@ export function Hero({
             aria-hidden
             className="pointer-events-none absolute -inset-x-6 -bottom-8 top-6 -z-10 rounded-[2.5rem] bg-gradient-to-b from-brand-soft/70 via-seal-soft/25 to-transparent blur-2xl"
           />
-          <HeroPreview t={preview} />
+          <HeroPreview t={preview} milestone={milestone} />
         </div>
       </div>
     </section>
