@@ -19,7 +19,9 @@ export function Coverage({ t }: { t: Dictionary["landing"]["coverage"] }) {
             key={f.name}
             className="flex flex-col rounded-2xl border border-line bg-paper-raised p-6 transition-colors hover:border-line-strong"
           >
-            <div className="flex items-start justify-between gap-3">
+            {/* `flex-wrap`: si título y etiqueta no caben juntos, la etiqueta
+                baja (en inglés «AI Video Interview Act · HB 3773» desbordaba). */}
+            <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
               <h3 className="font-display text-lg font-semibold text-ink">{f.name}</h3>
               {f.tag && (
                 <span className="shrink-0 rounded-full bg-brand-soft px-2.5 py-1 text-[11px] font-semibold leading-none text-brand-strong">

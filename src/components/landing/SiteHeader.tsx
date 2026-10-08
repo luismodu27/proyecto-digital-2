@@ -34,19 +34,30 @@ export function SiteHeader({
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          {/* En móvil, idioma, tema y «Entrar» viven en el menú (MobileNav). Se
+              ocultan con `max-sm:hidden`, NO con `hidden sm:inline-flex`: estos
+              componentes concatenan su `inline-flex` de base sin fusionar clases,
+              y en el CSS `.inline-flex` va detrás de `.hidden`, así que ganaba y
+              se veían en móvil, empujando el menú fuera de la pantalla. */}
           <LocaleToggle
             locale={locale}
             labelToEn={t.locale.switchToEn}
             labelToEs={t.locale.switchToEs}
-            className="hidden sm:inline-flex"
+            className="max-sm:hidden"
           />
-          <ThemeToggle />
-          <ButtonLink href="/login" variant="ghost" className="hidden sm:inline-flex">
+          <ThemeToggle className="max-sm:hidden" />
+          <ButtonLink href="/login" variant="ghost" className="max-sm:hidden">
             {t.nav.login}
           </ButtonLink>
           {/* Registro real, no lista de espera: el plan Diagnóstico es gratuito
               y el checkout está activo (ver comentario en Hero.tsx). */}
-          <CtaLink cta="header_signup" href="/login?signup=1" variant="primary">
+          <CtaLink
+            cta="header_signup"
+            href="/login?signup=1"
+            variant="primary"
+            // En una línea: a 360 px el relleno de base (px-5) lo partía en dos.
+            className="whitespace-nowrap max-sm:px-3"
+          >
             {t.nav.requestAccess}
           </CtaLink>
           <MobileNav

@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { LocaleToggle } from "@/components/ui/LocaleToggle";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import type { Locale } from "@/lib/i18n/config";
 
 type NavItem = { label: string; href: string };
 
 /**
  * Navegación móvil de la landing: botón hamburguesa + panel desplegable con las
- * mismas anclas de sección, el acceso a "Entrar" y el selector de idioma. Solo se
+ * mismas anclas de sección, el acceso a "Entrar" y los selectores de idioma y de
+ * tema (en la barra móvil no caben junto al logo y el CTA). Solo se
  * muestra en móvil (`md:hidden`); en escritorio la nav horizontal de `SiteHeader`
  * la sustituye. Todas las cadenas llegan por props (sin provider en la landing).
  */
@@ -103,11 +105,14 @@ export function MobileNav({
                 >
                   {loginLabel}
                 </a>
-                <LocaleToggle
-                  locale={locale}
-                  labelToEn={localeToEn}
-                  labelToEs={localeToEs}
-                />
+                <div className="flex items-center gap-2">
+                  <LocaleToggle
+                    locale={locale}
+                    labelToEn={localeToEn}
+                    labelToEs={localeToEs}
+                  />
+                  <ThemeToggle />
+                </div>
               </div>
             </nav>
           </div>
