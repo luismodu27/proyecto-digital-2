@@ -107,8 +107,12 @@ export default async function DemoPage() {
               <span className="hidden sm:inline">{t.backToSiteLong}</span>
               <span className="sm:hidden">{t.backToSiteShort}</span>
             </Link>
-            <ThemeToggle />
-            <ButtonLink href="/login" className="px-4 py-2 text-sm">
+            {/* En móvil la barra solo lleva lo esencial: sin el tema (que sigue al
+                sistema), «Crear cuenta» cabe en una línea sin chocar con el logo.
+                `max-sm:` porque `hidden`/`px-*` por className pierden contra la
+                base del componente (ver SiteHeader). */}
+            <ThemeToggle className="max-sm:hidden" />
+            <ButtonLink href="/login" className="whitespace-nowrap px-4 py-2 text-sm max-sm:px-3">
               {t.createAccount}
             </ButtonLink>
           </div>
@@ -152,7 +156,10 @@ export default async function DemoPage() {
           ))}
         </section>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
+        {/* `grid-cols-1` explícito (y abajo): sin él, la columna implícita de
+            móvil se dimensiona al contenido y los nombres con `truncate` la
+            ensanchaban hasta desbordar la pantalla. */}
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1.3fr_1fr]">
           {/* Inventario (abierto) */}
           <section className="rounded-2xl border border-line bg-paper-raised p-6">
             <div className="flex items-center justify-between">
@@ -206,7 +213,7 @@ export default async function DemoPage() {
             </h2>
             <span className="h-px flex-1 bg-line" />
           </div>
-          <div className="mt-5 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             <LockedCard
               title={t.lockGapTitle}
               description={t.lockGapDesc}

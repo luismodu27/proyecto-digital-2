@@ -210,7 +210,10 @@ export function UseCaseStory({
         <div className="mt-14 space-y-6 md:space-y-4">
           {t.steps.map((s, i) => (
             <Reveal key={s.title} delay={i * 80}>
-              <div className="grid items-center gap-6 rounded-2xl border border-line bg-paper-raised p-6 md:grid-cols-2 md:gap-10 md:p-8">
+              {/* `grid-cols-1` explícito: sin él, la columna implícita de móvil se
+                  dimensiona al contenido (min-content), y el nombre de fichero con
+                  `truncate` (nowrap) del paso 4 la ensanchaba hasta desbordar. */}
+              <div className="grid grid-cols-1 items-center gap-6 rounded-2xl border border-line bg-paper-raised p-6 md:grid-cols-2 md:gap-10 md:p-8">
                 <div className={i % 2 === 1 ? "md:order-2" : ""}>
                   <span className="flex size-9 items-center justify-center rounded-full bg-brand-soft font-display text-lg font-semibold text-brand-strong">
                     {i + 1}
