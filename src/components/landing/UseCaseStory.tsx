@@ -3,6 +3,7 @@ import { FillBar } from "@/components/ui/FillBar";
 import { Reveal } from "@/components/ui/Reveal";
 import { RISK_HEX } from "@/lib/mock-data";
 import type { Dictionary } from "@/lib/i18n";
+import type { MilestoneView } from "@/lib/showcase-milestone";
 
 type L = Dictionary["landing"]["useCaseStory"];
 
@@ -114,8 +115,14 @@ function GapVisual({ t }: { t: L["gap"] }) {
   );
 }
 
-/* Visual del paso 4 — evidencia generada + radar vigilando. */
-function EvidenceVisual({ t }: { t: L["evidence"] }) {
+/* Visual del paso 4 — evidencia generada + radar vigilando el plazo clave. */
+function EvidenceVisual({
+  t,
+  milestone,
+}: {
+  t: L["evidence"];
+  milestone: MilestoneView | null;
+}) {
   return (
     <div className="rounded-xl border border-line bg-paper p-4">
       <div className="flex items-center gap-3 rounded-lg border border-line bg-paper-raised px-3 py-3">
@@ -135,33 +142,46 @@ function EvidenceVisual({ t }: { t: L["evidence"] }) {
           <p className="text-[11px] text-muted">{t.fileSubtitle}</p>
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[var(--tone-good-bd)] bg-brand-soft/50 px-3 py-2">
-        <span className="flex items-center gap-1.5 text-[11px] font-medium text-ink">
-          <svg viewBox="0 0 24 24" className="size-3.5 text-brand-strong" fill="none" aria-hidden>
-            <path
-              d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          {t.radar}
-        </span>
-        <span className="shrink-0 text-[11px] font-semibold tabular-nums text-brand-strong">
-          {t.countdown}
-        </span>
-      </div>
+      {/* Plazo real del catálogo del radar (fecha + cuenta atrás por request). */}
+      {milestone && (
+        <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[var(--tone-good-bd)] bg-brand-soft/50 px-3 py-2">
+          <span className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-ink">
+            <svg viewBox="0 0 24 24" className="size-3.5 shrink-0 text-brand-strong" fill="none" aria-hidden>
+              <path
+                d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>
+              {t.radar}
+              {" · "}
+              {milestone.dateLabel}
+            </span>
+          </span>
+          <span className="shrink-0 text-[11px] font-semibold tabular-nums text-brand-strong">
+            {milestone.countdown}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
 
-export function UseCaseStory({ t }: { t: L }) {
+export function UseCaseStory({
+  t,
+  milestone,
+}: {
+  t: L;
+  milestone: MilestoneView | null;
+}) {
   const visuals = [
     <InventoryVisual key="1" t={t.inventory} />,
     <RiskVisual key="2" t={t.risk} />,
     <GapVisual key="3" t={t.gap} />,
-    <EvidenceVisual key="4" t={t.evidence} />,
+    <EvidenceVisual key="4" t={t.evidence} milestone={milestone} />,
   ];
 
   return (

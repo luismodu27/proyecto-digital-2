@@ -6,6 +6,7 @@ import { SealMark } from "@/components/ui/SealMark";
 import { setUserFlag } from "@/lib/data/user-actions";
 import { useT } from "@/lib/i18n/provider";
 import type { Dictionary } from "@/lib/i18n";
+import type { MilestoneView } from "@/lib/showcase-milestone";
 
 type GuideDict = Dictionary["dashboard"]["guide"];
 
@@ -128,7 +129,7 @@ type Step = {
  * son ejemplos ilustrativos (datos ficticios), no contenido regulatorio real:
  * los números de artículo se mantienen idénticos entre idiomas.
  */
-function makeSteps(g: GuideDict): Step[] {
+function makeSteps(g: GuideDict, milestone: MilestoneView | null): Step[] {
   const v = g.viz;
   return [
     {
@@ -243,12 +244,15 @@ function makeSteps(g: GuideDict): Step[] {
       visual: (
         <Frame label={g.frames.radar}>
           <div className="flex items-center justify-between gap-2 rounded-md border border-[var(--tone-good-bd)] bg-brand-soft/50 px-2.5 py-1.5">
-            <span className="text-[10px] font-medium text-ink">
+            <span className="min-w-0 text-[10px] font-medium text-ink">
               {v.radarMilestone}
+              {milestone && ` · ${milestone.dateLabel}`}
             </span>
-            <span className="shrink-0 text-[10px] font-semibold tabular-nums text-brand-strong">
-              {v.radarCountdown}
-            </span>
+            {milestone && (
+              <span className="shrink-0 text-[10px] font-semibold tabular-nums text-brand-strong">
+                {milestone.countdown}
+              </span>
+            )}
           </div>
           <div className="mt-1.5 flex items-center gap-1.5 px-1 text-[10px] text-muted">
             <span className="size-1.5 rounded-full" style={{ backgroundColor: C.good }} />
@@ -293,12 +297,15 @@ const LS_PREFIX = "attesta:guide:v1:";
 export function WelcomeGuide({
   show,
   userId,
+  milestone = null,
 }: {
   show: boolean;
   userId?: string;
+  /** Hito real del radar, calculado en el servidor (ver `milestoneView`). */
+  milestone?: MilestoneView | null;
 }) {
   const g = useT().dashboard.guide;
-  const STEPS = useMemo(() => makeSteps(g), [g]);
+  const STEPS = useMemo(() => makeSteps(g, milestone), [g, milestone]);
   const [open, setOpen] = useState(false);
   const [i, setI] = useState(0);
   const [entered, setEntered] = useState(false);

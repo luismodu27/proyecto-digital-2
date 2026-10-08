@@ -23,6 +23,10 @@ export const es = {
     loading: "Cargando…",
     seeAll: "Ver todos",
     skipToContent: "Saltar al contenido",
+    // Cuenta atrás «en N días», mismo formato que el panel (i18n/countdown.ts).
+    inDaysPrefix: "en ",
+    dayOne: "día",
+    dayOther: "días",
   },
 
   locale: {
@@ -123,8 +127,9 @@ export const es = {
         { k: "Alto riesgo", v: "4" },
         { k: "% listo", v: "59%" },
       ],
-      milestoneLabel: "Próximo hito · Transparencia (Art. 50)",
-      countdown: "en 16 días",
+      // La fecha y la cuenta atrás no van aquí: salen del catálogo del radar en
+      // cada request (`milestoneView`), para que no caduquen.
+      milestoneLabel: "Plazo clave · Alto riesgo (Anexo III)",
       distributionTitle: "Distribución de riesgo",
       riskLabels: ["Alto riesgo", "Riesgo limitado", "Riesgo mínimo"],
     },
@@ -325,14 +330,14 @@ export const es = {
         " (~30–36% CAGR). Quien se convierta hoy en el sistema de registro de la gobernanza, se queda.",
       milestones: [
         {
-          date: "Feb 2025 · en vigor",
+          date: "Feb 2025 · aplicable",
           title: "Alfabetización en IA (Art. 4)",
-          body: "Ya exigible: tu organización debe procurar que quien opera estas herramientas tenga formación suficiente en IA. Es un deber propio del deployer, no del proveedor.",
+          body: "Ya exigible: tu organización debe adoptar medidas que apoyen la alfabetización en IA de quien usa u opera estas herramientas en su nombre, adaptadas a su perfil y al contexto de uso. Es un deber propio del deployer y se mide por las medidas adoptadas: la norma no exige un nivel concreto en cada persona.",
         },
         {
-          date: "2 ago 2026",
+          date: "2 ago 2026 · aplicable",
           title: "Transparencia (Art. 50)",
-          body: "El plazo más cercano: empiezan a aplicarse los deberes de transparencia sobre la IA que interactúa con candidatos o genera contenido. Afecta directamente a un proceso de selección con IA.",
+          body: "Ya aplican los deberes de transparencia: un chatbot que habla con candidatos debe avisarles de que es una IA. Es un deber de diseño del proveedor (o tuyo, si lo desarrollaste tú): comprueba que lo haga antes de usarlo. El Digital Omnibus no aplazó este aviso.",
         },
         {
           date: "Dic 2027",
@@ -379,8 +384,7 @@ export const es = {
       evidence: {
         fileTitle: "Dossier de evidencia · Cribado de CVs.pdf",
         fileSubtitle: "Generado y listo para el auditor.",
-        radar: "El radar detectó un cambio · Transparencia (Art. 50)",
-        countdown: "en 16 días",
+        radar: "Plazo clave · Alto riesgo (Anexo III)",
       },
       steps: [
         {
@@ -586,7 +590,7 @@ export const es = {
         },
         {
           q: "El deadline se aplazó a 2027, ¿para qué empezar ahora?",
-          a: "Justo por eso: tienes más ventana para prepararte bien, sin prisas ni consultores caros de última hora. El aplazamiento del alto riesgo del Anexo III a diciembre de 2027 proviene del Digital Omnibus, acordado por el Parlamento y el Consejo en junio de 2026 y pendiente de publicación formal en el DOUE. La obligación sigue siendo inevitable; adelantarte es más barato y menos arriesgado. (Ojo: la alfabetización en IA y las prohibiciones del Art. 5 ya son exigibles desde febrero de 2025.)",
+          a: "Justo por eso: tienes más ventana para prepararte bien, sin prisas ni consultores caros de última hora. El aplazamiento del alto riesgo del Anexo III a diciembre de 2027 proviene del Digital Omnibus, publicado en el DOUE el 24 de julio de 2026 (Reglamento (UE) 2026/1744). La obligación sigue siendo inevitable; adelantarte es más barato y menos arriesgado. (Ojo: la alfabetización en IA y las prohibiciones del Art. 5 ya son exigibles desde febrero de 2025; el Omnibus añade dos prohibiciones más desde el 2 de diciembre de 2026.)",
         },
         {
           q: "¿En qué se diferencia de un consultor o de una hoja de cálculo?",
@@ -1285,8 +1289,7 @@ export const es = {
           { t: "Documentar supervisión humana", who: "Ana · 12 jul" },
           { t: "Publicar aviso de transparencia", who: "Luis · 20 jul" },
         ],
-        radarMilestone: "Próximo hito · Transparencia (Art. 50)",
-        radarCountdown: "en 16 días",
+        radarMilestone: "Plazo clave · Alto riesgo (Anexo III)",
         radarSources: "8 fuentes oficiales vigiladas · sin cambios",
         teamMembers: "3 miembros · roles por correo",
         activityLabel: "Actividad ·",
@@ -2750,9 +2753,8 @@ export const es = {
       lockWatchTitle: "Vigilancia regulatoria",
       lockWatchDesc:
         "Radar de fuentes oficiales que te avisa de cada cambio y plazo.",
-      lockWatchPreviewLabel: "Próximo hito",
-      lockWatchPreviewMilestone: "Transparencia (Art. 50)",
-      lockWatchPreviewCountdown: "en 16 días",
+      lockWatchPreviewLabel: "Plazo clave",
+      lockWatchPreviewMilestone: "Alto riesgo (Anexo III)",
       lockDossierTitle: "Dossier e informe (PDF)",
       lockDossierDesc:
         "Evidencia lista para el auditor, generada con un clic.",

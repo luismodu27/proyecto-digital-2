@@ -445,9 +445,9 @@ export const REGULATORY_EVENTS: RegulatoryEvent[] = [
     summary:
       "Desde el 2 de agosto de 2026 el Reglamento es de aplicación general, incluidas las obligaciones de transparencia del Art. 50. El Digital Omnibus NO aplazó esta fecha para el deployer: el único alivio es un periodo de gracia hasta el 2 de diciembre de 2026 para el mecanismo de marcado legible por máquina del PROVEEDOR (Art. 50.2), y solo para la IA generativa ya en el mercado antes del 2 de agosto de 2026.",
     impact:
-      "Relevante para RRHH: si usas un chatbot conversacional con candidatos, debes informarles de que interactúan con una IA. También debe etiquetarse el contenido generado por IA. Ojo: la prórroga de marcado del Art. 50.2 es del proveedor, no tuya — tu deber como deployer de avisar al candidato de que habla con una IA sigue vigente el 2 de agosto de 2026, sin prórroga.",
+      "Relevante para RRHH: si un chatbot habla con candidatos, debe avisarles de que interactúan con una IA. Es un deber de diseño del PROVEEDOR (Art. 50.1), o tuyo si desarrollaste el chatbot o lo pusiste en servicio con tu nombre o marca; como deployer, comprueba que el aviso aparece desde la primera interacción. Tus deberes propios del Art. 50 son etiquetar los deepfakes y los textos de interés público que difundas (50.4) y avisar a quien expongas a categorización biométrica (50.3; el reconocimiento de emociones en selección está prohibido, Art. 5.1.f). La prórroga del Art. 50.2 es solo del proveedor: nada de esto se aplazó.",
     action:
-      "Revisa que tu chatbot de reclutamiento avise de forma clara de que es una IA. Comprueba dónde generas o manipulas contenido con IA para etiquetarlo.",
+      "Comprueba que tu chatbot de reclutamiento avisa de forma clara de que es una IA desde la primera interacción. Si difundes deepfakes o textos de interés público generados por IA sin revisión editorial, etiquétalos.",
     articles: ["Art. 50", "Art. 50.2"],
     source: {
       label: "Art. 50 — AI Act Service Desk (Comisión Europea)",
@@ -894,9 +894,9 @@ export const REGULATORY_EVENTS_EN: RegulatoryEvent[] = [
     summary:
       "Since 2 August 2026 the Regulation applies in general, including the transparency obligations of Art. 50. The Digital Omnibus did NOT postpone this date for the deployer: the only relief is a grace period until 2 December 2026 for the PROVIDER's machine-readable marking mechanism (Art. 50.2), and only for generative AI already on the market before 2 August 2026.",
     impact:
-      "Relevant for HR: if you use a conversational chatbot with candidates, you must inform them that they are interacting with an AI. AI-generated content must also be labeled. Note: the Art. 50.2 marking extension belongs to the provider, not to you — your duty as a deployer to warn the candidate that they are talking to an AI still applies on 2 August 2026, with no extension.",
+      "Relevant for HR: if a chatbot talks to candidates, it must tell them they are interacting with an AI. That is a design duty of the PROVIDER (Art. 50.1), or yours if you developed the chatbot or put it into service under your own name or brand; as a deployer, check that the notice appears from the first interaction. Your own Art. 50 duties are labelling deepfakes and public-interest texts you publish (50.4) and informing anyone you expose to biometric categorisation (50.3; emotion recognition in hiring is prohibited, Art. 5.1.f). The Art. 50.2 extension is the provider's only: none of this was deferred.",
     action:
-      "Check that your recruitment chatbot clearly discloses that it is an AI. Review where you generate or manipulate content with AI so you can label it.",
+      "Check that your recruitment chatbot clearly discloses it is an AI from the first interaction. If you publish deepfakes, or AI-generated public-interest texts without editorial review, label them.",
     articles: ["Art. 50", "Art. 50.2"],
     source: {
       label: "Art. 50 — AI Act Service Desk (European Commission)",
@@ -1277,6 +1277,54 @@ export function upcomingDeadlines(
  */
 export function regulatoryEventsBase(locale: Locale = "es"): RegulatoryEvent[] {
   return locale === "en" ? REGULATORY_EVENTS_EN : REGULATORY_EVENTS;
+}
+
+/**
+ * Hito que muestran las ilustraciones de producto (hero, «En acción», /demo y la
+ * guía del panel). Sale de este catálogo —nunca de un texto escrito a mano—
+ * porque ese fue el fallo: en julio se escribió «Transparencia (Art. 50) · en
+ * 16 días» y siguió diciéndolo con el artículo ya aplicable desde el
+ * 2-ago-2026. Elegido por el fundador (2026-10-07): el plazo central para RRHH,
+ * el alto riesgo del Anexo III.
+ *
+ * Se presenta como «Plazo clave», NO como «Próximo hito»: el próximo hito del
+ * AI Act es otro (2-dic-2026, nuevas prohibiciones del Art. 5) y el panel ya
+ * calcula el real, así que «próximo» lo contradiría (revisión de compliance,
+ * 2026-10-07).
+ */
+export const SHOWCASE_MILESTONE_ID = "eu-highrisk-annex-iii";
+
+export type ShowcaseMilestone = {
+  /** Fecha ISO del evento en el catálogo. */
+  date: string;
+  /** Días que faltan; siempre > 0 (un hito pasado no se muestra). */
+  days: number;
+  /** Fecha legible por locale: «2 dic 2027» / «Dec 2, 2027». */
+  dateLabel: string;
+};
+
+/**
+ * Datos del hito destacado para `now`. Devuelve `null` si el evento no existe o
+ * ya no está en el futuro: mejor no mostrar nada que mostrar un hito caducado
+ * (un test avisa antes de que llegue ese día).
+ */
+export function showcaseMilestone(
+  locale: Locale = "es",
+  now: Date = new Date(),
+): ShowcaseMilestone | null {
+  const event = regulatoryEventsBase(locale).find(
+    (e) => e.id === SHOWCASE_MILESTONE_ID,
+  );
+  if (!event) return null;
+  const days = daysUntil(event.date, now);
+  if (!(days > 0)) return null;
+  const dateLabel = new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-ES", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${event.date}T00:00:00Z`));
+  return { date: event.date, days, dateLabel };
 }
 
 /**

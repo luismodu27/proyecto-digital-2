@@ -20,6 +20,7 @@ import { StructuredData } from "@/components/landing/StructuredData";
 import { Reveal } from "@/components/ui/Reveal";
 import { getDictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/config";
+import { milestoneView } from "@/lib/showcase-milestone";
 
 /**
  * Única fuente de composición de la landing/web pública. Resuelve el diccionario
@@ -29,6 +30,8 @@ import type { Locale } from "@/lib/i18n/config";
 export function LandingPage({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
   const l = t.landing;
+  // Hito real del radar para las ilustraciones, calculado en cada request.
+  const milestone = milestoneView(locale, t.common);
 
   const nav = [
     { label: t.nav.product, href: "#producto" },
@@ -49,7 +52,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
       </a>
       <SiteHeader nav={nav} t={t} locale={locale} />
       <main id="contenido">
-        <Hero t={l.hero} preview={l.heroPreview} />
+        <Hero t={l.hero} preview={l.heroPreview} milestone={milestone} />
         <Reveal>
           <TrustStrip t={l.trustStrip} />
         </Reveal>
@@ -71,7 +74,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
         <Reveal>
           <WhyNow t={l.whyNow} />
         </Reveal>
-        <UseCaseStory t={l.useCaseStory} />
+        <UseCaseStory t={l.useCaseStory} milestone={milestone} />
         <Reveal>
           <Evidence t={l.evidence} />
         </Reveal>

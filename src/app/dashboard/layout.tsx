@@ -16,6 +16,7 @@ import type { UserOrg } from "@/lib/mock-data";
 import { I18nProvider } from "@/lib/i18n/provider";
 import { getDictionary } from "@/lib/i18n";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import { milestoneView } from "@/lib/showcase-milestone";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -117,7 +118,13 @@ export default async function DashboardLayout({
           )}
           <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">{children}</div>
         </main>
-        {showGuide && <WelcomeGuide show userId={userId} />}
+        {showGuide && (
+          <WelcomeGuide
+            show
+            userId={userId}
+            milestone={milestoneView(locale, dict.common)}
+          />
+        )}
         <Suspense>
           <Toaster />
         </Suspense>
