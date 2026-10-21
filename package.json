@@ -19,10 +19,10 @@
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.110.7",
-    "next": "16.3.8",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "@supabase/supabase-js": "^2.118.0",
+    "next": "16.4.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "stripe": "^22.3.2"
   },
   "devDependencies": {
@@ -31,7 +31,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.8",
+    "eslint-config-next": "16.4.2",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"
